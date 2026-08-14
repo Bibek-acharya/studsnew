@@ -19,7 +19,9 @@ interface Course {
   estFee?: string;
   status: string;
   affiliation?: string;
+  affiliationName?: string;
   nonUniversityAffiliation?: string;
+  fieldOfStudy?: string;
 }
 
 export default function SuperadminCourseListSection({
@@ -70,8 +72,9 @@ export default function SuperadminCourseListSection({
   const filtered = courses.filter((c) => {
     const q = search.toLowerCase();
     const name = (c.title || c.name || "").toLowerCase();
-    const aff = (c.affiliation || c.nonUniversityAffiliation || "").toLowerCase();
-    return !search || name.includes(q) || aff.includes(q);
+    const aff = (c.affiliationName || c.affiliation || c.nonUniversityAffiliation || "").toLowerCase();
+    const fos = (c.fieldOfStudy || "").toLowerCase();
+    return !search || name.includes(q) || aff.includes(q) || fos.includes(q);
   });
 
   return (
@@ -131,6 +134,9 @@ export default function SuperadminCourseListSection({
                     Affiliation
                   </th>
                   <th className="text-left py-3 px-6 font-semibold text-gray-700">
+                    Field of Study
+                  </th>
+                  <th className="text-left py-3 px-6 font-semibold text-gray-700">
                     Duration
                   </th>
                   <th className="text-left py-3 px-6 font-semibold text-gray-700">
@@ -151,7 +157,10 @@ export default function SuperadminCourseListSection({
                       {c.title || c.name || "-"}
                     </td>
                     <td className="py-3 px-6 text-gray-600">
-                      {c.affiliation || c.nonUniversityAffiliation || "-"}
+                      {c.affiliationName || c.affiliation || c.nonUniversityAffiliation || "-"}
+                    </td>
+                    <td className="py-3 px-6 text-gray-600">
+                      {c.fieldOfStudy || "-"}
                     </td>
                     <td className="py-3 px-6 text-gray-600">
                       {c.duration || "-"}

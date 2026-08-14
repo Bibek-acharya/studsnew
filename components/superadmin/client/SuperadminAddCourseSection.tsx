@@ -150,6 +150,7 @@ export default function SuperadminAddCourseSection({
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
   const [field, setField] = useState("");
+  const [fieldOfStudy, setFieldOfStudy] = useState("");
   const [affiliationId, setAffiliationId] = useState<number | null>(null);
   const [affiliationName, setAffiliationName] = useState("");
   const [nonUniversityAffiliation, setNonUniversityAffiliation] = useState("");
@@ -219,7 +220,8 @@ export default function SuperadminAddCourseSection({
         setDuration(res.duration || "");
         setLevel(res.level || "");
         setField(res.field || "");
-        setAffiliationName(res.affiliation || "");
+        setFieldOfStudy(res.fieldOfStudy || "");
+        setAffiliationName(res.affiliationName || res.affiliation || "");
         setEstFee(res.estFee || "");
         setGovtFee(res.govtFee || "");
         setPrivateFee(res.privateFee || "");
@@ -296,16 +298,44 @@ export default function SuperadminAddCourseSection({
       .catch(() => {});
   }, []);
 
+  // Sync affiliationId from affiliationName when universities load (edit mode)
+  useEffect(() => {
+    if (affiliationName && universities.length > 0 && !affiliationId) {
+      const match = universities.find(
+        (u) => u.name.toLowerCase() === affiliationName.toLowerCase(),
+      );
+      if (match) setAffiliationId(match.id);
+    }
+  }, [affiliationName, universities]);
+
   const fieldError = (field: string) =>
     errors[field] ? "ring-2 ring-red-500" : "";
+
+  const UNIVERSITY_AFFILIATION_LEVELS = [
+    "Bachelor's",
+    "Bachelor's (Honours)",
+    "Postgraduate Diploma (PGD)",
+    "Master's",
+    "MPhil",
+    "PhD",
+  ];
+  const NON_UNIVERSITY_AFFILIATION_LEVELS = [
+    "+2",
+    "A-Level",
+    "TSLC (CTEVT)",
+    "Diploma (CTEVT)",
+    "PCL",
+  ];
+  const needsUniversityAffiliation = UNIVERSITY_AFFILIATION_LEVELS.includes(level);
+  const needsNonUniversityAffiliation = NON_UNIVERSITY_AFFILIATION_LEVELS.includes(level);
 
   const validate = () => {
     const errs: Record<string, boolean> = {};
     if (!title.trim()) errs.title = true;
-    if ((level === "Bachelor" || level === "Master") && !affiliationId) {
+    if (needsUniversityAffiliation && !affiliationId) {
       errs.affiliation = true;
     }
-    if (["+2", "A Level", "CTEVT", "Diploma"].includes(level) && !nonUniversityAffiliation.trim()) {
+    if (needsNonUniversityAffiliation && !nonUniversityAffiliation.trim()) {
       errs.nonUniversityAffiliation = true;
     }
     setErrors(errs);
@@ -334,8 +364,10 @@ export default function SuperadminAddCourseSection({
     duration,
     level,
     field,
-    affiliationId: level === "Bachelor" || level === "Master" ? affiliationId : null,
-    nonUniversityAffiliation: ["+2", "A Level", "CTEVT", "Diploma"].includes(level) ? nonUniversityAffiliation : "",
+    fieldOfStudy,
+    affiliationId: needsUniversityAffiliation ? affiliationId : null,
+    affiliation: needsUniversityAffiliation ? affiliationName : "",
+    nonUniversityAffiliation: needsNonUniversityAffiliation ? nonUniversityAffiliation : "",
     badges: badges.split(",").map(b => b.trim()).filter(Boolean),
     estFee,
     govtFee,
@@ -606,21 +638,77 @@ export default function SuperadminAddCourseSection({
                 >
                   <option value="">Select Level</option>
                   <option value="+2">+2</option>
-                  <option value="A Level">A Level</option>
-                  <option value="Bachelor">Bachelor</option>
-                  <option value="Master">Master</option>
-                  <option value="CTEVT">CTEVT</option>
-                  <option value="Diploma">Diploma</option>
+                  <option value="A-Level">A-Level</option>
+                  <option value="TSLC (CTEVT)">TSLC (CTEVT)</option>
+                  <option value="Diploma (CTEVT)">Diploma (CTEVT)</option>
+                  <option value="PCL">PCL</option>
+                  <option value="Bachelor's">Bachelor's</option>
+                  <option value="Bachelor's (Honours)">Bachelor's (Honours)</option>
+                  <option value="Postgraduate Diploma (PGD)">Postgraduate Diploma (PGD)</option>
+                  <option value="Master's">Master's</option>
+                  <option value="MPhil">MPhil</option>
+                  <option value="PhD">PhD</option>
+                </select>
+              </div>
+              <div>
+                <label className={labelClass}>Field of Study</label>
+                <select
+                  className={selectClass}
+                  value={fieldOfStudy}
+                  onChange={(e) => setFieldOfStudy(e.target.value)}
+                  style={{
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230000ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "right 1rem center",
+                    backgroundSize: "1.2em",
+                    paddingRight: "2.5rem",
+                  }}
+                >
+                  <option value="">Select Field of Study</option>
+                  <option value="Management & Business">Management & Business</option>
+                  <option value="Accounting & Finance">Accounting & Finance</option>
+                  <option value="Computer Science & Information Technology">Computer Science & IT</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Science & Mathematics">Science & Mathematics</option>
+                  <option value="Medicine & Health Sciences">Medicine & Health Sciences</option>
+                  <option value="Nursing">Nursing</option>
+                  <option value="Pharmacy">Pharmacy</option>
+                  <option value="Dentistry">Dentistry</option>
+                  <option value="Ayurveda & Alternative Medicine">Ayurveda & Alternative Medicine</option>
+                  <option value="Agriculture">Agriculture</option>
+                  <option value="Veterinary & Animal Science">Veterinary & Animal Science</option>
+                  <option value="Forestry & Environmental Studies">Forestry & Environmental Studies</option>
+                  <option value="Education & Teaching">Education & Teaching</option>
+                  <option value="Humanities">Humanities</option>
+                  <option value="Social Sciences">Social Sciences</option>
+                  <option value="Law & Legal Studies">Law & Legal Studies</option>
+                  <option value="Economics">Economics</option>
+                  <option value="Hospitality & Hotel Management">Hospitality & Hotel Management</option>
+                  <option value="Travel & Tourism">Travel & Tourism</option>
+                  <option value="Architecture, Design & Planning">Architecture, Design & Planning</option>
+                  <option value="Media & Communication">Media & Communication</option>
+                  <option value="Arts & Fine Arts">Arts & Fine Arts</option>
+                  <option value="Fashion & Textile">Fashion & Textile</option>
+                  <option value="Aviation">Aviation</option>
+                  <option value="Sports & Physical Education">Sports & Physical Education</option>
+                  <option value="Library & Information Science">Library & Information Science</option>
+                  <option value="Languages & Literature">Languages & Literature</option>
+                  <option value="Public Administration & Governance">Public Administration & Governance</option>
+                  <option value="Development Studies">Development Studies</option>
+                  <option value="Technical & Vocational">Technical & Vocational</option>
+                  <option value="Professional Studies">Professional Studies</option>
+                  <option value="Other / Interdisciplinary">Other / Interdisciplinary</option>
                 </select>
               </div>
               <div>
                 <label className={labelClass}>
                   Affiliation / Board
-                  {(level === "Bachelor" || level === "Master") && (
+                  {needsUniversityAffiliation && (
                     <span className="text-red-500"> *</span>
                   )}
                 </label>
-                {(level === "Bachelor" || level === "Master") ? (
+                {needsUniversityAffiliation ? (
                   <select
                     id="course-affiliation"
                     className={`${selectClass} ${fieldError("affiliation")}`}
