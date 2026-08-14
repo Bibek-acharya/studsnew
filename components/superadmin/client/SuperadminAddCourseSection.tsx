@@ -309,6 +309,21 @@ export default function SuperadminAddCourseSection({
       errs.nonUniversityAffiliation = true;
     }
     setErrors(errs);
+
+    if (Object.keys(errs).length > 0) {
+      const errorFieldIds: Record<string, string> = {
+        title: "course-title",
+        affiliation: "course-affiliation",
+        nonUniversityAffiliation: "course-non-university-affiliation",
+      };
+      const firstErrKey = Object.keys(errs)[0];
+      const el = document.getElementById(errorFieldIds[firstErrKey]);
+      if (el) {
+        const top = el.getBoundingClientRect().top + window.scrollY - 100;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+    }
+
     return Object.keys(errs).length === 0;
   };
 
@@ -399,17 +414,7 @@ export default function SuperadminAddCourseSection({
               : "Register a new academic course"}
           </p>
         </div>
-        <div className="flex gap-3">
-          <button
-            onClick={() => {
-              localStorage.removeItem("superadmin_edit_global_course_id");
-              setActiveSection("superadmin-course-directory");
-            }}
-            className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Cancel
-          </button>
-        </div>
+        <div />
       </div>
 
       <div className="space-y-6">
@@ -547,6 +552,7 @@ export default function SuperadminAddCourseSection({
               </label>
               <input
                 type="text"
+                id="course-title"
                 className={`${inputClass} ${fieldError("title")}`}
                 placeholder="e.g. 10+2 Science"
                 value={title}
@@ -616,6 +622,7 @@ export default function SuperadminAddCourseSection({
                 </label>
                 {(level === "Bachelor" || level === "Master") ? (
                   <select
+                    id="course-affiliation"
                     className={`${selectClass} ${fieldError("affiliation")}`}
                     value={affiliationId ?? ""}
                     onChange={(e) => {
@@ -644,6 +651,7 @@ export default function SuperadminAddCourseSection({
                 ) : (
                   <input
                     type="text"
+                    id="course-non-university-affiliation"
                     className={`${inputClass} ${fieldError("nonUniversityAffiliation")}`}
                     placeholder="e.g. NEB, CTEVT"
                     value={nonUniversityAffiliation}
