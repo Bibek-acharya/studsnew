@@ -400,7 +400,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </div>
                 ) : (details?.admissionRequirements?.length ?? 0) > 0 ? (
                   <ul className="space-y-3">
-                    {details.admissionRequirements.map(
+                    {details?.admissionRequirements?.map(
                       (req: string, i: number) => (
                         <li
                           key={i}
@@ -568,7 +568,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 {/* Fallback: Curriculum */}
                 {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length) && (details?.curriculum?.length ?? 0) > 0 && (
                   <div className="space-y-6">
-                    {details.curriculum.map((sem: any, i: number) => (
+                    {details?.curriculum?.map((sem: any, i: number) => (
                       <div key={i} className="border border-gray-200 rounded-md p-5">
                         <h3 className="font-bold text-gray-900 mb-2">{sem.title || `Semester ${sem.semester || i + 1}`}</h3>
                         {sem.subtitle && <p className="text-sm text-gray-500 mb-3">{sem.subtitle}</p>}
