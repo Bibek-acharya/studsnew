@@ -501,3 +501,15 @@ body {
 }
 
 /* End of global styles */
+
+/* Safe area for mobile bottom navigation */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Bottom tab navigation padding for mobile */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 4rem;
+  }
+}
