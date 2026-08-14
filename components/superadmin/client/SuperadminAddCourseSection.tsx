@@ -221,6 +221,7 @@ export default function SuperadminAddCourseSection({
         setLevel(res.level || "");
         setField(res.field || "");
         setFieldOfStudy(res.fieldOfStudy || "");
+        setAffiliationId(res.affiliationId || null);
         setAffiliationName(res.affiliationName || res.affiliation || "");
         setEstFee(res.estFee || "");
         setGovtFee(res.govtFee || "");
