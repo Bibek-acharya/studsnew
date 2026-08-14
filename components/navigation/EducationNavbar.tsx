@@ -488,7 +488,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   />
                 </Link>
 
-                <div className="flex-1 md:hidden mx-2">
+                <div className="flex-1 md:hidden min-w-0 mx-1">
                   <SearchBar isMobile defaultSearchOpen={false} showSuggestionDropdown={false} />
                 </div>
 

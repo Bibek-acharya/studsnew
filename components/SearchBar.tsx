@@ -249,6 +249,9 @@ export const SearchBar: React.FC<{
         className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 focus-within:shadow-sm sm:h-11.5"
         ref={searchContainerRef}
       >
+        {isMobile && (
+          <Search size={16} className="text-gray-400 ml-3 shrink-0" />
+        )}
         {!isMobile && (
           <button
             type="button"
@@ -304,7 +307,7 @@ export const SearchBar: React.FC<{
               ? "Search colleges, courses..."
               : "Search for courses, exams, scholarships..."
           }
-          className="flex-1 bg-transparent border-none py-3.5 pl-3 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0"
+          className={`flex-1 bg-transparent border-none py-3.5 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0 ${isMobile ? "pl-2" : "pl-3"}`}
           autoComplete="off"
         />
 
