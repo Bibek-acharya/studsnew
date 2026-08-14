@@ -488,12 +488,20 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   className="flex flex-1 shrink-0 cursor-pointer items-center justify-center min-w-0 md:flex-none md:justify-start"
                 >
                   <Image
+                    src="/mobilelogo.png"
+                    alt="Studsphere Logo"
+                    width={512}
+                    height={512}
+                    priority
+                    className="h-9 w-auto md:hidden object-contain"
+                  />
+                  <Image
                     src="/studsphere.png"
                     alt="Studsphere Logo"
                     width={4702}
                     height={1320}
                     priority
-                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-center scale-115 sm:scale-125"
+                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-center scale-115 sm:scale-125 hidden md:block"
                   />
                 </Link>
 
@@ -607,12 +615,20 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   className="flex shrink-0 cursor-pointer items-center min-w-0"
                 >
                   <Image
+                    src="/mobilelogo.png"
+                    alt="Studsphere Logo"
+                    width={512}
+                    height={512}
+                    priority
+                    className="h-9 w-auto md:hidden object-contain"
+                  />
+                  <Image
                     src="/studsphere.png"
                     alt="Studsphere Logo"
                     width={4702}
                     height={1320}
                     priority
-                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125"
+                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125 hidden md:block"
                   />
                 </Link>
 
