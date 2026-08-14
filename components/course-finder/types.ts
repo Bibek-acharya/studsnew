@@ -1,9 +1,8 @@
 export interface CourseFinderFilters {
   academicLevels: string[];
   fields: string[];
-  maxFee: number;
-  feeRanges: string[];
-  admissionStatus: string[];
+  universities: string[];
+  entranceRequired: boolean;
   location: string[];
   popularity: string[];
   province: string;
@@ -16,9 +15,8 @@ export interface CourseFinderFilters {
 export const defaultCourseFinderFilters: CourseFinderFilters = {
   academicLevels: [],
   fields: [],
-  maxFee: 1000000, // Default 10 Lakhs
-  feeRanges: [],
-  admissionStatus: [],
+  universities: [],
+  entranceRequired: false,
   location: [],
   popularity: [],
   province: "All Provinces",
@@ -31,6 +29,7 @@ export const defaultCourseFinderFilters: CourseFinderFilters = {
 export interface CourseFilterCounts {
   byAcademic: Record<string, number>;
   byField: Record<string, number>;
+  byUniversity: Record<string, number>;
   byProvider: Record<string, number>;
   byDuration: Record<string, number>;
 }
@@ -38,6 +37,7 @@ export interface CourseFilterCounts {
 export const defaultCourseFilterCounts: CourseFilterCounts = {
   byAcademic: {},
   byField: {},
+  byUniversity: {},
   byProvider: {},
   byDuration: {},
 };

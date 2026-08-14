@@ -34,33 +34,90 @@ type ProvinceName = keyof typeof NEPAL_DISTRICTS;
 // ── Filter Data ────────────────────────────────────────────────────────────────
 
 const ACADEMIC_LEVELS = [
-  { id: "plus2", label: "+2 / Higher Secondary" },
-  { id: "alevel", label: "A Level" },
-  { id: "diploma", label: "Diploma / CTEVT" },
+  { id: "Higher Secondary (+2)", label: "Higher Secondary (+2)" },
+  { id: "A Levels", label: "A Levels" },
+  { id: "Pre-Diploma / TSLC", label: "Pre-Diploma / TSLC" },
+  { id: "Diploma / PCL", label: "Diploma / PCL" },
+  { id: "Bachelor's Degree", label: "Bachelor's Degree" },
+  { id: "Postgraduate Diploma", label: "Postgraduate Diploma" },
+  { id: "Master's Degree", label: "Master's Degree" },
+  { id: "M.Phil.", label: "M.Phil." },
+  { id: "PhD / Doctorate", label: "PhD / Doctorate" },
+  { id: "Professional Qualifications", label: "Professional Qualifications" },
+  { id: "Certificate Courses", label: "Certificate Courses" },
+  { id: "Short-Term Courses", label: "Short-Term Courses" },
+  { id: "Vocational / Technical Training", label: "Vocational / Technical Training" },
+  { id: "Skill Development Programs", label: "Skill Development Programs" },
+  { id: "Entrance Preparation", label: "Entrance Preparation" },
+  { id: "Language & Test Preparation", label: "Language & Test Preparation" },
+  { id: "Continuing / Lifelong Education", label: "Continuing / Lifelong Education" },
 ];
 
 const FIELDS = [
-  { id: "science", label: "Science" },
-  { id: "management", label: "Management" },
-  { id: "it", label: "IT / Computer Science" },
-  { id: "engineering", label: "Engineering" },
-  { id: "medical", label: "Medical" },
-  { id: "law", label: "Law" },
-  { id: "humanities", label: "Humanities" },
-  { id: "education", label: "Education" },
+  { id: "Management & Business", label: "Management & Business" },
+  { id: "Accounting & Finance", label: "Accounting & Finance" },
+  { id: "Computer Science & Information Technology", label: "Computer Science & Information Technology" },
+  { id: "Engineering", label: "Engineering" },
+  { id: "Science & Mathematics", label: "Science & Mathematics" },
+  { id: "Medicine & Health Sciences", label: "Medicine & Health Sciences" },
+  { id: "Nursing", label: "Nursing" },
+  { id: "Pharmacy", label: "Pharmacy" },
+  { id: "Dentistry", label: "Dentistry" },
+  { id: "Ayurveda & Alternative Medicine", label: "Ayurveda & Alternative Medicine" },
+  { id: "Agriculture", label: "Agriculture" },
+  { id: "Veterinary & Animal Science", label: "Veterinary & Animal Science" },
+  { id: "Forestry & Environmental Studies", label: "Forestry & Environmental Studies" },
+  { id: "Education & Teaching", label: "Education & Teaching" },
+  { id: "Humanities", label: "Humanities" },
+  { id: "Social Sciences", label: "Social Sciences" },
+  { id: "Law & Legal Studies", label: "Law & Legal Studies" },
+  { id: "Economics", label: "Economics" },
+  { id: "Hospitality & Hotel Management", label: "Hospitality & Hotel Management" },
+  { id: "Travel & Tourism", label: "Travel & Tourism" },
+  { id: "Architecture, Design & Planning", label: "Architecture, Design & Planning" },
+  { id: "Media & Communication", label: "Media & Communication" },
+  { id: "Arts & Fine Arts", label: "Arts & Fine Arts" },
+  { id: "Fashion & Textile", label: "Fashion & Textile" },
+  { id: "Aviation", label: "Aviation" },
+  { id: "Sports & Physical Education", label: "Sports & Physical Education" },
+  { id: "Library & Information Science", label: "Library & Information Science" },
+  { id: "Languages & Literature", label: "Languages & Literature" },
+  { id: "Public Administration & Governance", label: "Public Administration & Governance" },
+  { id: "Development Studies", label: "Development Studies" },
+  { id: "Disaster & Risk Management", label: "Disaster & Risk Management" },
+  { id: "Maritime / Marine Studies", label: "Maritime / Marine Studies" },
+  { id: "Food & Nutrition", label: "Food & Nutrition" },
+  { id: "Religious & Cultural Studies", label: "Religious & Cultural Studies" },
+  { id: "Security & Defence Studies", label: "Security & Defence Studies" },
+  { id: "Technical & Vocational", label: "Technical & Vocational" },
+  { id: "Professional Studies", label: "Professional Studies" },
+  { id: "Language & Test Preparation", label: "Language & Test Preparation" },
+  { id: "Skill & Short-Term Courses", label: "Skill & Short-Term Courses" },
+  { id: "Other / Interdisciplinary", label: "Other / Interdisciplinary" },
 ];
 
-const FEE_OPTIONS = [
-  { id: "below1", label: "Below 1 Lakh" },
-  { id: "1_3", label: "1-3 Lakhs" },
-  { id: "3_6", label: "3-6 Lakhs" },
-  { id: "6plus", label: "6+ Lakhs" },
-];
-
-const ADMISSION_OPTIONS = [
-  { id: "open", label: "Admission Open" },
-  { id: "ongoing", label: "Entrance Ongoing" },
-  { id: "closed", label: "Closed" },
+const UNIVERSITIES = [
+  { id: "Tribhuvan University (TU)", label: "Tribhuvan University (TU)" },
+  { id: "Kathmandu University (KU)", label: "Kathmandu University (KU)" },
+  { id: "Pokhara University (PU)", label: "Pokhara University (PU)" },
+  { id: "Purbanchal University (PoU)", label: "Purbanchal University (PoU)" },
+  { id: "Nepal Sanskrit University (NSU)", label: "Nepal Sanskrit University (NSU)" },
+  { id: "Lumbini Buddhist University (LBU)", label: "Lumbini Buddhist University (LBU)" },
+  { id: "Mid-West University (MU)", label: "Mid-West University (MU)" },
+  { id: "Far Western University (FWU)", label: "Far Western University (FWU)" },
+  { id: "Agriculture and Forestry University (AFU)", label: "Agriculture and Forestry University (AFU)" },
+  { id: "Nepal Open University (NOU)", label: "Nepal Open University (NOU)" },
+  { id: "Rajarshi Janak University (RJU)", label: "Rajarshi Janak University (RJU)" },
+  { id: "Manmohan Technical University (MTU)", label: "Manmohan Technical University (MTU)" },
+  { id: "Gandaki University (GU)", label: "Gandaki University (GU)" },
+  { id: "Lumbini Technological University (LTU)", label: "Lumbini Technological University (LTU)" },
+  { id: "Madhesh University (MU)", label: "Madhesh University (MU)" },
+  { id: "University of Nepal", label: "University of Nepal" },
+  { id: "Madan Bhandari University of Science and Technology (MBUST)", label: "Madan Bhandari University of Science and Technology (MBUST)" },
+  { id: "Vidushi Yogmaya Himalayan Ayurveda University", label: "Vidushi Yogmaya Himalayan Ayurveda University" },
+  { id: "Shahid Dasharath Chand Health Sciences University", label: "Shahid Dasharath Chand Health Sciences University" },
+  { id: "National Examinations Board (NEB)", label: "National Examinations Board (NEB)" },
+  { id: "Council for Technical Education and Vocational Training (CTEVT)", label: "Council for Technical Education and Vocational Training (CTEVT)" },
 ];
 
 
@@ -135,7 +192,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   };
 
   const hasActiveFilters =
-    filters.academicLevels.length > 0 || filters.fields.length > 0;
+    filters.academicLevels.length > 0 || filters.fields.length > 0 || filters.universities.length > 0 || filters.entranceRequired;
 
   const appliedFilters = useMemo(() => {
     const tags: Array<{ key: string; value: string; label: string }> = [];
@@ -155,14 +212,21 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
     addTags("academicLevels", ACADEMIC_LEVELS);
     addTags("fields", FIELDS);
-    addTags("feeRanges", FEE_OPTIONS);
-    addTags("admissionStatus", ADMISSION_OPTIONS);
+    addTags("universities", UNIVERSITIES);
+
+    if (filters.entranceRequired) {
+      tags.push({ key: "entranceRequired", value: "true", label: "Entrance Required" });
+    }
 
     return tags;
   }, [filters]);
 
   const removeFilter = (key: string, value: string) => {
-    toggleArray(key as keyof CourseFinderFilters, value);
+    if (key === "entranceRequired") {
+      onChange({ ...filters, entranceRequired: false });
+    } else {
+      toggleArray(key as keyof CourseFinderFilters, value);
+    }
   };
 
   return (
@@ -274,60 +338,40 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </div>
           </Accordion>
 
-          <Accordion title="Fee Range">
-            <div className="pt-2">
-              <div className="mb-6">
-                <div className="flex justify-between items-center mb-4">
-                  <span className="text-[13px] font-bold text-slate-500">
-                    Max Fee
-                  </span>
-                  <span className="text-[14px] font-black text-blue-600">
-                    {(filters.maxFee / 100000).toFixed(1)} Lakhs
-                  </span>
-                </div>
-                <input
-                  type="range"
-                  min="50000"
-                  max="2000000"
-                  step="50000"
-                  value={filters.maxFee}
-                  onChange={(e) =>
-                    onChange({ ...filters, maxFee: Number(e.target.value) })
-                  }
-                  style={{
-                    background: `linear-gradient(to right, #2563eb 0%, #2563eb ${((filters.maxFee - 50000) / (2000000 - 50000)) * 100}%, #f1f5f9 ${((filters.maxFee - 50000) / (2000000 - 50000)) * 100}%, #f1f5f9 100%)`,
-                  }}
-                  className="w-full h-2 rounded-md appearance-none cursor-pointer accent-blue-600 transition-all"
-                />
-              </div>
-
-              <div className="flex flex-col gap-3.5">
-                {FEE_OPTIONS.map((opt) => (
+          <Accordion title="University / Board">
+            <div className="pt-1">
+              <div className="flex flex-col gap-3.5 custom-scrollbar max-h-[280px] overflow-y-auto pr-1">
+                {UNIVERSITIES.map((uni) => (
                   <CheckboxItem
-                    key={opt.id}
-                    id={"fee-" + opt.id}
-                    label={opt.label}
-                    checked={filters.feeRanges.includes(opt.id)}
-                    onChange={() => toggleArray("feeRanges", opt.id)}
+                    key={uni.id}
+                    id={"uni-" + uni.id}
+                    label={uni.label}
+                    count={counts.byUniversity[uni.id]}
+                    checked={filters.universities.includes(uni.id)}
+                    onChange={() => toggleArray("universities", uni.id)}
                   />
                 ))}
               </div>
             </div>
           </Accordion>
 
-          <Accordion title="Admission Status">
-            <div className="flex flex-col gap-3.5 pt-1">
-              {ADMISSION_OPTIONS.map((opt) => (
-                <CheckboxItem
-                  key={opt.id}
-                  id={"adm-" + opt.id}
-                  label={opt.label}
-                  checked={filters.admissionStatus.includes(opt.id)}
-                  onChange={() => toggleArray("admissionStatus", opt.id)}
-                />
-              ))}
-            </div>
-          </Accordion>
+          <label
+            htmlFor="entrance-required"
+            className="group flex w-full cursor-pointer items-center gap-3 pt-2"
+          >
+            <input
+              id="entrance-required"
+              type="checkbox"
+              checked={filters.entranceRequired}
+              onChange={() =>
+                onChange({ ...filters, entranceRequired: !filters.entranceRequired })
+              }
+              className="custom-checkbox"
+            />
+            <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+              Entrance Required
+            </span>
+          </label>
         </div>
       </div>
 
