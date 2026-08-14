@@ -1,18 +1,20 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "../../services/api";
-import { fetchCourseDetailsById, CourseFullDetails } from "../../services/course-api";
-import CourseGrid from "./CourseGrid";
-import { CourseFinderFilters, defaultCourseFinderFilters } from "./types";
+import { fetchCourseDetailsById } from "../../services/course-api";
+import { GlobalCourse } from "@/types/course";
 import {
+  ChevronRight,
+  ChevronDown,
+  ChevronLeft,
   Clock,
   Award,
   BookOpen,
-  Info,
-  ArrowRight,
   MapPin,
+  GraduationCap,
+  ArrowRight,
 } from "lucide-react";
 
 interface CourseDetailsPageProps {
@@ -26,227 +28,850 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 }
 
+const TAB_LIST = [
+  { id: "overview", label: "Overview" },
+  { id: "eligibility", label: "Eligibility" },
+  { id: "admission", label: "Admission" },
+  { id: "courses", label: "Courses & Fees" },
+  { id: "fees", label: "Program Fee" },
+  { id: "scholarships", label: "Scholarships" },
+  { id: "faq", label: "FAQ" },
+];
+
 const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
   courseId,
   onBack,
   onNavigate,
 }) => {
-  const [filters, setFilters] = useState<CourseFinderFilters>(defaultCourseFinderFilters);
+  const tabNavRef = useRef<HTMLDivElement>(null);
 
-  const { data: listData } = useQuery({
+  const { data: listData, isLoading: listLoading } = useQuery({
     queryKey: ["education-courses"],
     queryFn: () => apiService.getEducationCourses(),
   });
 
-  const { data: detailsData } = useQuery({
+  const { data: detailsData, isLoading: detailsLoading } = useQuery({
     queryKey: ["course-details", courseId],
     queryFn: () => fetchCourseDetailsById(String(courseId)),
   });
 
-  const allCourses = useMemo(() => (listData?.data?.courses || []) as unknown as import("../../types/course").GlobalCourse[], [listData]);
+  const allCourses = useMemo(
+    () => (listData?.data?.courses || []) as unknown as GlobalCourse[],
+    [listData],
+  );
 
-  const course = useMemo(() => {
-    const found = allCourses.find(c => String(c.id) === String(courseId));
-    if (found) return found;
-    return null;
-  }, [allCourses, courseId]);
+  const course = useMemo(
+    () => allCourses.find((c) => String(c.id) === String(courseId)) || null,
+    [allCourses, courseId],
+  );
 
   const details = detailsData || null;
 
   const courseTitle = stripHtml(course?.title || details?.course?.title || "");
-  const courseDuration = stripHtml(course?.duration || details?.course?.duration || "");
-  const courseLevel = stripHtml(course?.level || details?.course?.level || "");
-  const courseField = stripHtml(course?.field || details?.course?.field || "");
-  const courseDescription = stripHtml(course?.description || details?.course?.description || details?.about?.join(" ") || "");
-  const courseEstFee = stripHtml(course?.estFee || details?.course?.estFee || "");
-  const courseAffiliation = stripHtml(course?.affiliationName || details?.course?.affiliationName || "");
-  const courseLocation = stripHtml((course as any)?.location || details?.course?.location || "");
+  const courseDuration = stripHtml(
+    course?.duration || details?.course?.duration || "",
+  );
+  const courseLevel = stripHtml(
+    course?.level || details?.course?.level || "",
+  );
+  const courseField = stripHtml(
+    course?.field || details?.course?.field || "",
+  );
+  const courseDescription = stripHtml(
+    course?.description ||
+      details?.course?.description ||
+      details?.about?.join(" ") ||
+      "",
+  );
+  const courseEstFee = stripHtml(
+    course?.estFee || details?.course?.estFee || "",
+  );
+  const courseMode = stripHtml(
+    (course as any)?.mode || details?.course?.mode || "",
+  );
+  const courseBannerUrl =
+    course?.bannerUrl || details?.course?.bannerUrl || "";
 
-  const tabs: { id: string; label: string; visible: boolean }[] = [
-    { id: "overview", label: "Overview", visible: true },
-    { id: "eligibility", label: "Eligibility", visible: !!(details?.admissionRequirements?.length) },
-    { id: "curriculum", label: "Curriculum", visible: !!(details?.curriculum?.length) },
-    { id: "career", label: "Career", visible: !!(details?.careerOpportunities?.length) },
-  ];
+  const [activeTab, setActiveTab] = useState("overview");
 
-  const visibleTabs = tabs.filter(t => t.visible);
-  const [activeTab, setActiveTab] = useState(visibleTabs[0]?.id || "overview");
-
-  const handleTabClick = (tab: string) => {
-    setActiveTab(tab);
+  const scrollTabs = (dir: number) => {
+    tabNavRef.current?.scrollBy({ left: dir * 200, behavior: "smooth" });
   };
 
-  if (!course && !details) {
+  const isLoading = listLoading || detailsLoading;
+
+  if (isLoading) {
     return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center">
         <p className="text-gray-500">Loading course details...</p>
       </div>
     );
   }
 
+  if (!course && !details) {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] flex flex-col items-center justify-center gap-3">
+        <BookOpen className="w-12 h-12 text-gray-300" />
+        <h3 className="text-lg font-semibold text-gray-900">
+          Course Not Found
+        </h3>
+        <p className="text-sm text-gray-500">
+          The course you&apos;re looking for doesn&apos;t exist or has been
+          removed.
+        </p>
+        <button
+          onClick={onBack}
+          className="mt-2 text-sm font-medium text-blue-600 hover:underline"
+        >
+          Back to Course Finder
+        </button>
+      </div>
+    );
+  }
+
+  const relatedCourses = allCourses
+    .filter((c) => String(c.id) !== String(courseId))
+    .slice(0, 3);
+
   return (
     <>
       <style>{`
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-in-out; }
       `}</style>
-      <div className="bg-white text-gray-900 antialiased pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 flex flex-col gap-6">
-          {/* Breadcrumbs */}
-          <nav className="flex items-center space-x-2 text-sm text-gray-500 px-2 font-medium">
-            <button onClick={() => onNavigate("finder")} className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer">Home</button>
-            <ArrowRight size={10} className="text-gray-400" />
-            <button onClick={onBack} className="hover:text-blue-600 transition-colors bg-transparent border-none p-0 cursor-pointer">Course Finder</button>
-            <ArrowRight size={10} className="text-gray-400" />
-            <span className="text-gray-900 font-semibold">{courseField || "Course"}</span>
+
+      <div className="w-full bg-white">
+        {/* ── Header: Breadcrumb + Title + Banner ── */}
+        <div className="px-6 md:px-12 lg:px-24 xl:px-32 pt-12 pb-8">
+          {/* Breadcrumb */}
+          <nav className="flex items-center text-sm text-gray-500 mb-6 gap-1">
+            <button
+              onClick={() => onNavigate("finder")}
+              className="hover:text-gray-900 transition-colors bg-transparent border-none p-0 cursor-pointer"
+            >
+              Home
+            </button>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <button
+              onClick={onBack}
+              className="hover:text-gray-900 transition-colors bg-transparent border-none p-0 cursor-pointer"
+            >
+              Course Finder
+            </button>
+            <ChevronRight className="w-4 h-4 text-gray-400" />
+            <span className="text-gray-900 font-semibold">
+              {courseTitle || "Course"}
+            </span>
           </nav>
 
-          {/* Hero Section */}
-          <header className="w-full bg-[#0000ff] rounded-md relative overflow-hidden min-h-[280px] md:min-h-[320px]">
-            <div className="relative z-10 px-8 py-10 md:px-14 md:py-16">
-              <div className="text-white max-w-2xl">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-3 tracking-tight break-words">
-                  {courseTitle}
-                </h1>
-                {courseAffiliation && (
-                  <p className="text-blue-200 font-semibold text-base md:text-lg mb-4">
-                    {courseAffiliation}
-                  </p>
-                )}
-                <div className="flex flex-wrap gap-3 mb-4 text-sm font-medium">
-                  {courseDuration && (
-                    <span className="flex items-center gap-1.5 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md">
-                      <Clock className="w-4 h-4 text-blue-200" />
-                      {courseDuration}
-                    </span>
-                  )}
-                  {courseLevel && (
-                    <span className="flex items-center gap-1.5 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md">
-                      <Award className="w-4 h-4 text-blue-200" />
-                      {courseLevel}
-                    </span>
-                  )}
-                  {courseField && (
-                    <span className="flex items-center gap-1.5 text-blue-50 bg-white/10 px-3 py-1.5 rounded-md">
-                      <BookOpen className="w-4 h-4 text-blue-200" />
-                      {courseField}
-                    </span>
-                  )}
-                </div>
-                {courseEstFee && (
-                  <p className="text-blue-100 text-sm">Est. Fee: {courseEstFee}</p>
-                )}
-                {courseLocation && (
-                  <p className="text-blue-100 text-sm mt-1 flex items-center gap-1">
-                    <MapPin className="w-3.5 h-3.5" /> {courseLocation}
-                  </p>
-                )}
-              </div>
-            </div>
-          </header>
+          {/* Title + Subtitle */}
+          <div className="mb-6">
+            <h1 className="text-[28px] md:text-4xl font-bold text-gray-900">
+              {courseTitle}
+            </h1>
+            <p className="text-sm text-gray-400 font-medium mt-2">
+              {[courseDuration, courseLevel, courseMode]
+                .filter(Boolean)
+                .join(" | ")}
+            </p>
+          </div>
 
-          {/* Tabs */}
-          {visibleTabs.length > 0 && (
-            <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-gray-200">
-              <nav className="flex overflow-x-auto hide-scrollbar space-x-8 text-gray-500 font-medium">
-                {visibleTabs.map(tab => (
-                  <button key={tab.id} onClick={() => handleTabClick(tab.id)}
-                    className={`pb-4 -mb-px transition-colors hover:text-gray-900 border-b-2 bg-transparent cursor-pointer whitespace-nowrap ${
-                      activeTab === tab.id ? "text-gray-900 border-blue-600" : "border-transparent"
-                    }`}>
+          {/* Banner Image */}
+          <div
+            className="relative w-full h-[280px] md:h-[380px] bg-cover bg-center rounded-2xl overflow-hidden"
+            style={{
+              backgroundImage: courseBannerUrl
+                ? `url('${courseBannerUrl}')`
+                : undefined,
+              backgroundColor: courseBannerUrl ? undefined : "#0000ff",
+              backgroundPosition: "center 20%",
+            }}
+          >
+            <div className="absolute inset-0 bg-black/10" />
+          </div>
+        </div>
+
+        {/* ── Sticky Tab Navigation ── */}
+        <div className="px-6 md:px-12 lg:px-24 xl:px-32 overflow-hidden bg-white sticky top-0 z-40">
+          <div className="relative">
+            <button
+              onClick={() => scrollTabs(-1)}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden shadow-sm"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <div
+              ref={tabNavRef}
+              className="overflow-x-auto no-scrollbar"
+            >
+              <nav className="flex space-x-8 whitespace-nowrap border-b border-gray-100">
+                {TAB_LIST.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`border-b-2 py-4 text-[14px] bg-transparent cursor-pointer transition-colors ${
+                      activeTab === tab.id
+                        ? "border-[#0000ff] font-bold text-gray-900"
+                        : "border-transparent font-semibold text-gray-500 hover:text-gray-900"
+                    }`}
+                  >
                     {tab.label}
                   </button>
                 ))}
               </nav>
             </div>
-          )}
+            <button
+              onClick={() => scrollTabs(1)}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-9 h-9 bg-white border border-gray-200 rounded-full flex items-center justify-center md:hidden shadow-sm"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
+        </div>
 
-          {/* Content */}
-          <div className="min-h-[40vh]">
+        {/* ── Content: 2-Column Grid ── */}
+        <div className="px-6 md:px-12 lg:px-24 xl:px-32 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-3 gap-10 bg-white">
+          {/* Main Content */}
+          <div className="lg:col-span-2 min-h-[500px]">
+            {/* Overview */}
             {activeTab === "overview" && (
-              <section className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <Info className="w-5 h-5 text-blue-600" />
-                  Overview
-                </h2>
-                <div className="text-gray-600 leading-relaxed space-y-4 break-words overflow-hidden">
+              <div className="animate-fade-in">
+                <div className="space-y-6 text-gray-600 text-[15px] md:text-[15.5px] leading-[1.8]">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Overview
+                  </h2>
                   {courseDescription ? (
                     courseDescription.split("\n").map((para, i) => (
                       <p key={i}>{para}</p>
                     ))
                   ) : (
-                    <p className="text-gray-400 italic">No description available.</p>
+                    <p className="text-gray-400 italic">
+                      No description available.
+                    </p>
                   )}
                 </div>
-              </section>
-            )}
 
-            {activeTab === "eligibility" && details?.admissionRequirements && (
-              <section className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Eligibility Criteria</h2>
-                <ul className="space-y-3">
-                  {details.admissionRequirements.map((req: string, i: number) => (
-                    <li key={i} className="flex items-start gap-3 p-4 bg-blue-50 rounded-md">
-                      <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{i + 1}</span>
-                      <span className="text-gray-700 break-words overflow-hidden">{stripHtml(req)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {activeTab === "curriculum" && details?.curriculum && (
-              <section className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Curriculum</h2>
-                <div className="space-y-6">
-                  {details.curriculum.map((sem: any, i: number) => (
-                    <div key={i} className="border border-gray-200 rounded-md p-5">
-                      <h3 className="font-bold text-gray-900 mb-2">{sem.title || `Semester ${sem.semester || i + 1}`}</h3>
-                      {sem.subtitle && <p className="text-sm text-gray-500 mb-3">{sem.subtitle}</p>}
-                      {sem.subjects?.length > 0 && (
-                        <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
-                          {sem.subjects.map((sub: string, j: number) => (
-                            <li key={j}>{sub}</li>
-                          ))}
-                        </ul>
+                {/* Who Should Choose / Features */}
+                {details?.course?.whoShouldChoose?.length > 0 && (
+                  <div className="pt-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      Who Should Choose This Course?
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {details.course.whoShouldChoose.map(
+                        (item: any, i: number) => (
+                          <div
+                            key={i}
+                            className="border border-gray-200 rounded-xl p-6 bg-white"
+                          >
+                            <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white mb-4">
+                              <GraduationCap className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-bold text-gray-900 mb-2 text-[17px]">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {item.shortDesc}
+                            </p>
+                          </div>
+                        ),
                       )}
                     </div>
-                  ))}
-                </div>
-              </section>
+                  </div>
+                )}
+
+                {details?.course?.features?.length > 0 && (
+                  <div className="pt-6">
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                      Key Features
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {details.course.features.map(
+                        (item: any, i: number) => (
+                          <div
+                            key={i}
+                            className="border border-gray-200 rounded-xl p-6 bg-white"
+                          >
+                            <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white mb-4">
+                              <Award className="w-6 h-6" />
+                            </div>
+                            <h3 className="font-bold text-gray-900 mb-2 text-[17px]">
+                              {item.title}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {item.shortDesc}
+                            </p>
+                          </div>
+                        ),
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
 
-            {activeTab === "career" && details?.careerOpportunities && (
-              <section className="animate-fade-in">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Career Opportunities</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {details.careerOpportunities.map((career: any, i: number) => (
-                    <div key={i} className="border border-gray-200 rounded-md p-4">
-                      <h3 className="font-semibold text-gray-900">{career.title}</h3>
+            {/* Eligibility */}
+            {activeTab === "eligibility" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                  Eligibility Criteria
+                </h2>
+                {details?.course?.eligibilityRows?.length > 0 ? (
+                  <div className="mb-6">
+                    <h3 className="text-[17px] font-bold text-gray-900 mb-4">
+                      Full time Courses
+                    </h3>
+                    <div className="overflow-x-auto rounded border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
+                              S.N.
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
+                              Level
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
+                              Stream/Faculty
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
+                              Eligibility
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[25%]">
+                              Required Documents
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {details.course.eligibilityRows.map(
+                            (row: any, i: number) => (
+                              <tr
+                                key={i}
+                                className="border-b border-gray-200 hover:bg-gray-50"
+                              >
+                                <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                  {i + 1}
+                                </td>
+                                <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
+                                  {row.level || courseLevel}
+                                </td>
+                                <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                  {row.stream || "-"}
+                                </td>
+                                <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                  {Array.isArray(row.eligibility) ? row.eligibility.join(", ") : (row.eligibility || "-")}
+                                </td>
+                                <td className="p-4 align-top text-gray-700">
+                                  {Array.isArray(row.documents) && row.documents.length > 0 ? (
+                                    <ul className="space-y-1 text-sm">
+                                      {row.documents.map((doc: string, j: number) => (
+                                        <li key={j} className="flex items-center gap-2">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                          {doc.trim()}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : typeof row.documents === "string" && row.documents ? (
+                                    <ul className="space-y-1 text-sm">
+                                      {row.documents.split(",").map((doc: string, j: number) => (
+                                        <li key={j} className="flex items-center gap-2">
+                                          <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                          {doc.trim()}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  ) : (
+                                    "-"
+                                  )}
+                                </td>
+                              </tr>
+                            ),
+                          )}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
+                  </div>
+                ) : details?.admissionRequirements?.length > 0 ? (
+                  <ul className="space-y-3">
+                    {details.admissionRequirements.map(
+                      (req: string, i: number) => (
+                        <li
+                          key={i}
+                          className="flex items-start gap-3 p-4 bg-blue-50 rounded-md"
+                        >
+                          <span className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                            {i + 1}
+                          </span>
+                          <span className="text-gray-700">
+                            {stripHtml(req)}
+                          </span>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No eligibility information available.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Admission */}
+            {activeTab === "admission" && (
+              <div className="animate-fade-in">
+                <div className="mb-8">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                    Admission Process
+                  </h2>
+                  <p className="text-gray-600">
+                    Step-by-step guide for {courseTitle} admission
+                  </p>
                 </div>
-              </section>
+                {details?.course?.admissionSteps?.length > 0 ? (
+                  details.course.admissionSteps.map(
+                    (step: any, i: number) => (
+                      <div key={i} className="mb-6">
+                        <div className="flex items-start gap-4 mb-4">
+                          <div className="w-10 h-10 rounded-full bg-[#0000ff] text-white flex items-center justify-center font-bold text-sm flex-shrink-0">
+                            {i + 1}
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-gray-900 text-lg mb-3">
+                              {step.title}
+                            </h3>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                              {step.description}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ),
+                  )
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No admission process information available.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Courses & Fees */}
+            {activeTab === "courses" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                  {courseTitle} Courses & Fees
+                </h2>
+
+                {/* Full Time Courses Table */}
+                {details?.course?.fullTimeCourses?.length > 0 && (
+                  <div className="mb-8">
+                    <div className="overflow-x-auto rounded border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">Course</th>
+                            <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">Total Fees</th>
+                            <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">Admission Duration</th>
+                            <th className="p-4 font-bold text-gray-900 w-[15%]">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {details.course.fullTimeCourses.map((ftc: any, i: number) => (
+                            <tr key={i} className="border-b border-gray-200 hover:bg-gray-50">
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <div className="text-gray-900 font-semibold mb-1">{ftc.course}</div>
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <div className="text-[#059669] mb-1">{ftc.totalFees || "-"}</div>
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {[ftc.startDate, ftc.endDate].filter(Boolean).join(" - ") || "-"}
+                              </td>
+                              <td className="p-4 align-top">
+                                <span className="text-[#2563eb] hover:underline flex items-center cursor-pointer text-[14px]">
+                                  View College <ArrowRight className="w-4 h-4 ml-1" />
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+
+                {/* Course Details Cards */}
+                {details?.course?.subjectGroups?.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Details</h2>
+                    <div className="space-y-6">
+                      {details.course.subjectGroups.map((group: any, i: number) => (
+                        <div key={i} className="border border-gray-200 rounded-xl p-6 bg-white">
+                          <div className="flex items-start justify-between gap-4 mb-4">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
+                                <BookOpen className="w-6 h-6" />
+                              </div>
+                              <div>
+                                <h3 className="text-xl font-bold text-gray-900">{group.groupName || group.name}</h3>
+                                <p className="text-sm text-gray-500">{group.subtitle}</p>
+                              </div>
+                            </div>
+                          </div>
+                          {group.description && (
+                            <p className="text-gray-700 leading-relaxed mb-4">{group.description}</p>
+                          )}
+                          {(group.subjects?.length > 0 || group.careers?.length > 0 || group.streams || group.careerList) && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {(group.subjects?.length > 0 || group.streams) && (
+                                <div className="bg-gray-50 rounded-lg p-4">
+                                  <h4 className="font-semibold text-gray-900 mb-2">Available Streams:</h4>
+                                  <ul className="space-y-1 text-sm text-gray-600">
+                                    {(group.subjects || (group.streams || "").split(",")).filter(Boolean).map((s: string, j: number) => (
+                                      <li key={j} className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                        {typeof s === "string" ? s.trim() : s}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                              {(group.careers?.length > 0 || group.careerList) && (
+                                <div className="bg-gray-50 rounded-lg p-4">
+                                  <h4 className="font-semibold text-gray-900 mb-2">Career Opportunities:</h4>
+                                  <ul className="space-y-1 text-sm text-gray-600">
+                                    {(group.careers || (group.careerList || "").split(",")).filter(Boolean).map((c: string, j: number) => (
+                                      <li key={j} className="flex items-center gap-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]" />
+                                        {typeof c === "string" ? c.trim() : c}
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fallback: Curriculum */}
+                {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length) && details?.curriculum?.length > 0 && (
+                  <div className="space-y-6">
+                    {details.curriculum.map((sem: any, i: number) => (
+                      <div key={i} className="border border-gray-200 rounded-md p-5">
+                        <h3 className="font-bold text-gray-900 mb-2">{sem.title || `Semester ${sem.semester || i + 1}`}</h3>
+                        {sem.subtitle && <p className="text-sm text-gray-500 mb-3">{sem.subtitle}</p>}
+                        {sem.subjects?.length > 0 && (
+                          <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
+                            {sem.subjects.map((sub: string, j: number) => <li key={j}>{sub}</li>)}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length && !details?.curriculum?.length) && (
+                  <p className="text-gray-400 italic">No course information available.</p>
+                )}
+              </div>
+            )}
+
+            {/* Program Fee */}
+            {activeTab === "fees" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                  Fee Structure
+                </h2>
+                {details?.course?.feeItems?.length > 0 ? (
+                  <div className="mb-6">
+                    <h3 className="text-[17px] font-bold text-gray-900 mb-4">
+                      Full time Courses
+                    </h3>
+                    <div className="overflow-x-auto rounded border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
+                              Particulars
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
+                              Amount (NPR)
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">
+                              Frequency
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[15%]">
+                              Notes
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {details.course.feeItems.map(
+                            (item: any, i: number) => (
+                              <tr
+                                key={i}
+                                className="border-b border-gray-200 hover:bg-gray-50"
+                              >
+                                <td className="p-4 align-top border-r border-gray-200 text-gray-900 font-semibold">
+                                  {item.particular}
+                                </td>
+                                <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                  {item.amount || "-"}
+                                </td>
+                                <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                  {item.frequency || "-"}
+                                </td>
+                                <td className="p-4 align-top text-gray-700">
+                                  {item.notes || "-"}
+                                </td>
+                              </tr>
+                            ),
+                          )}
+                        </tbody>
+                        {courseEstFee && (
+                          <tfoot>
+                            <tr className="bg-[#eff4fc]">
+                              <td className="p-4 font-bold text-gray-900 border-r border-gray-200">
+                                Total Estimated Fee
+                              </td>
+                              <td className="p-4 font-bold text-gray-900 border-r border-gray-200">
+                                {courseEstFee}
+                              </td>
+                              <td className="p-4 text-gray-700 border-r border-gray-200" />
+                              <td className="p-4 text-gray-700">
+                                Varies by college
+                              </td>
+                            </tr>
+                          </tfoot>
+                        )}
+                      </table>
+                    </div>
+                  </div>
+                ) : courseEstFee ? (
+                  <div className="border border-gray-200 rounded-xl p-6 bg-white">
+                    <p className="text-gray-700">
+                      <span className="font-semibold">Estimated Fee:</span>{" "}
+                      {courseEstFee}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No fee information available.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Scholarships */}
+            {activeTab === "scholarships" && (
+              <div className="animate-fade-in">
+                <div className="mb-6">
+                  <h2 className="text-[22px] font-bold text-gray-900">
+                    Scholarship Programs
+                  </h2>
+                  {details?.course?.scholarshipDesc && (
+                    <p className="text-[15px] text-gray-600 mt-1">
+                      {details.course.scholarshipDesc}
+                    </p>
+                  )}
+                </div>
+                {details?.course?.scholarships?.length > 0 ? (
+                  <div className="overflow-x-auto rounded border border-gray-200">
+                    <table className="w-full text-left border-collapse min-w-[800px]">
+                      <thead>
+                        <tr className="bg-[#eff4fc] border-b border-gray-200">
+                          <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
+                            Scholarship Type
+                          </th>
+                          <th className="p-4 font-bold text-gray-900 w-[20%] border-r border-gray-200">
+                            Coverage
+                          </th>
+                          <th className="p-4 font-bold text-gray-900 w-[20%] border-r border-gray-200">
+                            Eligibility
+                          </th>
+                          <th className="p-4 font-bold text-gray-900 w-[20%] border-r border-gray-200">
+                            Seats
+                          </th>
+                          <th className="p-4 font-bold text-gray-900 w-[15%]">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-[15px]">
+                        {details.course.scholarships.map(
+                          (sch: any, i: number) => (
+                            <tr
+                              key={i}
+                              className="border-b border-gray-200 hover:bg-gray-50"
+                            >
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <div className="text-gray-900 font-semibold mb-1">
+                                  {sch.title}
+                                </div>
+                                {sch.subtitle && (
+                                  <div className="text-xs text-gray-500">
+                                    {sch.subtitle}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200">
+                                <span className="text-[13px] font-bold text-green-600 bg-green-50 px-2.5 py-1 rounded-md">
+                                  {sch.coverage || "-"}
+                                </span>
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {sch.requirement || "-"}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {sch.seats || "-"}
+                              </td>
+                              <td className="p-4 align-top">
+                                <span className="text-[#0000ff] hover:underline text-[13px] font-semibold cursor-pointer">
+                                  Apply Now
+                                </span>
+                              </td>
+                            </tr>
+                          ),
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No scholarship information available.
+                  </p>
+                )}
+                {details?.course?.scholarshipNotes && (
+                  <p className="mt-4 text-sm text-gray-500">
+                    {details.course.scholarshipNotes}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* FAQ */}
+            {activeTab === "faq" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-6">
+                  Frequently Asked Questions
+                </h2>
+                {details?.course?.faqs?.length > 0 ? (
+                  <div className="space-y-3">
+                    {details.course.faqs.map((faq: any, i: number) => (
+                      <FaqItem key={i} question={faq.question} answer={faq.answer} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">
+                    No FAQs available.
+                  </p>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Related Programs */}
-          <section className="mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Programs</h2>
-            <CourseGrid 
-              courses={allCourses.filter(c => String(c.id) !== String(courseId)).slice(0, 6)} 
-              totalCourses={allCourses.length - 1}
-              onNavigate={onNavigate}
-              filters={filters}
-              onFiltersChange={setFilters}
-              isLoading={false}
-            />
-          </section>
+          {/* Right Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-32 space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-4">
+                  Related Courses
+                </h3>
+                <div className="space-y-4">
+                  {relatedCourses.map((rc) => (
+                    <div
+                      key={rc.id}
+                      className="bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer hover:border-blue-500/20 transition-colors"
+                      onClick={() =>
+                        onNavigate("courseDetails", { id: rc.id })
+                      }
+                    >
+                      <div className="p-3 pb-0">
+                        {rc.bannerUrl ? (
+                          <img
+                            src={rc.bannerUrl}
+                            alt={rc.title}
+                            className="w-full h-32 object-cover rounded-xl"
+                          />
+                        ) : (
+                          <div className="w-full h-32 bg-blue-50 rounded-xl" />
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <div className="mb-2">
+                          <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600">
+                            {rc.level || "Course"}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-gray-900 text-[14px] mb-1">
+                          {rc.title}
+                        </h4>
+                        <p className="text-[11px] text-gray-600 mb-3 line-clamp-2">
+                          {stripHtml(rc.description || "") ||
+                            "Explore this program."}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-semibold text-[#059669] bg-green-50 px-2 py-0.5 rounded">
+                            Explore
+                          </span>
+                          <span className="text-blue-600 text-[11px] font-bold flex items-center gap-1">
+                            Details{" "}
+                            <ArrowRight className="w-3 h-3" />
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {relatedCourses.length === 0 && (
+                    <p className="text-sm text-gray-400 italic">
+                      No related courses.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </>
+  );
+};
+
+// ── FaqItem (expandable) ──
+
+const FaqItem: React.FC<{ question: string; answer: string }> = ({
+  question,
+  answer,
+}) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-white rounded-xl overflow-hidden border border-gray-100">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full px-5 py-4 flex items-center justify-between text-left transition bg-transparent cursor-pointer"
+      >
+        <span className="font-semibold text-gray-900 text-[15px] pr-4">
+          Q: {question}
+        </span>
+        <ChevronDown
+          className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div className="px-5 pb-4">
+          <p className="text-[14px] text-gray-600 leading-relaxed">
+            {answer}
+          </p>
+        </div>
+      )}
+    </div>
   );
 };
 

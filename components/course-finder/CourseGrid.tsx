@@ -9,13 +9,13 @@ import {
   CreditCard,
   Briefcase,
   Bookmark,
+  BookOpen,
 } from "lucide-react";
 import { GlobalCourse } from "@/types/course";
 import { apiService } from "../../services/api";
 import { useAuth } from "@/services/AuthContext";
 import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
-import { mockCourses } from "./mockCourses";
 import CourseCarouselAd from "./ads/CourseCarouselAd";
 import KistProgramsAd from "./ads/KistProgramsAd";
 import SudsphereBannerAd from "./ads/SudsphereBannerAd";
@@ -119,8 +119,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   }, [isAuthenticated]);
 
   const allCourses = useMemo(() => {
-    if (courses.length > 0) return courses;
-    return mockCourses;
+    return courses;
   }, [courses]);
 
   const totalPages = Math.ceil(allCourses.length / COURSES_PER_PAGE);
@@ -181,6 +180,13 @@ const CourseGrid: React.FC<CourseGridProps> = ({
       `}</style>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {allCourses.length === 0 && !isLoading && (
+          <div className="col-span-1 md:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-20 px-4">
+            <BookOpen className="w-12 h-12 text-gray-300 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-1">No Courses Found</h3>
+            <p className="text-sm text-gray-500">Try adjusting your filters or search criteria.</p>
+          </div>
+        )}
         {currentCourses.map((course, index) => {
           const levelText = course.level || "+2(plus two)";
 

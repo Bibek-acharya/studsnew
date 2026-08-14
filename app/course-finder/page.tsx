@@ -30,13 +30,11 @@ export default function FindCoursePage() {
       {view === "finder" ? (
         <CourseFinderPage onNavigate={handleNavigate} />
       ) : view === "details" ? (
-        <div className="pt-10">
-          <CourseDetailsPage
-            courseId={selectedCourse?.id || "1"}
-            onBack={() => setView("finder")}
-            onNavigate={handleNavigate}
-          />
-        </div>
+        <CourseDetailsPage
+          courseId={selectedCourse?.id || "1"}
+          onBack={() => setView("finder")}
+          onNavigate={handleNavigate}
+        />
       ) : (
         <div className="pt-10">
 
