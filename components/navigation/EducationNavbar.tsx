@@ -58,7 +58,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const pathname = usePathname();
 
   const [mobileMenus, setMobileMenus] = useState<Record<string, boolean>>({});
-  const drawerDirection = user ? "right" : "left";
+  const drawerDirection = "right";
   const mobileSearchSuggestions = trendingSearches.slice(0, 4);
   const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState<
     { title: string; type: string }[]
@@ -473,7 +473,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
             {!user ? (
               <>
-                {/* Mobile: Logo Left, Hamburger Right */}
+                {/* Mobile: Logo Left, Search Center, Hamburger Right */}
                 <Link
                   href="/"
                   className="flex shrink-0 cursor-pointer items-center min-w-0 md:hidden"
@@ -488,7 +488,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   />
                 </Link>
 
-                <div className="flex-1 md:hidden" />
+                <div className="flex-1 md:hidden mx-2">
+                  <SearchBar isMobile defaultSearchOpen={false} showSuggestionDropdown={false} />
+                </div>
 
                 <button
                   type="button"
