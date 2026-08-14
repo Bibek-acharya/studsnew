@@ -179,9 +179,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   onClose,
 }) => {
   const [showAppliedDropdown, setShowAppliedDropdown] = useState(false);
+  const [academicSearch, setAcademicSearch] = useState("");
   const [fieldSearch, setFieldSearch] = useState("");
-
-  const availableFields = FIELDS;
+  const [universitySearch, setUniversitySearch] = useState("");
 
   const toggleArray = (key: keyof CourseFinderFilters, value: string) => {
     const current = filters[key] as string[];
@@ -192,7 +192,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
   };
 
   const hasActiveFilters =
-    filters.academicLevels.length > 0 || filters.fields.length > 0 || filters.universities.length > 0 || filters.entranceRequired;
+    filters.academicLevels.length > 0 || filters.fields.length > 0 || filters.universities.length > 0 || filters.entranceRequired !== "";
 
   const appliedFilters = useMemo(() => {
     const tags: Array<{ key: string; value: string; label: string }> = [];
@@ -214,8 +214,8 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
     addTags("fields", FIELDS);
     addTags("universities", UNIVERSITIES);
 
-    if (filters.entranceRequired) {
-      tags.push({ key: "entranceRequired", value: "true", label: "Entrance Required" });
+    if (filters.entranceRequired !== "") {
+      tags.push({ key: "entranceRequired", value: filters.entranceRequired, label: `Entrance: ${filters.entranceRequired}` });
     }
 
     return tags;
@@ -223,7 +223,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
   const removeFilter = (key: string, value: string) => {
     if (key === "entranceRequired") {
-      onChange({ ...filters, entranceRequired: false });
+      onChange({ ...filters, entranceRequired: "" });
     } else {
       toggleArray(key as keyof CourseFinderFilters, value);
     }
@@ -295,17 +295,31 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
         <div className="space-y-4 pt-4">
           <Accordion title="Academic Level / Program">
-            <div className="flex flex-col gap-3.5 pt-1">
-              {ACADEMIC_LEVELS.map((level) => (
-                <CheckboxItem
-                  key={level.id}
-                  id={"acad-" + level.id}
-                  label={level.label}
-                  count={counts.byAcademic[level.id]}
-                  checked={filters.academicLevels.includes(level.id)}
-                  onChange={() => toggleArray("academicLevels", level.id)}
+            <div className="pt-1">
+              <div className="relative mb-4 group">
+                <input
+                  type="text"
+                  placeholder="Search academic levels..."
+                  value={academicSearch}
+                  onChange={(e) => setAcademicSearch(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-[13px] text-slate-900 outline-none transition group-focus-within:border-blue-500 group-focus-within:ring-1 group-focus-within:ring-blue-500"
                 />
-              ))}
+                <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
+              </div>
+              <div className="flex flex-col gap-3.5 custom-scrollbar max-h-[280px] overflow-y-auto pr-1">
+                {ACADEMIC_LEVELS.filter((l) =>
+                  l.label.toLowerCase().includes(academicSearch.toLowerCase()),
+                ).map((level) => (
+                  <CheckboxItem
+                    key={level.id}
+                    id={"acad-" + level.id}
+                    label={level.label}
+                    count={counts.byAcademic[level.id]}
+                    checked={filters.academicLevels.includes(level.id)}
+                    onChange={() => toggleArray("academicLevels", level.id)}
+                  />
+                ))}
+              </div>
             </div>
           </Accordion>
 
@@ -340,8 +354,20 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
           <Accordion title="University / Board">
             <div className="pt-1">
+              <div className="relative mb-4 group">
+                <input
+                  type="text"
+                  placeholder="Search universities..."
+                  value={universitySearch}
+                  onChange={(e) => setUniversitySearch(e.target.value)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-[13px] text-slate-900 outline-none transition group-focus-within:border-blue-500 group-focus-within:ring-1 group-focus-within:ring-blue-500"
+                />
+                <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
+              </div>
               <div className="flex flex-col gap-3.5 custom-scrollbar max-h-[280px] overflow-y-auto pr-1">
-                {UNIVERSITIES.map((uni) => (
+                {UNIVERSITIES.filter((u) =>
+                  u.label.toLowerCase().includes(universitySearch.toLowerCase()),
+                ).map((uni) => (
                   <CheckboxItem
                     key={uni.id}
                     id={"uni-" + uni.id}
@@ -355,23 +381,21 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </div>
           </Accordion>
 
-          <label
-            htmlFor="entrance-required"
-            className="group flex w-full cursor-pointer items-center gap-3 pt-2"
-          >
-            <input
-              id="entrance-required"
-              type="checkbox"
-              checked={filters.entranceRequired}
-              onChange={() =>
-                onChange({ ...filters, entranceRequired: !filters.entranceRequired })
-              }
-              className="custom-checkbox"
-            />
-            <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
-              Entrance Required
-            </span>
-          </label>
+          <Accordion title="Entrance Required">
+            <div className="pt-1">
+              <select
+                value={filters.entranceRequired}
+                onChange={(e) =>
+                  onChange({ ...filters, entranceRequired: e.target.value })
+                }
+                className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-[13px] text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="">Select</option>
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+          </Accordion>
         </div>
       </div>
 

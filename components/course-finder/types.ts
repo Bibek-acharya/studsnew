@@ -2,7 +2,7 @@ export interface CourseFinderFilters {
   academicLevels: string[];
   fields: string[];
   universities: string[];
-  entranceRequired: boolean;
+  entranceRequired: string;
   location: string[];
   popularity: string[];
   province: string;
@@ -16,7 +16,7 @@ export const defaultCourseFinderFilters: CourseFinderFilters = {
   academicLevels: [],
   fields: [],
   universities: [],
-  entranceRequired: false,
+  entranceRequired: "",
   location: [],
   popularity: [],
   province: "All Provinces",
