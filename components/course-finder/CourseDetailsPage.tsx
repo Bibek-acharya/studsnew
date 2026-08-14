@@ -32,9 +32,14 @@ const TAB_LIST = [
   { id: "overview", label: "Overview" },
   { id: "eligibility", label: "Eligibility" },
   { id: "admission", label: "Admission" },
-  { id: "courses", label: "Courses & Fees" },
+  { id: "courses", label: "Courses" },
   { id: "fees", label: "Program Fee" },
   { id: "scholarships", label: "Scholarships" },
+  { id: "facilities", label: "Facilities" },
+  { id: "faculty", label: "Faculty" },
+  { id: "achievements", label: "Achievements" },
+  { id: "news", label: "News" },
+  { id: "downloads", label: "Downloads" },
   { id: "faq", label: "FAQ" },
 ];
 
@@ -254,7 +259,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 </div>
 
                 {/* Who Should Choose / Features */}
-                {details?.course?.whoShouldChoose?.length > 0 && (
+                {(details?.course?.whoShouldChoose?.length ?? 0) > 0 && (
                   <div className="pt-6">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Who Should Choose This Course?
@@ -282,7 +287,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </div>
                 )}
 
-                {details?.course?.features?.length > 0 && (
+                {(details?.course?.features?.length ?? 0) > 0 && (
                   <div className="pt-6">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Key Features
@@ -318,7 +323,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Eligibility Criteria
                 </h2>
-                {details?.course?.eligibilityRows?.length > 0 ? (
+                {(details?.course?.eligibilityRows?.length ?? 0) > 0 ? (
                   <div className="mb-6">
                     <h3 className="text-[17px] font-bold text-gray-900 mb-4">
                       Full time Courses
@@ -393,7 +398,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       </table>
                     </div>
                   </div>
-                ) : details?.admissionRequirements?.length > 0 ? (
+                ) : (details?.admissionRequirements?.length ?? 0) > 0 ? (
                   <ul className="space-y-3">
                     {details.admissionRequirements.map(
                       (req: string, i: number) => (
@@ -430,7 +435,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     Step-by-step guide for {courseTitle} admission
                   </p>
                 </div>
-                {details?.course?.admissionSteps?.length > 0 ? (
+                {(details?.course?.admissionSteps?.length ?? 0) > 0 ? (
                   details.course.admissionSteps.map(
                     (step: any, i: number) => (
                       <div key={i} className="mb-6">
@@ -466,7 +471,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 </h2>
 
                 {/* Full Time Courses Table */}
-                {details?.course?.fullTimeCourses?.length > 0 && (
+                {(details?.course?.fullTimeCourses?.length ?? 0) > 0 && (
                   <div className="mb-8">
                     <div className="overflow-x-auto rounded border border-gray-200">
                       <table className="w-full text-left border-collapse min-w-[800px]">
@@ -504,7 +509,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 )}
 
                 {/* Course Details Cards */}
-                {details?.course?.subjectGroups?.length > 0 && (
+                {(details?.course?.subjectGroups?.length ?? 0) > 0 && (
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Details</h2>
                     <div className="space-y-6">
@@ -524,9 +529,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           {group.description && (
                             <p className="text-gray-700 leading-relaxed mb-4">{group.description}</p>
                           )}
-                          {(group.subjects?.length > 0 || group.careers?.length > 0 || group.streams || group.careerList) && (
+                          {(group.subjects?.length ?? 0) > 0 || (group.careers?.length ?? 0) > 0 || group.streams || group.careerList) && (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {(group.subjects?.length > 0 || group.streams) && (
+                              {((group.subjects?.length ?? 0) > 0 || group.streams) && (
                                 <div className="bg-gray-50 rounded-lg p-4">
                                   <h4 className="font-semibold text-gray-900 mb-2">Available Streams:</h4>
                                   <ul className="space-y-1 text-sm text-gray-600">
@@ -539,7 +544,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                                   </ul>
                                 </div>
                               )}
-                              {(group.careers?.length > 0 || group.careerList) && (
+                              {((group.careers?.length ?? 0) > 0 || group.careerList) && (
                                 <div className="bg-gray-50 rounded-lg p-4">
                                   <h4 className="font-semibold text-gray-900 mb-2">Career Opportunities:</h4>
                                   <ul className="space-y-1 text-sm text-gray-600">
@@ -561,13 +566,13 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 )}
 
                 {/* Fallback: Curriculum */}
-                {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length) && details?.curriculum?.length > 0 && (
+                {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length) && (details?.curriculum?.length ?? 0) > 0 && (
                   <div className="space-y-6">
                     {details.curriculum.map((sem: any, i: number) => (
                       <div key={i} className="border border-gray-200 rounded-md p-5">
                         <h3 className="font-bold text-gray-900 mb-2">{sem.title || `Semester ${sem.semester || i + 1}`}</h3>
                         {sem.subtitle && <p className="text-sm text-gray-500 mb-3">{sem.subtitle}</p>}
-                        {sem.subjects?.length > 0 && (
+                        {(sem.subjects?.length ?? 0) > 0 && (
                           <ul className="list-disc list-inside text-gray-600 text-sm space-y-1">
                             {sem.subjects.map((sub: string, j: number) => <li key={j}>{sub}</li>)}
                           </ul>
@@ -589,7 +594,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Fee Structure
                 </h2>
-                {details?.course?.feeItems?.length > 0 ? (
+                {(details?.course?.feeItems?.length ?? 0) > 0 ? (
                   <div className="mb-6">
                     <h3 className="text-[17px] font-bold text-gray-900 mb-4">
                       Full time Courses
@@ -682,7 +687,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     </p>
                   )}
                 </div>
-                {details?.course?.scholarships?.length > 0 ? (
+                {(details?.course?.scholarships?.length ?? 0) > 0 ? (
                   <div className="overflow-x-auto rounded border border-gray-200">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                       <thead>
@@ -762,7 +767,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <h2 className="text-[22px] font-bold text-gray-900 mb-6">
                   Frequently Asked Questions
                 </h2>
-                {details?.course?.faqs?.length > 0 ? (
+                {(details?.course?.faqs?.length ?? 0) > 0 ? (
                   <div className="space-y-3">
                     {details.course.faqs.map((faq: any, i: number) => (
                       <FaqItem key={i} question={faq.question} answer={faq.answer} />
@@ -773,6 +778,51 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     No FAQs available.
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Facilities */}
+            {activeTab === "facilities" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-2">Facilities</h2>
+                <p className="text-[15px] text-gray-600 mb-6">State-of-the-art infrastructure for quality education</p>
+                <p className="text-gray-400 italic">Facility information is available on the college page.</p>
+              </div>
+            )}
+
+            {/* Faculty */}
+            {activeTab === "faculty" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-2">Faculty</h2>
+                <p className="text-[15px] text-gray-600 mb-6">Experienced and dedicated educators</p>
+                <p className="text-gray-400 italic">Faculty information is available on the college page.</p>
+              </div>
+            )}
+
+            {/* Achievements */}
+            {activeTab === "achievements" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[20px] font-bold text-gray-900 mb-2">Achievements</h2>
+                <p className="text-[14px] text-gray-500 mb-6">Milestones and success stories</p>
+                <p className="text-gray-400 italic">Achievement information is available on the college page.</p>
+              </div>
+            )}
+
+            {/* News */}
+            {activeTab === "news" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[20px] font-bold text-gray-900 mb-2">News & Notices</h2>
+                <p className="text-[14px] text-gray-500 mb-6">Stay updated with latest announcements</p>
+                <p className="text-gray-400 italic">News and notices are available on the college page.</p>
+              </div>
+            )}
+
+            {/* Downloads */}
+            {activeTab === "downloads" && (
+              <div className="animate-fade-in">
+                <h2 className="text-[22px] font-bold text-gray-900 mb-2">Downloads</h2>
+                <p className="text-[15px] text-gray-600 mb-6">Important documents and resources</p>
+                <p className="text-gray-400 italic">Downloadable resources are available on the college page.</p>
               </div>
             )}
           </div>
