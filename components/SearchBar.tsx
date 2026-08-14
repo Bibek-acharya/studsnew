@@ -344,13 +344,15 @@ export const SearchBar: React.FC<{
               </div>
             )}
           </div>
-          <button
-            onClick={() => handleSearchExecute(searchQuery)}
-            className="flex items-center justify-center w-9 h-9 rounded-full text-white bg-brand-blue hover:bg-brand-hover transition-colors"
-            aria-label="Search"
-          >
-            <Search size={18} />
-          </button>
+          {!isMobile && (
+            <button
+              onClick={() => handleSearchExecute(searchQuery)}
+              className="flex items-center justify-center w-9 h-9 rounded-full text-white bg-brand-blue hover:bg-brand-hover transition-colors"
+              aria-label="Search"
+            >
+              <Search size={18} />
+            </button>
+          )}
         </div>
 
         {isSearchOpen && showSuggestionDropdown && (
