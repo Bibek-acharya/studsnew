@@ -473,19 +473,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
             {!user ? (
               <>
-                {/* Not Logged In: Hamburger Left, Logo Center, Search + Login/Register Right */}
-                <button
-                  type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 md:hidden shrink-0 z-10"
-                  onClick={toggleMobileDrawer}
-                  aria-label="Toggle menu"
-                >
-                  {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
-                </button>
-
+                {/* Mobile: Logo Left, Hamburger Right */}
                 <Link
                   href="/"
-                  className="flex flex-1 shrink-0 cursor-pointer items-center justify-center min-w-0 md:flex-none md:justify-start"
+                  className="flex shrink-0 cursor-pointer items-center min-w-0 md:hidden"
                 >
                   <Image
                     src="/mobilelogo.png"
@@ -493,23 +484,41 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     width={512}
                     height={512}
                     priority
-                    className="h-9 w-auto md:hidden object-contain"
+                    className="h-9 w-auto object-contain"
                   />
+                </Link>
+
+                <div className="flex-1 md:hidden" />
+
+                <button
+                  type="button"
+                  className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0 z-10 md:hidden"
+                  onClick={toggleMobileDrawer}
+                  aria-label="Toggle menu"
+                >
+                  {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+
+                {/* Desktop: Logo Left, Search Center, Login/Register Right */}
+                <Link
+                  href="/"
+                  className="hidden md:flex shrink-0 cursor-pointer items-center min-w-0"
+                >
                   <Image
                     src="/studsphere.png"
                     alt="Studsphere Logo"
                     width={4702}
                     height={1320}
                     priority
-                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-center scale-115 sm:scale-125 hidden md:block"
+                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125"
                   />
                 </Link>
 
-                <div className="hidden md:block flex-1 max-w-3xl mx-4">
+                <div className="hidden md:flex flex-1 max-w-3xl mx-4">
                   <SearchBar />
                 </div>
 
-                <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
+                <div className="hidden md:flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
                   <button
                     onClick={() => go("login")}
                     className="hidden md:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
