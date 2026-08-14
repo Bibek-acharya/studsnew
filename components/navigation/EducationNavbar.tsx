@@ -21,6 +21,10 @@ import {
   X,
   Menu,
   FileSpreadsheet,
+  Home,
+  MessageSquare,
+  Sparkles,
+  LogIn,
 } from "lucide-react";
 import {
   desktopMenuSections,
@@ -1618,6 +1622,86 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             )}
           </div>
         </aside>
+      </div>
+
+      {/* Mobile Bottom Tab Navigation */}
+      <div className="fixed bottom-0 left-0 right-0 z-[130] bg-white border-t border-gray-200 md:hidden safe-area-bottom">
+        <nav className="flex items-center justify-around h-14">
+          <button
+            onClick={() => {
+              router.push("/");
+              setIsMobileOpen(false);
+            }}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+              isRouteActive("/") ? "text-brand-blue" : "text-gray-500"
+            }`}
+          >
+            <Home size={20} />
+            <span className="text-[10px] font-medium">Home</span>
+          </button>
+
+          <button
+            onClick={() => {
+              router.push("/campus-feed");
+              setIsMobileOpen(false);
+            }}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+              isRouteActive("/campus-feed") ? "text-brand-blue" : "text-gray-500"
+            }`}
+          >
+            <MessageSquare size={20} />
+            <span className="text-[10px] font-medium">Campus</span>
+          </button>
+
+          <button
+            onClick={() => {
+              router.push("/sphere-ai");
+              setIsMobileOpen(false);
+            }}
+            className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+              isRouteActive("/sphere-ai") ? "text-brand-blue" : "text-gray-500"
+            }`}
+          >
+            <Sparkles size={20} />
+            <span className="text-[10px] font-medium">Sphere AI</span>
+          </button>
+
+          {user ? (
+            <button
+              onClick={() => {
+                go("userDashboard");
+                setIsMobileOpen(false);
+              }}
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+                isRouteActive("/dashboard") ? "text-brand-blue" : "text-gray-500"
+              }`}
+            >
+              {user.image_url ? (
+                <img
+                  src={getImageUrl(user.image_url)}
+                  alt=""
+                  className="w-6 h-6 rounded-full object-cover"
+                />
+              ) : (
+                <User size={20} />
+              )}
+              <span className="text-[10px] font-medium">Profile</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                router.push("/login");
+                setIsMobileOpen(false);
+              }}
+              className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
+                isRouteActive("/login") ? "text-brand-blue" : "text-gray-500"
+              }`}
+            >
+              <LogIn size={20} />
+              <span className="text-[10px] font-medium">Login</span>
+            </button>
+          )}
+        </nav>
       </div>
     </>
   );
