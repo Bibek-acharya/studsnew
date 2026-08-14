@@ -58,7 +58,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const pathname = usePathname();
 
   const [mobileMenus, setMobileMenus] = useState<Record<string, boolean>>({});
-  const drawerDirection = user ? "right" : "left";
+  const drawerDirection = "right";
   const mobileSearchSuggestions = trendingSearches.slice(0, 4);
   const [mobileLiveSuggestions, setMobileLiveSuggestions] = useState<
     { title: string; type: string }[]
@@ -473,19 +473,38 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-2 sm:gap-4 py-2.5 sm:py-3">
             {!user ? (
               <>
-                {/* Not Logged In: Hamburger Left, Logo Center, Search + Login/Register Right */}
+                {/* Mobile: Logo Left, Search Center, Hamburger Right */}
+                <Link
+                  href="/"
+                  className="flex shrink-0 cursor-pointer items-center min-w-0 md:hidden"
+                >
+                  <Image
+                    src="/mobilelogo.png"
+                    alt="Studsphere Logo"
+                    width={512}
+                    height={512}
+                    priority
+                    className="h-9 w-auto object-contain"
+                  />
+                </Link>
+
+                <div className="flex-1 md:hidden min-w-0 mx-1">
+                  <SearchBar isMobile defaultSearchOpen={false} showSuggestionDropdown={false} />
+                </div>
+
                 <button
                   type="button"
-                  className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 md:hidden shrink-0 z-10"
+                  className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0 z-10 md:hidden"
                   onClick={toggleMobileDrawer}
                   aria-label="Toggle menu"
                 >
                   {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
 
+                {/* Desktop: Logo Left, Search Center, Login/Register Right */}
                 <Link
                   href="/"
-                  className="flex flex-1 shrink-0 cursor-pointer items-center justify-center min-w-0 md:flex-none md:justify-start"
+                  className="hidden md:flex shrink-0 cursor-pointer items-center min-w-0"
                 >
                   <Image
                     src="/studsphere.png"
@@ -493,15 +512,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     width={4702}
                     height={1320}
                     priority
-                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-center scale-115 sm:scale-125"
+                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125"
                   />
                 </Link>
 
-                <div className="hidden md:block flex-1 max-w-3xl mx-4">
+                <div className="hidden md:flex flex-1 max-w-3xl mx-4">
                   <SearchBar />
                 </div>
 
-                <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
+                <div className="hidden md:flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0 z-10">
                   <button
                     onClick={() => go("login")}
                     className="hidden md:flex items-center gap-2 bg-brand-blue hover:bg-brand-hover text-white px-4 py-2.5 rounded-md text-[14px] font-semibold transition-colors shrink-0"
@@ -607,12 +626,20 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   className="flex shrink-0 cursor-pointer items-center min-w-0"
                 >
                   <Image
+                    src="/mobilelogo.png"
+                    alt="Studsphere Logo"
+                    width={512}
+                    height={512}
+                    priority
+                    className="h-9 w-auto md:hidden object-contain"
+                  />
+                  <Image
                     src="/studsphere.png"
                     alt="Studsphere Logo"
                     width={4702}
                     height={1320}
                     priority
-                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125"
+                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125 hidden md:block"
                   />
                 </Link>
 
@@ -1384,10 +1411,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           className={`absolute top-0 h-full w-80 max-w-[85vw] bg-white shadow-2xl md:hidden transform transition-transform duration-300 ease-in-out ${
             isMobileOpen
               ? "translate-x-0"
-              : drawerDirection === "left"
-                ? "-translate-x-full"
-                : "translate-x-full"
-          } ${drawerDirection === "left" ? "left-0" : "right-0"}`}
+              : "translate-x-full"
+          } right-0`}
         >
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-gray-200 p-4">
@@ -1433,27 +1458,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   </div>
                 </div>
               )}
-
-              {/* Mobile Search + Sphere AI */}
-              <div className="mb-3 flex flex-col gap-2">
-                <SearchBar
-                  isMobile
-                  defaultSearchOpen={false}
-                  showSuggestionDropdown={false}
-                  onQueryStateChange={handleMobileSearchStateChange}
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsMobileOpen(false);
-                    router.push("/sphere-ai");
-                  }}
-                  className="flex items-center gap-2 rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                >
-                  <Search size={15} className="text-gray-500" />
-                  <span>Sphere AI</span>
-                </button>
-              </div>
 
               <div className="flex flex-col gap-1 text-[15px] font-semibold text-gray-700">
                 <button
