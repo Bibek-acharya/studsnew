@@ -1625,8 +1625,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       </div>
 
       {/* Mobile Bottom Tab Navigation */}
-      <div className="fixed bottom-0 left-0 right-0 z-[130] bg-white border-t border-gray-200 md:hidden safe-area-bottom">
-        <nav className="flex items-center justify-around h-14">
+      <div className="fixed bottom-0 left-0 right-0 z-[150] bg-white border-t border-gray-200 shadow-[0_-2px_10px_rgba(0,0,0,0.05)] md:hidden">
+        <nav className="flex items-center justify-around h-16 pb-safe">
           <button
             onClick={() => {
               router.push("/");

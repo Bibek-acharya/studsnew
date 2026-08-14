@@ -246,7 +246,7 @@ export const SearchBar: React.FC<{
   return (
     <div className={isMobile ? "w-full" : "hidden max-w-480 flex-1 md:block"}>
       <div
-        className="group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 focus-within:shadow-sm sm:h-11.5"
+        className={`group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 sm:h-11.5 ${isMobile ? "" : "focus-within:shadow-sm"}`}
         ref={searchContainerRef}
       >
         {isMobile && (
