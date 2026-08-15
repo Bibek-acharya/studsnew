@@ -262,7 +262,7 @@ export default function FeedbackWidget() {
   }
 
   return (
-    <div className="absolute left-0 top-1/2 z-50 -translate-y-1/2 scale-75 sm:scale-90 xl:scale-100 origin-left">
+    <div className="hidden md:block absolute left-0 top-1/2 z-50 -translate-y-1/2 scale-75 sm:scale-90 xl:scale-100 origin-left">
       <div className="flex items-stretch">
         <button
           onClick={() => setIsOpen(!isOpen)}
