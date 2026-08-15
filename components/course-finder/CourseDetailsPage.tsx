@@ -72,6 +72,14 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
 
   const details = detailsData || null;
 
+  // Debug: log actual data shape
+  if (details && typeof window !== "undefined") {
+    console.log("[CourseDetails] details keys:", Object.keys(details));
+    console.log("[CourseDetails] details.course keys:", details.course ? Object.keys(details.course) : "NO COURSE");
+    console.log("[CourseDetails] whoShouldChoose:", details.course?.whoShouldChoose?.length ?? "MISSING");
+    console.log("[CourseDetails] features:", details.course?.features?.length ?? "MISSING");
+  }
+
   const courseTitle = stripHtml(course?.title || details?.course?.title || "");
   const courseDuration = stripHtml(
     course?.duration || details?.course?.duration || "",
