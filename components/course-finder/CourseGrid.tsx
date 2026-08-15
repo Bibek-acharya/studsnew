@@ -193,7 +193,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
             <React.Fragment key={course.id || index}>
               <div className="bg-white rounded-md border border-gray-200 flex flex-col relative transition-all hover:border-blue-500/20 duration-300">
                 {/* Image Area - Reduced height and padding */}
-                <div className="relative h-28 w-full p-3 pb-2">
+                <div className="relative h-30 w-full p-3 pb-2">
                   <img
                     src={
                       course.bannerUrl ||

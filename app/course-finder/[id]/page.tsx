@@ -278,7 +278,7 @@ export default function CourseDetailPage({
           </div>
 
           <div
-            className="relative w-full h-[300px] md:h-[400px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-2xl overflow-hidden"
+            className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-2xl overflow-hidden"
             style={{
               backgroundImage: `url('${bannerImage}')`,
               backgroundPosition: "center 20%",
@@ -414,92 +414,6 @@ export default function CourseDetailPage({
                           <p className="text-sm text-gray-600">
                             {item.shortDesc}
                           </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {subjectGroups.length > 0 && (
-                <div className="pt-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    Subjects & Career Opportunities
-                  </h2>
-                  <div className="space-y-6">
-                    {subjectGroups.map((sg: any, i: number) => (
-                      <div
-                        key={i}
-                        className="border border-gray-200 rounded-xl p-6 bg-white"
-                      >
-                        <div className="flex items-start justify-between gap-4 mb-4">
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                              {getIcon(sg.icon)}
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-gray-900">
-                                {sg.groupName}
-                              </h3>
-                              <p className="text-sm text-gray-500">
-                                {sg.subjects?.slice(0, 3).join(", ")}
-                              </p>
-                            </div>
-                          </div>
-                          {sg.status && (
-                            <span
-                              className={`px-3 py-1 text-xs font-semibold rounded-full shrink-0 ${
-                                sg.status === "Admissions Open"
-                                  ? "bg-green-100 text-green-700"
-                                  : "bg-blue-100 text-blue-700"
-                              }`}
-                            >
-                              {sg.status}
-                            </span>
-                          )}
-                        </div>
-                        {sg.description && (
-                          <p className="text-gray-700 leading-relaxed mb-4">
-                            {sg.description}
-                          </p>
-                        )}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {sg.subjects?.length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4">
-                              <h4 className="font-semibold text-gray-900 mb-2">
-                                Available Streams:
-                              </h4>
-                              <ul className="space-y-1 text-sm text-gray-600">
-                                {sg.subjects.map((sub: string, j: number) => (
-                                  <li
-                                    key={j}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
-                                    {sub}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                          {sg.careers?.length > 0 && (
-                            <div className="bg-gray-50 rounded-lg p-4">
-                              <h4 className="font-semibold text-gray-900 mb-2">
-                                Career Opportunities:
-                              </h4>
-                              <ul className="space-y-1 text-sm text-gray-600">
-                                {sg.careers.map((c: string, j: number) => (
-                                  <li
-                                    key={j}
-                                    className="flex items-center gap-2"
-                                  >
-                                    <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
-                                    {c}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
                         </div>
                       </div>
                     ))}
