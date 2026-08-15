@@ -646,7 +646,7 @@ export default function CourseDetailPage({
                                             {e.code}
                                           </span>
                                         )}
-                                        {e.name || e}
+                                        {e.name || ""}
                                       </span>
                                     </li>
                                   ))}
