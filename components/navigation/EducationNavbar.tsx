@@ -1643,11 +1643,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
           <button
             onClick={() => {
-              router.push("/campus-feed");
+              router.push("/campus-forum");
               setIsMobileOpen(false);
             }}
             className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors ${
-              isRouteActive("/campus-feed") ? "text-brand-blue" : "text-gray-500"
+              isRouteActive("/campus-forum") ? "text-brand-blue" : "text-gray-500"
             }`}
           >
             <MessageSquare size={20} />
