@@ -897,7 +897,7 @@ const CampusForumPage: React.FC = () => {
       <main className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-0 lg:px-8">
           {/* ── LEFT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5 order-2 lg:order-1 hidden lg:block">
+          <aside className="lg:col-span-3 space-y-5 order-1">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
@@ -968,7 +968,7 @@ const CampusForumPage: React.FC = () => {
           </aside>
 
           {/* ── MIDDLE ── */}
-          <section className="lg:col-span-6 space-y-5 order-1 lg:order-2">
+          <section className="lg:col-span-6 space-y-5 order-2">
             {/* Create Post Widget */}
             <div className="bg-white rounded-lg p-4 border border-slate-200/80 shadow-xs input-glow transition-all">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
@@ -1047,83 +1047,23 @@ const CampusForumPage: React.FC = () => {
               </div>
             ) : (
               <div className="lg:space-y-4 space-y-0 divide-y divide-slate-100">
-                {posts.flatMap((post, idx) => {
-                  const cards = [
-                    <PostCard
-                      key={post.id}
-                      post={post}
-                      onLike={handleLike}
-                      onCommentClick={handleCommentClick}
-                      onLightbox={handleLightbox}
-                      comments={commentsData[post.id]}
-                      commentsOpen={openComments[post.id]}
-                    />,
-                  ];
-                  if (
-                    (idx + 1) % 5 === 0 ||
-                    (idx === posts.length - 1 && posts.length < 5)
-                  ) {
-                    cards.push(
-                      <div key={`communities-${idx}`} className="lg:hidden px-0 py-4 bg-white border-b border-slate-100">
-                        <div className="flex items-center justify-between px-4 mb-3">
-                          <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">Discover Communities</h3>
-                          <div className="flex gap-1">
-                            <button
-                              onClick={() => document.getElementById(`comm-scroll-${idx}`)?.scrollBy({ left: -200, behavior: "smooth" })}
-                              className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
-                            >
-                              <ChevronLeft className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => document.getElementById(`comm-scroll-${idx}`)?.scrollBy({ left: 200, behavior: "smooth" })}
-                              className="p-1 rounded-full hover:bg-slate-100 text-slate-500"
-                            >
-                              <ChevronRight className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                        <div
-                          id={`comm-scroll-${idx}`}
-                          className="flex gap-3 overflow-x-auto scrollbar-hide px-4"
-                          style={{ scrollSnapType: "x mandatory" }}
-                        >
-                          {communities.filter((c) => !c.is_general).map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex-shrink-0 w-[130px] flex flex-col items-center gap-2 p-3 rounded-xl border border-slate-200 bg-white"
-                              style={{ scrollSnapAlign: "start" }}
-                            >
-                              <div
-                                className="w-12 h-12 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
-                                style={{ backgroundColor: (item.bg_color || "#e0e7ff") + "40" }}
-                              >
-                                {item.icon ? <DynamicIcon name={item.icon} size={22} className="text-slate-700" /> : null}
-                              </div>
-                              <p className="text-[11px] font-bold text-slate-800 text-center leading-tight line-clamp-2">
-                                {item.name}
-                              </p>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleJoinToggle(item.id); }}
-                                className={`w-full py-1.5 text-[10px] font-bold rounded-full transition-all ${
-                                  item.is_member ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-[#0000ff] hover:opacity-90 text-white'
-                                }`}
-                              >
-                                {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  }
-                  return cards;
-                })}
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    onLike={handleLike}
+                    onCommentClick={handleCommentClick}
+                    onLightbox={handleLightbox}
+                    comments={commentsData[post.id]}
+                    commentsOpen={openComments[post.id]}
+                  />
+                ))}
               </div>
             )}
           </section>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5 hidden lg:block">
+          <aside className="lg:col-span-3 space-y-5 order-3">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
