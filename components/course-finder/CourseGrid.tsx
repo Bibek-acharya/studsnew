@@ -240,7 +240,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                           Affiliation:
                         </span>{" "}
                         <span className="text-gray-600">
-                          {course.affiliationName || "Tribhuvan University"}
+                          {course.affiliationName || course.nonUniversityAffiliation || "-"}
                         </span>
                       </div>
                     </div>

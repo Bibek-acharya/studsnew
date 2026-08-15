@@ -97,6 +97,25 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
   const courseBannerUrl =
     course?.bannerUrl || details?.course?.bannerUrl || "";
 
+  // Detailed fields — read from course first, then details top level
+  const whoShouldChoose = details?.course?.whoShouldChoose || [];
+  const features = details?.course?.features || [];
+  const eligibilityRows = details?.course?.eligibilityRows || [];
+  const admissionSteps = details?.course?.admissionSteps || [];
+  const subjectGroups = details?.course?.subjectGroups || [];
+  const fullTimeCourses = details?.course?.fullTimeCourses || [];
+  const feeItems = details?.course?.feeItems || [];
+  const scholarshipDesc = details?.course?.scholarshipDesc || "";
+  const scholarshipNotes = details?.course?.scholarshipNotes || "";
+  const scholarships = details?.course?.scholarships || [];
+  const faqs = details?.course?.faqs || [];
+
+  // Top-level details (fallback from CourseDetailsResponse)
+  const detailAbout = details?.about || [];
+  const detailCurriculum = details?.curriculum || [];
+  const detailAdmissionReqs = details?.admissionRequirements || [];
+  const detailCareers = details?.careerOpportunities || [];
+
   const [activeTab, setActiveTab] = useState("overview");
 
   const scrollTabs = (dir: number) => {
@@ -259,13 +278,13 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 </div>
 
                 {/* Who Should Choose / Features */}
-                {(details?.course?.whoShouldChoose?.length ?? 0) > 0 && (
+                {whoShouldChoose.length > 0 && (
                   <div className="pt-6">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Who Should Choose This Course?
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {details?.course?.whoShouldChoose?.map(
+                      {whoShouldChoose.map(
                         (item: any, i: number) => (
                           <div
                             key={i}
@@ -287,13 +306,13 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </div>
                 )}
 
-                {(details?.course?.features?.length ?? 0) > 0 && (
+                {features.length > 0 && (
                   <div className="pt-6">
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">
                       Key Features
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {details?.course?.features?.map(
+                      {features.map(
                         (item: any, i: number) => (
                           <div
                             key={i}
@@ -323,7 +342,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Eligibility Criteria
                 </h2>
-                {(details?.course?.eligibilityRows?.length ?? 0) > 0 ? (
+                {eligibilityRows.length > 0 ? (
                   <div className="mb-6">
                     <h3 className="text-[17px] font-bold text-gray-900 mb-4">
                       Full time Courses
@@ -347,7 +366,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {details?.course?.eligibilityRows?.map(
+                          {eligibilityRows.map(
                             (row: any, i: number) => (
                               <tr
                                 key={i}
@@ -392,9 +411,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                       </table>
                     </div>
                   </div>
-                ) : (details?.admissionRequirements?.length ?? 0) > 0 ? (
+                ) : detailAdmissionReqs.length > 0 ? (
                   <ul className="space-y-3">
-                    {details?.admissionRequirements?.map(
+                    {detailAdmissionReqs.map(
                       (req: string, i: number) => (
                         <li
                           key={i}
@@ -429,8 +448,8 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     Step-by-step guide for {courseTitle} admission
                   </p>
                 </div>
-                {(details?.course?.admissionSteps?.length ?? 0) > 0 ? (
-                  details?.course?.admissionSteps?.map(
+                {admissionSteps.length > 0 ? (
+                  admissionSteps.map(
                     (step: any, i: number) => (
                       <div key={i} className="mb-6">
                         <div className="flex items-start gap-4 mb-4">
@@ -465,7 +484,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 </h2>
 
                 {/* Full Time Courses Table */}
-                {(details?.course?.fullTimeCourses?.length ?? 0) > 0 && (
+                {fullTimeCourses.length > 0 && (
                   <div className="mb-8">
                     <div className="overflow-x-auto rounded border border-gray-200">
                       <table className="w-full text-left border-collapse min-w-[800px]">
@@ -478,7 +497,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {details?.course?.fullTimeCourses?.map((ftc: any, i: number) => (
+                          {fullTimeCourses.map((ftc: any, i: number) => (
                             <tr key={i} className="border-b border-gray-200 hover:bg-gray-50">
                               <td className="p-4 align-top border-r border-gray-200">
                                 <div className="text-gray-900 font-semibold mb-1">{ftc.course}</div>
@@ -503,11 +522,11 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 )}
 
                 {/* Course Details Cards */}
-                {(details?.course?.subjectGroups?.length ?? 0) > 0 && (
+                {subjectGroups.length > 0 && (
                   <div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-6">Course Details</h2>
                     <div className="space-y-6">
-                      {details?.course?.subjectGroups?.map((group: any, i: number) => (
+                      {subjectGroups.map((group: any, i: number) => (
                         <div key={i} className="border border-gray-200 rounded-xl p-6 bg-white">
                           <div className="flex items-start justify-between gap-4 mb-4">
                             <div className="flex items-start gap-4">
@@ -560,9 +579,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 )}
 
                 {/* Fallback: Curriculum */}
-                {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length) && (details?.curriculum?.length ?? 0) > 0 && (
+                {(!fullTimeCourses.length && !subjectGroups.length) && detailCurriculum.length > 0 && (
                   <div className="space-y-6">
-                    {details?.curriculum?.map((sem: any, i: number) => (
+                    {detailCurriculum.map((sem: any, i: number) => (
                       <div key={i} className="border border-gray-200 rounded-md p-5">
                         <h3 className="font-bold text-gray-900 mb-2">{sem.title || `Semester ${sem.semester || i + 1}`}</h3>
                         {sem.subtitle && <p className="text-sm text-gray-500 mb-3">{sem.subtitle}</p>}
@@ -576,7 +595,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </div>
                 )}
 
-                {(!details?.course?.fullTimeCourses?.length && !details?.course?.subjectGroups?.length && !details?.curriculum?.length) && (
+                {(!fullTimeCourses.length && !subjectGroups.length && !detailCurriculum.length) && (
                   <p className="text-gray-400 italic">No course information available.</p>
                 )}
               </div>
@@ -588,7 +607,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                   Fee Structure
                 </h2>
-                {(details?.course?.feeItems?.length ?? 0) > 0 ? (
+                {feeItems.length > 0 ? (
                   <div className="mb-6">
                     <h3 className="text-[17px] font-bold text-gray-900 mb-4">
                       Full time Courses
@@ -612,7 +631,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {details?.course?.feeItems?.map(
+                          {feeItems.map(
                             (item: any, i: number) => (
                               <tr
                                 key={i}
@@ -675,13 +694,13 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   <h2 className="text-[22px] font-bold text-gray-900">
                     Scholarship Programs
                   </h2>
-                  {details?.course?.scholarshipDesc && (
+                  {scholarshipDesc && (
                     <p className="text-[15px] text-gray-600 mt-1">
-                      {details?.course?.scholarshipDesc}
+                      {scholarshipDesc}
                     </p>
                   )}
                 </div>
-                {(details?.course?.scholarships?.length ?? 0) > 0 ? (
+                {scholarships.length > 0 ? (
                   <div className="overflow-x-auto rounded border border-gray-200">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                       <thead>
@@ -704,7 +723,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                         </tr>
                       </thead>
                       <tbody className="text-[15px]">
-                        {details?.course?.scholarships?.map(
+                        {scholarships.map(
                           (sch: any, i: number) => (
                             <tr
                               key={i}
@@ -747,9 +766,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     No scholarship information available.
                   </p>
                 )}
-                {details?.course?.scholarshipNotes && (
+                {scholarshipNotes && (
                   <p className="mt-4 text-sm text-gray-500">
-                    {details?.course?.scholarshipNotes}
+                    {scholarshipNotes}
                   </p>
                 )}
               </div>
@@ -761,9 +780,9 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                 <h2 className="text-[22px] font-bold text-gray-900 mb-6">
                   Frequently Asked Questions
                 </h2>
-                {(details?.course?.faqs?.length ?? 0) > 0 ? (
+                {faqs.length > 0 ? (
                   <div className="space-y-3">
-                    {details?.course?.faqs?.map((faq: any, i: number) => (
+                    {faqs.map((faq: any, i: number) => (
                       <FaqItem key={i} question={faq.question} answer={faq.answer} />
                     ))}
                   </div>
