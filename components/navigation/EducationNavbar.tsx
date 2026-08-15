@@ -1093,7 +1093,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       </div>
                     )}
                   </div>
-                </div>
               </>
             )}
           </div>
