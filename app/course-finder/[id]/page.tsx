@@ -17,7 +17,6 @@ type TabKey =
   | "curriculum"
   | "eligibility"
   | "admission"
-  | "courses"
   | "fees"
   | "scholarships"
   | "faq";
@@ -26,8 +25,7 @@ const tabs: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "curriculum", label: "Curriculum" },
   { key: "eligibility", label: "Eligibility" },
-  { key: "admission", label: "Admission" },
-  { key: "courses", label: "Courses" },
+  { key: "admission", label: "Entrance & Admission" },
   { key: "fees", label: "Program Fee" },
   { key: "scholarships", label: "Scholarships" },
   { key: "faq", label: "FAQ" },
@@ -137,18 +135,18 @@ export default function CourseDetailPage({
   if (isLoading) {
     return (
       <div className="w-full animate-pulse">
-        <div className="mx-auto max-w-350 pt-12 pb-8 px-4">
+        <div className="mx-auto max-w-350 pt-12 pb-8">
           <div className="h-4 w-64 rounded bg-gray-200 mb-6" />
           <div className="h-9 w-80 rounded bg-gray-200 mb-2" />
           <div className="h-4 w-48 rounded bg-gray-200 mb-6" />
           <div className="h-[280px] md:h-[380px] rounded-md bg-gray-200" />
         </div>
-        <div className="mx-auto max-w-350 flex gap-8 px-4 border-b border-gray-100">
+        <div className="mx-auto max-w-350 flex gap-8 border-b border-gray-100">
           {[1, 2, 3, 4, 5, 6, 7].map((i) => (
             <div key={i} className="h-10 w-20 rounded bg-gray-200 mb-0" />
           ))}
         </div>
-        <div className="mx-auto max-w-350 py-8 md:py-12 px-4">
+        <div className="mx-auto max-w-350 py-8 md:py-12">
           <div className="space-y-4">
             <div className="h-6 w-48 rounded bg-gray-200" />
             <div className="h-4 w-full rounded bg-gray-200" />
@@ -233,7 +231,7 @@ export default function CourseDetailPage({
       `}</style>
 
       <div className="w-full bg-white text-gray-800">
-        <div className="mx-auto max-w-350 pt-12 pb-8 px-4">
+        <div className="mx-auto max-w-350 pt-12 pb-8">
           <nav className="flex items-center text-sm text-gray-500 mb-6 gap-1 overflow-x-auto whitespace-nowrap">
             <a
               href="/"
@@ -288,7 +286,7 @@ export default function CourseDetailPage({
         </div>
 
         <div className="mx-auto max-w-350 sticky top-0 z-40 bg-white border-b border-gray-100">
-          <div className="relative overflow-hidden px-4">
+          <div className="relative overflow-hidden">
             {isTabsOverflowing && canScrollTabsLeft && (
               <button
                 type="button"
@@ -335,7 +333,7 @@ export default function CourseDetailPage({
           </div>
         </div>
 
-        <div className="mx-auto max-w-350 py-8 md:py-12 bg-white px-4">
+        <div className="mx-auto max-w-350 py-8 md:py-12 bg-white">
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="tab-content">
@@ -768,248 +766,6 @@ export default function CourseDetailPage({
                 </div>
               ) : (
                 <EmptyTabState tabName="admission process" />
-              )}
-            </div>
-          )}
-
-          {/* Courses Tab */}
-          {activeTab === "courses" && (
-            <div className="tab-content">
-              {hasCoursesData ? (
-                <div>
-                  {fullTimeCourses.some((ft: any) => ft.course || ft.totalFees || ft.startDate || ft.endDate) && (
-                    <div className="mb-6">
-                      <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                        {courseTitle} Courses & Fees
-                      </h2>
-
-                      <div className="overflow-x-auto rounded border border-gray-200">
-                        <table className="w-full text-left border-collapse min-w-[800px]">
-                          <thead>
-                            <tr className="bg-[#eff4fc] border-b border-gray-200">
-                              <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
-                                Course
-                              </th>
-                              <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
-                                Total Fees
-                              </th>
-                              <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">
-                                Admission Duration
-                              </th>
-                              <th className="p-4 font-bold text-gray-900 w-[15%]">
-                                Action
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody className="text-[15px]">
-                            {fullTimeCourses.filter((ft: any) => ft.course || ft.totalFees || ft.startDate || ft.endDate).map((ft: any, i: number) => (
-                              <tr
-                                key={i}
-                                className="border-b border-gray-200 hover:bg-gray-50"
-                              >
-                                <td className="p-4 align-top border-r border-gray-200">
-                                  <div className="text-gray-900 font-semibold mb-1">
-                                    {ft.course}
-                                  </div>
-                                </td>
-                                <td className="p-4 align-top border-r border-gray-200">
-                                  <div className="text-[#059669] mb-1">
-                                    {ft.totalFees || "-"}
-                                  </div>
-                                </td>
-                                <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                  {ft.startDate && ft.endDate
-                                    ? (() => {
-                                        const s = new Date(ft.startDate);
-                                        const e = new Date(ft.endDate);
-                                        const months = [
-                                          "Jan",
-                                          "Feb",
-                                          "Mar",
-                                          "Apr",
-                                          "May",
-                                          "Jun",
-                                          "Jul",
-                                          "Aug",
-                                          "Sep",
-                                          "Oct",
-                                          "Nov",
-                                          "Dec",
-                                        ];
-                                        if (
-                                          !isNaN(s.getTime()) &&
-                                          !isNaN(e.getTime())
-                                        ) {
-                                          return `${months[s.getMonth()]}-${months[e.getMonth()]} ${s.getFullYear()}`;
-                                        }
-                                        return `${ft.startDate} - ${ft.endDate}`;
-                                      })()
-                                    : ft.admissionDuration || "-"}
-                                </td>
-                                <td className="p-4 align-top">
-                                  <a
-                                    href="#"
-                                    className="text-[#2563eb] hover:underline flex items-center text-sm font-medium"
-                                  >
-                                    View College{" "}
-                                    <ArrowRight className="w-4 h-4 ml-1" />
-                                  </a>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  {subjectGroups.length > 0 && (
-                    <div className="pt-6">
-                      <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Subjects & Career Opportunities
-                      </h2>
-                      <div className="space-y-6">
-                        {subjectGroups.map((sg: any, i: number) => (
-                          <div
-                            key={i}
-                            className="border border-gray-200 rounded-xl p-6 bg-white"
-                          >
-                            <div className="flex items-start justify-between gap-4 mb-4">
-                              <div className="flex items-start gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                                  {getIcon(sg.icon)}
-                                </div>
-                                <div>
-                                  <h3 className="text-xl font-bold text-gray-900">
-                                    {sg.groupName}
-                                  </h3>
-                                  <p className="text-sm text-gray-500">
-                                    {sg.subjects?.slice(0, 3).join(", ")}
-                                  </p>
-                                </div>
-                              </div>
-                              {sg.status && (
-                                <span
-                                  className={`px-3 py-1 text-xs font-semibold rounded-full shrink-0 ${
-                                    sg.status === "Admissions Open"
-                                      ? "bg-green-100 text-green-700"
-                                      : "bg-blue-100 text-blue-700"
-                                  }`}
-                                >
-                                  {sg.status}
-                                </span>
-                              )}
-                            </div>
-                            {sg.description && (
-                              <p className="text-gray-700 leading-relaxed mb-4">
-                                {sg.description}
-                              </p>
-                            )}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {sg.subjects?.length > 0 && (
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                  <h4 className="font-semibold text-gray-900 mb-2">
-                                    Available Streams:
-                                  </h4>
-                                  <ul className="space-y-1 text-sm text-gray-600">
-                                    {sg.subjects.map(
-                                      (sub: string, j: number) => (
-                                        <li
-                                          key={j}
-                                          className="flex items-center gap-2"
-                                        >
-                                          <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
-                                          {sub}
-                                        </li>
-                                      ),
-                                    )}
-                                  </ul>
-                                </div>
-                              )}
-                              {sg.careers?.length > 0 && (
-                                <div className="bg-gray-50 rounded-lg p-4">
-                                  <h4 className="font-semibold text-gray-900 mb-2">
-                                    Career Opportunities:
-                                  </h4>
-                                  <ul className="space-y-1 text-sm text-gray-600">
-                                    {sg.careers.map((c: string, j: number) => (
-                                      <li
-                                        key={j}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
-                                        {c}
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {curriculum.length > 0 &&
-                    fullTimeCourses.length === 0 &&
-                    subjectGroups.length === 0 && (
-                      <div className="mb-8">
-                        <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                          Course Curriculum
-                        </h2>
-                        <div className="space-y-6">
-                          {curriculum.map((sem: any, i: number) => (
-                            <div
-                              key={i}
-                              className="border border-gray-200 rounded-md p-6 bg-white"
-                            >
-                              <div className="flex items-start gap-4 mb-4">
-                                <div className="w-12 h-12 rounded-md bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                                  <span className="text-sm font-bold">
-                                    {sem.semester || i + 1}
-                                  </span>
-                                </div>
-                                <div>
-                                  <h3 className="text-xl font-bold text-gray-900">
-                                    {sem.title ||
-                                      `Semester ${sem.semester || i + 1}`}
-                                  </h3>
-                                  {sem.subtitle && (
-                                    <p className="text-sm text-gray-500">
-                                      {sem.subtitle}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                              {sem.subjects?.length > 0 && (
-                                <div className="bg-gray-50 rounded-md p-4">
-                                  <h4 className="font-semibold text-gray-900 mb-2">
-                                    Subjects:
-                                  </h4>
-                                  <ul className="space-y-1 text-sm text-gray-600">
-                                    {sem.subjects.map(
-                                      (sub: string, j: number) => (
-                                        <li
-                                          key={j}
-                                          className="flex items-center gap-2"
-                                        >
-                                          <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
-                                          {sub}
-                                        </li>
-                                      ),
-                                    )}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                </div>
-              ) : (
-                <EmptyTabState tabName="courses" />
               )}
             </div>
           )}

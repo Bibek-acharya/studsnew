@@ -316,7 +316,7 @@ export function MediaCard( ) {
 interface CurriculumSection {
   id: string;
   title: string;
-  subjects: string[];
+  subjects: { code: string; name: string; credits: string }[];
   electives: { id: string; name: string; code: string }[];
 }
 
@@ -325,7 +325,7 @@ export function CurriculumCard() {
     {
       id: generateId(),
       title: "Semester I",
-      subjects: [""],
+      subjects: [{ code: "", name: "", credits: "" }],
       electives: [],
     },
   ]);
@@ -333,7 +333,7 @@ export function CurriculumCard() {
   const addSection = () =>
     setSections((prev) => [
       ...prev,
-      { id: generateId(), title: "", subjects: [""], electives: [] },
+      { id: generateId(), title: "", subjects: [{ code: "", name: "", credits: "" }], electives: [] },
     ]);
 
   const removeSection = (id: string) =>
@@ -347,13 +347,14 @@ export function CurriculumCard() {
   const addSubject = (sectionId: string) =>
     setSections((prev) =>
       prev.map((s) =>
-        s.id === sectionId ? { ...s, subjects: [...s.subjects, ""] } : s,
+        s.id === sectionId ? { ...s, subjects: [...s.subjects, { code: "", name: "", credits: "" }] } : s,
       ),
     );
 
   const updateSubject = (
     sectionId: string,
     index: number,
+    field: "code" | "name" | "credits",
     value: string,
   ) =>
     setSections((prev) =>
@@ -362,7 +363,7 @@ export function CurriculumCard() {
           ? {
               ...s,
               subjects: s.subjects.map((sub, i) =>
-                i === index ? value : sub,
+                i === index ? { ...sub, [field]: value } : sub,
               ),
             }
           : s,
@@ -502,11 +503,29 @@ export function CurriculumCard() {
                     </span>
                     <input
                       type="text"
+                      className="input-field w-20 py-1.5 text-sm"
+                      placeholder="Code"
+                      value={subject.code}
+                      onChange={(e) =>
+                        updateSubject(section.id, subIdx, "code", e.target.value)
+                      }
+                    />
+                    <input
+                      type="text"
                       className="input-field flex-1 py-1.5 text-sm"
                       placeholder="Subject name"
-                      value={subject}
+                      value={subject.name}
                       onChange={(e) =>
-                        updateSubject(section.id, subIdx, e.target.value)
+                        updateSubject(section.id, subIdx, "name", e.target.value)
+                      }
+                    />
+                    <input
+                      type="text"
+                      className="input-field w-20 py-1.5 text-sm"
+                      placeholder="Credits"
+                      value={subject.credits}
+                      onChange={(e) =>
+                        updateSubject(section.id, subIdx, "credits", e.target.value)
                       }
                     />
                     {section.subjects.length > 1 && (

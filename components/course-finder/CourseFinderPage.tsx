@@ -140,9 +140,6 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                 Showing 1-{filteredCourses.length} of {filteredCourses.length}{" "}
                 <span className="font-bold">courses</span>
               </h1>
-              <p className="mt-1 text-[13px] text-gray-500 font-medium">
-                Tailored for your future.
-              </p>
             </div>
 
             <div className="flex items-center gap-3 w-full md:w-auto">

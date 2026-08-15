@@ -5,7 +5,6 @@ import {
   Clock,
   Building2,
   GraduationCap,
-  ClipboardCheck,
   CreditCard,
   Briefcase,
   Bookmark,
@@ -252,17 +251,6 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                         </span>{" "}
                         <span className="text-gray-600">
                           {course.fieldOfStudy || course.field || "-"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <ClipboardCheck className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
-                      <div>
-                        <span className="font-bold text-gray-700">
-                          Mode:
-                        </span>{" "}
-                        <span className="text-gray-600">
-                          {course.mode || "On-Campus"}
                         </span>
                       </div>
                     </div>

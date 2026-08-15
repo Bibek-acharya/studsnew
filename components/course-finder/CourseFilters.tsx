@@ -158,14 +158,16 @@ const CheckboxItem: React.FC<{
 const Accordion: React.FC<{
   title: string;
   defaultOpen?: boolean;
+  hideDivider?: boolean;
   children: React.ReactNode;
-}> = ({ title, defaultOpen = false, children }) => {
+}> = ({ title, defaultOpen = false, hideDivider = false, children }) => {
   const [open, setOpen] = useState(defaultOpen);
   return (
     <GlobalFilterSection
       title={title}
       isOpen={open}
       onToggle={() => setOpen((o) => !o)}
+      hideDivider={hideDivider}
     >
       {children}
     </GlobalFilterSection>
@@ -231,7 +233,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
 
   return (
     <>
-      <div className="relative w-full rounded-[20px] border border-gray-200 bg-white p-6">
+      <div className="relative w-full rounded-md border border-gray-200 bg-white p-6">
         {onClose && (
           <button
             type="button"
@@ -381,19 +383,34 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
             </div>
           </Accordion>
 
-          <Accordion title="Entrance Required">
-            <div className="pt-1">
-              <select
-                value={filters.entranceRequired}
-                onChange={(e) =>
-                  onChange({ ...filters, entranceRequired: e.target.value })
-                }
-                className="w-full bg-slate-50 border border-slate-200 rounded-md px-3 py-2 text-[13px] text-slate-900 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500 cursor-pointer"
-              >
-                <option value="">Select</option>
-                <option value="Yes">Yes</option>
-                <option value="No">No</option>
-              </select>
+          <Accordion title="Entrance Required" hideDivider>
+            <div className="pt-1 flex gap-6">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="entranceRequired"
+                  value="Yes"
+                  checked={filters.entranceRequired === "Yes"}
+                  onChange={() =>
+                    onChange({ ...filters, entranceRequired: filters.entranceRequired === "Yes" ? "" : "Yes" })
+                  }
+                  className="custom-radio"
+                />
+                <span className="text-[14.5px] text-[#475569]">Yes</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="radio"
+                  name="entranceRequired"
+                  value="No"
+                  checked={filters.entranceRequired === "No"}
+                  onChange={() =>
+                    onChange({ ...filters, entranceRequired: filters.entranceRequired === "No" ? "" : "No" })
+                  }
+                  className="custom-radio"
+                />
+                <span className="text-[14.5px] text-[#475569]">No</span>
+              </label>
             </div>
           </Accordion>
         </div>
