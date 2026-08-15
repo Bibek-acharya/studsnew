@@ -191,16 +191,17 @@ export default function CourseDetailPage({
   const careerOpportunities = details?.careerOpportunities || [];
   const programData = details?.data as Record<string, any> | undefined;
 
-  const features = programData?.features || [];
-  const whoShouldChoose = programData?.whoShouldChoose || [];
-  const eligibilityRows = programData?.eligibilityRows || [];
-  const admissionSteps = programData?.admissionSteps || [];
-  const fullTimeCourses = programData?.fullTimeCourses || [];
-  const feeItems = programData?.feeItems || [];
-  const scholarships = programData?.scholarships || [];
-  const scholarshipDesc = programData?.scholarshipDesc || "";
-  const subjectGroups = programData?.subjectGroups || [];
-  const faqs = programData?.faqs || [];
+  const features = course?.features || programData?.features || [];
+  const whoShouldChoose = course?.whoShouldChoose || programData?.whoShouldChoose || [];
+  const eligibilityRows = course?.eligibilityRows || programData?.eligibilityRows || [];
+  const admissionSteps = course?.admissionSteps || programData?.admissionSteps || [];
+  const fullTimeCourses = course?.fullTimeCourses || programData?.fullTimeCourses || [];
+  const feeItems = course?.feeItems || programData?.feeItems || [];
+  const scholarships = course?.scholarships || programData?.scholarships || [];
+  const scholarshipDesc = course?.scholarshipDesc || programData?.scholarshipDesc || "";
+  const scholarshipNotes = course?.scholarshipNotes || programData?.scholarshipNotes || "";
+  const subjectGroups = course?.subjectGroups || programData?.subjectGroups || [];
+  const faqs = course?.faqs || programData?.faqs || [];
   const programLevel = programData?.level || "";
   const affiliationData = programData?.affiliation || "";
 
