@@ -114,13 +114,21 @@ export default function InstitutionZone() {
       );
       const token = (response as any).data?.token || (response as any).token;
       const user = (response as any).data?.user || (response as any).user;
+      const preferencesCompleted =
+        (response as any).data?.preferences_completed ??
+        (response as any).preferences_completed ??
+        false;
       if (token) {
         localStorage.setItem("institutionToken", token);
       }
       if (user) {
         localStorage.setItem("institutionUser", JSON.stringify(user));
       }
-      router.push("/institution-zone/dashboard");
+      if (!preferencesCompleted) {
+        router.push("/institution-zone/onboarding");
+      } else {
+        router.push("/institution-zone/dashboard");
+      }
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Login failed. Please try again.";
       setAuthError(msg);

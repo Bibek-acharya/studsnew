@@ -278,7 +278,7 @@ export default function CourseDetailPage({
           </div>
 
           <div
-            className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-2xl overflow-hidden"
+            className="relative w-full h-[300px] md:h-[400px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-2xl overflow-hidden"
             style={{
               backgroundImage: `url('${bannerImage}')`,
               backgroundPosition: "center 20%",

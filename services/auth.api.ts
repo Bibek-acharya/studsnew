@@ -174,6 +174,14 @@ export const authApi = {
       body: JSON.stringify(data),
     });
   },
+  async saveInstitutionPreferences(
+    preferences: Record<string, any>,
+  ): Promise<any> {
+    return apiRequest("/api/v1/institutions/preferences", {
+      method: "POST",
+      body: JSON.stringify({ preferences }),
+    });
+  },
   async institutionSendOTP(
     email: string,
     type: "verification" | "password_reset",

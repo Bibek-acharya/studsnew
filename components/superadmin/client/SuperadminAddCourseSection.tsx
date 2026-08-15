@@ -9,10 +9,8 @@ import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCrop
 import type {
   PersonaItem,
   FeatureItem,
-  EligibilityRow,
   AdmissionStep,
   SubjectGroup,
-  FeeItem,
   ScholarshipItem,
   FullTimeCourse,
   FaqItem,
@@ -166,11 +164,9 @@ export default function SuperadminAddCourseSection({
 
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
 
-  const [eligibilityRows, setEligibilityRows] = useState<WithId<EligibilityRow>[]>([]);
   const [admissionSteps, setAdmissionSteps] = useState<WithId<AdmissionStep>[]>([]);
   const [subjectGroups, setSubjectGroups] = useState<WithId<SubjectGroup>[]>([]);
   const [fullTimeCourses, setFullTimeCourses] = useState<WithId<FullTimeCourse>[]>([]);
-  const [feeItems, setFeeItems] = useState<WithId<FeeItem>[]>([]);
   const [scholarshipDesc, setScholarshipDesc] = useState("");
   const [scholarshipNotes, setScholarshipNotes] = useState("");
   const [scholarships, setScholarships] = useState<WithId<ScholarshipItem>[]>([]);
@@ -258,13 +254,6 @@ export default function SuperadminAddCourseSection({
           setFeatures(
             res.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
           );
-        if (res.eligibilityRows)
-          setEligibilityRows(
-            res.eligibilityRows.map((x: any, i: number) => ({
-              ...x,
-              id: i + 1,
-            })),
-          );
         if (res.admissionSteps)
           setAdmissionSteps(
             res.admissionSteps.map((x: any, i: number) => ({
@@ -282,10 +271,6 @@ export default function SuperadminAddCourseSection({
         if (res.subjectGroups)
           setSubjectGroups(
             res.subjectGroups.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-          );
-        if (res.feeItems)
-          setFeeItems(
-            res.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
           );
         if (res.feeStructure) setFeeStructureText(res.feeStructure);
         if (res.eligibilityText) setEligibilityText(res.eligibilityText);
@@ -411,11 +396,9 @@ export default function SuperadminAddCourseSection({
     scholarshipNotes,
     whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
     features: features.map(({ id, ...rest }) => rest),
-    eligibilityRows: eligibilityRows.map(({ id, ...rest }) => rest),
     admissionSteps: admissionSteps.map(({ id, ...rest }) => rest),
     fullTimeCourses: fullTimeCourses.map(({ id, ...rest }) => rest),
     subjectGroups: subjectGroups.map(({ id, ...rest }) => rest),
-    feeItems: feeItems.map(({ id, ...rest }) => rest),
     feeStructure: feeStructureText,
     eligibilityText: eligibilityText,
     scholarships: scholarships.map(({ id, ...rest }) => rest),
@@ -1019,6 +1002,7 @@ export default function SuperadminAddCourseSection({
                 theme="snow"
                 value={eligibilityText}
                 onChange={setEligibilityText}
+                modules={quillModules}
                 placeholder="Describe eligibility requirements..."
                 className="bg-white"
               />
@@ -1622,6 +1606,7 @@ export default function SuperadminAddCourseSection({
                 theme="snow"
                 value={feeStructureText}
                 onChange={setFeeStructureText}
+                modules={quillModules}
                 placeholder="Describe fee structure, payment details..."
                 className="bg-white"
               />
