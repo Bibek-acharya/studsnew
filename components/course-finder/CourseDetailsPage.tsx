@@ -92,7 +92,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
     course?.estFee || details?.course?.estFee || "",
   );
   const courseMode = stripHtml(
-    (course as any)?.mode || details?.course?.mode || details?.mode || "",
+    (course as any)?.mode || details?.course?.mode || "",
   );
   const courseBannerUrl =
     course?.bannerUrl || details?.course?.bannerUrl || "";

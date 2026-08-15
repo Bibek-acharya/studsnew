@@ -12,6 +12,11 @@ import { GlobalCourse } from "@/types/course";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import "react-quill-new/dist/quill.snow.css";
 
+function stripHtml(html: string): string {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
+}
+
 const kebabToPascal = (name: string): string =>
   name
     .replace(/-./g, (m) => m[1].toUpperCase())
@@ -441,7 +446,9 @@ const CourseCreatePage: React.FC = () => {
                 Course Overview
               </h2>
               <p className="text-sm text-gray-500 mt-0.5">
-                Basic details about the course
+                {selectedGlobalCourse
+                  ? "Global fields are locked. Edit institution-specific details below."
+                  : "Basic details about the course"}
               </p>
             </div>
           </div>
@@ -616,27 +623,22 @@ const CourseCreatePage: React.FC = () => {
               </select>
             </div>
 
-            <button
-              type="button"
-              className="text-sm text-blue-600 hover:text-blue-800"
-            >
-              Can't find your course? Request new course
-            </button>
             <div>
               <label className={labelClass}>
                 Course Title <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                className={`${inputClass} ${fieldError("title")}`}
+                className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""} ${fieldError("title")}`}
                 placeholder="e.g. 10+2 Science"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                value={selectedGlobalCourse ? selectedGlobalCourse.title : title}
+                onChange={(e) => !selectedGlobalCourse && setTitle(e.target.value)}
+                disabled={!!selectedGlobalCourse}
               />
             </div>
             <div>
               <label className={labelClass}>
-                Description <span className="text-red-500">*</span>
+                {selectedGlobalCourse ? "Description Override" : "Description"}
               </label>
               <div
                 className={`border border-gray-200 rounded-lg overflow-hidden ${fieldError("description")}`}
@@ -645,55 +647,67 @@ const CourseCreatePage: React.FC = () => {
                   value={description}
                   onChange={setDescription}
                   modules={quillModules}
-                  placeholder="Describe the course..."
+                  placeholder={
+                    selectedGlobalCourse
+                      ? "Override description for your institution..."
+                      : "Describe the course..."
+                  }
                   style={{ minHeight: "120px" }}
                   className="bg-white"
                 />
               </div>
+              {selectedGlobalCourse && selectedGlobalCourse.description && (
+                <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <p className="text-xs font-medium text-gray-500 mb-1">Global Description:</p>
+                  <div
+                    className="text-sm text-gray-700 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: selectedGlobalCourse.description }}
+                  />
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className={labelClass}>
-                  Duration <span className="text-red-500">*</span>
-                </label>
+                <label className={labelClass}>Duration</label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""}`}
                   placeholder="e.g. 2 Years"
-                  value={duration}
-                  onChange={(e) => setDuration(e.target.value)}
+                  value={selectedGlobalCourse ? selectedGlobalCourse.duration : duration}
+                  onChange={(e) => !selectedGlobalCourse && setDuration(e.target.value)}
+                  disabled={!!selectedGlobalCourse}
                 />
               </div>
               <div>
                 <label className={labelClass}>Level</label>
-                <select
-                  className={selectClass}
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                  style={{
-                    backgroundImage:
-                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%230000ff'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right 1rem center",
-                    backgroundSize: "1.2em",
-                    paddingRight: "2.5rem",
-                  }}
-                >
-                  <option value="">Select Level</option>
-                  <option value="+2">+2</option>
-                  <option value="Bachelor">Bachelor</option>
-                  <option value="Master">Master</option>
-                  <option value="Diploma">Diploma</option>
-                </select>
+                <input
+                  type="text"
+                  className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""}`}
+                  value={selectedGlobalCourse ? selectedGlobalCourse.level : level}
+                  disabled
+                />
               </div>
               <div>
                 <label className={labelClass}>Affiliation / Board</label>
                 <input
                   type="text"
-                  className={inputClass}
+                  className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""}`}
                   placeholder="e.g. NEB, Tribhuvan University"
-                  value={affiliation}
-                  onChange={(e) => setAffiliation(e.target.value)}
+                  value={
+                    selectedGlobalCourse
+                      ? selectedGlobalCourse.affiliationName || selectedGlobalCourse.nonUniversityAffiliation || ""
+                      : affiliation
+                  }
+                  disabled
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Field</label>
+                <input
+                  type="text"
+                  className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""}`}
+                  value={selectedGlobalCourse ? selectedGlobalCourse.field || "" : ""}
+                  disabled
                 />
               </div>
               <div>
@@ -706,93 +720,7 @@ const CourseCreatePage: React.FC = () => {
                   onChange={(e) => setEstFee(e.target.value)}
                 />
               </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 2. Global Course Information (Locked) */}
-        {selectedGlobalCourse && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-              <div className="p-2 bg-green-100 text-green-600 rounded-lg">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-800">Global Course Information</h2>
-                <p className="text-sm text-gray-500 mt-0.5">This information is locked and inherited from the global catalog</p>
-              </div>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Title</label>
-                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.title} disabled />
-                </div>
-                <div>
-                  <label className={labelClass}>Duration</label>
-                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.duration} disabled />
-                </div>
-                <div>
-                  <label className={labelClass}>Level</label>
-                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.level} disabled />
-                </div>
-                <div>
-                  <label className={labelClass}>Field</label>
-                  <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.field} disabled />
-                </div>
-                {selectedGlobalCourse.affiliationName && (
-                  <div>
-                    <label className={labelClass}>University Affiliation</label>
-                    <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.affiliationName} disabled />
-                  </div>
-                )}
-                {selectedGlobalCourse.nonUniversityAffiliation && (
-                  <div>
-                    <label className={labelClass}>Board Affiliation</label>
-                    <input type="text" className={`${inputClass} bg-gray-50`} value={selectedGlobalCourse.nonUniversityAffiliation} disabled />
-                  </div>
-                )}
-              </div>
-              {selectedGlobalCourse.description && (
-                <div>
-                  <label className={labelClass}>Description</label>
-                  <textarea className={`${inputClass} bg-gray-50`} rows={3} value={selectedGlobalCourse.description} disabled />
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* 3. Institution-Specific Information */}
-        {selectedGlobalCourse && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-              <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                  <polyline points="9 22 9 12 15 12 15 22" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-800">Institution-Specific Information</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Fill in details specific to your institution</p>
-              </div>
-            </div>
-            <div className="p-6 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>Estimated Fee</label>
-                  <input
-                    type="text"
-                    className={inputClass}
-                    placeholder="e.g. NPR 80,000/year"
-                    value={estFee}
-                    onChange={(e) => setEstFee(e.target.value)}
-                  />
-                </div>
+              {selectedGlobalCourse && (
                 <div>
                   <label className={labelClass}>Capacity (Seats)</label>
                   <input
@@ -802,42 +730,12 @@ const CourseCreatePage: React.FC = () => {
                     placeholder="e.g. 60"
                   />
                 </div>
-              </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
-        {/* 4. Optional Overrides */}
-        {selectedGlobalCourse && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-              <div className="p-2 bg-orange-100 text-orange-600 rounded-lg">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-800">Optional Overrides</h2>
-                <p className="text-sm text-gray-500 mt-0.5">Override global defaults if your institution differs</p>
-              </div>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className={labelClass}>Custom Description</label>
-                <textarea
-                  className={inputClass}
-                  rows={3}
-                  placeholder="Override the global course description for your institution..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 5. Who Should Choose This Course */}
+        {/* 2. Who Should Choose This Course */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
             icon="users"
