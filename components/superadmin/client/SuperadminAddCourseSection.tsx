@@ -183,8 +183,7 @@ export default function SuperadminAddCourseSection({
       id: number;
       semester: number;
       title: string;
-      subtitle: string;
-      subjects: string[];
+      subjects: { code: string; name: string; credits: string }[];
       electives: { code: string; name: string }[];
     }[]
   >([]);
@@ -300,8 +299,13 @@ export default function SuperadminAddCourseSection({
               id: i + 1,
               semester: x.semester ?? i + 1,
               title: x.title ?? "",
-              subtitle: x.subtitle ?? "",
-              subjects: Array.isArray(x.subjects) ? x.subjects : [],
+              subjects: Array.isArray(x.subjects)
+                ? x.subjects.map((s: any) =>
+                    typeof s === "string"
+                      ? { code: "", name: s, credits: "" }
+                      : { code: s.code ?? "", name: s.name ?? "", credits: s.credits ?? "" },
+                  )
+                : [],
               electives: Array.isArray(x.electives) ? x.electives : [],
             })),
           );
@@ -2220,8 +2224,7 @@ export default function SuperadminAddCourseSection({
                   id: nextId(prev),
                   semester: prev.length + 1,
                   title: `Semester ${prev.length + 1}`,
-                  subtitle: "",
-                  subjects: [""],
+                  subjects: [{ code: "", name: "", credits: "" }],
                   electives: [],
                 },
               ])
@@ -2254,8 +2257,8 @@ export default function SuperadminAddCourseSection({
                     <path d="M19 6v14a2 2 0 0 1-2 2H7c-1 0-2-1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                   </svg>
                 </button>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-12 mb-4">
-                  <div>
+                <div className="mb-4">
+                  <div className="pr-12 mb-4">
                     <label className={labelClass}>
                       Section Name <span className="text-red-500">*</span>
                     </label>
@@ -2273,26 +2276,8 @@ export default function SuperadminAddCourseSection({
                       }
                     />
                   </div>
-                  <div>
-                    <label className={labelClass}>Subtitle</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Foundation courses"
-                      value={sec.subtitle}
-                      onChange={(e) =>
-                        setCurriculum((prev) =>
-                          prev.map((x) =>
-                            x.id === sec.id ? { ...x, subtitle: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                </div>
 
-                {/* Subjects */}
-                <div className="mb-4">
+                  {/* Subjects */}
                   <label className={labelClass}>Subjects</label>
                   <div className="space-y-2">
                     {sec.subjects.map((subject, subIdx) => (
@@ -2302,9 +2287,9 @@ export default function SuperadminAddCourseSection({
                         </span>
                         <input
                           type="text"
-                          className={`${inputClass} flex-1`}
-                          placeholder="Subject name"
-                          value={subject}
+                          className={`${inputClass} w-24`}
+                          placeholder="Code"
+                          value={subject.code}
                           onChange={(e) =>
                             setCurriculum((prev) =>
                               prev.map((x) =>
@@ -2312,7 +2297,47 @@ export default function SuperadminAddCourseSection({
                                   ? {
                                       ...x,
                                       subjects: x.subjects.map((s, i) =>
-                                        i === subIdx ? e.target.value : s,
+                                        i === subIdx ? { ...s, code: e.target.value } : s,
+                                      ),
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                        <input
+                          type="text"
+                          className={`${inputClass} flex-1`}
+                          placeholder="Subject name"
+                          value={subject.name}
+                          onChange={(e) =>
+                            setCurriculum((prev) =>
+                              prev.map((x) =>
+                                x.id === sec.id
+                                  ? {
+                                      ...x,
+                                      subjects: x.subjects.map((s, i) =>
+                                        i === subIdx ? { ...s, name: e.target.value } : s,
+                                      ),
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                        <input
+                          type="text"
+                          className={`${inputClass} w-20`}
+                          placeholder="Credits"
+                          value={subject.credits}
+                          onChange={(e) =>
+                            setCurriculum((prev) =>
+                              prev.map((x) =>
+                                x.id === sec.id
+                                  ? {
+                                      ...x,
+                                      subjects: x.subjects.map((s, i) =>
+                                        i === subIdx ? { ...s, credits: e.target.value } : s,
                                       ),
                                     }
                                   : x,
@@ -2361,7 +2386,7 @@ export default function SuperadminAddCourseSection({
                       setCurriculum((prev) =>
                         prev.map((x) =>
                           x.id === sec.id
-                            ? { ...x, subjects: [...x.subjects, ""] }
+                            ? { ...x, subjects: [...x.subjects, { code: "", name: "", credits: "" }] }
                             : x,
                         ),
                       )

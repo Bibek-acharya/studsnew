@@ -71,6 +71,7 @@ export interface GlobalCourse {
   duration: string;
   level: string;
   field: string;
+  fieldOfStudy: string;
   affiliationId: number | null;
   affiliationName: string;
   nonUniversityAffiliation: string;

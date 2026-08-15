@@ -6,13 +6,6 @@ import {
   ChevronRight,
   ChevronLeft,
   ChevronDown,
-  Lightbulb,
-  Brain,
-  Target,
-  FlaskConical,
-  TrendingUp,
-  Users,
-  HeartPulse,
   ArrowRight,
 } from "lucide-react";
 import { fetchCourseDetailsById } from "@/services/course-api";
@@ -49,14 +42,10 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-const iconMap: Record<string, React.ReactNode> = {
-  lightbulb: <Lightbulb className="w-6 h-6" />,
-  brain: <Brain className="w-6 h-6" />,
-  target: <Target className="w-6 h-6" />,
-  "flask-conical": <FlaskConical className="w-6 h-6" />,
-  "trending-up": <TrendingUp className="w-6 h-6" />,
-  users: <Users className="w-6 h-6" />,
-  "heart-pulse": <HeartPulse className="w-6 h-6" />,
+const getIcon = (iconName: string | undefined) => {
+  if (!iconName) return <i className="fa-solid fa-circle-question text-white"></i>;
+  const clean = iconName.replace(/^fa-solid\s*/, "").replace(/^fa-/, "");
+  return <i className={`fa-solid fa-${clean} text-white`}></i>;
 };
 
 export default function CourseDetailPage({
@@ -228,11 +217,6 @@ export default function CourseDetailPage({
     courseImage ||
     "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&h=600&fit=crop";
 
-  const getIcon = (iconName: string | undefined, index: number) => {
-    if (iconName && iconMap[iconName.toLowerCase()]) return iconMap[iconName.toLowerCase()];
-    return <span className="text-sm font-bold">{index + 1}</span>;
-  };
-
   return (
     <>
       <style>{`
@@ -397,7 +381,7 @@ export default function CourseDetailPage({
                         className="border border-gray-200 rounded-xl p-6 bg-white"
                       >
                         <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white mb-4">
-                          {getIcon(item.icon, i)}
+                          {getIcon(item.icon)}
                         </div>
                         <h3 className="font-bold text-gray-900 mb-2 text-[17px]">
                           {item.title != null ? String(item.title) : ""}
@@ -439,7 +423,7 @@ export default function CourseDetailPage({
               {subjectGroups.length > 0 && (
                 <div className="pt-8">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    Course Details
+                    Subjects & Career Opportunities
                   </h2>
                   <div className="space-y-6">
                     {subjectGroups.map((sg: any, i: number) => (
@@ -450,7 +434,7 @@ export default function CourseDetailPage({
                         <div className="flex items-start justify-between gap-4 mb-4">
                           <div className="flex items-start gap-4">
                             <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                              {getIcon(sg.icon, i)}
+                              {getIcon(sg.icon)}
                             </div>
                             <div>
                               <h3 className="text-xl font-bold text-gray-900">
@@ -578,7 +562,7 @@ export default function CourseDetailPage({
                       return (
                         <details
                           key={i}
-                          className="group bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+                          className="group bg-white border border-gray-200 rounded-xl overflow-hidden"
                           open={i === 0}
                         >
                           <summary className="flex justify-between items-center font-bold cursor-pointer list-none [&::-webkit-details-marker]:hidden p-5 text-gray-900 text-[16px] hover:bg-gray-50 transition-colors">
@@ -588,11 +572,6 @@ export default function CourseDetailPage({
                             <ChevronDown className="w-5 h-5 text-gray-500 transition-transform duration-200 group-open:rotate-180" />
                           </summary>
                           <div className="border-t border-gray-200">
-                            {sem.subtitle && (
-                              <p className="px-5 pt-4 text-sm text-gray-500">
-                                {sem.subtitle}
-                              </p>
-                            )}
                             {subjects.length > 0 && (
                               <div className="overflow-x-auto">
                                 <table className="w-full text-left border-collapse min-w-[500px]">
@@ -601,14 +580,20 @@ export default function CourseDetailPage({
                                       <th className="p-4 font-semibold w-[8%] text-[14px]">
                                         S.N.
                                       </th>
+                                      <th className="p-4 font-semibold w-[20%] text-[14px]">
+                                        Code
+                                      </th>
                                       <th className="p-4 font-semibold text-[14px]">
                                         Subject
+                                      </th>
+                                      <th className="p-4 font-semibold w-[15%] text-[14px]">
+                                        Credits
                                       </th>
                                     </tr>
                                   </thead>
                                   <tbody className="text-[14px]">
                                     {subjects.map(
-                                      (subject: string, j: number) => (
+                                      (subject: any, j: number) => (
                                         <tr
                                           key={j}
                                           className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
@@ -616,8 +601,14 @@ export default function CourseDetailPage({
                                           <td className="p-4 text-gray-600">
                                             {j + 1}
                                           </td>
+                                          <td className="p-4 font-mono text-sm text-gray-500">
+                                            {typeof subject === "string" ? "" : subject.code || ""}
+                                          </td>
                                           <td className="p-4 font-medium text-gray-800">
-                                            {subject}
+                                            {typeof subject === "string" ? subject : subject.name || ""}
+                                          </td>
+                                          <td className="p-4 text-gray-600">
+                                            {typeof subject === "string" ? "" : subject.credits || ""}
                                           </td>
                                         </tr>
                                       ),
@@ -641,11 +632,7 @@ export default function CourseDetailPage({
                                         {k + 1}.
                                       </span>
                                       <span>
-                                        {e.code && (
-                                          <span className="font-mono text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded mr-2">
-                                            {e.code}
-                                          </span>
-                                        )}
+                                        {e.code ? `${e.code} — ` : ""}
                                         {e.name || ""}
                                       </span>
                                     </li>
@@ -879,7 +866,7 @@ export default function CourseDetailPage({
                   {subjectGroups.length > 0 && (
                     <div className="pt-6">
                       <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                        Course Details
+                        Subjects & Career Opportunities
                       </h2>
                       <div className="space-y-6">
                         {subjectGroups.map((sg: any, i: number) => (
@@ -890,7 +877,7 @@ export default function CourseDetailPage({
                             <div className="flex items-start justify-between gap-4 mb-4">
                               <div className="flex items-start gap-4">
                                 <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white flex-shrink-0">
-                                  {getIcon(sg.icon, i)}
+                                  {getIcon(sg.icon)}
                                 </div>
                                 <div>
                                   <h3 className="text-xl font-bold text-gray-900">

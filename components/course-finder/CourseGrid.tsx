@@ -248,11 +248,10 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       <GraduationCap className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
                       <div>
                         <span className="font-bold text-gray-700">
-                          Eligibility:
+                          Field:
                         </span>{" "}
                         <span className="text-gray-600">
-                          {(course as any).eligibility ||
-                            "As per institution criteria"}
+                          {course.fieldOfStudy || course.field || "-"}
                         </span>
                       </div>
                     </div>
@@ -260,11 +259,10 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       <ClipboardCheck className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
                       <div>
                         <span className="font-bold text-gray-700">
-                          Entrance:
+                          Mode:
                         </span>{" "}
                         <span className="text-gray-600">
-                          {(course as any).entranceExam ||
-                            "Entrance exam required"}
+                          {course.mode || "On-Campus"}
                         </span>
                       </div>
                     </div>
