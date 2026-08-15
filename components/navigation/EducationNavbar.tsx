@@ -628,7 +628,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 {/* Logged In: Logo Left, Search Center, Hamburger Right */}
                 <Link
                   href="/"
-                  className="flex shrink-0 cursor-pointer items-center min-w-0"
+                  className="flex shrink-0 cursor-pointer items-center min-w-0 md:hidden"
                 >
                   <Image
                     src="/mobilelogo.png"
@@ -636,15 +636,35 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     width={512}
                     height={512}
                     priority
-                    className="h-9 w-auto md:hidden object-contain"
+                    className="h-9 w-auto object-contain"
                   />
+                </Link>
+
+                <div className="flex-1 md:hidden min-w-0 mx-1">
+                  <SearchBar isMobile defaultSearchOpen={false} showSuggestionDropdown={false} />
+                </div>
+
+                <button
+                  type="button"
+                  className="flex h-10 w-10 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 shrink-0 z-10 md:hidden"
+                  onClick={toggleMobileDrawer}
+                  aria-label="Toggle menu"
+                >
+                  {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
+                </button>
+
+                {/* Desktop: Logo Left, Search Center, Hamburger Right */}
+                <Link
+                  href="/"
+                  className="hidden md:flex shrink-0 cursor-pointer items-center min-w-0"
+                >
                   <Image
                     src="/studsphere.png"
                     alt="Studsphere Logo"
                     width={4702}
                     height={1320}
                     priority
-                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125 hidden md:block"
+                    className="h-7 sm:h-9 w-auto max-w-55 sm:max-w-67.5 object-contain origin-left scale-115 sm:scale-125"
                   />
                 </Link>
 
@@ -652,17 +672,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   <SearchBar />
                 </div>
 
-                <div className="flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
-                  {/* Hamburger Menu - Mobile (Logged In) */}
-                  <button
-                    type="button"
-                    className="z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-gray-600 transition-colors hover:bg-gray-100 md:hidden"
-                    onClick={toggleMobileDrawer}
-                    aria-label="Toggle menu"
-                  >
-                    {isMobileOpen ? <X size={20} /> : <Menu size={20} />}
-                  </button>
-
+                <div className="hidden md:flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
                   {/* Notification Bell - Desktop */}
                   <div className="menu-anchor relative group/notif hidden sm:block">
                     <button
@@ -788,8 +798,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       </div>
                     )}
                   </div>
+                </div>
 
-                  {/* Profile Avatar - Mobile (hidden, moved to bottom tab) */}
+                {/* Profile Avatar - Mobile (hidden, moved to bottom tab) */}
                   <div className="menu-anchor hidden sm:hidden relative">
                     <button
                       type="button"
