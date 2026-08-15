@@ -111,9 +111,19 @@ export async function fetchCourseById(id: string | number): Promise<GlobalCourse
 export interface CourseFullDetails {
   course: GlobalCourse;
   about: string[];
-  admissionRequirements: string[];
+  mode: string;
+  degreeLabel: string;
   curriculum: any[];
+  admissionRequirements: string[];
   careerOpportunities: { title: string; icon?: string; color?: string }[];
+  universities: string[];
+  contact: { email: string; phone: string };
+  otherPrograms: { id: string; title: string; duration: string; faculty: string }[];
+  highlightsUniversity: string;
+  highlightsFaculty: string;
+  highlightsDuration: string;
+  highlightsDegreeLevel: string;
+  offeringCollegesCount: number;
   data?: Record<string, any>;
 }
 

@@ -92,7 +92,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
     course?.estFee || details?.course?.estFee || "",
   );
   const courseMode = stripHtml(
-    (course as any)?.mode || details?.course?.mode || "",
+    (course as any)?.mode || details?.mode || details?.course?.mode || "",
   );
   const courseBannerUrl =
     course?.bannerUrl || details?.course?.bannerUrl || "";
@@ -115,6 +115,14 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
   const detailCurriculum = details?.curriculum || [];
   const detailAdmissionReqs = details?.admissionRequirements || [];
   const detailCareers = details?.careerOpportunities || [];
+  const detailUniversities = details?.universities || [];
+  const detailContact = details?.contact || { email: "", phone: "" };
+  const detailOtherPrograms = details?.otherPrograms || [];
+  const detailHighlightsUniversity = details?.highlightsUniversity || "";
+  const detailHighlightsFaculty = details?.highlightsFaculty || "";
+  const detailHighlightsDuration = details?.highlightsDuration || "";
+  const detailHighlightsDegreeLevel = details?.highlightsDegreeLevel || "";
+  const detailOfferingCollegesCount = details?.offeringCollegesCount || 0;
 
   const [activeTab, setActiveTab] = useState("overview");
 
@@ -799,7 +807,23 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               <div className="animate-fade-in">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">Facilities</h2>
                 <p className="text-[15px] text-gray-600 mb-6">State-of-the-art infrastructure for quality education</p>
-                <p className="text-gray-400 italic">Facility information is available on the college page.</p>
+                {features.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {features.map((item: any, i: number) => (
+                      <div key={i} className="border border-gray-200 rounded-xl p-5 bg-white">
+                        <div className="flex items-center gap-3 mb-3">
+                          <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                            <Award className="w-5 h-5 text-[#0000ff]" />
+                          </div>
+                          <h3 className="font-bold text-gray-900">{item.title}</h3>
+                        </div>
+                        <p className="text-sm text-gray-600 leading-relaxed">{item.shortDesc}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">Facility information is available on the college page.</p>
+                )}
               </div>
             )}
 
@@ -808,7 +832,14 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               <div className="animate-fade-in">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">Faculty</h2>
                 <p className="text-[15px] text-gray-600 mb-6">Experienced and dedicated educators</p>
-                <p className="text-gray-400 italic">Faculty information is available on the college page.</p>
+                {detailHighlightsFaculty ? (
+                  <div className="border border-gray-200 rounded-xl p-6 bg-white">
+                    <h3 className="font-bold text-gray-900 mb-2">Faculty / Stream</h3>
+                    <p className="text-gray-600">{detailHighlightsFaculty}</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">Faculty information is available on the college page.</p>
+                )}
               </div>
             )}
 
@@ -817,7 +848,18 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               <div className="animate-fade-in">
                 <h2 className="text-[20px] font-bold text-gray-900 mb-2">Achievements</h2>
                 <p className="text-[14px] text-gray-500 mb-6">Milestones and success stories</p>
-                <p className="text-gray-400 italic">Achievement information is available on the college page.</p>
+                {course?.highlights && course.highlights.length > 0 ? (
+                  <div className="space-y-3">
+                    {course.highlights.map((h: string, i: number) => (
+                      <div key={i} className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
+                        <Award className="w-5 h-5 text-[#0000ff] mt-0.5 shrink-0" />
+                        <span className="text-gray-700">{h}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">Achievement information is available on the college page.</p>
+                )}
               </div>
             )}
 
@@ -826,7 +868,22 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               <div className="animate-fade-in">
                 <h2 className="text-[20px] font-bold text-gray-900 mb-2">News & Notices</h2>
                 <p className="text-[14px] text-gray-500 mb-6">Stay updated with latest announcements</p>
-                <p className="text-gray-400 italic">News and notices are available on the college page.</p>
+                {detailOtherPrograms.length > 0 ? (
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-gray-900">Other Programs</h3>
+                    {detailOtherPrograms.map((prog: any, i: number) => (
+                      <div key={i} className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <BookOpen className="w-5 h-5 text-[#0000ff] shrink-0" />
+                        <div>
+                          <span className="font-semibold text-gray-900">{prog.title}</span>
+                          <span className="text-sm text-gray-500 ml-2">{prog.duration} | {prog.faculty}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">News and notices are available on the college page.</p>
+                )}
               </div>
             )}
 
@@ -835,7 +892,28 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
               <div className="animate-fade-in">
                 <h2 className="text-[22px] font-bold text-gray-900 mb-2">Downloads</h2>
                 <p className="text-[15px] text-gray-600 mb-6">Important documents and resources</p>
-                <p className="text-gray-400 italic">Downloadable resources are available on the college page.</p>
+                {detailContact.email || detailContact.phone ? (
+                  <div className="border border-gray-200 rounded-xl p-6 bg-white">
+                    <h3 className="font-bold text-gray-900 mb-4">Contact & Support</h3>
+                    <div className="space-y-3">
+                      {detailContact.email && (
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <span className="font-medium">Email:</span>
+                          <a href={`mailto:${detailContact.email}`} className="text-[#0000ff] hover:underline">{detailContact.email}</a>
+                        </div>
+                      )}
+                      {detailContact.phone && (
+                        <div className="flex items-center gap-3 text-gray-700">
+                          <span className="font-medium">Phone:</span>
+                          <a href={`tel:${detailContact.phone}`} className="text-[#0000ff] hover:underline">{detailContact.phone}</a>
+                        </div>
+                      )}
+                    </div>
+                    <p className="mt-4 text-sm text-gray-500">Downloadable resources are available on the college page.</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-400 italic">Downloadable resources are available on the college page.</p>
+                )}
               </div>
             )}
           </div>
