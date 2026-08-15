@@ -1610,11 +1610,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             <>
               <button
                 onClick={() => {
-                  go("notificationSettings");
+                  router.push("/notifications");
                   setIsMobileOpen(false);
                 }}
                 className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative ${
-                  isRouteActive("/user/dashboard/notifications")
+                  isRouteActive("/notifications")
                     ? "text-brand-blue"
                     : "text-gray-500"
                 }`}
