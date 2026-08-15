@@ -330,11 +330,14 @@ const CourseCreatePage: React.FC = () => {
     setDuration(course.duration || "");
     setEstFee(course.estFee || "");
     setLevel(course.level || "");
+    setDescription(course.description || "");
   };
 
   const clearGlobalCourse = () => {
     setSelectedGlobalCourse(null);
   };
+
+  const selectedCourseId = selectedGlobalCourse?.id || "";
 
   const fieldError = (field: string) =>
     errors[field] ? "ring-2 ring-red-500" : "";
@@ -606,27 +609,23 @@ const CourseCreatePage: React.FC = () => {
             )}
 
             <div>
-              <label className={labelClass}>Course</label>
+              <label className={labelClass}>
+                Course <span className="text-red-500">*</span>
+              </label>
               <select
                 className={selectClass}
-                value={selectedGlobalCourse?.id || ""}
+                value={selectedCourseId}
                 onChange={(e) => {
                   const course = globalCourses.find(c => c.id === Number(e.target.value));
                   if (course) selectGlobalCourse(course);
                 }}
                 disabled={loadingCourses || globalCourses.length === 0}
               >
-                <option value="">{loadingCourses ? "Loading courses..." : globalCourses.length === 0 ? "No courses available" : "Select Course"}</option>
+                <option value="">{loadingCourses ? "Loading courses..." : globalCourses.length === 0 ? "No courses available" : "Select existing course (optional)"}</option>
                 {globalCourses.map(course => (
                   <option key={course.id} value={course.id}>{course.title}</option>
                 ))}
               </select>
-            </div>
-
-            <div>
-              <label className={labelClass}>
-                Course Title <span className="text-red-500">*</span>
-              </label>
               <input
                 type="text"
                 className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""} ${fieldError("title")}`}
@@ -636,9 +635,10 @@ const CourseCreatePage: React.FC = () => {
                 disabled={!!selectedGlobalCourse}
               />
             </div>
+
             <div>
               <label className={labelClass}>
-                {selectedGlobalCourse ? "Description Override" : "Description"}
+                Description
               </label>
               <div
                 className={`border border-gray-200 rounded-lg overflow-hidden ${fieldError("description")}`}
@@ -647,24 +647,11 @@ const CourseCreatePage: React.FC = () => {
                   value={description}
                   onChange={setDescription}
                   modules={quillModules}
-                  placeholder={
-                    selectedGlobalCourse
-                      ? "Override description for your institution..."
-                      : "Describe the course..."
-                  }
+                  placeholder="Describe the course..."
                   style={{ minHeight: "120px" }}
                   className="bg-white"
                 />
               </div>
-              {selectedGlobalCourse && selectedGlobalCourse.description && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <p className="text-xs font-medium text-gray-500 mb-1">Global Description:</p>
-                  <div
-                    className="text-sm text-gray-700 prose prose-sm max-w-none"
-                    dangerouslySetInnerHTML={{ __html: selectedGlobalCourse.description }}
-                  />
-                </div>
-              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
