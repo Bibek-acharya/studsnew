@@ -124,11 +124,7 @@ export default function InstitutionZone() {
       if (user) {
         localStorage.setItem("institutionUser", JSON.stringify(user));
       }
-      if (!preferencesCompleted) {
-        router.push("/institution-zone/onboarding");
-      } else {
-        router.push("/institution-zone/dashboard");
-      }
+      router.push("/institution-zone/dashboard");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Login failed. Please try again.";
       setAuthError(msg);

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import NotificationBell, { NotificationItem } from "@/components/shared/NotificationBell";
 import MessageBell from "@/components/shared/MessageBell";
+import InstitutionOnboarding from "@/components/institution-zone/InstitutionOnboarding";
 import {
   LayoutDashboard,
   UserPlus,
@@ -107,6 +108,7 @@ const InstitutionLayout: React.FC<Props> = ({
   const [instName, setInstName] = useState("");
   const [instLogo, setInstLogo] = useState("");
   const [subType, setSubType] = useState("");
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     const API_BASE_URL =
@@ -130,6 +132,10 @@ const InstitutionLayout: React.FC<Props> = ({
         setInstName(p.institution_name || "Institution");
         if (p.logo_url) setInstLogo(p.logo_url);
         setSubType(p.subscription_type || "");
+
+        if (p.preferences_completed === false) {
+          setShowOnboarding(true);
+        }
 
         const accessData = await accessRes.json();
         const access: Record<string, boolean> = accessData.data || {};
@@ -643,6 +649,11 @@ const InstitutionLayout: React.FC<Props> = ({
           background-color: rgba(0, 0, 0, 0.06);
         }
       `}</style>
+
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <InstitutionOnboarding onComplete={() => setShowOnboarding(false)} />
+      )}
 
       {/* Logout Modal */}
       {showLogoutModal && (

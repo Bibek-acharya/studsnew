@@ -220,7 +220,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
         location:
           filters.district[0] || filters.province[0] || undefined,
         courseId: activeCourseId || undefined,
-        sortBy: filters.sortBy,
+        sort: filters.sortBy,
         academic:
           filters.academic.length > 0 ? filters.academic : undefined,
         type: filters.type.length > 0 ? filters.type.join(",") : undefined,
@@ -230,7 +230,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
 
   const colleges = useMemo(() => {
     const list = collegesResponse?.data?.colleges || [];
-    return list.length > 0 ? list : MOCK_COLLEGES;
+    return list.length > 0 ? list : [];
   }, [collegesResponse]);
 
   const pagination = collegesResponse?.data?.pagination;

@@ -10,28 +10,28 @@ const steps = [
   {
     id: 1,
     question: "What type of college experience does your college offer?",
-    type: "checkbox" as const,
-    name: "experience",
+    type: "radio" as const,
+    name: "experience_type",
     options: [
       {
         value: "Academic Excellence",
         title: "Academic Excellence",
-        desc: "Strong academics, experienced faculty, and competitive results.",
+        desc: "Strong academics, experienced faculty, competitive results.",
       },
       {
         value: "Vibrant Campus Life",
         title: "Vibrant Campus Life",
-        desc: "Active environment with events, clubs, and networking.",
+        desc: "Events, clubs, networking, and activities beyond classrooms.",
       },
       {
         value: "Career & Industry Focused",
         title: "Career & Industry Focused",
-        desc: "Prioritize internships, practical learning, and job placement.",
+        desc: "Internships, practical learning, job placement focus.",
       },
       {
         value: "Holistic & Balanced",
         title: "Holistic & Balanced",
-        desc: "Balanced experience combining academics, life, and career.",
+        desc: "Academics, campus life, activities, and career combined.",
       },
     ],
   },
@@ -45,22 +45,22 @@ const steps = [
       {
         value: "Scholarship-Focused",
         title: "Scholarship-Focused",
-        desc: "Merit and need-based scholarships to manage expenses.",
+        desc: "Merit and need-based scholarships for students.",
       },
       {
         value: "Affordable Fees",
         title: "Affordable Fees",
-        desc: "Transparent tuition fees making quality education accessible.",
+        desc: "Transparent, affordable tuition for quality education.",
       },
       {
         value: "Premium / Full-Fee",
         title: "Premium / Full-Fee",
-        desc: "Premium educational experience with full tuition structure.",
+        desc: "Premium experience with full tuition structure.",
       },
       {
-        value: "Multiple Options",
-        title: "Multiple Financial Options",
-        desc: "Scholarships, aid, and flexible payment options.",
+        value: "Multiple Financial Support Options",
+        title: "Multiple Financial Support Options",
+        desc: "Scholarships, aid, discounts, and flexible payments.",
       },
     ],
   },
@@ -73,22 +73,22 @@ const steps = [
       {
         value: "Highly Reputed",
         title: "Highly Reputed",
-        desc: "Widely recognized for academic quality and graduate outcomes.",
+        desc: "Recognized for academic quality and outcomes.",
       },
       {
         value: "Well Established",
         title: "Well Established",
-        desc: "Recognized institution with strong community presence.",
+        desc: "Strong presence and community reputation.",
       },
       {
         value: "Growing & Emerging",
         title: "Growing & Emerging",
-        desc: "Developing institution focused on improving facilities.",
+        desc: "Developing institution improving continuously.",
       },
       {
-        value: "Specialized",
+        value: "Specialized Reputation",
         title: "Specialized Reputation",
-        desc: "Particularly well known for specific expertise.",
+        desc: "Known for specific programs or expertise.",
       },
     ],
   },
@@ -101,22 +101,22 @@ const steps = [
       {
         value: "Small Classes",
         title: "Small Classes",
-        desc: "Smaller sizes with personalized support and individual attention.",
+        desc: "Individual attention and personalized support.",
       },
       {
-        value: "Medium-Sized",
+        value: "Medium-Sized Classes",
         title: "Medium-Sized Classes",
-        desc: "Balanced environment providing faculty interaction.",
+        desc: "Balanced interaction and group learning.",
       },
       {
         value: "Large Batches",
         title: "Large Batches",
-        desc: "Diverse communities and broad networking opportunities.",
+        desc: "Diverse communities and broad networking.",
       },
       {
-        value: "Mixed",
+        value: "Mixed Class Sizes",
         title: "Mixed Class Sizes",
-        desc: "Varies by program offering personalized and community learning.",
+        desc: "Varies by program, both personalized and community.",
       },
     ],
   },
@@ -129,17 +129,17 @@ const steps = [
       {
         value: "Academic Excellence",
         title: "Academic Excellence",
-        desc: "Greater emphasis on academic performance and rigorous learning.",
+        desc: "Emphasis on performance, rigor, and outcomes.",
       },
       {
         value: "Vibrant Campus Life",
         title: "Vibrant Campus Life",
-        desc: "Emphasize student activities, clubs, sports, and experience.",
+        desc: "Activities, events, clubs, and campus experience.",
       },
       {
         value: "Balanced Experience",
         title: "Balanced Experience",
-        desc: "Equal importance to academic excellence and campus life.",
+        desc: "Equal importance to academics and campus life.",
       },
     ],
   },
@@ -152,50 +152,55 @@ const steps = [
       {
         value: "Highly Active",
         title: "Highly Active",
-        desc: "Strongly promote sports, clubs, events, and extracurriculars.",
+        desc: "Strong sports, clubs, events, and extracurriculars.",
       },
       {
         value: "Moderately Active",
         title: "Moderately Active",
-        desc: "Provide a range of extracurricular activities alongside academics.",
+        desc: "Range of activities alongside academics.",
       },
       {
         value: "Academics-Focused",
         title: "Academics-Focused",
-        desc: "Primary focus is academic learning with limited activities.",
+        desc: "Primary focus on academic learning.",
       },
       {
         value: "Well-Rounded",
         title: "Well-Rounded",
-        desc: "Balanced combination of academics, sports, and cultural events.",
+        desc: "Balanced academics, sports, and cultural events.",
       },
     ],
   },
   {
     id: 7,
     question: "What facilities does your college offer?",
-    type: "radio" as const,
+    type: "checkbox" as const,
     name: "facilities",
     options: [
       {
-        value: "Modern Labs",
+        value: "Modern Labs & Technology",
         title: "Modern Labs & Technology",
-        desc: "Well-equipped labs, smart classrooms, and modern tech.",
+        desc: "Labs, computers, smart classrooms, modern tech.",
       },
       {
-        value: "Hostel",
+        value: "Hostel & Accommodation",
         title: "Hostel & Accommodation",
-        desc: "On-campus or nearby accommodation options for students.",
+        desc: "On-campus or nearby accommodation options.",
       },
       {
-        value: "Library",
+        value: "Library & Learning Resources",
         title: "Library & Learning Resources",
-        desc: "Well-equipped library with books and digital study spaces.",
+        desc: "Books, digital resources, and study spaces.",
       },
       {
-        value: "Cafeteria",
+        value: "Cafeteria & Student Amenities",
         title: "Cafeteria & Student Amenities",
-        desc: "Quality cafeteria, common areas, and essential facilities.",
+        desc: "Cafeteria, common areas, and recreational spaces.",
+      },
+      {
+        value: "Sports & Recreation",
+        title: "Sports & Recreation",
+        desc: "Sports grounds, fitness, and indoor/outdoor activities.",
       },
     ],
   },
@@ -207,30 +212,36 @@ const steps = [
     name: "tuition",
     options: [
       {
-        value: "Affordable",
+        value: "Affordable & Budget-Friendly",
         title: "Affordable & Budget-Friendly",
-        desc: "Focus on keeping tuition affordable and reasonable.",
+        desc: "Quality education at a reasonable cost.",
       },
       {
         value: "Quality-Focused",
         title: "Quality-Focused",
-        desc: "Fees reflect premium quality education and facilities.",
+        desc: "Fees reflect quality education and experience.",
       },
       {
         value: "Scholarship-Dependent",
         title: "Scholarship-Dependent",
-        desc: "Significant financial aid to reduce cost for eligible students.",
+        desc: "Scholarships and aid reduce cost for eligible students.",
       },
       {
         value: "Value for Money",
         title: "Value for Money",
-        desc: "Strong balance between tuition, quality, and student support.",
+        desc: "Balance of tuition, quality, and student support.",
       },
     ],
   },
 ];
 
-export default function InstitutionOnboarding() {
+interface InstitutionOnboardingProps {
+  onComplete: () => void;
+}
+
+export default function InstitutionOnboarding({
+  onComplete,
+}: InstitutionOnboardingProps) {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -303,7 +314,7 @@ export default function InstitutionOnboarding() {
       }
 
       await authApi.saveInstitutionPreferences(preferences);
-      router.push("/institution-zone/dashboard");
+      onComplete();
     } catch (err: any) {
       setError(err.message || "Failed to save preferences. Please try again.");
     } finally {
@@ -314,51 +325,55 @@ export default function InstitutionOnboarding() {
   return (
     <div
       style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 50,
         display: "flex",
-        justifyContent: "center",
         alignItems: "center",
-        minHeight: "100vh",
+        justifyContent: "center",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
         padding: "1rem",
-        backgroundColor: "#f9fafb",
       }}
     >
       <div
         style={{
           backgroundColor: "#fff",
-          borderRadius: "12px",
+          borderRadius: "16px",
           width: "100%",
-          maxWidth: "360px",
-          minHeight: "440px",
+          maxWidth: "520px",
+          maxHeight: "90vh",
           display: "flex",
           flexDirection: "column",
           border: "1px solid #e5e7eb",
           overflow: "hidden",
         }}
       >
+        {/* Header */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            padding: "0.75rem 1rem",
+            padding: "1rem 1.25rem",
             borderBottom: "1px solid #f1f1f4",
+            flexShrink: 0,
           }}
         >
           <div
             style={{
-              fontSize: "0.8rem",
+              fontSize: "0.95rem",
               fontWeight: 700,
               color: "#111827",
               display: "flex",
               alignItems: "center",
-              gap: "0.4rem",
+              gap: "0.5rem",
             }}
           >
-            College Recommender{" "}
+            College Profile
             <span
               style={{
                 color: "#6b7280",
-                fontSize: "0.7rem",
+                fontSize: "0.75rem",
                 fontWeight: 500,
               }}
             >
@@ -367,13 +382,14 @@ export default function InstitutionOnboarding() {
           </div>
         </div>
 
+        {/* Body */}
         <div
           style={{
-            padding: "0.85rem 1rem",
+            padding: "1.25rem",
             flex: 1,
+            overflowY: "auto",
             display: "flex",
             flexDirection: "column",
-            justifyContent: "flex-start",
           }}
         >
           <div
@@ -381,16 +397,16 @@ export default function InstitutionOnboarding() {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: "0.5rem",
+              gap: "0.6rem",
               animation: "fadeIn 0.2s ease-in-out",
             }}
           >
             <h2
               style={{
                 color: "#111827",
-                fontSize: "0.85rem",
+                fontSize: "1rem",
                 fontWeight: 700,
-                lineHeight: 1.3,
+                lineHeight: 1.4,
                 marginBottom: "0.25rem",
               }}
             >
@@ -398,7 +414,11 @@ export default function InstitutionOnboarding() {
             </h2>
 
             <div
-              style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.4rem",
+              }}
             >
               {currentStepData.options.map((option) => {
                 const checked = isSelected(
@@ -421,25 +441,24 @@ export default function InstitutionOnboarding() {
                     }
                     style={{
                       border: checked
-                        ? "1px solid #0000ff"
-                        : "1px solid #e5e7eb",
-                      borderRadius: "6px",
-                      padding: "0.5rem 0.75rem",
+                        ? "1.5px solid #0000ff"
+                        : "1.5px solid #e5e7eb",
+                      borderRadius: "10px",
+                      padding: "0.7rem 0.85rem",
                       cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "space-between",
-                      backgroundColor: "#fff",
-                      position: "relative",
-                      transition: "all 0.2s ease",
+                      backgroundColor: checked ? "#f5f5ff" : "#fff",
+                      transition: "all 0.15s ease",
                     }}
                   >
                     <div
                       style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "0.1rem",
-                        paddingRight: "0.5rem",
+                        gap: "0.15rem",
+                        paddingRight: "0.75rem",
                         flex: 1,
                       }}
                     >
@@ -447,7 +466,7 @@ export default function InstitutionOnboarding() {
                         style={{
                           fontWeight: 600,
                           color: "#111827",
-                          fontSize: "0.75rem",
+                          fontSize: "0.8rem",
                         }}
                       >
                         {option.title}
@@ -455,8 +474,8 @@ export default function InstitutionOnboarding() {
                       <p
                         style={{
                           color: "#6b7280",
-                          fontSize: "0.65rem",
-                          lineHeight: 1.25,
+                          fontSize: "0.7rem",
+                          lineHeight: 1.35,
                           margin: 0,
                         }}
                       >
@@ -473,40 +492,45 @@ export default function InstitutionOnboarding() {
                     >
                       <div
                         style={{
-                          width: "15px",
-                          height: "15px",
+                          width: "18px",
+                          height: "18px",
                           border: checked
                             ? "2px solid #0000ff"
                             : "2px solid #d1d5db",
                           borderRadius:
                             currentStepData.type === "checkbox"
-                              ? "4px"
+                              ? "5px"
                               : "50%",
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
                           backgroundColor: checked ? "#0000ff" : "#fff",
-                          transition: "all 0.2s ease",
+                          transition: "all 0.15s ease",
                         }}
                       >
                         {currentStepData.type === "checkbox" ? (
                           checked && (
-                            <span
-                              style={{
-                                color: "white",
-                                fontSize: "9px",
-                                fontWeight: "bold",
-                              }}
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 10 10"
+                              fill="none"
                             >
-                              ✓
-                            </span>
+                              <path
+                                d="M2 5L4.5 7.5L8 3"
+                                stroke="white"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
                           )
                         ) : (
                           checked && (
                             <div
                               style={{
-                                width: "5px",
-                                height: "5px",
+                                width: "6px",
+                                height: "6px",
                                 backgroundColor: "white",
                                 borderRadius: "50%",
                               }}
@@ -524,7 +548,7 @@ export default function InstitutionOnboarding() {
               <p
                 style={{
                   color: "#ef4444",
-                  fontSize: "0.7rem",
+                  fontSize: "0.75rem",
                   marginTop: "0.25rem",
                 }}
               >
@@ -534,22 +558,25 @@ export default function InstitutionOnboarding() {
           </div>
         </div>
 
+        {/* Footer */}
         <div
           style={{
             display: "flex",
             justifyContent: "flex-end",
             alignItems: "center",
-            padding: "0.75rem 1rem",
+            padding: "0.85rem 1.25rem",
+            borderTop: "1px solid #f1f1f4",
+            flexShrink: 0,
           }}
         >
-          <div style={{ display: "flex", gap: "0.4rem" }}>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
             {currentStep > 1 && (
               <button
                 onClick={handleBack}
                 style={{
-                  padding: "0.4rem 0.85rem",
-                  borderRadius: "6px",
-                  fontSize: "0.7rem",
+                  padding: "0.5rem 1rem",
+                  borderRadius: "8px",
+                  fontSize: "0.8rem",
                   fontWeight: 600,
                   cursor: "pointer",
                   backgroundColor: "white",
@@ -566,9 +593,9 @@ export default function InstitutionOnboarding() {
               }
               disabled={loading}
               style={{
-                padding: "0.4rem 0.85rem",
-                borderRadius: "6px",
-                fontSize: "0.7rem",
+                padding: "0.5rem 1rem",
+                borderRadius: "8px",
+                fontSize: "0.8rem",
                 fontWeight: 600,
                 cursor: loading ? "not-allowed" : "pointer",
                 backgroundColor: "#0000ff",
