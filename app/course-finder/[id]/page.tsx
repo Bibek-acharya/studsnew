@@ -179,9 +179,11 @@ export default function CourseDetailPage({
   const features = course?.features || programData?.features || [];
   const whoShouldChoose = course?.whoShouldChoose || programData?.whoShouldChoose || [];
   const eligibilityRows = course?.eligibilityRows || programData?.eligibilityRows || [];
+  const eligibilityText = course?.eligibilityText || programData?.eligibilityText || "";
   const admissionSteps = course?.admissionSteps || programData?.admissionSteps || [];
   const fullTimeCourses = course?.fullTimeCourses || programData?.fullTimeCourses || [];
   const feeItems = course?.feeItems || programData?.feeItems || [];
+  const feeStructure = course?.feeStructure || programData?.feeStructure || "";
   const scholarships = course?.scholarships || programData?.scholarships || [];
   const scholarshipDesc = course?.scholarshipDesc || programData?.scholarshipDesc || "";
   const scholarshipNotes = course?.scholarshipNotes || programData?.scholarshipNotes || "";
@@ -199,13 +201,14 @@ export default function CourseDetailPage({
     metadataParts.length > 0 ? metadataParts.join(" | ") : "";
 
   const hasEligibilityData =
-    eligibilityRows.length > 0 || admissionRequirements.length > 0;
+    !!eligibilityText || eligibilityRows.length > 0 || admissionRequirements.length > 0;
   const hasAdmissionData = admissionSteps.length > 0;
   const hasCoursesData =
     fullTimeCourses.some((ft: any) => ft.course || ft.totalFees || ft.startDate || ft.endDate) ||
     subjectGroups.length > 0 ||
     curriculum.length > 0;
   const hasFeeData =
+    !!feeStructure ||
     feeItems.some((fi: any) => fi.particular || fi.amount) ||
     !!(courseEstFee || courseGovtFee || coursePrivateFee);
   const hasScholarshipData = !!(scholarshipDesc || scholarships.length > 0);
@@ -658,74 +661,81 @@ export default function CourseDetailPage({
                   <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                     Eligibility Criteria
                   </h2>
-                  <div className="overflow-x-auto rounded border border-gray-200">
-                    <table className="w-full text-left border-collapse min-w-[800px]">
-                      <thead>
-                        <tr className="bg-[#eff4fc] border-b border-gray-200">
-                          <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
-                            S.N.
-                          </th>
-                          <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
-                            Stream/Faculty
-                          </th>
-                          <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
-                            Eligibility
-                          </th>
-                          <th className="p-4 font-bold text-gray-900 w-[25%]">
-                            Required Documents
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="text-[15px]">
-                        {eligibilityRows.map((row: any, i: number) => (
-                          <tr
-                            key={i}
-                            className="border-b border-gray-200 hover:bg-gray-50"
-                          >
-                            <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                              {i + 1}
-                            </td>
-                            <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                              {row.stream || row.faculty || "-"}
-                            </td>
-                            <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                              {Array.isArray(row.eligibility) &&
-                              row.eligibility.length > 0 ? (
-                                <ul className="list-disc list-inside space-y-1">
-                                  {row.eligibility.map(
-                                    (item: string, j: number) => (
-                                      <li key={j}>{item}</li>
-                                    ),
-                                  )}
-                                </ul>
-                              ) : (
-                                row.eligibility || "-"
-                              )}
-                            </td>
-                            <td className="p-4 align-top text-gray-700">
-                              {row.documents?.length > 0 ? (
-                                <ul className="space-y-1 text-sm">
-                                  {row.documents.map(
-                                    (doc: string, j: number) => (
-                                      <li
-                                        key={j}
-                                        className="flex items-center gap-2"
-                                      >
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
-                                        {doc}
-                                      </li>
-                                    ),
-                                  )}
-                                </ul>
-                              ) : (
-                                "-"
-                              )}
-                            </td>
+                  {eligibilityText ? (
+                    <div
+                      className="ql-editor prose prose-sm max-w-none text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: eligibilityText }}
+                    />
+                  ) : (
+                    <div className="overflow-x-auto rounded border border-gray-200">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead>
+                          <tr className="bg-[#eff4fc] border-b border-gray-200">
+                            <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
+                              S.N.
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
+                              Stream/Faculty
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[25%] border-r border-gray-200">
+                              Eligibility
+                            </th>
+                            <th className="p-4 font-bold text-gray-900 w-[25%]">
+                              Required Documents
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                        </thead>
+                        <tbody className="text-[15px]">
+                          {eligibilityRows.map((row: any, i: number) => (
+                            <tr
+                              key={i}
+                              className="border-b border-gray-200 hover:bg-gray-50"
+                            >
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {i + 1}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {row.stream || row.faculty || "-"}
+                              </td>
+                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                {Array.isArray(row.eligibility) &&
+                                row.eligibility.length > 0 ? (
+                                  <ul className="list-disc list-inside space-y-1">
+                                    {row.eligibility.map(
+                                      (item: string, j: number) => (
+                                        <li key={j}>{item}</li>
+                                      ),
+                                    )}
+                                  </ul>
+                                ) : (
+                                  row.eligibility || "-"
+                                )}
+                              </td>
+                              <td className="p-4 align-top text-gray-700">
+                                {row.documents?.length > 0 ? (
+                                  <ul className="space-y-1 text-sm">
+                                    {row.documents.map(
+                                      (doc: string, j: number) => (
+                                        <li
+                                          key={j}
+                                          className="flex items-center gap-2"
+                                        >
+                                          <span className="w-1.5 h-1.5 rounded-full bg-[#0000ff]"></span>
+                                          {doc}
+                                        </li>
+                                      ),
+                                    )}
+                                  </ul>
+                                ) : (
+                                  "-"
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <EmptyTabState tabName="eligibility" />
@@ -775,102 +785,109 @@ export default function CourseDetailPage({
             <div className="tab-content">
               {hasFeeData ? (
                 <div>
-                  {feeItems.some((fi: any) => fi.particular || fi.amount) && (
+                  <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                    Fee Structure
+                  </h2>
+                  {feeStructure ? (
+                    <div
+                      className="ql-editor prose prose-sm max-w-none text-gray-700"
+                      dangerouslySetInnerHTML={{ __html: feeStructure }}
+                    />
+                  ) : (
                     <>
-                      <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                        Fee Structure
-                      </h2>
-                      <div className="overflow-x-auto rounded border border-gray-200 mb-6">
-                      <table className="w-full text-left border-collapse min-w-[800px]">
-                        <thead>
-                          <tr className="bg-[#eff4fc] border-b border-gray-200">
-                            <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
-                              Particular
-                            </th>
-                            <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
-                              Amount (NPR)
-                            </th>
-                            <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">
-                              Frequency
-                            </th>
-                            <th className="p-4 font-bold text-gray-900 w-[15%]">
-                              Notes
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="text-[15px]">
-                          {feeItems.filter((fi: any) => fi.particular || fi.amount).map((fi: any, i: number) => (
-                            <tr
-                              key={i}
-                              className="border-b border-gray-200 hover:bg-gray-50"
-                            >
-                              <td className="p-4 align-top border-r border-gray-200">
-                                <div className="text-gray-900 font-semibold mb-1">
-                                  {fi.particular}
-                                </div>
-                              </td>
-                              <td className="p-4 align-top border-r border-gray-200">
-                                <div className="text-gray-700">{fi.amount}</div>
-                              </td>
-                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                {fi.frequency || "-"}
-                              </td>
-                              <td className="p-4 align-top text-gray-700">
-                                {fi.notes || "-"}
-                              </td>
-                            </tr>
-                          ))}
-                          {courseGovtFee && (
-                            <tr className="border-b border-gray-200 hover:bg-gray-50">
-                              <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                                Government Fee
-                              </td>
-                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                {courseGovtFee}
-                              </td>
-                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                One-time
-                              </td>
-                              <td className="p-4 align-top text-gray-700">
-                                Government college
-                              </td>
-                            </tr>
-                          )}
-                          {coursePrivateFee && (
-                            <tr className="border-b border-gray-200 hover:bg-gray-50">
-                              <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                                Private Fee
-                              </td>
-                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                {coursePrivateFee}
-                              </td>
-                              <td className="p-4 align-top border-r border-gray-200 text-gray-700">
-                                One-time
-                              </td>
-                              <td className="p-4 align-top text-gray-700">
-                                Private college
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                        <tfoot>
-                          <tr className="bg-[#eff4fc]">
-                            <td className="p-4 font-bold text-gray-900 border-r border-gray-200">
-                              Total Estimated First Year Fee
-                            </td>
-                            <td className="p-4 font-bold text-gray-900 border-r border-gray-200">
-                              {courseEstFee || "Varies"}
-                            </td>
-                            <td className="p-4 text-gray-700 border-r border-gray-200">
-                              First Year
-                            </td>
-                            <td className="p-4 text-gray-700">
-                              Varies by college
-                            </td>
-                          </tr>
-                        </tfoot>
-                      </table>
-                    </div>
+                      {feeItems.some((fi: any) => fi.particular || fi.amount) && (
+                        <div className="overflow-x-auto rounded border border-gray-200 mb-6">
+                          <table className="w-full text-left border-collapse min-w-[800px]">
+                            <thead>
+                              <tr className="bg-[#eff4fc] border-b border-gray-200">
+                                <th className="p-4 font-bold text-gray-900 w-[28%] border-r border-gray-200">
+                                  Particular
+                                </th>
+                                <th className="p-4 font-bold text-gray-900 w-[30%] border-r border-gray-200">
+                                  Amount (NPR)
+                                </th>
+                                <th className="p-4 font-bold text-gray-900 w-[27%] border-r border-gray-200">
+                                  Frequency
+                                </th>
+                                <th className="p-4 font-bold text-gray-900 w-[15%]">
+                                  Notes
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="text-[15px]">
+                              {feeItems.filter((fi: any) => fi.particular || fi.amount).map((fi: any, i: number) => (
+                                <tr
+                                  key={i}
+                                  className="border-b border-gray-200 hover:bg-gray-50"
+                                >
+                                  <td className="p-4 align-top border-r border-gray-200">
+                                    <div className="text-gray-900 font-semibold mb-1">
+                                      {fi.particular}
+                                    </div>
+                                  </td>
+                                  <td className="p-4 align-top border-r border-gray-200">
+                                    <div className="text-gray-700">{fi.amount}</div>
+                                  </td>
+                                  <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                    {fi.frequency || "-"}
+                                  </td>
+                                  <td className="p-4 align-top text-gray-700">
+                                    {fi.notes || "-"}
+                                  </td>
+                                </tr>
+                              ))}
+                              {courseGovtFee && (
+                                <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                  <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
+                                    Government Fee
+                                  </td>
+                                  <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                    {courseGovtFee}
+                                  </td>
+                                  <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                    One-time
+                                  </td>
+                                  <td className="p-4 align-top text-gray-700">
+                                    Government college
+                                  </td>
+                                </tr>
+                              )}
+                              {coursePrivateFee && (
+                                <tr className="border-b border-gray-200 hover:bg-gray-50">
+                                  <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
+                                    Private Fee
+                                  </td>
+                                  <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                    {coursePrivateFee}
+                                  </td>
+                                  <td className="p-4 align-top border-r border-gray-200 text-gray-700">
+                                    One-time
+                                  </td>
+                                  <td className="p-4 align-top text-gray-700">
+                                    Private college
+                                  </td>
+                                </tr>
+                              )}
+                            </tbody>
+                            <tfoot>
+                              <tr className="bg-[#eff4fc]">
+                                <td className="p-4 font-bold text-gray-900 border-r border-gray-200">
+                                  Total Estimated First Year Fee
+                                </td>
+                                <td className="p-4 font-bold text-gray-900 border-r border-gray-200">
+                                  {courseEstFee || "Varies"}
+                                </td>
+                                <td className="p-4 text-gray-700 border-r border-gray-200">
+                                  First Year
+                                </td>
+                                <td className="p-4 text-gray-700">
+                                  Varies by college
+                                </td>
+                              </tr>
+                            </tfoot>
+                          </table>
+                        </div>
+                      )}
                     </>
                   )}
                 </div>

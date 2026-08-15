@@ -178,6 +178,8 @@ export default function SuperadminAddCourseSection({
   const [whoShouldChoose, setWhoShouldChoose] = useState<WithId<PersonaItem>[]>([]);
   const [faqs, setFaqs] = useState<WithId<FaqItem>[]>([]);
   const [careers, setCareers] = useState<WithId<CareerItem>[]>([]);
+  const [feeStructureText, setFeeStructureText] = useState("");
+  const [eligibilityText, setEligibilityText] = useState("");
   const [curriculum, setCurriculum] = useState<
     {
       id: number;
@@ -285,6 +287,8 @@ export default function SuperadminAddCourseSection({
           setFeeItems(
             res.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
           );
+        if (res.feeStructure) setFeeStructureText(res.feeStructure);
+        if (res.eligibilityText) setEligibilityText(res.eligibilityText);
         if (res.scholarships)
           setScholarships(
             res.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })),
@@ -412,6 +416,8 @@ export default function SuperadminAddCourseSection({
     fullTimeCourses: fullTimeCourses.map(({ id, ...rest }) => rest),
     subjectGroups: subjectGroups.map(({ id, ...rest }) => rest),
     feeItems: feeItems.map(({ id, ...rest }) => rest),
+    feeStructure: feeStructureText,
+    eligibilityText: eligibilityText,
     scholarships: scholarships.map(({ id, ...rest }) => rest),
     faqs: faqs.map(({ id, ...rest }) => rest),
     careers: careers.map(({ id, ...rest }) => rest),
@@ -1005,255 +1011,18 @@ export default function SuperadminAddCourseSection({
 
         {/* 4. Eligibility Criteria */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <SectionItemHeader
-            icon="clipboard-check"
-            title="Eligibility Criteria"
-            subtitle="Define eligibility requirements"
-            onAdd={() =>
-              setEligibilityRows((prev) => [
-                ...prev,
-                {
-                  id: nextId(prev),
-                  level: "",
-                  stream: "",
-                  eligibility: [],
-                  documents: [],
-                },
-              ])
-            }
-            addLabel="Add Row"
-          />
-          <div className="p-6 space-y-6">
-            {eligibilityRows.map((ec) => (
-              <div
-                key={ec.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-              >
-                <button
-                  onClick={() =>
-                    setEligibilityRows((prev) =>
-                      prev.filter((x) => x.id !== ec.id),
-                    )
-                  }
-                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                  <div>
-                    <label className={labelClass}>Stream/Faculty</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Biology, Computer Science"
-                      value={ec.stream}
-                      onChange={(e) =>
-                        setEligibilityRows((prev) =>
-                          prev.map((x) =>
-                            x.id === ec.id
-                              ? { ...x, stream: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Eligibility (bullet points)
-                    </label>
-                    <div className="space-y-2">
-                      {(ec.eligibility || []).map((item, ei) => (
-                        <div key={ei} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Minimum 2.5 GPA"
-                            value={item}
-                            onChange={(e) =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        eligibility: x.eligibility.map(
-                                          (v, j) =>
-                                            j === ei ? e.target.value : v,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        eligibility: x.eligibility.filter(
-                                          (_, j) => j !== ei,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setEligibilityRows((prev) =>
-                            prev.map((x) =>
-                              x.id === ec.id
-                                ? { ...x, eligibility: [...x.eligibility, ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>{" "}
-                        Add Item
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Required Documents (bullet points)
-                    </label>
-                    <div className="space-y-2">
-                      {(ec.documents || []).map((item, di) => (
-                        <div key={di} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. SEE Mark Sheet"
-                            value={item}
-                            onChange={(e) =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        documents: x.documents.map((v, j) =>
-                                          j === di ? e.target.value : v,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        documents: x.documents.filter(
-                                          (_, j) => j !== di,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setEligibilityRows((prev) =>
-                            prev.map((x) =>
-                              x.id === ec.id
-                                ? { ...x, documents: [...x.documents, ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>{" "}
-                        Add Item
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="p-6">
+            <label className={labelClass}>Eligibility Criteria</label>
+            <p className="text-xs text-gray-500 mb-2">Define eligibility requirements using rich text</p>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <QuillEditor
+                theme="snow"
+                value={eligibilityText}
+                onChange={setEligibilityText}
+                placeholder="Describe eligibility requirements..."
+                className="bg-white"
+              />
+            </div>
           </div>
         </div>
 
@@ -1845,126 +1614,18 @@ export default function SuperadminAddCourseSection({
 
         {/* 8. Program Fee */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <SectionItemHeader
-            icon="wallet"
-            title="Program Fee"
-            subtitle="Fee structure details"
-            onAdd={() =>
-              setFeeItems((prev) => [
-                ...prev,
-                {
-                  id: nextId(prev),
-                  particular: "",
-                  amount: "",
-                  frequency: "",
-                  notes: "",
-                },
-              ])
-            }
-            addLabel="Add Fee Item"
-          />
-          <div className="p-6 space-y-4">
-            {feeItems.map((fi) => (
-              <div
-                key={fi.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-              >
-                <button
-                  onClick={() =>
-                    setFeeItems((prev) => prev.filter((x) => x.id !== fi.id))
-                  }
-                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pr-12">
-                  <div>
-                    <label className={labelClass}>Particulars</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Admission Fee"
-                      value={fi.particular}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, particular: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Amount (NPR)</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. 25,000"
-                      value={fi.amount}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, amount: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Frequency</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. One-time, Yearly"
-                      value={fi.frequency}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, frequency: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Notes</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="Optional notes"
-                      value={fi.notes}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, notes: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="p-6">
+            <label className={labelClass}>Fee Structure</label>
+            <p className="text-xs text-gray-500 mb-2">Describe the fee structure using rich text</p>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <QuillEditor
+                theme="snow"
+                value={feeStructureText}
+                onChange={setFeeStructureText}
+                placeholder="Describe fee structure, payment details..."
+                className="bg-white"
+              />
+            </div>
           </div>
         </div>
 

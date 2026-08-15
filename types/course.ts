@@ -92,9 +92,11 @@ export interface GlobalCourse {
   whoShouldChoose: PersonaItem[];
   features: FeatureItem[];
   eligibilityRows: EligibilityRow[];
+  eligibilityText: string;
   admissionSteps: AdmissionStep[];
   subjectGroups: SubjectGroup[];
   feeItems: FeeItem[];
+  feeStructure: string;
   scholarshipDesc: string;
   scholarshipNotes: string;
   scholarships: ScholarshipItem[];
