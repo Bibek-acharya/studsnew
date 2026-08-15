@@ -30,7 +30,7 @@ const renderOption = (
     }`}
   >
     <div
-      className={`mr-4 flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-md border-2 border-[#e2e8f0] transition-all duration-200 ${
+      className={`mr-4 flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-sm border-2 border-[#e2e8f0] transition-all duration-200 ${
         checked ? 'border-brand-blue bg-brand-blue' : 'bg-white'
       }`}
     >
@@ -39,16 +39,16 @@ const renderOption = (
       )}
     </div>
     <span
-      className={`text-[17px] font-medium text-brand-blue' `}
+      className={`text-[17px] font-medium text-brand-blue'`}
     >
       {label}
     </span>
   </button>
 )
 
-export default function Step6({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 10 }: Step6Props) {
+export default function Step6({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 9 }: Step6Props) {
   return (
-    <StepWrapper step={step} stepImages={stepImages} imageSize={500} maxWidth='max-w-80 lg:max-w-130'>
+    <StepWrapper step={step} stepImages={stepImages} imageSize={400} maxWidth='max-w-60 lg:max-w-80'>
       <div className='mb-6'>
         <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
           {stepTitles[step]}
@@ -58,19 +58,19 @@ export default function Step6({ step, stepImages, form, handleInputChange, stepT
       <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
         <div className='mt-8 space-y-4'>
           {renderOption(
-            form.class_size === 'Small class (more teacher attention)',
-            () => handleInputChange('class_size', 'Small class (more teacher attention)'),
-            'Small class (more teacher attention)',
+            form.academics_vs_campus === 'Academics matter more than fun',
+            () => handleInputChange('academics_vs_campus', 'Academics matter more than fun'),
+            'Academics matter more than fun',
           )}
           {renderOption(
-            form.class_size === 'Medium class',
-            () => handleInputChange('class_size', 'Medium class'),
-            'Medium class',
+            form.academics_vs_campus === 'Campus life matters more',
+            () => handleInputChange('academics_vs_campus', 'Campus life matters more'),
+            'Campus life matters more',
           )}
           {renderOption(
-            form.class_size === 'Large college with big batches',
-            () => handleInputChange('class_size', 'Large college with big batches'),
-            'Large college with big batches',
+            form.academics_vs_campus === 'Both equally important',
+            () => handleInputChange('academics_vs_campus', 'Both equally important'),
+            'Both equally important',
           )}
         </div>
       </div>

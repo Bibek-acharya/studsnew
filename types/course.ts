@@ -62,6 +62,12 @@ export interface CareerItem {
   color?: string;
 }
 
+export interface DownloadItem {
+  title: string;
+  size: string;
+  file: string;
+}
+
 // Main types
 export interface GlobalCourse {
   id: number;
@@ -102,6 +108,7 @@ export interface GlobalCourse {
   scholarships: ScholarshipItem[];
   fullTimeCourses: FullTimeCourse[];
   faqs: FaqItem[];
+  downloads: DownloadItem[];
   isGlobal: boolean;
   status: string;
   createdBy: number;

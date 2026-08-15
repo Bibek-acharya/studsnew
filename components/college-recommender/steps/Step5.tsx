@@ -30,7 +30,7 @@ const renderOption = (
     }`}
   >
     <div
-      className={`mr-4 flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-sm border-2 border-[#e2e8f0] transition-all duration-200 ${
+      className={`mr-4 flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-md border-2 border-[#e2e8f0] transition-all duration-200 ${
         checked ? 'border-brand-blue bg-brand-blue' : 'bg-white'
       }`}
     >
@@ -39,16 +39,16 @@ const renderOption = (
       )}
     </div>
     <span
-      className={`text-[17px] font-medium text-black' `}
+      className={`text-[17px] font-medium text-brand-blue' `}
     >
       {label}
     </span>
   </button>
 )
 
-export default function Step5({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 10 }: Step5Props) {
+export default function Step5({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 9 }: Step5Props) {
   return (
-    <StepWrapper step={step} stepImages={stepImages} imageSize={300} maxWidth='max-w-70 lg:max-w-100'>
+    <StepWrapper step={step} stepImages={stepImages} imageSize={500} maxWidth='max-w-80 lg:max-w-130'>
       <div className='mb-6'>
         <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
           {stepTitles[step]}
@@ -58,24 +58,19 @@ export default function Step5({ step, stepImages, form, handleInputChange, stepT
       <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
         <div className='mt-8 space-y-4'>
           {renderOption(
-            form.distance_from_home === 'I want to stay at home (Day scholar)',
-            () => handleInputChange('distance_from_home', 'I want to stay at home (Day scholar)'),
-            'I want to stay at home (Day scholar)',
+            form.class_size === 'Small class (more teacher attention)',
+            () => handleInputChange('class_size', 'Small class (more teacher attention)'),
+            'Small class (more teacher attention)',
           )}
           {renderOption(
-            form.distance_from_home === 'Within 2–3 hours travel',
-            () => handleInputChange('distance_from_home', 'Within 2–3 hours travel'),
-            'Within 2–3 hours travel',
+            form.class_size === 'Medium class',
+            () => handleInputChange('class_size', 'Medium class'),
+            'Medium class',
           )}
           {renderOption(
-            form.distance_from_home === 'Different city but same province',
-            () => handleInputChange('distance_from_home', 'Different city but same province'),
-            'Different city but same province',
-          )}
-          {renderOption(
-            form.distance_from_home === 'Anywhere in Nepal',
-            () => handleInputChange('distance_from_home', 'Anywhere in Nepal'),
-            'Anywhere in Nepal',
+            form.class_size === 'Large college with big batches',
+            () => handleInputChange('class_size', 'Large college with big batches'),
+            'Large college with big batches',
           )}
         </div>
       </div>

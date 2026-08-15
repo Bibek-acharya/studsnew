@@ -11,7 +11,6 @@ import Step6 from "./steps/Step6";
 import Step7 from "./steps/Step7";
 import Step8 from "./steps/Step8";
 import Step9 from "./steps/Step9";
-import Step10 from "./steps/Step10";
 import ResultsPage from "./ResultsPage";
 import CollegeShortlistView from "./CollegeShortlistView";
 
@@ -27,12 +26,11 @@ const stepTitles: Record<number, string> = {
   2: "Let's Talk Budget",
   3: "Future Plan",
   4: "Location Preference",
-  5: "Distance From Home",
-  6: "Class Size Preference",
-  7: "Academics vs Campus Life",
-  8: "Activities & Sports",
-  9: "Facilities & Infrastructure",
-  10: "Money Matters",
+  5: "Class Size Preference",
+  6: "Academics vs Campus Life",
+  7: "Activities & Sports",
+  8: "Facilities & Infrastructure",
+  9: "Money Matters",
 };
 
 const stepImages: Record<number, string> = {
@@ -40,12 +38,11 @@ const stepImages: Record<number, string> = {
   2: "/college-recommender/two.svg",
   3: "/mirror.svg",
   4: "/college-recommender/four.svg",
-  5: "/college-recommender/five.svg",
-  6: "/teacher.svg",
-  7: "/college-recommender/seven.svg",
-  8: "/college-recommender/eight.svg",
-  9: "/college-recommender/nine.svg",
-  10: "/college-recommender/ten.svg",
+  5: "/teacher.svg",
+  6: "/college-recommender/seven.svg",
+  7: "/college-recommender/eight.svg",
+  8: "/college-recommender/nine.svg",
+  9: "/college-recommender/ten.svg",
 };
 
 export const studentTypeOptions = [
@@ -99,7 +96,6 @@ export interface CollegeRecommenderForm {
   province: string;
   district: string;
   setting: string;
-  distance_from_home: string;
   class_size: string;
   academics_vs_campus: string;
   activities_importance: string;
@@ -117,7 +113,6 @@ export const initialForm: CollegeRecommenderForm = {
   province: "",
   district: "",
   setting: "",
-  distance_from_home: "",
   class_size: "",
   academics_vs_campus: "",
   activities_importance: "",
@@ -197,16 +192,14 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           (form.province === "No preference" || !!form.district)
         );
       case 5:
-        return !!form.distance_from_home;
-      case 6:
         return !!form.class_size;
-      case 7:
+      case 6:
         return !!form.academics_vs_campus;
-      case 8:
+      case 7:
         return !!form.activities_importance;
-      case 9:
+      case 8:
         return !!form.facility_choice;
-      case 10:
+      case 9:
         return !!form.tuition_factor;
       default:
         return false;
@@ -218,17 +211,17 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
     try {
       const res = await apiService.getCollegeRecommenderRecommendations(form);
       setResults(res.data?.recommendations || []);
-      setStep(11);
+      setStep(10);
     } catch (err) {
       console.error("Failed to fetch recommendations:", err);
       setResults([]);
-      setStep(11);
+      setStep(10);
     } finally {
       setLoading(false);
     }
   };
 
-  if (step === 11) {
+  if (step === 10) {
     return (
       <ResultsPage
         results={results}
@@ -242,17 +235,17 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
         setIsRefineModalOpen={setIsRefineModalOpen}
         toggleSelection={toggleSelection}
         onNavigate={onNavigate}
-        onRefine={() => setStep(10)}
+        onRefine={() => setStep(9)}
         onShortlist={() => {
           setShortlistedIds(new Set([...shortlistedIds, ...selectedIds]));
-          setStep(12);
+          setStep(11);
         }}
         tution={form.yearly_budget}
       />
     );
   }
 
-  if (step === 12) {
+  if (step === 11) {
     return (
       <CollegeShortlistView
         recommendedItems={results}
@@ -263,7 +256,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           else next.add(id);
           setShortlistedIds(next);
         }}
-        onBack={() => setStep(11)}
+        onBack={() => setStep(10)}
         onNavigate={onNavigate}
       />
     );
@@ -324,6 +317,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           stepTitles={stepTitles}
           canContinue={canContinue}
           setStep={setStep}
+          stepCount={9}
         />
       )}
       {step === 6 && (
@@ -335,6 +329,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           stepTitles={stepTitles}
           canContinue={canContinue}
           setStep={setStep}
+          stepCount={9}
         />
       )}
       {step === 7 && (
@@ -346,6 +341,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           stepTitles={stepTitles}
           canContinue={canContinue}
           setStep={setStep}
+          stepCount={9}
         />
       )}
       {step === 8 && (
@@ -357,6 +353,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           stepTitles={stepTitles}
           canContinue={canContinue}
           setStep={setStep}
+          stepCount={9}
         />
       )}
       {step === 9 && (
@@ -368,19 +365,9 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
           stepTitles={stepTitles}
           canContinue={canContinue}
           setStep={setStep}
-        />
-      )}
-      {step === 10 && (
-        <Step10
-          step={step}
-          stepImages={stepImages}
-          form={form}
-          handleInputChange={handleInputChange}
-          stepTitles={stepTitles}
-          canContinue={canContinue}
-          setStep={setStep}
           fetchRecommendations={fetchRecommendations}
           loading={loading}
+          stepCount={9}
         />
       )}
     </div>

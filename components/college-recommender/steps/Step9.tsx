@@ -5,7 +5,7 @@ import { Check } from 'lucide-react'
 import { CollegeRecommenderForm } from '../CollegeRecommenderToolPage'
 import StepWrapper from './StepWrapper'
 
-interface StepProps {
+interface Step9Props {
   step: number
   stepImages: Record<number, string>
   form: CollegeRecommenderForm
@@ -13,18 +13,12 @@ interface StepProps {
   stepTitles: Record<number, string>
   canContinue: (step: number) => boolean
   setStep: (step: number) => void
+  fetchRecommendations: () => void
+  loading: boolean
   stepCount?: number
 }
 
-const facilityOptions = [
-  'Modern labs',
-  'Hostel facility',
-  'Library',
-  'Cafeteria quality',
-  'Other',
-]
-
-const renderCheckboxOption = (
+const renderRadioOption = (
   checked: boolean,
   onClick: () => void,
   label: string,
@@ -55,23 +49,9 @@ const renderCheckboxOption = (
   </button>
 )
 
-export default function Step9({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 10 }: StepProps) {
-  const selectedFacilities = form.facility_choice ? form.facility_choice.split(', ') : []
-  
-  const handleCheckboxToggle = (option: string) => {
-    let newSelection: string[]
-    
-    if (selectedFacilities.includes(option)) {
-      newSelection = selectedFacilities.filter(f => f !== option)
-    } else {
-      newSelection = [...selectedFacilities, option]
-    }
-    
-    handleInputChange('facility_choice', newSelection.join(', '))
-  }
-
+export default function Step9({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, fetchRecommendations, loading, stepCount = 9 }: Step9Props) {
   return (
-    <StepWrapper step={step} stepImages={stepImages} imageSize={400} maxWidth='max-w-110 lg:max-w-130'>
+    <StepWrapper step={step} stepImages={stepImages}>
       <div className='mb-6'>
         <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
           {stepTitles[step]}
@@ -79,16 +59,34 @@ export default function Step9({ step, stepImages, form, handleInputChange, stepT
       </div>
 
       <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
-<div className='mt-4 space-y-3'>
-          {facilityOptions.map((option) => (
-            <div key={option}>
-              {renderCheckboxOption(
-                selectedFacilities.includes(option),
-                () => handleCheckboxToggle(option),
-                option,
-              )}
-            </div>
-          ))}
+        <div className='mt-8 space-y-4'>
+          {renderRadioOption(
+            form.tuition_factor === 'Yes, low cost is very important',
+            () =>
+              handleInputChange(
+                'tuition_factor',
+                'Yes, low cost is very important',
+              ),
+            'Yes, low cost is very important',
+          )}
+          {renderRadioOption(
+            form.tuition_factor === "I'm okay paying more for quality",
+            () =>
+              handleInputChange(
+                'tuition_factor',
+                "I'm okay paying more for quality",
+              ),
+            "I'm okay paying more for quality",
+          )}
+          {renderRadioOption(
+            form.tuition_factor === 'Depends on scholarship availability',
+            () =>
+              handleInputChange(
+                'tuition_factor',
+                'Depends on scholarship availability',
+              ),
+            'Depends on scholarship availability',
+          )}
         </div>
       </div>
 
@@ -101,30 +99,17 @@ export default function Step9({ step, stepImages, form, handleInputChange, stepT
             Back
           </button>
         )}
-        {step < stepCount ? (
-          <button
-            onClick={() => setStep(Math.min(stepCount, step + 1))}
-            disabled={!canContinue(step)}
-            className={`rounded-md px-8 py-3.5 text-sm font-semibold transition-all duration-300 ${
-              canContinue(step)
-                ? 'cursor-pointer bg-brand-blue text-white hover:bg-brand-hover'
-                : 'cursor-not-allowed bg-slate-100 text-slate-400'
-            }`}
-          >
-            Continue
-          </button>
-        ) : (
-          <button
-            disabled={!canContinue(step)}
-            className={`rounded-md px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
-              canContinue(step)
-                ? 'bg-brand-blue cursor-pointer'
-                : 'bg-slate-300 cursor-not-allowed'
-            }`}
-          >
-            Find Colleges
-          </button>
-        )}
+        <button
+          onClick={fetchRecommendations}
+          disabled={!canContinue(step) || loading}
+          className={`rounded-md px-8 py-3.5 text-sm font-bold text-white transition-all hover:bg-[#1d4ed8] ${
+            canContinue(step) && !loading
+              ? 'bg-brand-blue cursor-pointer'
+              : 'bg-slate-300 cursor-not-allowed'
+          }`}
+        >
+          {loading ? 'Loading...' : 'Find Colleges'}
+        </button>
       </div>
     </StepWrapper>
   )

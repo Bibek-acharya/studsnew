@@ -1,10 +1,11 @@
 'use client'
 
 import React from 'react'
+import { Check } from 'lucide-react'
 import { CollegeRecommenderForm } from '../CollegeRecommenderToolPage'
 import StepWrapper from './StepWrapper'
 
-interface StepProps {
+interface Step7Props {
   step: number
   stepImages: Record<number, string>
   form: CollegeRecommenderForm
@@ -15,12 +16,13 @@ interface StepProps {
   stepCount?: number
 }
 
-const renderOption = (
+const renderRadioOption = (
   checked: boolean,
   onClick: () => void,
   label: string,
+  description?: string,
 ) => (
-  <button
+ <button
     type='button'
     onClick={onClick}
     className={`flex w-full cursor-pointer items-center rounded-md border-2 border-[#e2e8f0] bg-white p-5 transition-all duration-200 ${
@@ -46,9 +48,9 @@ const renderOption = (
   </button>
 )
 
-export default function Step7({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 10 }: StepProps) {
+export default function Step7({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 9 }: Step7Props) {
   return (
-    <StepWrapper step={step} stepImages={stepImages} imageSize={400} maxWidth='max-w-60 lg:max-w-80'>
+    <StepWrapper step={step} stepImages={stepImages} imageSize={400} maxWidth='max-w-70 lg:max-w-90'>
       <div className='mb-6'>
         <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
           {stepTitles[step]}
@@ -56,21 +58,21 @@ export default function Step7({ step, stepImages, form, handleInputChange, stepT
       </div>
 
       <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
-        <div className='mt-8 space-y-4'>
-          {renderOption(
-            form.academics_vs_campus === 'Academics matter more than fun',
-            () => handleInputChange('academics_vs_campus', 'Academics matter more than fun'),
-            'Academics matter more than fun',
+        <div className='mt-8 space-y-8'>
+          {renderRadioOption(
+            form.activities_importance === 'Yes',
+            () => handleInputChange('activities_importance', 'Yes'),
+            'Yes, they are very important',
           )}
-          {renderOption(
-            form.academics_vs_campus === 'Campus life matters more',
-            () => handleInputChange('academics_vs_campus', 'Campus life matters more'),
-            'Campus life matters more',
+          {renderRadioOption(
+            form.activities_importance === 'Somewhat',
+            () => handleInputChange('activities_importance', 'Somewhat'),
+            'Somewhat important',
           )}
-          {renderOption(
-            form.academics_vs_campus === 'Both equally important',
-            () => handleInputChange('academics_vs_campus', 'Both equally important'),
-            'Both equally important',
+          {renderRadioOption(
+            form.activities_importance === 'No',
+            () => handleInputChange('activities_importance', 'No'),
+            'No, I prefer to focus on academics',
           )}
         </div>
       </div>

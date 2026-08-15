@@ -18,6 +18,7 @@ type TabKey =
   | "eligibility"
   | "admission"
   | "fees"
+  | "downloads"
   | "scholarships"
   | "faq";
 
@@ -27,6 +28,7 @@ const tabs: { key: TabKey; label: string }[] = [
   { key: "eligibility", label: "Eligibility" },
   { key: "admission", label: "Entrance & Admission" },
   { key: "fees", label: "Program Fee" },
+  { key: "downloads", label: "Downloads" },
   { key: "scholarships", label: "Scholarships" },
   { key: "faq", label: "FAQ" },
 ];
@@ -189,6 +191,7 @@ export default function CourseDetailPage({
   const scholarshipNotes = course?.scholarshipNotes || programData?.scholarshipNotes || "";
   const subjectGroups = course?.subjectGroups || programData?.subjectGroups || [];
   const faqs = course?.faqs || programData?.faqs || [];
+  const downloads = course?.downloads || programData?.downloads || [];
   const programLevel = programData?.level || "";
   const affiliationData = programData?.affiliation || "";
 
@@ -212,6 +215,7 @@ export default function CourseDetailPage({
     feeItems.some((fi: any) => fi.particular || fi.amount) ||
     !!(courseEstFee || courseGovtFee || coursePrivateFee);
   const hasScholarshipData = !!(scholarshipDesc || scholarships.length > 0);
+  const hasDownloadsData = downloads.length > 0;
   const hasFaqData = faqs.length > 0;
 
   const bannerImage =
@@ -807,6 +811,46 @@ export default function CourseDetailPage({
                 </div>
               ) : (
                 <EmptyTabState tabName="fee" />
+              )}
+            </div>
+          )}
+
+          {/* Downloads Tab */}
+          {activeTab === "downloads" && (
+            <div className="tab-content">
+              {hasDownloadsData ? (
+                <div>
+                  <div className="mb-6">
+                    <h2 className="text-[20px] font-bold text-gray-900">Downloads</h2>
+                    <p className="mt-1 text-[14px] text-gray-500">Access brochures, forms, and study materials.</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {downloads.map((download: any, i: number) => (
+                      <div key={download.title || i} className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition">
+                        <div className="flex items-center gap-4">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                            <i className="fa-regular fa-file-lines text-xl"></i>
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900">{download.title}</h4>
+                            <p className="text-[12.5px] text-gray-500">{download.size || "Download file"}</p>
+                          </div>
+                        </div>
+                        {download.file ? (
+                          <a href={download.file} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-md bg-[#0000ff] hover:bg-blue-700 px-5 py-2.5 text-sm font-bold text-white">
+                            <i className="fa-solid fa-download"></i>Download
+                          </a>
+                        ) : (
+                          <button className="flex items-center gap-2 rounded-md bg-[#0000ff] hover:bg-blue-700 px-5 py-2.5 text-sm font-bold text-white">
+                            <i className="fa-solid fa-download"></i>Download
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="downloads" />
               )}
             </div>
           )}

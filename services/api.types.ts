@@ -557,7 +557,6 @@ export interface CollegeRecommendation {
     activities: number;
     facilities: number;
     reputation: number;
-    distanceFromHome?: number;
     classSize?: number;
     profileCompatibility?: number;
   };

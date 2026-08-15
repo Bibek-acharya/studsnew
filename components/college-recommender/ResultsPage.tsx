@@ -384,15 +384,6 @@ export default function ResultsPage({
                             key: "reputation" as const,
                             color: "bg-indigo-500",
                           },
-                          ...(item.breakdown.distanceFromHome !== undefined
-                            ? [
-                                {
-                                  label: "Distance",
-                                  key: "distanceFromHome" as const,
-                                  color: "bg-red-500",
-                                },
-                              ]
-                            : []),
                           ...(item.breakdown.classSize !== undefined
                             ? [
                                 {

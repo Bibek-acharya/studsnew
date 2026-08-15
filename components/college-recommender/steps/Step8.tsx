@@ -5,7 +5,7 @@ import { Check } from 'lucide-react'
 import { CollegeRecommenderForm } from '../CollegeRecommenderToolPage'
 import StepWrapper from './StepWrapper'
 
-interface StepProps {
+interface Step8Props {
   step: number
   stepImages: Record<number, string>
   form: CollegeRecommenderForm
@@ -16,13 +16,20 @@ interface StepProps {
   stepCount?: number
 }
 
-const renderRadioOption = (
+const facilityOptions = [
+  'Modern labs',
+  'Hostel facility',
+  'Library',
+  'Cafeteria quality',
+  'Other',
+]
+
+const renderCheckboxOption = (
   checked: boolean,
   onClick: () => void,
   label: string,
-  description?: string,
 ) => (
- <button
+  <button
     type='button'
     onClick={onClick}
     className={`flex w-full cursor-pointer items-center rounded-md border-2 border-[#e2e8f0] bg-white p-5 transition-all duration-200 ${
@@ -48,9 +55,23 @@ const renderRadioOption = (
   </button>
 )
 
-export default function Step8({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 10 }: StepProps) {
+export default function Step8({ step, stepImages, form, handleInputChange, stepTitles, canContinue, setStep, stepCount = 9 }: Step8Props) {
+  const selectedFacilities = form.facility_choice ? form.facility_choice.split(', ') : []
+  
+  const handleCheckboxToggle = (option: string) => {
+    let newSelection: string[]
+    
+    if (selectedFacilities.includes(option)) {
+      newSelection = selectedFacilities.filter(f => f !== option)
+    } else {
+      newSelection = [...selectedFacilities, option]
+    }
+    
+    handleInputChange('facility_choice', newSelection.join(', '))
+  }
+
   return (
-    <StepWrapper step={step} stepImages={stepImages} imageSize={400} maxWidth='max-w-70 lg:max-w-90'>
+    <StepWrapper step={step} stepImages={stepImages} imageSize={400} maxWidth='max-w-110 lg:max-w-130'>
       <div className='mb-6'>
         <h1 className='mb-2 text-2xl font-bold leading-tight tracking-tight text-[#0f172a] sm:text-[2rem]'>
           {stepTitles[step]}
@@ -58,22 +79,16 @@ export default function Step8({ step, stepImages, form, handleInputChange, stepT
       </div>
 
       <div className='animate-in fade-in slide-in-from-bottom-6 duration-700'>
-        <div className='mt-8 space-y-8'>
-          {renderRadioOption(
-            form.activities_importance === 'Yes',
-            () => handleInputChange('activities_importance', 'Yes'),
-            'Yes, they are very important',
-          )}
-          {renderRadioOption(
-            form.activities_importance === 'Somewhat',
-            () => handleInputChange('activities_importance', 'Somewhat'),
-            'Somewhat important',
-          )}
-          {renderRadioOption(
-            form.activities_importance === 'No',
-            () => handleInputChange('activities_importance', 'No'),
-            'No, I prefer to focus on academics',
-          )}
+<div className='mt-4 space-y-3'>
+          {facilityOptions.map((option) => (
+            <div key={option}>
+              {renderCheckboxOption(
+                selectedFacilities.includes(option),
+                () => handleCheckboxToggle(option),
+                option,
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

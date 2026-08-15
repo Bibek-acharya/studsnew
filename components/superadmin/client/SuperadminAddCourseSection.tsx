@@ -15,6 +15,7 @@ import type {
   FullTimeCourse,
   FaqItem,
   CareerItem,
+  DownloadItem,
 } from "@/types/course";
 
 import "react-quill-new/dist/quill.snow.css";
@@ -174,6 +175,7 @@ export default function SuperadminAddCourseSection({
   const [whoShouldChoose, setWhoShouldChoose] = useState<WithId<PersonaItem>[]>([]);
   const [faqs, setFaqs] = useState<WithId<FaqItem>[]>([]);
   const [careers, setCareers] = useState<WithId<CareerItem>[]>([]);
+  const [downloads, setDownloads] = useState<WithId<DownloadItem>[]>([]);
   const [feeStructureText, setFeeStructureText] = useState("");
   const [eligibilityText, setEligibilityText] = useState("");
   const [curriculum, setCurriculum] = useState<
@@ -282,6 +284,8 @@ export default function SuperadminAddCourseSection({
           setFaqs(res.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
         if (res.careers)
           setCareers(res.careers.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+        if (res.downloads)
+          setDownloads(res.downloads.map((x: any, i: number) => ({ ...x, id: i + 1 })));
         if (res.curriculum && Array.isArray(res.curriculum))
           setCurriculum(
             res.curriculum.map((x: any, i: number) => ({
@@ -404,6 +408,7 @@ export default function SuperadminAddCourseSection({
     scholarships: scholarships.map(({ id, ...rest }) => rest),
     faqs: faqs.map(({ id, ...rest }) => rest),
     careers: careers.map(({ id, ...rest }) => rest),
+    downloads: downloads.map(({ id, ...rest }) => rest),
     curriculum: curriculum.map(({ id, ...rest }) => rest),
   });
 
@@ -1857,6 +1862,92 @@ export default function SuperadminAddCourseSection({
           </div>
         </div>
 
+        {/* Downloads */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="download"
+            title="Downloads"
+            subtitle="Brochures, forms, and study materials"
+            onAdd={() =>
+              setDownloads((prev) => [
+                ...prev,
+                { id: nextId(prev), title: "", size: "", file: "" },
+              ])
+            }
+            addLabel="Add Download"
+          />
+          <div className="p-6 space-y-4">
+            {downloads.map((d) => (
+              <div
+                key={d.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setDownloads((prev) => prev.filter((x) => x.id !== d.id))
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pr-12">
+                  <div>
+                    <label className={labelClass}>Title</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Course Brochure"
+                      value={d.title}
+                      onChange={(e) =>
+                        setDownloads((prev) =>
+                          prev.map((x) =>
+                            x.id === d.id ? { ...x, title: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Size</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. 2.4 MB"
+                      value={d.size}
+                      onChange={(e) =>
+                        setDownloads((prev) =>
+                          prev.map((x) =>
+                            x.id === d.id ? { ...x, size: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>File URL</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="https://..."
+                      value={d.file}
+                      onChange={(e) =>
+                        setDownloads((prev) =>
+                          prev.map((x) =>
+                            x.id === d.id ? { ...x, file: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* N. Curriculum */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
@@ -1953,7 +2044,7 @@ export default function SuperadminAddCourseSection({
                         />
                         <input
                           type="text"
-                          className={`${inputClass} flex-1`}
+                          className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none transition-colors bg-white min-w-0 flex-1"
                           placeholder="Subject name"
                           value={subject.name}
                           onChange={(e) =>
@@ -2090,7 +2181,7 @@ export default function SuperadminAddCourseSection({
                           />
                           <input
                             type="text"
-                            className={`${inputClass} flex-1`}
+                            className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none transition-colors bg-white min-w-0 flex-1"
                             placeholder="Elective name"
                             value={ele.name}
                             onChange={(e) =>
