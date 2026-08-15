@@ -23,9 +23,17 @@ import {
   FileSpreadsheet,
   Home,
   MessageSquare,
+  Newspaper,
   Sparkles,
   LogIn,
   CircleUser,
+  GraduationCap,
+  Wrench,
+  Award,
+  ClipboardList,
+  DoorOpen,
+  Landmark,
+  LayoutGrid,
 } from "lucide-react";
 import {
   desktopMenuSections,
@@ -1312,7 +1320,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
       {/* Mobile Drawer Overlay */}
       <div
-        className={`fixed inset-0 z-[140] md:hidden transition-opacity duration-300 ${
+        className={`fixed inset-0 z-[160] md:hidden transition-opacity duration-300 ${
           isMobileOpen
             ? "pointer-events-auto opacity-100"
             : "pointer-events-none opacity-0"
@@ -1381,8 +1389,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <button
                   type="button"
                   onClick={() => go("findCollege")}
-                  className="flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+                  className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
                 >
+                  <GraduationCap size={18} className="text-gray-400 shrink-0" />
                   <span>Find College</span>
                 </button>
 
@@ -1393,7 +1402,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileToolsSection.key] ? "text-blue-600" : ""}`}
                       onClick={() => toggleMobileMenu(mobileToolsSection.key)}
                     >
-                      <span>{mobileToolsSection.label}</span>
+                      <span className="flex items-center gap-3">
+                        <Wrench size={18} className="text-gray-400 shrink-0" />
+                        <span>{mobileToolsSection.label}</span>
+                      </span>
                       <ChevronDown
                         size={14}
                         className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileToolsSection.key] ? "rotate-180" : ""}`}
@@ -1416,7 +1428,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         toggleMobileMenu(mobileScholarshipsSection.key)
                       }
                     >
-                      <span>{mobileScholarshipsSection.label}</span>
+                      <span className="flex items-center gap-3">
+                        <Award size={18} className="text-gray-400 shrink-0" />
+                        <span>{mobileScholarshipsSection.label}</span>
+                      </span>
                       <ChevronDown
                         size={14}
                         className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileScholarshipsSection.key] ? "rotate-180" : ""}`}
@@ -1433,10 +1448,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <button
                   type="button"
                   onClick={() => go("campusForum")}
-                  className="flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+                  className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
                 >
+                  <MessageSquare size={18} className="text-gray-400 shrink-0" />
                   <span>Campus Feed</span>
-                  <span className="rounded bg-blue-600 px-1.5 py-1 text-[10px] font-bold leading-none tracking-wide text-white">
+                  <span className="ml-auto rounded bg-blue-600 px-1.5 py-1 text-[10px] font-bold leading-none tracking-wide text-white">
                     NEW
                   </span>
                 </button>
@@ -1450,7 +1466,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         toggleMobileMenu(mobileAdmissionSection.key)
                       }
                     >
-                      <span>{mobileAdmissionSection.label}</span>
+                      <span className="flex items-center gap-3">
+                        <ClipboardList size={18} className="text-gray-400 shrink-0" />
+                        <span>{mobileAdmissionSection.label}</span>
+                      </span>
                       <ChevronDown
                         size={14}
                         className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileAdmissionSection.key] ? "rotate-180" : ""}`}
@@ -1467,8 +1486,9 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 <button
                   type="button"
                   onClick={() => go("entranceDiscovery")}
-                  className="flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+                  className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
                 >
+                  <DoorOpen size={18} className="text-gray-400 shrink-0" />
                   <span>Entrance</span>
                 </button>
 
@@ -1481,7 +1501,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         toggleMobileMenu(mobileUniversitiesSection.key)
                       }
                     >
-                      <span>{mobileUniversitiesSection.label}</span>
+                      <span className="flex items-center gap-3">
+                        <Landmark size={18} className="text-gray-400 shrink-0" />
+                        <span>{mobileUniversitiesSection.label}</span>
+                      </span>
                       <ChevronDown
                         size={14}
                         className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileUniversitiesSection.key] ? "rotate-180" : ""}`}
@@ -1502,7 +1525,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileMoreSection.key] ? "text-blue-600" : ""}`}
                       onClick={() => toggleMobileMenu(mobileMoreSection.key)}
                     >
-                      <span>{mobileMoreSection.label}</span>
+                      <span className="flex items-center gap-3">
+                        <LayoutGrid size={18} className="text-gray-400 shrink-0" />
+                        <span>{mobileMoreSection.label}</span>
+                      </span>
                       <ChevronDown
                         size={14}
                         className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileMoreSection.key] ? "rotate-180" : ""}`}
@@ -1563,7 +1589,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               isRouteActive("/campus-forum") ? "text-brand-blue" : "text-gray-500"
             }`}
           >
-            <MessageSquare size={20} />
+            <Newspaper size={20} />
             <span className="text-[10px] font-medium">Feed</span>
           </button>
 
@@ -1584,13 +1610,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             <>
               <button
                 onClick={() => {
-                  setActiveMenu((prev) =>
-                    prev === "notification-menu"
-                      ? null
-                      : "notification-menu",
-                  );
+                  go("notificationSettings");
+                  setIsMobileOpen(false);
                 }}
-                className="flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative text-gray-500"
+                className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors relative ${
+                  isRouteActive("/user/dashboard/notifications")
+                    ? "text-brand-blue"
+                    : "text-gray-500"
+                }`}
               >
                 <div className="relative">
                   <Bell size={20} />
@@ -1640,101 +1667,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           )}
         </nav>
       </div>
-
-      {/* Mobile Bottom Notification Dropdown */}
-      {user && activeMenu === "notification-menu" && (
-        <div className="fixed bottom-16 left-2 right-2 z-[160] md:hidden">
-          <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] max-h-[60vh]">
-            <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-3 py-2.5">
-              <div className="flex items-center gap-2">
-                <h3 className="text-[15px] font-semibold text-gray-900">
-                  Notifications
-                </h3>
-                {unreadNotificationCount > 0 && (
-                  <span className="rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
-                    {unreadNotificationCount}
-                  </span>
-                )}
-              </div>
-              <button
-                onClick={markAllAsRead}
-                className="rounded-md px-2 py-1 text-[11px] font-medium text-blue-600 transition-colors hover:bg-blue-50 hover:text-blue-900"
-              >
-                Mark all as read
-              </button>
-            </div>
-            <div className="no-scrollbar flex gap-3 overflow-x-auto whitespace-nowrap border-b border-gray-50 bg-gray-50/50 px-3 py-2 text-[12px]">
-              {notificationTabs.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setCurrentNotifTab(tab)}
-                  className={`pb-1 capitalize transition-all ${
-                    currentNotifTab === tab
-                      ? "border-b-2 border-blue-600 font-medium text-blue-600"
-                      : "text-gray-500 hover:text-gray-700"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <div className="no-scrollbar flex flex-col overflow-y-auto">
-              {visibleNotifications.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-8 text-gray-400">
-                  <Bell size={28} className="mb-2 opacity-50" />
-                  <p className="text-sm">No notifications</p>
-                </div>
-              ) : (
-                visibleNotifications.map((notif) => (
-                  <div
-                    key={notif.id}
-                    className="group relative flex cursor-pointer items-start gap-2.5 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
-                    onClick={() => markAsRead(notif.id)}
-                  >
-                    <div
-                      className={`mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
-                    >
-                      <i className="fa-solid fa-bell text-[12px]"></i>
-                    </div>
-                    <div className="min-w-0 flex-1 pr-6">
-                      <div className="mb-0.5 flex flex-wrap items-center gap-2">
-                        <p className="truncate text-[13px] font-semibold text-black">
-                          {notif.title}
-                        </p>
-                        {notif.isFollowing && (
-                          <span className="whitespace-nowrap rounded bg-blue-100 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-blue-600">
-                            Following
-                          </span>
-                        )}
-                      </div>
-                      <p className="line-clamp-2 text-[12px] leading-relaxed text-gray-800">
-                        {notif.message}
-                      </p>
-                      <p className="mt-1 flex items-center gap-1 text-[11px] text-gray-500">
-                        <Clock size={11} /> {notif.time}
-                      </p>
-                    </div>
-                    {!notif.isRead && (
-                      <div className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-blue-500"></div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-            <div className="border-t border-gray-100 bg-gray-50/50 p-2">
-              <button
-                onClick={() => {
-                  go("notificationSettings");
-                  setIsMobileOpen(false);
-                }}
-                className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
-              >
-                View all activity
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
