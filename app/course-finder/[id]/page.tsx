@@ -21,25 +21,23 @@ import RichText from "@/components/RichText";
 
 type TabKey =
   | "overview"
+  | "curriculum"
   | "eligibility"
   | "admission"
   | "courses"
   | "fees"
   | "scholarships"
-  | "faq"
-  | "news"
-  | "blogs";
+  | "faq";
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
+  { key: "curriculum", label: "Curriculum" },
   { key: "eligibility", label: "Eligibility" },
   { key: "admission", label: "Admission" },
   { key: "courses", label: "Courses" },
   { key: "fees", label: "Program Fee" },
   { key: "scholarships", label: "Scholarships" },
   { key: "faq", label: "FAQ" },
-  { key: "news", label: "News" },
-  { key: "blogs", label: "Blogs" },
 ];
 
 function stripHtml(html: string): string {
@@ -217,11 +215,11 @@ export default function CourseDetailPage({
     eligibilityRows.length > 0 || admissionRequirements.length > 0;
   const hasAdmissionData = admissionSteps.length > 0;
   const hasCoursesData =
-    fullTimeCourses.length > 0 ||
+    fullTimeCourses.some((ft: any) => ft.course || ft.totalFees || ft.startDate || ft.endDate) ||
     subjectGroups.length > 0 ||
     curriculum.length > 0;
   const hasFeeData =
-    feeItems.length > 0 ||
+    feeItems.some((fi: any) => fi.particular || fi.amount) ||
     !!(courseEstFee || courseGovtFee || coursePrivateFee);
   const hasScholarshipData = !!(scholarshipDesc || scholarships.length > 0);
   const hasFaqData = faqs.length > 0;
@@ -231,7 +229,7 @@ export default function CourseDetailPage({
     "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&h=600&fit=crop";
 
   const getIcon = (iconName: string | undefined, index: number) => {
-    if (iconName && iconMap[iconName]) return iconMap[iconName];
+    if (iconName && iconMap[iconName.toLowerCase()]) return iconMap[iconName.toLowerCase()];
     return <span className="text-sm font-bold">{index + 1}</span>;
   };
 
@@ -558,6 +556,115 @@ export default function CourseDetailPage({
             </div>
           )}
 
+          {/* Curriculum Tab */}
+          {activeTab === "curriculum" && (
+            <div className="tab-content">
+              {curriculum.length > 0 ? (
+                <div>
+                  <div className="mb-8">
+                    <h2 className="text-[24px] font-bold text-gray-900 mb-2">
+                      Course Structure
+                    </h2>
+                    <p className="text-gray-500 text-[15px]">
+                      Detailed semester-wise breakdown of the curriculum.
+                    </p>
+                  </div>
+
+                  <div className="space-y-4">
+                    {curriculum.map((sem: any, i: number) => {
+                      const subjects = sem.subjects || [];
+                      const electives = sem.electives || [];
+
+                      return (
+                        <details
+                          key={i}
+                          className="group bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
+                          open={i === 0}
+                        >
+                          <summary className="flex justify-between items-center font-bold cursor-pointer list-none [&::-webkit-details-marker]:hidden p-5 text-gray-900 text-[16px] hover:bg-gray-50 transition-colors">
+                            <span>
+                              {sem.title || `Semester ${sem.semester || i + 1}`}
+                            </span>
+                            <ChevronDown className="w-5 h-5 text-gray-500 transition-transform duration-200 group-open:rotate-180" />
+                          </summary>
+                          <div className="border-t border-gray-200">
+                            {sem.subtitle && (
+                              <p className="px-5 pt-4 text-sm text-gray-500">
+                                {sem.subtitle}
+                              </p>
+                            )}
+                            {subjects.length > 0 && (
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse min-w-[500px]">
+                                  <thead>
+                                    <tr className="bg-[#eff4fc] text-gray-700">
+                                      <th className="p-4 font-semibold w-[8%] text-[14px]">
+                                        S.N.
+                                      </th>
+                                      <th className="p-4 font-semibold text-[14px]">
+                                        Subject
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="text-[14px]">
+                                    {subjects.map(
+                                      (subject: string, j: number) => (
+                                        <tr
+                                          key={j}
+                                          className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                                        >
+                                          <td className="p-4 text-gray-600">
+                                            {j + 1}
+                                          </td>
+                                          <td className="p-4 font-medium text-gray-800">
+                                            {subject}
+                                          </td>
+                                        </tr>
+                                      ),
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+                            {electives.length > 0 && (
+                              <div className="px-5 pb-5 pt-4">
+                                <h4 className="font-semibold text-gray-900 mb-3 text-[15px]">
+                                  List of Electives
+                                </h4>
+                                <ol className="space-y-2">
+                                  {electives.map((e: any, k: number) => (
+                                    <li
+                                      key={k}
+                                      className="flex items-start gap-3 text-sm text-gray-700"
+                                    >
+                                      <span className="font-semibold text-gray-900 mt-0.5">
+                                        {k + 1}.
+                                      </span>
+                                      <span>
+                                        {e.code && (
+                                          <span className="font-mono text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded mr-2">
+                                            {e.code}
+                                          </span>
+                                        )}
+                                        {e.name || e}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ol>
+                              </div>
+                            )}
+                          </div>
+                        </details>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <EmptyTabState tabName="curriculum" />
+              )}
+            </div>
+          )}
+
           {/* Eligibility Tab */}
           {activeTab === "eligibility" && (
             <div className="tab-content">
@@ -566,18 +673,12 @@ export default function CourseDetailPage({
                   <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                     Eligibility Criteria
                   </h2>
-                  <h3 className="text-[17px] font-bold text-gray-900 mb-4">
-                    Full time Courses
-                  </h3>
                   <div className="overflow-x-auto rounded border border-gray-200">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                       <thead>
                         <tr className="bg-[#eff4fc] border-b border-gray-200">
                           <th className="p-4 font-bold text-gray-900 w-[8%] border-r border-gray-200">
                             S.N.
-                          </th>
-                          <th className="p-4 font-bold text-gray-900 w-[18%] border-r border-gray-200">
-                            Level
                           </th>
                           <th className="p-4 font-bold text-gray-900 w-[24%] border-r border-gray-200">
                             Stream/Faculty
@@ -598,9 +699,6 @@ export default function CourseDetailPage({
                           >
                             <td className="p-4 align-top border-r border-gray-200 text-gray-700">
                               {i + 1}
-                            </td>
-                            <td className="p-4 align-top border-r border-gray-200 font-semibold text-gray-900">
-                              {row.level || "N/A"}
                             </td>
                             <td className="p-4 align-top border-r border-gray-200 text-gray-700">
                               {row.stream || row.faculty || "-"}
@@ -692,7 +790,7 @@ export default function CourseDetailPage({
             <div className="tab-content">
               {hasCoursesData ? (
                 <div>
-                  {fullTimeCourses.length > 0 && (
+                  {fullTimeCourses.some((ft: any) => ft.course || ft.totalFees || ft.startDate || ft.endDate) && (
                     <div className="mb-6">
                       <h2 className="text-[22px] font-bold text-gray-900 mb-4">
                         {courseTitle} Courses & Fees
@@ -717,7 +815,7 @@ export default function CourseDetailPage({
                             </tr>
                           </thead>
                           <tbody className="text-[15px]">
-                            {fullTimeCourses.map((ft: any, i: number) => (
+                            {fullTimeCourses.filter((ft: any) => ft.course || ft.totalFees || ft.startDate || ft.endDate).map((ft: any, i: number) => (
                               <tr
                                 key={i}
                                 className="border-b border-gray-200 hover:bg-gray-50"
@@ -934,16 +1032,12 @@ export default function CourseDetailPage({
             <div className="tab-content">
               {hasFeeData ? (
                 <div>
-                  <h2 className="text-[22px] font-bold text-gray-900 mb-4">
-                    Fee Structure
-                  </h2>
-                  <h3 className="text-[17px] font-bold text-gray-900 mb-4">
-                    Full time Courses
-                  </h3>
-                  {(feeItems.length > 0 ||
-                    courseGovtFee ||
-                    coursePrivateFee) && (
-                    <div className="overflow-x-auto rounded border border-gray-200 mb-6">
+                  {feeItems.some((fi: any) => fi.particular || fi.amount) && (
+                    <>
+                      <h2 className="text-[22px] font-bold text-gray-900 mb-4">
+                        Fee Structure
+                      </h2>
+                      <div className="overflow-x-auto rounded border border-gray-200 mb-6">
                       <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                           <tr className="bg-[#eff4fc] border-b border-gray-200">
@@ -962,7 +1056,7 @@ export default function CourseDetailPage({
                           </tr>
                         </thead>
                         <tbody className="text-[15px]">
-                          {feeItems.map((fi: any, i: number) => (
+                          {feeItems.filter((fi: any) => fi.particular || fi.amount).map((fi: any, i: number) => (
                             <tr
                               key={i}
                               className="border-b border-gray-200 hover:bg-gray-50"
@@ -1034,6 +1128,7 @@ export default function CourseDetailPage({
                         </tfoot>
                       </table>
                     </div>
+                    </>
                   )}
                 </div>
               ) : (
@@ -1197,20 +1292,6 @@ export default function CourseDetailPage({
               ) : (
                 <EmptyTabState tabName="FAQ" />
               )}
-            </div>
-          )}
-
-          {/* News Tab */}
-          {activeTab === "news" && (
-            <div className="tab-content">
-              <EmptyTabState tabName="news" />
-            </div>
-          )}
-
-          {/* Blogs Tab */}
-          {activeTab === "blogs" && (
-            <div className="tab-content">
-              <EmptyTabState tabName="blogs" />
             </div>
           )}
         </div>

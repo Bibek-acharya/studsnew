@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { BasicInfoCard, DescriptionCard, FeesCard, FeaturesCard, StreamsCard, ScholarshipsOverviewCard, AdmissionProcessCard, FaqCard, MediaCard } from "./create-course/basic-info";
+import { BasicInfoCard, DescriptionCard, FeesCard, FeaturesCard, StreamsCard, ScholarshipsOverviewCard, AdmissionProcessCard, FaqCard, MediaCard, CurriculumCard } from "./create-course/basic-info";
 
 export default function AddCourseSection({
   setActiveSection,
@@ -42,6 +42,7 @@ export default function AddCourseSection({
 
       <BasicInfoCard />
       <DescriptionCard />
+      <CurriculumCard />
       <FeesCard />
       <FeaturesCard />
       <StreamsCard />

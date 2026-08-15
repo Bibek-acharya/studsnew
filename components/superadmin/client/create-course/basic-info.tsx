@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { BookOpen, FileText, CreditCard, ClipboardList, GraduationCap, Award, HelpCircle, ImageIcon } from "lucide-react";
+import { BookOpen, FileText, CreditCard, ClipboardList, GraduationCap, Award, HelpCircle, ImageIcon, List } from "lucide-react";
 import { FormCard } from "../add-college/FormCard";
 import { FormInput } from "../add-college/FormInput";
 import { generateId } from "@/lib/superadmin/constants";
@@ -308,6 +308,312 @@ export function MediaCard( ) {
             <input type="file" className="hidden" accept="image/*" multiple />
           </div>
         </div>
+      </div>
+    </FormCard>
+  );
+}
+
+interface CurriculumSection {
+  id: string;
+  title: string;
+  subjects: string[];
+  electives: { id: string; name: string; code: string }[];
+}
+
+export function CurriculumCard() {
+  const [sections, setSections] = useState<CurriculumSection[]>([
+    {
+      id: generateId(),
+      title: "Semester I",
+      subjects: [""],
+      electives: [],
+    },
+  ]);
+
+  const addSection = () =>
+    setSections((prev) => [
+      ...prev,
+      { id: generateId(), title: "", subjects: [""], electives: [] },
+    ]);
+
+  const removeSection = (id: string) =>
+    setSections((prev) => prev.filter((s) => s.id !== id));
+
+  const updateSectionTitle = (id: string, title: string) =>
+    setSections((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, title } : s)),
+    );
+
+  const addSubject = (sectionId: string) =>
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId ? { ...s, subjects: [...s.subjects, ""] } : s,
+      ),
+    );
+
+  const updateSubject = (
+    sectionId: string,
+    index: number,
+    value: string,
+  ) =>
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              subjects: s.subjects.map((sub, i) =>
+                i === index ? value : sub,
+              ),
+            }
+          : s,
+      ),
+    );
+
+  const removeSubject = (sectionId: string, index: number) =>
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? { ...s, subjects: s.subjects.filter((_, i) => i !== index) }
+          : s,
+      ),
+    );
+
+  const addElective = (sectionId: string) =>
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              electives: [
+                ...s.electives,
+                { id: generateId(), name: "", code: "" },
+              ],
+            }
+          : s,
+      ),
+    );
+
+  const updateElective = (
+    sectionId: string,
+    electiveId: string,
+    field: "name" | "code",
+    value: string,
+  ) =>
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? {
+              ...s,
+              electives: s.electives.map((e) =>
+                e.id === electiveId ? { ...e, [field]: value } : e,
+              ),
+            }
+          : s,
+      ),
+    );
+
+  const removeElective = (sectionId: string, electiveId: string) =>
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId
+          ? { ...s, electives: s.electives.filter((e) => e.id !== electiveId) }
+          : s,
+      ),
+    );
+
+  return (
+    <FormCard
+      icon={<List size={24} className="text-indigo-600" />}
+      title="Curriculum"
+      sub="Semester or year-wise course structure"
+      action={
+        <button
+          type="button"
+          onClick={addSection}
+          className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path d="M5 12h14" />
+            <path d="M12 5v14" />
+          </svg>{" "}
+          Add Section
+        </button>
+      }
+    >
+      <div className="space-y-6">
+        {sections.map((section, sIdx) => (
+          <div
+            key={section.id}
+            className="rounded-md border border-gray-200 p-5"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm font-bold text-gray-700">
+                Section {sIdx + 1}
+              </span>
+              {sections.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => removeSection(section.id)}
+                  className="rounded p-1 text-red-500 hover:bg-red-50"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <path d="M3 6h18" />
+                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                  </svg>
+                </button>
+              )}
+            </div>
+
+            <input
+              type="text"
+              className="input-field mb-4"
+              placeholder='e.g. "Semester I" or "Year 1"'
+              value={section.title}
+              onChange={(e) =>
+                updateSectionTitle(section.id, e.target.value)
+              }
+            />
+
+            {/* Subjects */}
+            <div className="mb-4">
+              <label className="mb-2 block text-xs font-medium text-gray-600">
+                Subjects
+              </label>
+              <div className="space-y-2">
+                {section.subjects.map((subject, subIdx) => (
+                  <div key={subIdx} className="flex items-center gap-2">
+                    <span className="w-6 text-right text-xs font-semibold text-gray-400">
+                      {subIdx + 1}.
+                    </span>
+                    <input
+                      type="text"
+                      className="input-field flex-1 py-1.5 text-sm"
+                      placeholder="Subject name"
+                      value={subject}
+                      onChange={(e) =>
+                        updateSubject(section.id, subIdx, e.target.value)
+                      }
+                    />
+                    {section.subjects.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeSubject(section.id, subIdx)}
+                        className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        >
+                          <path d="M18 6L6 18" />
+                          <path d="M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={() => addSubject(section.id)}
+                className="mt-2 text-xs font-medium text-blue-600 hover:text-blue-700"
+              >
+                + Add Subject
+              </button>
+            </div>
+
+            {/* Electives */}
+            <div>
+              <label className="mb-2 block text-xs font-medium text-gray-600">
+                Electives{" "}
+                <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              {section.electives.length > 0 && (
+                <div className="space-y-2 mb-2">
+                  {section.electives.map((elective) => (
+                    <div
+                      key={elective.id}
+                      className="flex items-center gap-2"
+                    >
+                      <input
+                        type="text"
+                        className="input-field w-20 py-1.5 text-sm"
+                        placeholder="Code"
+                        value={elective.code}
+                        onChange={(e) =>
+                          updateElective(
+                            section.id,
+                            elective.id,
+                            "code",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <input
+                        type="text"
+                        className="input-field flex-1 py-1.5 text-sm"
+                        placeholder="Elective name"
+                        value={elective.name}
+                        onChange={(e) =>
+                          updateElective(
+                            section.id,
+                            elective.id,
+                            "name",
+                            e.target.value,
+                          )
+                        }
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          removeElective(section.id, elective.id)
+                        }
+                        className="rounded p-1 text-red-400 hover:bg-red-50 hover:text-red-600"
+                      >
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                        >
+                          <path d="M18 6L6 18" />
+                          <path d="M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={() => addElective(section.id)}
+                className="text-xs font-medium text-blue-600 hover:text-blue-700"
+              >
+                + Add Elective
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </FormCard>
   );

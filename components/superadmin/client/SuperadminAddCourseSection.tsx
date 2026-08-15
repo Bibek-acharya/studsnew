@@ -178,6 +178,16 @@ export default function SuperadminAddCourseSection({
   const [whoShouldChoose, setWhoShouldChoose] = useState<WithId<PersonaItem>[]>([]);
   const [faqs, setFaqs] = useState<WithId<FaqItem>[]>([]);
   const [careers, setCareers] = useState<WithId<CareerItem>[]>([]);
+  const [curriculum, setCurriculum] = useState<
+    {
+      id: number;
+      semester: number;
+      title: string;
+      subtitle: string;
+      subjects: string[];
+      electives: { code: string; name: string }[];
+    }[]
+  >([]);
 
   const [errors, setErrors] = useState<Record<string, boolean>>({});
   const [cropperOpen, setCropperOpen] = useState(false);
@@ -284,6 +294,17 @@ export default function SuperadminAddCourseSection({
           setFaqs(res.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
         if (res.careers)
           setCareers(res.careers.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+        if (res.curriculum && Array.isArray(res.curriculum))
+          setCurriculum(
+            res.curriculum.map((x: any, i: number) => ({
+              id: i + 1,
+              semester: x.semester ?? i + 1,
+              title: x.title ?? "",
+              subtitle: x.subtitle ?? "",
+              subjects: Array.isArray(x.subjects) ? x.subjects : [],
+              electives: Array.isArray(x.electives) ? x.electives : [],
+            })),
+          );
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -390,6 +411,7 @@ export default function SuperadminAddCourseSection({
     scholarships: scholarships.map(({ id, ...rest }) => rest),
     faqs: faqs.map(({ id, ...rest }) => rest),
     careers: careers.map(({ id, ...rest }) => rest),
+    curriculum: curriculum.map(({ id, ...rest }) => rest),
   });
 
   const handleSave = async (publish: boolean) => {
@@ -2179,6 +2201,309 @@ export default function SuperadminAddCourseSection({
                       )
                     }
                   />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* N. Curriculum */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="book-open"
+            title="Curriculum"
+            subtitle="Semester or year-wise course structure"
+            onAdd={() =>
+              setCurriculum((prev) => [
+                ...prev,
+                {
+                  id: nextId(prev),
+                  semester: prev.length + 1,
+                  title: `Semester ${prev.length + 1}`,
+                  subtitle: "",
+                  subjects: [""],
+                  electives: [],
+                },
+              ])
+            }
+            addLabel="Add Section"
+          />
+          <div className="p-6 space-y-6">
+            {curriculum.map((sec) => (
+              <div
+                key={sec.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setCurriculum((prev) => prev.filter((x) => x.id !== sec.id))
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7c-1 0-2-1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-12 mb-4">
+                  <div>
+                    <label className={labelClass}>
+                      Section Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder='e.g. "Semester I" or "Year 1"'
+                      value={sec.title}
+                      onChange={(e) =>
+                        setCurriculum((prev) =>
+                          prev.map((x) =>
+                            x.id === sec.id ? { ...x, title: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Subtitle</label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder="e.g. Foundation courses"
+                      value={sec.subtitle}
+                      onChange={(e) =>
+                        setCurriculum((prev) =>
+                          prev.map((x) =>
+                            x.id === sec.id ? { ...x, subtitle: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                </div>
+
+                {/* Subjects */}
+                <div className="mb-4">
+                  <label className={labelClass}>Subjects</label>
+                  <div className="space-y-2">
+                    {sec.subjects.map((subject, subIdx) => (
+                      <div key={subIdx} className="flex items-center gap-2">
+                        <span className="w-6 text-right text-xs font-semibold text-gray-400">
+                          {subIdx + 1}.
+                        </span>
+                        <input
+                          type="text"
+                          className={`${inputClass} flex-1`}
+                          placeholder="Subject name"
+                          value={subject}
+                          onChange={(e) =>
+                            setCurriculum((prev) =>
+                              prev.map((x) =>
+                                x.id === sec.id
+                                  ? {
+                                      ...x,
+                                      subjects: x.subjects.map((s, i) =>
+                                        i === subIdx ? e.target.value : s,
+                                      ),
+                                    }
+                                  : x,
+                              ),
+                            )
+                          }
+                        />
+                        {sec.subjects.length > 1 && (
+                          <button
+                            onClick={() =>
+                              setCurriculum((prev) =>
+                                prev.map((x) =>
+                                  x.id === sec.id
+                                    ? {
+                                        ...x,
+                                        subjects: x.subjects.filter(
+                                          (_, i) => i !== subIdx,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() =>
+                      setCurriculum((prev) =>
+                        prev.map((x) =>
+                          x.id === sec.id
+                            ? { ...x, subjects: [...x.subjects, ""] }
+                            : x,
+                        ),
+                      )
+                    }
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>{" "}
+                    Add Subject
+                  </button>
+                </div>
+
+                {/* Electives */}
+                <div>
+                  <label className={labelClass}>
+                    Electives{" "}
+                    <span className="text-gray-400 font-normal">(optional)</span>
+                  </label>
+                  {sec.electives.length > 0 && (
+                    <div className="space-y-2 mb-2">
+                      {sec.electives.map((ele, ei) => (
+                        <div key={ei} className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            className={`${inputClass} w-24`}
+                            placeholder="Code"
+                            value={ele.code}
+                            onChange={(e) =>
+                              setCurriculum((prev) =>
+                                prev.map((x) =>
+                                  x.id === sec.id
+                                    ? {
+                                        ...x,
+                                        electives: x.electives.map((el, j) =>
+                                          j === ei
+                                            ? { ...el, code: e.target.value }
+                                            : el,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                          />
+                          <input
+                            type="text"
+                            className={`${inputClass} flex-1`}
+                            placeholder="Elective name"
+                            value={ele.name}
+                            onChange={(e) =>
+                              setCurriculum((prev) =>
+                                prev.map((x) =>
+                                  x.id === sec.id
+                                    ? {
+                                        ...x,
+                                        electives: x.electives.map((el, j) =>
+                                          j === ei
+                                            ? { ...el, name: e.target.value }
+                                            : el,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                          />
+                          <button
+                            onClick={() =>
+                              setCurriculum((prev) =>
+                                prev.map((x) =>
+                                  x.id === sec.id
+                                    ? {
+                                        ...x,
+                                        electives: x.electives.filter(
+                                          (_, j) => j !== ei,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <line x1="18" y1="6" x2="6" y2="18" />
+                              <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <button
+                    onClick={() =>
+                      setCurriculum((prev) =>
+                        prev.map((x) =>
+                          x.id === sec.id
+                            ? {
+                                ...x,
+                                electives: [...x.electives, { code: "", name: "" }],
+                              }
+                            : x,
+                        ),
+                      )
+                    }
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                  >
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>{" "}
+                    Add Elective
+                  </button>
                 </div>
               </div>
             ))}
