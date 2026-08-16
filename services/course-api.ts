@@ -104,6 +104,17 @@ export async function fetchCourses(params?: {
   return apiCall(`/api/v1/education/courses${qs ? `?${qs}` : ""}`);
 }
 
+export interface CourseFilterCountsResponse {
+  level_counts: Record<string, number>;
+  field_counts: Record<string, number>;
+  affiliation_counts: Record<string, number>;
+  total: number;
+}
+
+export async function fetchCourseFilterCounts(): Promise<CourseFilterCountsResponse> {
+  return apiCall(`/api/v1/education/courses/filter-counts`);
+}
+
 export async function fetchCourseById(id: string | number): Promise<GlobalCourse> {
   return apiCall(`/api/v1/education/courses/${id}`);
 }

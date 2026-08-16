@@ -2,12 +2,13 @@
 
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchGlobalCourses } from "@/services/course-api";
+import { fetchGlobalCourses, searchGlobalCourses, fetchCourseFilterCounts, CourseFilterCountsResponse } from "@/services/course-api";
 import CourseFilters from "./CourseFilters";
 import {
   CourseFinderFilters,
   defaultCourseFinderFilters,
   defaultCourseFilterCounts,
+  CourseFilterCounts,
 } from "./types";
 import CourseGrid from "./CourseGrid";
 
@@ -20,93 +21,95 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
     defaultCourseFinderFilters,
   );
   const [globalSearch, setGlobalSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  // Debounce search input
+  React.useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(globalSearch), 300);
+    return () => clearTimeout(timer);
+  }, [globalSearch]);
+
+  // Fetch all courses (base data)
+  const { data: allData, isLoading } = useQuery({
     queryKey: ["global-courses"],
     queryFn: () => fetchGlobalCourses(1, 100),
   });
 
-  const allCourses = data?.courses || [];
+  // Fetch search results when search is active
+  const { data: searchData } = useQuery({
+    queryKey: ["global-courses-search", debouncedSearch],
+    queryFn: () => searchGlobalCourses(debouncedSearch),
+    enabled: debouncedSearch.trim().length > 0,
+  });
+
+  // Fetch filter counts from backend
+  const { data: filterCountsData } = useQuery({
+    queryKey: ["course-filter-counts"],
+    queryFn: fetchCourseFilterCounts,
+  });
+
+  const allCourses = allData?.courses || [];
+  const baseCourses = debouncedSearch.trim() ? (searchData || []) : allCourses;
+
+  // Map backend filter counts to frontend format
+  const filterCounts: CourseFilterCounts = useMemo(() => {
+    if (!filterCountsData) return defaultCourseFilterCounts;
+    return {
+      byAcademic: filterCountsData.level_counts || {},
+      byField: filterCountsData.field_counts || {},
+      byUniversity: filterCountsData.affiliation_counts || {},
+      byProvider: {},
+      byDuration: {},
+    };
+  }, [filterCountsData]);
 
   const filteredCourses = useMemo(() => {
-    const q = globalSearch.trim().toLowerCase();
-
-    return allCourses.filter((course) => {
-      // Basic Search
-      if (q) {
-        const hit =
-          course.title?.toLowerCase().includes(q) ||
-          course.field?.toLowerCase().includes(q) ||
-          course.affiliationName?.toLowerCase().includes(q);
-        if (!hit) return false;
-      }
-
-      // Academic Level Filter
+    return baseCourses.filter((course) => {
+      // Academic Level Filter — match against full level string
       if (filters.academicLevels.length > 0) {
         const level = (course.level || "").toLowerCase();
         const matchesLevel = filters.academicLevels.some((l) => {
-          if (l === "plus2")
-            return (
-              level.includes("+2") ||
-              level.includes("higher") ||
-              level.includes("intermediate")
-            );
-          if (l === "alevel") return level.includes("a level");
-          if (l === "diploma")
-            return level.includes("diploma") || level.includes("ctevt");
-          if (l === "masters")
-            return level.includes("masters") || level.includes("master");
-          return false;
+          const filterLabel = l.toLowerCase();
+          return level.includes(filterLabel) || filterLabel.includes(level);
         });
         if (!matchesLevel) return false;
       }
 
-      // Field of Study Filter
+      // Field of Study Filter — match against full field string
       if (filters.fields.length > 0) {
         const field = (course.field || "").toLowerCase();
         const matchesField = filters.fields.some((f) => {
-          if (f === "p2_sci" && field.includes("science")) return true;
-          if (f === "p2_mgmt" && field.includes("management")) return true;
-          if (f === "p2_hum" && field.includes("humanities")) return true;
-          if (f === "p2_edu" && field.includes("education")) return true;
-          if (f === "p2_law" && field.includes("law")) return true;
-          if (f === "d_eng" && field.includes("engineering")) return true;
-          if (
-            f === "d_med" &&
-            (field.includes("medical") || field.includes("nursing"))
-          )
-            return true;
-          if (
-            f === "d_hm" &&
-            (field.includes("hotel") || field.includes("tourism"))
-          )
-            return true;
-          if (f === "d_agr" && field.includes("agriculture")) return true;
-          if (
-            f === "m_mgmt" &&
-            (field.includes("management") ||
-              field.includes("mba") ||
-              field.includes("mbs"))
-          )
-            return true;
-          if (
-            f === "m_it" &&
-            (field.includes("it") || field.includes("computer"))
-          )
-            return true;
-          if (f === "m_edu" && field.includes("education")) return true;
-          return false;
+          const filterLabel = f.toLowerCase();
+          return field.includes(filterLabel) || filterLabel.includes(field);
         });
         if (!matchesField) return false;
       }
 
+      // University/Board Filter — match against affiliation name
+      if (filters.universities.length > 0) {
+        const affiliation = (course.affiliationName || "").toLowerCase();
+        const matchesUni = filters.universities.some((u) => {
+          const filterLabel = u.toLowerCase();
+          return affiliation.includes(filterLabel) || filterLabel.includes(affiliation);
+        });
+        if (!matchesUni) return false;
+      }
+
       return true;
     });
-  }, [allCourses, globalSearch, filters]);
+  }, [baseCourses, filters]);
 
-  const hasActiveFilters = filters.academicLevels.length > 0 || filters.fields.length > 0;
-  const appliedCount = filters.academicLevels.length + filters.fields.length;
+  const hasActiveFilters =
+    filters.academicLevels.length > 0 ||
+    filters.fields.length > 0 ||
+    filters.universities.length > 0 ||
+    filters.entranceRequired !== "";
+  const appliedCount =
+    filters.academicLevels.length +
+    filters.fields.length +
+    filters.universities.length +
+    (filters.entranceRequired ? 1 : 0);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 text-gray-800 md:p-6 lg:p-8 pt-24">
@@ -114,7 +117,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         <aside className="hidden lg:block w-full shrink-0 lg:w-75 h-fit sticky top-24">
           <CourseFilters
             filters={filters}
-            counts={defaultCourseFilterCounts}
+            counts={filterCounts}
             onChange={setFilters}
           />
         </aside>
@@ -125,7 +128,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
               <CourseFilters
                 filters={filters}
-                counts={defaultCourseFilterCounts}
+                counts={filterCounts}
                 onChange={setFilters}
                 onClose={() => setShowMobileFilters(false)}
               />

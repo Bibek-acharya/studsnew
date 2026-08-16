@@ -264,7 +264,26 @@ const CourseCreatePage: React.FC = () => {
         setTitle(res.globalCourseTitle || "");
         setDescription(res.overrides?.description || "");
         setEstFee(res.fee || "");
-        setBannerUrl(res.overrides?.bannerUrl || "");
+        setBannerUrl(res.overrides?.bannerUrl || res.bannerUrl || "");
+        setDuration(res.duration || "");
+        setLevel(res.level || "");
+        setAffiliation(res.affiliationName || res.nonUniversityAffiliation || "");
+
+        if (res.globalCourseId) {
+          setSelectedGlobalCourse({
+            id: res.globalCourseId,
+            title: res.globalCourseTitle || "",
+            duration: res.duration || "",
+            level: res.level || "",
+            field: res.field || "",
+            affiliationName: res.affiliationName || "",
+            nonUniversityAffiliation: res.nonUniversityAffiliation || "",
+            bannerUrl: res.bannerUrl || "",
+            description: res.overrides?.description || "",
+            estFee: res.fee || "",
+          } as GlobalCourse);
+        }
+
         if (res.whoShouldChoose)
           setWhoShouldChoose(
             res.whoShouldChoose.map((x: any, i: number) => ({
@@ -331,6 +350,36 @@ const CourseCreatePage: React.FC = () => {
     setEstFee(course.estFee || "");
     setLevel(course.level || "");
     setDescription(course.description || "");
+    setBannerUrl(course.bannerUrl || "");
+    setAffiliation(course.affiliationName || course.nonUniversityAffiliation || "");
+
+    if (course.eligibilityRows?.length) {
+      setEligibilityRows(course.eligibilityRows.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.admissionSteps?.length) {
+      setAdmissionSteps(course.admissionSteps.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.scholarships?.length) {
+      setScholarships(course.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.faqs?.length) {
+      setFaqs(course.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.whoShouldChoose?.length) {
+      setWhoShouldChoose(course.whoShouldChoose.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.features?.length) {
+      setFeatures(course.features.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.fullTimeCourses?.length) {
+      setFullTimeCourses(course.fullTimeCourses.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.feeItems?.length) {
+      setFeeItems(course.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    }
+    if (course.scholarshipDesc) {
+      setScholarshipDesc(course.scholarshipDesc);
+    }
   };
 
   const clearGlobalCourse = () => {

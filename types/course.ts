@@ -163,6 +163,12 @@ export interface InstitutionProgram {
   institution_link: string;
   globalCourseId: number;
   globalCourseTitle: string;
+  duration: string;
+  level: string;
+  field: string;
+  affiliationName: string;
+  nonUniversityAffiliation: string;
+  bannerUrl: string;
   fee: string;
   eligibility: string;
   capacity: number;
