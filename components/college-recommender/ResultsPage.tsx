@@ -119,111 +119,59 @@ export default function ResultsPage({
                         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                       />
                     </svg>
-                    Status
+                    Match Score
                   </div>
                   <div className="text-brand-blue font-bold text-[1.05rem]">
-                    Target
+                    {previewItem?.match_score}%
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
                     <Building2 className="w-4 h-4 text-slate-700" />
-                    Institution type
+                    Institution Type
                   </div>
                   <div className="font-bold text-slate-900 text-[1.05rem]">
-                    University
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg
-                      className="w-4 h-4 text-slate-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                      />
-                    </svg>
-                    Application Fee
-                  </div>
-                  <div className="font-bold text-slate-900 text-[1.05rem]">
-                    Rs. 1,000/year
+                    {previewItem?.type || "College"}
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
                     <Banknote className="w-4 h-4 text-slate-700" />
-                    Tuition cost
+                    Tuition Cost
                   </div>
                   <div className="font-bold text-slate-900 text-[1.05rem]">
-                    Rs. {previewItem?.tuition}
+                    Rs. {previewItem?.tuition || "N/A"}
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg
-                      className="w-4 h-4 text-slate-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2.5"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    Admission rate
+                    <MapPin className="w-4 h-4 text-slate-700" />
+                    Location
                   </div>
                   <div className="font-bold text-slate-900 text-[1.05rem]">
-                    45% admission rate
-                  </div>
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 text-slate-500 font-extrabold mb-2 text-[13px] uppercase tracking-wide">
-                    <svg
-                      className="w-4 h-4 text-slate-700"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-                      />
-                    </svg>
-                    Avg. cost after aid
-                  </div>
-                  <div className="font-bold text-slate-900 text-[1.05rem]">
-                    Rs. 80,000/year
+                    {previewItem?.location || "N/A"}
                   </div>
                 </div>
               </div>
 
-              <div className="border-t border-slate-100 mt-10 pt-8">
-                <h3 className="text-xl font-bold text-slate-900 mb-4 tracking-tight">
-                  About
-                </h3>
-                <p className="text-slate-600 font-medium leading-relaxed text-[15px]">
-                  A dynamic university located in the scenic city of Pokhara
-                  offering diverse programs. It focuses on higher education and
-                  research, particularly in business, science, and technology.
-                  For more information, visit http://www.edu.np.
-                </p>
-              </div>
+              {previewItem?.reasons && previewItem.reasons.length > 0 && (
+                <div className="border-t border-slate-100 mt-10 pt-8">
+                  <h3 className="text-xl font-bold text-slate-900 mb-4 tracking-tight">
+                    Why this college?
+                  </h3>
+                  <ul className="space-y-2">
+                    {previewItem.reasons.map((reason, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-slate-600 font-medium text-[15px]">
+                        <Check className="w-4 h-4 text-green-500 mt-1 shrink-0" />
+                        {reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -250,8 +198,26 @@ export default function ResultsPage({
         </header>
 
         <main className="max-w-350 mx-auto px-4 mt-4 pb-32">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {results.map((item) => {
+          {results.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                <Building2 className="w-10 h-10 text-slate-400" />
+              </div>
+              <h2 className="text-xl font-bold text-slate-900 mb-2">No colleges found</h2>
+              <p className="text-slate-500 text-sm max-w-md mb-6">
+                We couldn&apos;t find any colleges matching your preferences. Try adjusting your answers to get better results.
+              </p>
+              <button
+                onClick={() => setIsRefineModalOpen(true)}
+                className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0000ff] text-white rounded-md text-sm font-semibold hover:bg-blue-700 transition-colors"
+              >
+                <Filter className="w-4 h-4" />
+                Refine your answers
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {results.map((item) => {
               const isSelected = selectedIds.has(item.id);
               const isExpanded = expandedMatchId === item.id;
 
@@ -429,7 +395,8 @@ export default function ResultsPage({
                 </div>
               );
             })}
-          </div>
+            </div>
+          )}
         </main>
       </div>
 

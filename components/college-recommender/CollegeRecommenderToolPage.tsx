@@ -210,8 +210,13 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
     setLoading(true);
     try {
       const res = await apiService.getCollegeRecommenderRecommendations(form);
-      setResults(res.data?.recommendations || []);
-      setStep(10);
+      if (res.data?.recommendations && res.data.recommendations.length > 0) {
+        setResults(res.data.recommendations);
+        setStep(10);
+      } else {
+        setResults([]);
+        setStep(10);
+      }
     } catch (err) {
       console.error("Failed to fetch recommendations:", err);
       setResults([]);
