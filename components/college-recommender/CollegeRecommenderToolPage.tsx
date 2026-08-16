@@ -183,7 +183,7 @@ const CollegeRecommenderToolPage: React.FC<CollegeRecommenderToolPageProps> = ({
       case 3:
         return (
           !!form.knows_course &&
-          !!form.preferred_field &&
+          (form.knows_course !== 'Yes' || !!form.preferred_field) &&
           !!form.reputation_importance
         );
       case 4:

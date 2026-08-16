@@ -57,32 +57,69 @@ export default function Step3({ step, stepImages, form, handleInputChange, stepT
               )}
               {renderPillOption(
                 form.knows_course === 'Not sure',
-                () => handleInputChange('knows_course', 'Not sure'),
+                () => {
+                  handleInputChange('knows_course', 'Not sure')
+                  handleInputChange('preferred_field', '')
+                },
                 'Not sure yet',
               )}
             </div>
           </div>
 
-          <div className='space-y-4'>
-            <p className='text-[17px] font-semibold text-[#0f172a]'>
-              Select your preferred field:
-            </p>
-            <Dropdown
-              value={form.preferred_field || ''}
-              onChange={(val) => handleInputChange('preferred_field', val)}
-              options={[
-                { value: 'Science (+2 Science / BSc / BIT / CSIT / Engineering)', label: 'Science (+2 Science / BSc / BIT / CSIT / Engineering)' },
-                { value: 'Management (BBS / BBA / BBM / BHM)', label: 'Management (BBS / BBA / BBM / BHM)' },
-                { value: 'Humanities / Law', label: 'Humanities / Law' },
-                { value: 'Medical / Nursing / Pharmacy', label: 'Medical / Nursing / Pharmacy' },
-                { value: 'IT / Computer', label: 'IT / Computer' },
-                { value: 'Hotel Management', label: 'Hotel Management' },
-                { value: 'Education', label: 'Education' },
-                { value: 'Others', label: 'Others' },
-              ]}
-              placeholder='Search or select your preferred field'
-            />
-          </div>
+          {form.knows_course === 'Yes' && (
+            <div className='space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300'>
+              <p className='text-[17px] font-semibold text-[#0f172a]'>
+                Select your preferred field:
+              </p>
+              <Dropdown
+                value={form.preferred_field || ''}
+                onChange={(val) => handleInputChange('preferred_field', val)}
+                options={[
+                  { value: 'Management & Business', label: 'Management & Business' },
+                  { value: 'Accounting & Finance', label: 'Accounting & Finance' },
+                  { value: 'Computer Science & Information Technology', label: 'Computer Science & Information Technology' },
+                  { value: 'Engineering', label: 'Engineering' },
+                  { value: 'Science & Mathematics', label: 'Science & Mathematics' },
+                  { value: 'Medicine & Health Sciences', label: 'Medicine & Health Sciences' },
+                  { value: 'Nursing', label: 'Nursing' },
+                  { value: 'Pharmacy', label: 'Pharmacy' },
+                  { value: 'Dentistry', label: 'Dentistry' },
+                  { value: 'Ayurveda & Alternative Medicine', label: 'Ayurveda & Alternative Medicine' },
+                  { value: 'Agriculture', label: 'Agriculture' },
+                  { value: 'Veterinary & Animal Science', label: 'Veterinary & Animal Science' },
+                  { value: 'Forestry & Environmental Studies', label: 'Forestry & Environmental Studies' },
+                  { value: 'Education & Teaching', label: 'Education & Teaching' },
+                  { value: 'Humanities', label: 'Humanities' },
+                  { value: 'Social Sciences', label: 'Social Sciences' },
+                  { value: 'Law & Legal Studies', label: 'Law & Legal Studies' },
+                  { value: 'Economics', label: 'Economics' },
+                  { value: 'Hospitality & Hotel Management', label: 'Hospitality & Hotel Management' },
+                  { value: 'Travel & Tourism', label: 'Travel & Tourism' },
+                  { value: 'Architecture, Design & Planning', label: 'Architecture, Design & Planning' },
+                  { value: 'Media & Communication', label: 'Media & Communication' },
+                  { value: 'Arts & Fine Arts', label: 'Arts & Fine Arts' },
+                  { value: 'Fashion & Textile', label: 'Fashion & Textile' },
+                  { value: 'Aviation', label: 'Aviation' },
+                  { value: 'Sports & Physical Education', label: 'Sports & Physical Education' },
+                  { value: 'Library & Information Science', label: 'Library & Information Science' },
+                  { value: 'Languages & Literature', label: 'Languages & Literature' },
+                  { value: 'Public Administration & Governance', label: 'Public Administration & Governance' },
+                  { value: 'Development Studies', label: 'Development Studies' },
+                  { value: 'Disaster & Risk Management', label: 'Disaster & Risk Management' },
+                  { value: 'Maritime / Marine Studies', label: 'Maritime / Marine Studies' },
+                  { value: 'Food & Nutrition', label: 'Food & Nutrition' },
+                  { value: 'Religious & Cultural Studies', label: 'Religious & Cultural Studies' },
+                  { value: 'Security & Defence Studies', label: 'Security & Defence Studies' },
+                  { value: 'Technical & Vocational', label: 'Technical & Vocational' },
+                  { value: 'Professional Studies', label: 'Professional Studies' },
+                  { value: 'Language & Test Preparation', label: 'Language & Test Preparation' },
+                  { value: 'Skill & Short-Term Courses', label: 'Skill & Short-Term Courses' },
+                  { value: 'Other / Interdisciplinary', label: 'Other / Interdisciplinary' },
+                ]}
+                placeholder='Search or select your preferred field'
+              />
+            </div>
+          )}
 
           <div className='space-y-4'>
             <p className='text-[17px] font-semibold text-[#0f172a]'>
