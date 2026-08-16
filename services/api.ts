@@ -256,6 +256,7 @@ export const apiService = {
   scholarshipProviderRegister: authApi.scholarshipProviderRegister.bind(authApi),
   institutionRegister: authApi.institutionRegister.bind(authApi),
   saveInstitutionPreferences: authApi.saveInstitutionPreferences.bind(authApi),
+  getInstitutionPreferences: authApi.getInstitutionPreferences.bind(authApi),
   institutionSendOTP: authApi.institutionSendOTP.bind(authApi),
   institutionResetPassword: authApi.institutionResetPassword.bind(authApi),
   claimRegister: authApi.claimRegister.bind(authApi),

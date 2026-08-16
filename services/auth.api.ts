@@ -182,6 +182,11 @@ export const authApi = {
       body: JSON.stringify({ preferences }),
     });
   },
+  async getInstitutionPreferences(): Promise<any> {
+    return apiRequest("/api/v1/institutions/preferences", {
+      method: "GET",
+    });
+  },
   async institutionSendOTP(
     email: string,
     type: "verification" | "password_reset",
