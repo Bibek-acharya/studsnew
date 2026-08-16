@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CollegeRecommendation } from "@/services/api";
-import { Check, MapPin, Banknote, TrendingUp, Star, ChevronDown, ChevronLeft, Building2, ChevronRight } from "lucide-react";
+import { Check, MapPin, Banknote, TrendingUp, Star, ChevronDown, ChevronLeft, Building2, ChevronRight, BadgeCheck } from "lucide-react";
 
 interface CollegeShortlistViewProps {
   recommendedItems: CollegeRecommendation[];
@@ -265,12 +265,19 @@ export default function CollegeShortlistView({
                     <div className="p-6 grow">
                       <div className="flex justify-between items-start gap-4 mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-md bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter">
-                            {item.name?.[0]}
+                          <div className="w-12 h-12 rounded-md bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter overflow-hidden">
+                            {item.logo ? (
+                              <img src={item.logo} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              item.name?.[0]
+                            )}
                           </div>
                           <h3 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
                             {item.name}
                           </h3>
+                          {item.verified && (
+                            <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />
+                          )}
                         </div>
                         <div className="shrink-0 pt-1">
                           <button
@@ -306,15 +313,17 @@ export default function CollegeShortlistView({
                         <div className="flex items-center gap-2 text-slate-600">
                           <Banknote className="w-4 h-4 text-slate-400" />
                           <span className="font-bold text-slate-700">
-                            Rs. {item.tuition}
+                            {item.tuition || "Contact college"}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-slate-600">
-                          <Check className="w-4 h-4 text-brand-blue" />
-                          <span className="font-bold text-slate-700">
-                            Verified
-                          </span>
-                        </div>
+                        {item.verified && (
+                          <div className="flex items-center gap-2 text-slate-600">
+                            <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500" />
+                            <span className="font-bold text-slate-700">
+                              Verified
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 

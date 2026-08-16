@@ -545,6 +545,8 @@ export interface CollegeRecommendation {
   name: string;
   location: string;
   type?: string;
+  logo?: string;
+  verified?: boolean;
   match_score: number;
   reasons?: string[];
   breakdown?: {
