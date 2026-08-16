@@ -265,7 +265,7 @@ export default function CollegeShortlistView({
                     <div className="p-6 grow">
                       <div className="flex justify-between items-start gap-4 mb-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-md bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter overflow-hidden">
+                          <div className="w-12 h-12 rounded-md bg-brand-blue text-white flex items-center justify-center font-extrabold shrink-0 text-xs tracking-tighter overflow-hidden">
                             {item.logo ? (
                               <img src={item.logo} alt={item.name} className="w-full h-full object-cover" />
                             ) : (
@@ -275,9 +275,6 @@ export default function CollegeShortlistView({
                           <h3 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
                             {item.name}
                           </h3>
-                          {item.verified && (
-                            <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />
-                          )}
                         </div>
                         <div className="shrink-0 pt-1">
                           <button

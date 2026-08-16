@@ -90,7 +90,7 @@ export default function ResultsPage({
 
               <div className="flex items-center justify-between gap-4 mb-8">
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-md border border-slate-100 bg-white flex items-center justify-center font-extrabold text-2xl text-slate-800 shrink-0 shadow-slate-100 overflow-hidden">
+                  <div className="w-16 h-16 rounded-md bg-brand-blue text-white flex items-center justify-center font-extrabold text-2xl shrink-0 shadow-slate-100 overflow-hidden">
                     {previewItem?.logo ? (
                       <img src={previewItem.logo} alt={previewItem.name} className="w-full h-full object-cover" />
                     ) : (
@@ -98,14 +98,9 @@ export default function ResultsPage({
                     )}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-2xl font-bold text-slate-900 leading-tight tracking-tight">
-                        {previewItem?.name}
-                      </h2>
-                      {previewItem?.verified && (
-                        <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />
-                      )}
-                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900 leading-tight tracking-tight">
+                      {previewItem?.name}
+                    </h2>
                     <p className="text-slate-500 font-bold text-sm mt-0.5">
                       {previewItem?.location}
                     </p>
@@ -240,7 +235,7 @@ export default function ResultsPage({
                   <div className="p-6 grow">
                     <div className="flex justify-between items-start gap-4 mb-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-md bg-brand-blue/10 text-brand-blue flex items-center justify-center font-extrabold border border-brand-blue/20 shrink-0 text-xs tracking-tighter overflow-hidden">
+                        <div className="w-12 h-12 rounded-md bg-brand-blue text-white flex items-center justify-center font-extrabold shrink-0 text-xs tracking-tighter overflow-hidden">
                           {item.logo ? (
                             <img src={item.logo} alt={item.name} className="w-full h-full object-cover" />
                           ) : (
@@ -250,9 +245,6 @@ export default function ResultsPage({
                         <h3 className="font-bold text-slate-800 text-lg leading-tight tracking-tight">
                           {item.name}
                         </h3>
-                        {item.verified && (
-                          <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500 shrink-0" />
-                        )}
                       </div>
                       <div className="shrink-0 pt-1">
                         <button
