@@ -72,43 +72,10 @@ const labelClass = "block text-sm font-medium text-gray-700 mb-1.5";
 const selectClass =
   "w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none appearance-none bg-white transition-colors";
 
-interface EligibilityRow {
-  id: number;
-  level: string;
-  stream: string;
-  eligibility: string[];
-  documents: string[];
-}
-
 interface AdmissionStep {
   id: number;
   title: string;
   description: string;
-}
-
-interface SubjectGroup {
-  id: number;
-  groupName: string;
-  description: string;
-  subjects: string[];
-  careers: string[];
-}
-
-interface FullTimeCourse {
-  id: number;
-  course: string;
-  totalFees: string;
-  seats: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface FeeItem {
-  id: number;
-  particular: string;
-  amount: string;
-  frequency: string;
-  notes: string;
 }
 
 interface ScholarshipItem {
@@ -202,16 +169,16 @@ const CourseCreatePage: React.FC = () => {
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState("");
   const [level, setLevel] = useState("");
+  const [fieldOfStudy, setFieldOfStudy] = useState("");
   const [affiliation, setAffiliation] = useState("");
   const [estFee, setEstFee] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
 
-  const [eligibilityRows, setEligibilityRows] = useState<EligibilityRow[]>([]);
+  const [eligibilityText, setEligibilityText] = useState("");
   const [admissionSteps, setAdmissionSteps] = useState<AdmissionStep[]>([]);
-  const [subjectGroups, setSubjectGroups] = useState<SubjectGroup[]>([]);
-  const [fullTimeCourses, setFullTimeCourses] = useState<FullTimeCourse[]>([]);
-  const [feeItems, setFeeItems] = useState<FeeItem[]>([]);
+  const [feeStructureText, setFeeStructureText] = useState("");
   const [scholarshipDesc, setScholarshipDesc] = useState("");
+  const [scholarshipNotes, setScholarshipNotes] = useState("");
   const [scholarships, setScholarships] = useState<ScholarshipItem[]>([]);
   const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [whoShouldChoose, setWhoShouldChoose] = useState<WhoShouldChoose[]>([]);
@@ -276,6 +243,7 @@ const CourseCreatePage: React.FC = () => {
             duration: res.duration || "",
             level: res.level || "",
             field: res.field || "",
+            fieldOfStudy: res.fieldOfStudy || "",
             affiliationName: res.affiliationName || "",
             nonUniversityAffiliation: res.nonUniversityAffiliation || "",
             bannerUrl: res.bannerUrl || "",
@@ -295,17 +263,10 @@ const CourseCreatePage: React.FC = () => {
           setFeatures(
             res.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
           );
-        if (res.fullTimeCourses)
-          setFullTimeCourses(
-            res.fullTimeCourses.map((x: any, i: number) => ({
-              ...x,
-              id: i + 1,
-            })),
-          );
-        if (res.feeItems)
-          setFeeItems(
-            res.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-          );
+        if (res.eligibilityText)
+          setEligibilityText(res.eligibilityText);
+        if (res.feeStructureText)
+          setFeeStructureText(res.feeStructureText);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -325,7 +286,7 @@ const CourseCreatePage: React.FC = () => {
 
     setLoadingCourses(true);
 
-    if (selectedLevel === "Bachelor" || selectedLevel === "Master") {
+    if (selectedLevel === "Bachelor's Degree" || selectedLevel === "Master's Degree" || selectedLevel === "Postgraduate Diploma" || selectedLevel === "M.Phil." || selectedLevel === "PhD / Doctorate") {
       if (selectedAffiliationId) {
         fetchCoursesByAffiliation(selectedAffiliationId, 1, 100)
           .then(res => setGlobalCourses(res.courses || []))
@@ -350,12 +311,13 @@ const CourseCreatePage: React.FC = () => {
     setDuration(normalized.duration || "");
     setEstFee(normalized.estFee || "");
     setLevel(normalized.level || "");
+    setFieldOfStudy(normalized.fieldOfStudy || normalized.field || "");
     setDescription(normalized.description || "");
     setBannerUrl(normalized.bannerUrl || "");
     setAffiliation(normalized.affiliationName || normalized.nonUniversityAffiliation || "");
 
-    if (normalized.eligibilityRows?.length) {
-      setEligibilityRows(normalized.eligibilityRows.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.eligibilityText) {
+      setEligibilityText(normalized.eligibilityText);
     }
     if (normalized.admissionSteps?.length) {
       setAdmissionSteps(normalized.admissionSteps.map((x: any, i: number) => ({ ...x, id: i + 1 })));
@@ -372,14 +334,14 @@ const CourseCreatePage: React.FC = () => {
     if (normalized.features?.length) {
       setFeatures(normalized.features.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (normalized.fullTimeCourses?.length) {
-      setFullTimeCourses(normalized.fullTimeCourses.map((x: any, i: number) => ({ ...x, id: i + 1 })));
-    }
-    if (normalized.feeItems?.length) {
-      setFeeItems(normalized.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.feeStructureText) {
+      setFeeStructureText(normalized.feeStructureText);
     }
     if (normalized.scholarshipDesc) {
       setScholarshipDesc(normalized.scholarshipDesc);
+    }
+    if (normalized.scholarshipNotes) {
+      setScholarshipNotes(normalized.scholarshipNotes);
     }
   };
 
@@ -402,12 +364,11 @@ const CourseCreatePage: React.FC = () => {
   const collectData = () => ({
     globalCourseId: Number(selectedGlobalCourse?.id) || 0,
     fee: estFee,
-    eligibility: "",
+    eligibilityText: eligibilityText || undefined,
     capacity: 0,
     whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
     features: features.map(({ id, ...rest }) => rest),
-    fullTimeCourses: fullTimeCourses.map(({ id, ...rest }) => rest),
-    feeItems: feeItems.map(({ id, ...rest }) => rest),
+    feeStructureText: feeStructureText || undefined,
     overrides: {
       description: description || undefined,
       bannerUrl: bannerUrl || undefined,
@@ -617,16 +578,27 @@ const CourseCreatePage: React.FC = () => {
                 }}
               >
                 <option value="">Select Level</option>
-                <option value="+2">+2</option>
-                <option value="A Level">A Level</option>
-                <option value="CTEVT">CTEVT</option>
-                <option value="Diploma">Diploma</option>
-                <option value="Bachelor">Bachelor</option>
-                <option value="Master">Master</option>
+                <option value="Higher Secondary (+2)">Higher Secondary (+2)</option>
+                <option value="A Levels">A Levels</option>
+                <option value="Pre-Diploma / TSLC">Pre-Diploma / TSLC</option>
+                <option value="Diploma / PCL">Diploma / PCL</option>
+                <option value="Bachelor's Degree">Bachelor's Degree</option>
+                <option value="Postgraduate Diploma">Postgraduate Diploma</option>
+                <option value="Master's Degree">Master's Degree</option>
+                <option value="M.Phil.">M.Phil.</option>
+                <option value="PhD / Doctorate">PhD / Doctorate</option>
+                <option value="Professional Qualifications">Professional Qualifications</option>
+                <option value="Certificate Courses">Certificate Courses</option>
+                <option value="Short-Term Courses">Short-Term Courses</option>
+                <option value="Vocational / Technical Training">Vocational / Technical Training</option>
+                <option value="Skill Development Programs">Skill Development Programs</option>
+                <option value="Entrance Preparation">Entrance Preparation</option>
+                <option value="Language & Test Preparation">Language & Test Preparation</option>
+                <option value="Continuing / Lifelong Education">Continuing / Lifelong Education</option>
               </select>
             </div>
 
-            {(selectedLevel === "Bachelor" || selectedLevel === "Master") && (
+            {(selectedLevel === "Bachelor's Degree" || selectedLevel === "Master's Degree" || selectedLevel === "Postgraduate Diploma" || selectedLevel === "M.Phil." || selectedLevel === "PhD / Doctorate") && (
               <div>
                 <label className={labelClass}>University / Affiliation</label>
                 <select
@@ -648,7 +620,7 @@ const CourseCreatePage: React.FC = () => {
               </div>
             )}
 
-            {["+2", "A Level", "CTEVT", "Diploma"].includes(selectedLevel) && (
+            {["Higher Secondary (+2)", "A Levels", "Pre-Diploma / TSLC", "Diploma / PCL", "Certificate Courses", "Short-Term Courses", "Vocational / Technical Training", "Skill Development Programs", "Entrance Preparation", "Language & Test Preparation", "Continuing / Lifelong Education", "Professional Qualifications"].includes(selectedLevel) && (
               <div>
                 <label className={labelClass}>Board / Non-University Affiliation</label>
                 <input
@@ -742,13 +714,54 @@ const CourseCreatePage: React.FC = () => {
                 />
               </div>
               <div>
-                <label className={labelClass}>Field</label>
-                <input
-                  type="text"
-                  className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""}`}
-                  value={selectedGlobalCourse ? selectedGlobalCourse.field || "" : ""}
+                <label className={labelClass}>Field of Study</label>
+                <select
+                  className={`${selectClass} ${selectedGlobalCourse ? "bg-gray-50" : ""}`}
+                  value={selectedGlobalCourse ? selectedGlobalCourse.fieldOfStudy || selectedGlobalCourse.field || "" : ""}
                   disabled
-                />
+                >
+                  <option value="">Select Field of Study</option>
+                  <option value="Management & Business">Management & Business</option>
+                  <option value="Accounting & Finance">Accounting & Finance</option>
+                  <option value="Computer Science & Information Technology">Computer Science & Information Technology</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Science & Mathematics">Science & Mathematics</option>
+                  <option value="Medicine & Health Sciences">Medicine & Health Sciences</option>
+                  <option value="Nursing">Nursing</option>
+                  <option value="Pharmacy">Pharmacy</option>
+                  <option value="Dentistry">Dentistry</option>
+                  <option value="Ayurveda & Alternative Medicine">Ayurveda & Alternative Medicine</option>
+                  <option value="Agriculture">Agriculture</option>
+                  <option value="Veterinary & Animal Science">Veterinary & Animal Science</option>
+                  <option value="Forestry & Environmental Studies">Forestry & Environmental Studies</option>
+                  <option value="Education & Teaching">Education & Teaching</option>
+                  <option value="Humanities">Humanities</option>
+                  <option value="Social Sciences">Social Sciences</option>
+                  <option value="Law & Legal Studies">Law & Legal Studies</option>
+                  <option value="Economics">Economics</option>
+                  <option value="Hospitality & Hotel Management">Hospitality & Hotel Management</option>
+                  <option value="Travel & Tourism">Travel & Tourism</option>
+                  <option value="Architecture, Design & Planning">Architecture, Design & Planning</option>
+                  <option value="Media & Communication">Media & Communication</option>
+                  <option value="Arts & Fine Arts">Arts & Fine Arts</option>
+                  <option value="Fashion & Textile">Fashion & Textile</option>
+                  <option value="Aviation">Aviation</option>
+                  <option value="Sports & Physical Education">Sports & Physical Education</option>
+                  <option value="Library & Information Science">Library & Information Science</option>
+                  <option value="Languages & Literature">Languages & Literature</option>
+                  <option value="Public Administration & Governance">Public Administration & Governance</option>
+                  <option value="Development Studies">Development Studies</option>
+                  <option value="Disaster & Risk Management">Disaster & Risk Management</option>
+                  <option value="Maritime / Marine Studies">Maritime / Marine Studies</option>
+                  <option value="Food & Nutrition">Food & Nutrition</option>
+                  <option value="Religious & Cultural Studies">Religious & Cultural Studies</option>
+                  <option value="Security & Defence Studies">Security & Defence Studies</option>
+                  <option value="Technical & Vocational">Technical & Vocational</option>
+                  <option value="Professional Studies">Professional Studies</option>
+                  <option value="Language & Test Preparation">Language & Test Preparation</option>
+                  <option value="Skill & Short-Term Courses">Skill & Short-Term Courses</option>
+                  <option value="Other / Interdisciplinary">Other / Interdisciplinary</option>
+                </select>
               </div>
               <div>
                 <label className={labelClass}>Estimated Fee</label>
@@ -989,275 +1002,19 @@ const CourseCreatePage: React.FC = () => {
 
         {/* 4. Eligibility Criteria */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <SectionItemHeader
-            icon="clipboard-check"
-            title="Eligibility Criteria"
-            subtitle="Define eligibility requirements"
-            onAdd={() =>
-              setEligibilityRows((prev) => [
-                ...prev,
-                {
-                  id: nextId(prev),
-                  level: "",
-                  stream: "",
-                  eligibility: [],
-                  documents: [],
-                },
-              ])
-            }
-            addLabel="Add Row"
-          />
-          <div className="p-6 space-y-6">
-            {eligibilityRows.map((ec) => (
-              <div
-                key={ec.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-              >
-                <button
-                  onClick={() =>
-                    setEligibilityRows((prev) =>
-                      prev.filter((x) => x.id !== ec.id),
-                    )
-                  }
-                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pr-12">
-                  <div>
-                    <label className={labelClass}>
-                      Level <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. +2 Science"
-                      value={ec.level}
-                      onChange={(e) =>
-                        setEligibilityRows((prev) =>
-                          prev.map((x) =>
-                            x.id === ec.id
-                              ? { ...x, level: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Stream/Faculty</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Biology, Computer Science"
-                      value={ec.stream}
-                      onChange={(e) =>
-                        setEligibilityRows((prev) =>
-                          prev.map((x) =>
-                            x.id === ec.id
-                              ? { ...x, stream: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Eligibility (bullet points)
-                    </label>
-                    <div className="space-y-2">
-                      {(ec.eligibility || []).map((item, ei) => (
-                        <div key={ei} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Minimum 2.5 GPA"
-                            value={item}
-                            onChange={(e) =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        eligibility: x.eligibility.map(
-                                          (v, j) =>
-                                            j === ei ? e.target.value : v,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        eligibility: x.eligibility.filter(
-                                          (_, j) => j !== ei,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setEligibilityRows((prev) =>
-                            prev.map((x) =>
-                              x.id === ec.id
-                                ? { ...x, eligibility: [...x.eligibility, ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>{" "}
-                        Add Item
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Required Documents (bullet points)
-                    </label>
-                    <div className="space-y-2">
-                      {(ec.documents || []).map((item, di) => (
-                        <div key={di} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. SEE Mark Sheet"
-                            value={item}
-                            onChange={(e) =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        documents: x.documents.map((v, j) =>
-                                          j === di ? e.target.value : v,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setEligibilityRows((prev) =>
-                                prev.map((x) =>
-                                  x.id === ec.id
-                                    ? {
-                                        ...x,
-                                        documents: x.documents.filter(
-                                          (_, j) => j !== di,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setEligibilityRows((prev) =>
-                            prev.map((x) =>
-                              x.id === ec.id
-                                ? { ...x, documents: [...x.documents, ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>{" "}
-                        Add Item
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="p-6">
+            <label className={labelClass}>Eligibility Criteria</label>
+            <p className="text-xs text-gray-500 mb-2">Define eligibility requirements using rich text</p>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <QuillEditor
+                theme="snow"
+                value={eligibilityText}
+                onChange={setEligibilityText}
+                modules={quillModules}
+                placeholder="Describe eligibility requirements..."
+                className="bg-white"
+              />
+            </div>
           </div>
         </div>
 
@@ -1359,620 +1116,25 @@ const CourseCreatePage: React.FC = () => {
           </div>
         </div>
 
-        {/* 6. Full Time Courses */}
+        {/* 6. Program Fee */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <line x1="3" y1="9" x2="21" y2="9" />
-                  <line x1="9" y1="21" x2="9" y2="9" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-base font-semibold text-gray-800">
-                  Full Time Courses
-                </h2>
-                <p className="text-sm text-gray-500 mt-0.5">
-                  Manage full-time course listings, fees, and durations
-                </p>
-              </div>
+          <div className="p-6">
+            <label className={labelClass}>Fee Structure</label>
+            <p className="text-xs text-gray-500 mb-2">Describe the fee structure using rich text</p>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <QuillEditor
+                theme="snow"
+                value={feeStructureText}
+                onChange={setFeeStructureText}
+                modules={quillModules}
+                placeholder="Describe fee structure, payment details..."
+                className="bg-white"
+              />
             </div>
-            <button
-              onClick={() =>
-                setFullTimeCourses((prev) => [
-                  ...prev,
-                  {
-                    id: nextId(prev),
-                    course: "",
-                    totalFees: "",
-                    seats: "",
-                    startDate: "",
-                    endDate: "",
-                  },
-                ])
-              }
-              className="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-gray-200 rounded-lg hover:bg-blue-50 flex items-center gap-1.5 transition-colors shadow-sm shrink-0"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>{" "}
-              Add Row
-            </button>
-          </div>
-          <div className="p-6 overflow-visible">
-            <div className="rounded-lg border border-gray-200 overflow-visible">
-              <table className="w-full text-left">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">
-                      Course
-                    </th>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">
-                      Total Fees
-                    </th>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">
-                      Seats
-                    </th>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">
-                      Start Date
-                    </th>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200">
-                      End Date
-                    </th>
-                    <th className="px-4 py-3 text-sm font-semibold text-gray-700 border-b border-gray-200 w-16"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {fullTimeCourses.map((ft) => (
-                    <tr key={ft.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-2 border-b border-gray-200">
-                        <input
-                          type="text"
-                          className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white"
-                          placeholder="e.g. B.Sc. CSIT"
-                          value={ft.course}
-                          onChange={(e) =>
-                            setFullTimeCourses((prev) =>
-                              prev.map((x) =>
-                                x.id === ft.id
-                                  ? { ...x, course: e.target.value }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-2 border-b border-gray-200">
-                        <input
-                          type="text"
-                          className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white"
-                          placeholder="e.g. NPR 250,000"
-                          value={ft.totalFees}
-                          onChange={(e) =>
-                            setFullTimeCourses((prev) =>
-                              prev.map((x) =>
-                                x.id === ft.id
-                                  ? { ...x, totalFees: e.target.value }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-2 border-b border-gray-200">
-                        <input
-                          type="number"
-                          min="0"
-                          className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white"
-                          placeholder="e.g. 60"
-                          value={ft.seats}
-                          onChange={(e) =>
-                            setFullTimeCourses((prev) =>
-                              prev.map((x) =>
-                                x.id === ft.id
-                                  ? { ...x, seats: e.target.value }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-2 border-b border-gray-200">
-                        <input
-                          type="date"
-                          className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white"
-                          value={ft.startDate}
-                          max={ft.endDate || undefined}
-                          onChange={(e) =>
-                            setFullTimeCourses((prev) =>
-                              prev.map((x) =>
-                                x.id === ft.id
-                                  ? { ...x, startDate: e.target.value }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-2 border-b border-gray-200">
-                        <input
-                          type="date"
-                          className="w-full border-0 rounded-none px-1 py-1.5 text-sm focus:border-blue-400 outline-none bg-white"
-                          value={ft.endDate}
-                          min={ft.startDate || undefined}
-                          onChange={(e) =>
-                            setFullTimeCourses((prev) =>
-                              prev.map((x) =>
-                                x.id === ft.id
-                                  ? { ...x, endDate: e.target.value }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                      </td>
-                      <td className="px-4 py-2 text-right border-b border-gray-200">
-                        <button
-                          onClick={() =>
-                            setFullTimeCourses((prev) =>
-                              prev.filter((x) => x.id !== ft.id),
-                            )
-                          }
-                          className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
-                        >
-                          <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polyline points="3 6 5 6 21 6" />
-                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {fullTimeCourses.length === 0 && (
-              <p className="text-sm text-gray-400 text-center py-4">
-                No courses added yet.
-              </p>
-            )}
           </div>
         </div>
 
-        {/* 7. Subjects & Career */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <SectionItemHeader
-            icon="book-open"
-            title="Subjects & Career Opportunities"
-            subtitle="Define subject groups and career paths"
-            onAdd={() =>
-              setSubjectGroups((prev) => [
-                ...prev,
-                {
-                  id: nextId(prev),
-                  groupName: "",
-                  description: "",
-                  subjects: [],
-                  careers: [],
-                },
-              ])
-            }
-            addLabel="Add Group"
-          />
-          <div className="p-6 space-y-6">
-            {subjectGroups.map((sg) => (
-              <div
-                key={sg.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-              >
-                <button
-                  onClick={() =>
-                    setSubjectGroups((prev) =>
-                      prev.filter((x) => x.id !== sg.id),
-                    )
-                  }
-                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-                <div className="pr-12 space-y-4">
-                  <div>
-                    <label className={labelClass}>
-                      Group Name <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Physical Group"
-                      value={sg.groupName}
-                      onChange={(e) =>
-                        setSubjectGroups((prev) =>
-                          prev.map((x) =>
-                            x.id === sg.id
-                              ? { ...x, groupName: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Group Description</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. This group focuses on core science subjects"
-                      value={sg.description}
-                      onChange={(e) =>
-                        setSubjectGroups((prev) =>
-                          prev.map((x) =>
-                            x.id === sg.id
-                              ? { ...x, description: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Available Streams (bullet points)
-                    </label>
-                    <div className="space-y-2">
-                      {(sg.subjects || []).map((item, si) => (
-                        <div key={si} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Physics"
-                            value={item}
-                            onChange={(e) =>
-                              setSubjectGroups((prev) =>
-                                prev.map((x) =>
-                                  x.id === sg.id
-                                    ? {
-                                        ...x,
-                                        subjects: (x.subjects || []).map(
-                                          (v, j) =>
-                                            j === si ? e.target.value : v,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setSubjectGroups((prev) =>
-                                prev.map((x) =>
-                                  x.id === sg.id
-                                    ? {
-                                        ...x,
-                                        subjects: (x.subjects || []).filter(
-                                          (_, j) => j !== si,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setSubjectGroups((prev) =>
-                            prev.map((x) =>
-                              x.id === sg.id
-                                ? {
-                                    ...x,
-                                    subjects: [...(x.subjects || []), ""],
-                                  }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>{" "}
-                        Add Stream
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className={labelClass}>
-                      Career Opportunities (bullet points)
-                    </label>
-                    <div className="space-y-2">
-                      {(sg.careers || []).map((item, ci) => (
-                        <div key={ci} className="flex items-center gap-2">
-                          <span className="text-gray-400 shrink-0">&bull;</span>
-                          <input
-                            type="text"
-                            className={inputClass}
-                            placeholder="e.g. Medicine (MBBS)"
-                            value={item}
-                            onChange={(e) =>
-                              setSubjectGroups((prev) =>
-                                prev.map((x) =>
-                                  x.id === sg.id
-                                    ? {
-                                        ...x,
-                                        careers: (x.careers || []).map(
-                                          (v, j) =>
-                                            j === ci ? e.target.value : v,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setSubjectGroups((prev) =>
-                                prev.map((x) =>
-                                  x.id === sg.id
-                                    ? {
-                                        ...x,
-                                        careers: (x.careers || []).filter(
-                                          (_, j) => j !== ci,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 shrink-0"
-                          >
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <polyline points="3 6 5 6 21 6" />
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                            </svg>
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        onClick={() =>
-                          setSubjectGroups((prev) =>
-                            prev.map((x) =>
-                              x.id === sg.id
-                                ? { ...x, careers: [...(x.careers || []), ""] }
-                                : x,
-                            ),
-                          )
-                        }
-                        className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="12" y1="5" x2="12" y2="19" />
-                          <line x1="5" y1="12" x2="19" y2="12" />
-                        </svg>{" "}
-                        Add Career
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 8. Program Fee */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <SectionItemHeader
-            icon="wallet"
-            title="Program Fee"
-            subtitle="Fee structure details"
-            onAdd={() =>
-              setFeeItems((prev) => [
-                ...prev,
-                {
-                  id: nextId(prev),
-                  particular: "",
-                  amount: "",
-                  frequency: "",
-                  notes: "",
-                },
-              ])
-            }
-            addLabel="Add Fee Item"
-          />
-          <div className="p-6 space-y-4">
-            {feeItems.map((fi) => (
-              <div
-                key={fi.id}
-                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-              >
-                <button
-                  onClick={() =>
-                    setFeeItems((prev) => prev.filter((x) => x.id !== fi.id))
-                  }
-                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <polyline points="3 6 5 6 21 6" />
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                  </svg>
-                </button>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pr-12">
-                  <div>
-                    <label className={labelClass}>Particulars</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. Admission Fee"
-                      value={fi.particular}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, particular: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Amount (NPR)</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. 25,000"
-                      value={fi.amount}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, amount: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Frequency</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. One-time, Yearly"
-                      value={fi.frequency}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, frequency: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>Notes</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="Optional notes"
-                      value={fi.notes}
-                      onChange={(e) =>
-                        setFeeItems((prev) =>
-                          prev.map((x) =>
-                            x.id === fi.id
-                              ? { ...x, notes: e.target.value }
-                              : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 9. Scholarships Overview */}
+        {/* 7. Scholarships Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
             <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
@@ -2117,10 +1279,22 @@ const CourseCreatePage: React.FC = () => {
                 </div>
               ))}
             </div>
+            <div>
+              <label className={labelClass}>
+                Scholarship Notes (important details, bullet points)
+              </label>
+              <textarea
+                className={`${inputClass} min-h-[120px]`}
+                rows={5}
+                placeholder={`• Scholarship is awarded based on merit\n• Students must maintain 3.0 GPA\n• Apply before admission deadline`}
+                value={scholarshipNotes}
+                onChange={(e) => setScholarshipNotes(e.target.value)}
+              />
+            </div>
           </div>
         </div>
 
-        {/* 10. FAQ */}
+        {/* 8. FAQ */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <SectionItemHeader
             icon="help-circle"
