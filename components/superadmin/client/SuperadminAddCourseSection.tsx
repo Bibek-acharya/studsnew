@@ -2015,6 +2015,7 @@ export default function SuperadminAddCourseSection({
                             </svg>
                           </button>
                         )}
+                        </div>
                       </div>
                     ))}
                   </div>
