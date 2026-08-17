@@ -174,27 +174,27 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
                   <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full -ml-16 -mb-16 blur-2xl"></div>
 
-                  <h2 className="text-white text-[1.3rem] font-bold leading-tight relative z-10 mb-2">
+                  <h2 className="text-white text-[1.1rem] font-bold leading-tight relative z-10 mb-2">
                     {course.title}
                   </h2>
-                  <div className="text-white/80 text-[0.65rem] relative z-10 mt-auto pt-2 tracking-wide font-medium">
+                  <div className="text-white/80 text-[0.55rem] relative z-10 mt-auto pt-2 tracking-wide font-medium">
                     studsphere.com
                   </div>
                 </div>
 
                 {/* Badges and Duration Row */}
                 <div className="flex justify-between items-center mb-3">
-                  <span className={`${levelBadgeColor(levelText)} text-xs font-bold px-3 py-1 rounded-md tracking-wider`}>
+                  <span className={`${levelBadgeColor(levelText)} text-[0.65rem] font-bold px-3 py-1 rounded-md tracking-wider`}>
                     {levelText.toUpperCase()}
                   </span>
-                  <div className="flex items-center text-gray-500 text-sm font-medium">
+                  <div className="flex items-center text-gray-500 text-xs font-medium">
                     <Clock className="w-4 h-4 mr-1.5" />
                     <span>{course.duration || "4 Years"}</span>
                   </div>
                 </div>
 
                 {/* Main Title */}
-                <h3 className="text-[1.1rem] font-bold text-gray-900 mb-4 leading-tight">
+                <h3 className="text-[0.95rem] font-bold text-gray-900 mb-4 leading-tight">
                   {course.title}
                 </h3>
 
@@ -204,7 +204,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     <div className="w-6 flex justify-center mt-0.5">
                       <Building2 className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.9rem]">
+                    <div className="text-[0.8rem]">
                       <span className="font-semibold text-gray-800">Affiliation:</span>{" "}
                       <span className="text-gray-500">
                         {course.affiliationName || course.nonUniversityAffiliation || "-"}
@@ -215,7 +215,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     <div className="w-6 flex justify-center mt-0.5">
                       <GraduationCap className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.9rem]">
+                    <div className="text-[0.8rem]">
                       <span className="font-semibold text-gray-800">Field:</span>{" "}
                       <span className="text-gray-500">
                         {course.fieldOfStudy || course.field || "-"}
@@ -226,7 +226,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     <div className="w-6 flex justify-center mt-0.5">
                       <CreditCard className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.9rem]">
+                    <div className="text-[0.8rem]">
                       <span className="font-semibold text-gray-800">Est. Fee:</span>{" "}
                       <span className="font-bold text-[#0014FF]">
                         {course.estFee || "-"}
@@ -237,7 +237,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                     <div className="w-6 flex justify-center mt-0.5">
                       <Users className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.9rem]">
+                    <div className="text-[0.8rem]">
                       <span className="font-semibold text-gray-800">Seats:</span>{" "}
                       <span className="text-gray-500">
                         {course.fullTimeCourses?.[0]?.seats || "-"}
@@ -253,7 +253,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => router.push(`/course-finder/${course.id}`)}
-                    className="flex-1 py-2.5 px-4 bg-white border border-gray-300 rounded text-gray-600 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                    className="flex-1 py-2.5 px-4 bg-white border border-gray-300 rounded text-gray-600 font-medium text-xs focus:outline-none focus:ring-2 focus:ring-gray-200"
                   >
                     Details
                   </button>
@@ -264,7 +264,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                         courseTitle: course.title,
                       })
                     }
-                    className="flex-[1.5] py-2.5 px-4 bg-[#0014FF] text-white rounded font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-[#0014FF] focus:ring-offset-1"
+                    className="flex-[1.5] py-2.5 px-4 bg-[#0014FF] text-white rounded font-semibold text-xs focus:outline-none focus:ring-2 focus:ring-[#0014FF] focus:ring-offset-1"
                   >
                     View Colleges
                   </button>
