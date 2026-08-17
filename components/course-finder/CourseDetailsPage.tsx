@@ -703,9 +703,10 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                     Scholarship Programs
                   </h2>
                   {scholarshipDesc && (
-                    <p className="text-[15px] text-gray-600 mt-1">
-                      {scholarshipDesc}
-                    </p>
+                    <div
+                      className="text-[15px] text-gray-600 mt-1 prose prose-sm max-w-none"
+                      dangerouslySetInnerHTML={{ __html: scholarshipDesc }}
+                    />
                   )}
                 </div>
                 {scholarships.length > 0 ? (
@@ -775,9 +776,10 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                   </p>
                 )}
                 {scholarshipNotes && (
-                  <p className="mt-4 text-sm text-gray-500">
-                    {scholarshipNotes}
-                  </p>
+                  <div
+                    className="mt-4 text-sm text-gray-500 prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: scholarshipNotes }}
+                  />
                 )}
               </div>
             )}

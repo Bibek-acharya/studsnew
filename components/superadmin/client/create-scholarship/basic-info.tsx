@@ -88,15 +88,9 @@ export function DescriptionCard()  {
           <label className="mb-2 block text-sm font-medium text-gray-700">Program Description (About Tab)</label>
           <RichTextEditor placeholder="Describe the scholarship program, its mission, and what makes it unique..." minHeight={200} />
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Scholarship Subtitle (shown below heading in Scholarship tab)</label>
-            <input type="text" className="input-field" placeholder="e.g., Fully funded higher secondary education for SEE graduates across Nepal" />
-          </div>
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-700">Scholarship Tab Description</label>
-            <textarea className="input-field min-h-[80px]" rows={3} placeholder="This scholarship is based on financial need and academic performance of candidates." />
-          </div>
+        <div>
+          <label className="mb-2 block text-sm font-medium text-gray-700">Scholarship Overview</label>
+          <RichTextEditor placeholder="Describe the scholarship program, its mission, and what makes it unique..." minHeight={160} />
         </div>
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>

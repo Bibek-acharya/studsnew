@@ -1893,7 +1893,7 @@ export default function SuperadminAddCourseSection({
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                   </svg>
                 </button>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pr-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-12">
                   <div>
                     <label className={labelClass}>Title</label>
                     <input
@@ -1911,40 +1911,75 @@ export default function SuperadminAddCourseSection({
                     />
                   </div>
                   <div>
-                    <label className={labelClass}>Size</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="e.g. 2.4 MB"
-                      value={d.size}
-                      onChange={(e) =>
-                        setDownloads((prev) =>
-                          prev.map((x) =>
-                            x.id === d.id ? { ...x, size: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className={labelClass}>File URL</label>
-                    <input
-                      type="text"
-                      className={inputClass}
-                      placeholder="https://..."
-                      value={d.file}
-                      onChange={(e) =>
-                        setDownloads((prev) =>
-                          prev.map((x) =>
-                            x.id === d.id ? { ...x, file: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
+                    <label className={labelClass}>File</label>
+                    {d.file ? (
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-white truncate">
+                          {d.file.split("/").pop()}
+                          {d.size && <span className="text-gray-400 ml-2">({d.size})</span>}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setDownloads((prev) =>
+                              prev.map((x) =>
+                                x.id === d.id ? { ...x, file: "", size: "" } : x,
+                              ),
+                            )
+                          }
+                          className="px-3 py-2.5 text-sm text-red-600 hover:bg-red-50 rounded-lg border border-gray-200 transition-colors"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex items-center justify-center w-full px-4 py-2.5 border border-dashed border-gray-300 rounded-lg text-sm text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition-colors cursor-pointer">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                        Choose file
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.ppt,.pptx,.doc,.docx,.xls,.xlsx,.csv"
+                          onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+                            const maxSize = 25 * 1024 * 1024;
+                            if (file.size > maxSize) {
+                              alert("File size must be under 25 MB.");
+                              e.target.value = "";
+                              return;
+                            }
+                            const formatSize = (bytes: number) => {
+                              if (bytes < 1024) return bytes + " B";
+                              if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+                              return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+                            };
+                            const sizeStr = formatSize(file.size);
+                            try {
+                              const url = await uploadFile(file, "course/downloads");
+                              setDownloads((prev) =>
+                                prev.map((x) =>
+                                  x.id === d.id ? { ...x, file: url, size: sizeStr } : x,
+                                ),
+                              );
+                            } catch {
+                              alert("Upload failed. Please try again.");
+                            }
+                          }}
+                        />
+                      </label>
+                    )}
                   </div>
                 </div>
               </div>
             ))}
+            {downloads.length === 0 && (
+              <p className="text-sm text-gray-400 text-center py-4">No downloads added yet.</p>
+            )}
           </div>
         </div>
 

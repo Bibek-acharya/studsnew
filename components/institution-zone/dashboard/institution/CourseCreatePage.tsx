@@ -344,41 +344,42 @@ const CourseCreatePage: React.FC = () => {
   }, [selectedLevel, selectedAffiliationId]);
 
   const selectGlobalCourse = (course: GlobalCourse) => {
-    setSelectedGlobalCourse(course);
-    setTitle(course.title || "");
-    setDuration(course.duration || "");
-    setEstFee(course.estFee || "");
-    setLevel(course.level || "");
-    setDescription(course.description || "");
-    setBannerUrl(course.bannerUrl || "");
-    setAffiliation(course.affiliationName || course.nonUniversityAffiliation || "");
+    const normalized = { ...course, id: Number(course.id) || 0 };
+    setSelectedGlobalCourse(normalized);
+    setTitle(normalized.title || "");
+    setDuration(normalized.duration || "");
+    setEstFee(normalized.estFee || "");
+    setLevel(normalized.level || "");
+    setDescription(normalized.description || "");
+    setBannerUrl(normalized.bannerUrl || "");
+    setAffiliation(normalized.affiliationName || normalized.nonUniversityAffiliation || "");
 
-    if (course.eligibilityRows?.length) {
-      setEligibilityRows(course.eligibilityRows.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.eligibilityRows?.length) {
+      setEligibilityRows(normalized.eligibilityRows.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.admissionSteps?.length) {
-      setAdmissionSteps(course.admissionSteps.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.admissionSteps?.length) {
+      setAdmissionSteps(normalized.admissionSteps.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.scholarships?.length) {
-      setScholarships(course.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.scholarships?.length) {
+      setScholarships(normalized.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.faqs?.length) {
-      setFaqs(course.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.faqs?.length) {
+      setFaqs(normalized.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.whoShouldChoose?.length) {
-      setWhoShouldChoose(course.whoShouldChoose.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.whoShouldChoose?.length) {
+      setWhoShouldChoose(normalized.whoShouldChoose.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.features?.length) {
-      setFeatures(course.features.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.features?.length) {
+      setFeatures(normalized.features.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.fullTimeCourses?.length) {
-      setFullTimeCourses(course.fullTimeCourses.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.fullTimeCourses?.length) {
+      setFullTimeCourses(normalized.fullTimeCourses.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.feeItems?.length) {
-      setFeeItems(course.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })));
+    if (normalized.feeItems?.length) {
+      setFeeItems(normalized.feeItems.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (course.scholarshipDesc) {
-      setScholarshipDesc(course.scholarshipDesc);
+    if (normalized.scholarshipDesc) {
+      setScholarshipDesc(normalized.scholarshipDesc);
     }
   };
 
@@ -399,7 +400,7 @@ const CourseCreatePage: React.FC = () => {
   };
 
   const collectData = () => ({
-    globalCourseId: selectedGlobalCourse?.id || 0,
+    globalCourseId: Number(selectedGlobalCourse?.id) || 0,
     fee: estFee,
     eligibility: "",
     capacity: 0,
@@ -637,9 +638,12 @@ const CourseCreatePage: React.FC = () => {
                   }}
                 >
                   <option value="">Select University</option>
-                  {universities.map((u) => (
-                    <option key={u.id} value={u.id}>{u.name}</option>
-                  ))}
+                  {universities
+                    .slice()
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((u) => (
+                      <option key={u.id} value={u.id}>{u.name}</option>
+                    ))}
                 </select>
               </div>
             )}
