@@ -6,7 +6,7 @@ import {
   Building2,
   GraduationCap,
   CreditCard,
-  Briefcase,
+  Users,
   Bookmark,
   BookOpen,
 } from "lucide-react";
@@ -37,12 +37,12 @@ const levelBadgeColor = (level?: string) => {
     l.includes("plus two") ||
     l.includes("higher secondary")
   )
-    return "bg-[#7c3aed]/10 text-[#7c3aed]";
+    return "bg-[#FDE8EE] text-[#D11D5A]";
   if (l.includes("bachelor") || l.includes("bach") || l.includes("diploma"))
-    return "bg-[#db2777]/10 text-[#db2777]";
+    return "bg-[#FDE8EE] text-[#D11D5A]";
   if (l.includes("master") || l.includes("post"))
-    return "bg-[#ea580c]/10 text-[#ea580c]";
-  return "bg-gray-100 text-gray-600";
+    return "bg-[#FDE8EE] text-[#D11D5A]";
+  return "bg-[#FDE8EE] text-[#D11D5A]";
 };
 
 const CourseGrid: React.FC<CourseGridProps> = ({
@@ -143,38 +143,15 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   return (
     <>
       <style>{`
-        .custom-tooltip {
-          position: absolute;
-          bottom: 100%;
-          left: 0;
-          margin-bottom: 8px;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.3s;
-          z-index: 20;
-          width: auto;
-          max-width: 200px;
-          background-color: #111827;
-          color: white;
-          font-size: 11px;
-          font-weight: 500;
-          padding: 6px 10px;
-          border-radius: 6px;
-          pointer-events: none;
-          transform: translateY(4px);
+        .banner-gradient {
+          background: linear-gradient(135deg, #0d21e0 0%, #0014ff 100%);
+          background-image:
+            radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 40%),
+            radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0%, transparent 40%),
+            linear-gradient(135deg, #1126ef 0%, #0014FF 100%);
         }
-        .group:hover .custom-tooltip {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(-4px);
-        }
-        .tooltip-arrow {
-          position: absolute;
-          top: 100%;
-          left: 16px;
-          border-width: 5px;
-          border-style: solid;
-          border-color: #111827 transparent transparent transparent;
+        .card-shadow {
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
         }
       `}</style>
 
@@ -191,159 +168,130 @@ const CourseGrid: React.FC<CourseGridProps> = ({
 
           return (
             <React.Fragment key={course.id || index}>
-              <div className="bg-white rounded-md border border-gray-200 flex flex-col relative transition-all hover:border-blue-500/20 duration-300">
-                {/* Image Area - Reduced height and padding */}
-                <div className="relative h-30 w-full p-3 pb-2">
-                  <img
-                    src={
-                      course.bannerUrl ||
-                      `https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=400&q=200`
-                    }
-                    alt={course.title}
-                    className="w-full h-full object-cover rounded-md"
-                  />
+              <div className="bg-white rounded-xl border border-gray-200 w-full p-4 card-shadow flex flex-col">
+                {/* Banner Area */}
+                <div className="banner-gradient rounded-lg p-6 mb-4 relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[140px]">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
+                  <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full -ml-16 -mb-16 blur-2xl"></div>
+
+                  <h2 className="text-white text-[1.3rem] font-bold leading-tight relative z-10 mb-2">
+                    {course.title}
+                  </h2>
+                  <div className="text-white/80 text-[0.65rem] relative z-10 mt-auto pt-2 tracking-wide font-medium">
+                    studsphere.com
+                  </div>
                 </div>
 
-                {/* Content Area - Reduced paddings */}
-                <div className="px-3 pb-3 pt-0 flex-1 flex flex-col">
-                  {/* Level & Duration */}
-                  <div className="flex justify-between items-center mb-1.5 text-[12px] font-bold">
-                    <span
-                      className={`${levelBadgeColor(levelText)} px-2 py-0.5 rounded-md tracking-wide uppercase`}
-                    >
-                      {levelText}
-                    </span>
-                    <div className="flex items-center text-gray-500 gap-1 font-medium">
-                      <Clock className="w-3.5 h-3.5 text-gray-400" />
-                      {course.duration || "4 Years"}
+                {/* Badges and Duration Row */}
+                <div className="flex justify-between items-center mb-3">
+                  <span className={`${levelBadgeColor(levelText)} text-xs font-bold px-3 py-1 rounded-md tracking-wider`}>
+                    {levelText.toUpperCase()}
+                  </span>
+                  <div className="flex items-center text-gray-500 text-sm font-medium">
+                    <Clock className="w-4 h-4 mr-1.5" />
+                    <span>{course.duration || "4 Years"}</span>
+                  </div>
+                </div>
+
+                {/* Main Title */}
+                <h3 className="text-[1.1rem] font-bold text-gray-900 mb-4 leading-tight">
+                  {course.title}
+                </h3>
+
+                {/* Details List */}
+                <div className="space-y-2.5 mb-5">
+                  <div className="flex items-start">
+                    <div className="w-6 flex justify-center mt-0.5">
+                      <Building2 className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div className="text-[0.9rem]">
+                      <span className="font-semibold text-gray-800">Affiliation:</span>{" "}
+                      <span className="text-gray-500">
+                        {course.affiliationName || course.nonUniversityAffiliation || "-"}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Title with Custom Tooltip */}
-                  <div className="relative group mb-1.5">
-                    <h2 className="text-base font-bold text-gray-900 group-hover:text-[#0000ff] cursor-pointer transition-colors truncate leading-tight">
-                      {course.title}
-                    </h2>
-                    <div className="custom-tooltip">
-                      {course.title}
-                      <div className="tooltip-arrow"></div>
+                  <div className="flex items-start">
+                    <div className="w-6 flex justify-center mt-0.5">
+                      <GraduationCap className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div className="text-[0.9rem]">
+                      <span className="font-semibold text-gray-800">Field:</span>{" "}
+                      <span className="text-gray-500">
+                        {course.fieldOfStudy || course.field || "-"}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Details List - Tighter spacing */}
-                  <div className="space-y-1 text-[12px] flex-1">
-                    <div className="flex items-start gap-2">
-                      <Building2 className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
-                      <div>
-                        <span className="font-bold text-gray-700">
-                          Affiliation:
-                        </span>{" "}
-                        <span className="text-gray-600">
-                          {course.affiliationName || course.nonUniversityAffiliation || "-"}
-                        </span>
-                      </div>
+                  <div className="flex items-start">
+                    <div className="w-6 flex justify-center mt-0.5">
+                      <CreditCard className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="flex items-start gap-2">
-                      <GraduationCap className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
-                      <div>
-                        <span className="font-bold text-gray-700">
-                          Field:
-                        </span>{" "}
-                        <span className="text-gray-600">
-                          {course.fieldOfStudy || course.field || "-"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <CreditCard className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
-                      <div>
-                        <span className="font-bold text-gray-700">
-                          Est. Fee:
-                        </span>{" "}
-                        <span className="text-[#0000ff] font-bold">
-                          {course.estFee || "Rs. 5,00,000"}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <Briefcase className="w-3.75 h-3.75 text-gray-400 mt-px shrink-0" />
-                      <div>
-                        <span className="font-bold text-gray-700">Career:</span>{" "}
-                        <span className="text-gray-600 truncate inline-block max-w-37.5 align-bottom">
-                          {course.careerPath ||
-                            "Software Engineer, Web Developer, Sys..."}
-                        </span>
-                      </div>
+                    <div className="text-[0.9rem]">
+                      <span className="font-semibold text-gray-800">Est. Fee:</span>{" "}
+                      <span className="font-bold text-[#0014FF]">
+                        {course.estFee || "-"}
+                      </span>
                     </div>
                   </div>
-
-                  {/* Action Buttons - All in a single row */}
-                  <div className="flex gap-2 mt-3 -mb-3 py-5 border-t border-dashed border-gray-200">
-                    <button
-                      onClick={() => router.push(`/course-finder/${course.id}`)}
-                      className="flex-[1.5] flex items-center justify-center border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 rounded-md transition-colors text-[12px] whitespace-nowrap"
-                    >
-                      Details
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        onNavigate("universitiesPage", {
-                          courseId: course.id,
-                          courseTitle: course.title,
-                        })
-                      }
-                      className="flex-[2.5] bg-[#0014f4] hover:bg-blue-800 text-white font-semibold py-2 rounded-md  text-[12px] flex items-center justify-center transition-colors whitespace-nowrap"
-                    >
-                      View Colleges
-                    </button>
-
-                    <button
-                      type="button"
-                      disabled={!!pendingBookmarks[Number(course.id)]}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleSaved(Number(course.id));
-                      }}
-                      className={`shrink-0 w-10 flex items-center justify-center border rounded-md transition-colors ${
-                        pendingBookmarks[Number(course.id)]
-                          ? "border-gray-100 bg-gray-50 cursor-not-allowed"
-                          : savedCourseIds.includes(Number(course.id))
-                            ? "border-blue-200 bg-blue-50"
-                            : "border-gray-200 hover:bg-gray-50"
-                      }`}
-                    >
-                      {pendingBookmarks[Number(course.id)] ? (
-                        <svg
-                          className="w-4 h-4 animate-spin text-gray-400"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          />
-                        </svg>
-                      ) : (
-                        <Bookmark
-                          className={`w-4 h-4 transition-all ${
-                            savedCourseIds.includes(Number(course.id))
-                              ? "text-[#0000ff] fill-[#0000ff]"
-                              : "text-gray-400"
-                          }`}
-                        />
-                      )}
-                    </button>
+                  <div className="flex items-start">
+                    <div className="w-6 flex justify-center mt-0.5">
+                      <Users className="w-4 h-4 text-gray-400" />
+                    </div>
+                    <div className="text-[0.9rem]">
+                      <span className="font-semibold text-gray-800">Seats:</span>{" "}
+                      <span className="text-gray-500">
+                        {course.fullTimeCourses?.[0]?.seats || "-"}
+                      </span>
+                    </div>
                   </div>
+                </div>
+
+                {/* Divider */}
+                <div className="border-t border-dashed border-gray-300 mb-4"></div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => router.push(`/course-finder/${course.id}`)}
+                    className="flex-1 py-2.5 px-4 bg-white border border-gray-300 rounded text-gray-600 font-medium text-sm focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() =>
+                      onNavigate("universitiesPage", {
+                        courseId: course.id,
+                        courseTitle: course.title,
+                      })
+                    }
+                    className="flex-[1.5] py-2.5 px-4 bg-[#0014FF] text-white rounded font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-[#0014FF] focus:ring-offset-1"
+                  >
+                    View Colleges
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!!pendingBookmarks[Number(course.id)]}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleSaved(Number(course.id));
+                    }}
+                    className="w-[42px] h-[42px] flex items-center justify-center bg-white border border-gray-300 rounded text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-200 shrink-0"
+                  >
+                    {pendingBookmarks[Number(course.id)] ? (
+                      <svg className="w-4 h-4 animate-spin text-gray-400" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : (
+                      <Bookmark
+                        className={`w-5 h-5 transition-all ${
+                          savedCourseIds.includes(Number(course.id))
+                            ? "text-[#0014FF] fill-[#0014FF]"
+                            : "text-gray-400"
+                        }`}
+                      />
+                    )}
+                  </button>
                 </div>
               </div>
               {(index + 1) % 6 === 0 && index !== currentCourses.length - 1 && (
