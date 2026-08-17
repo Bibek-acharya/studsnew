@@ -243,7 +243,6 @@ const CourseCreatePage: React.FC = () => {
             duration: res.duration || "",
             level: res.level || "",
             field: res.field || "",
-            fieldOfStudy: res.fieldOfStudy || "",
             affiliationName: res.affiliationName || "",
             nonUniversityAffiliation: res.nonUniversityAffiliation || "",
             bannerUrl: res.bannerUrl || "",
@@ -334,8 +333,8 @@ const CourseCreatePage: React.FC = () => {
     if (normalized.features?.length) {
       setFeatures(normalized.features.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (normalized.feeStructureText) {
-      setFeeStructureText(normalized.feeStructureText);
+    if (normalized.feeStructure) {
+      setFeeStructureText(normalized.feeStructure);
     }
     if (normalized.scholarshipDesc) {
       setScholarshipDesc(normalized.scholarshipDesc);

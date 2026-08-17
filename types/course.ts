@@ -171,12 +171,12 @@ export interface InstitutionProgram {
   bannerUrl: string;
   fee: string;
   eligibility: string;
+  eligibilityText: string;
+  feeStructureText: string;
   capacity: number;
   status: string;
   whoShouldChoose: PersonaItem[];
   features: FeatureItem[];
-  fullTimeCourses: FullTimeCourse[];
-  feeItems: FeeItem[];
   overrides: CourseOverrides;
   nullifiedFields: string[];
 }

@@ -313,7 +313,7 @@ const NewsDetailsPage: React.FC<{
 
   return (
     <div className="bg-white text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900">
-      <div className="max-w-350 mx-auto py-8 px-4 sm:px-6 flex flex-col lg:flex-row gap-10 lg:gap-16">
+      <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
             <span
