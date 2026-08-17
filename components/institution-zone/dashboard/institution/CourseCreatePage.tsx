@@ -636,28 +636,30 @@ const CourseCreatePage: React.FC = () => {
               <label className={labelClass}>
                 Course <span className="text-red-500">*</span>
               </label>
-              <select
-                className={selectClass}
-                value={selectedCourseId}
-                onChange={(e) => {
-                  const course = globalCourses.find(c => c.id === Number(e.target.value));
-                  if (course) selectGlobalCourse(course);
-                }}
-                disabled={loadingCourses || globalCourses.length === 0}
-              >
-                <option value="">{loadingCourses ? "Loading courses..." : globalCourses.length === 0 ? "No courses available" : "Select existing course (optional)"}</option>
-                {globalCourses.map(course => (
-                  <option key={course.id} value={course.id}>{course.title}</option>
-                ))}
-              </select>
-              <input
-                type="text"
-                className={`${inputClass} ${selectedGlobalCourse ? "bg-gray-50" : ""} ${fieldError("title")}`}
-                placeholder="e.g. 10+2 Science"
-                value={selectedGlobalCourse ? selectedGlobalCourse.title : title}
-                onChange={(e) => !selectedGlobalCourse && setTitle(e.target.value)}
-                disabled={!!selectedGlobalCourse}
-              />
+              {globalCourses.length > 0 || loadingCourses ? (
+                <select
+                  className={selectClass}
+                  value={selectedCourseId}
+                  onChange={(e) => {
+                    const course = globalCourses.find(c => c.id === Number(e.target.value));
+                    if (course) selectGlobalCourse(course);
+                  }}
+                  disabled={loadingCourses}
+                >
+                  <option value="">{loadingCourses ? "Loading courses..." : "Select course"}</option>
+                  {globalCourses.map(course => (
+                    <option key={course.id} value={course.id}>{course.title}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  className={`${inputClass} ${fieldError("title")}`}
+                  placeholder="e.g. 10+2 Science"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              )
             </div>
 
             <div>
