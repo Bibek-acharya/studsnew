@@ -3,8 +3,7 @@
 import type { SyntheticEvent } from "react";
 import { useRef } from "react";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { EducationNewsItem } from "@/services/api";
-import HoverTooltip from "./HoverTooltip";
+import { EducationNewsItem, stripHtml } from "@/services/api";
 
 interface NewsStoriesSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -27,12 +26,6 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({
   newsArticles,
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const stripHtml = (html: string) =>
-    html
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .trim();
 
   const data: NewsCard[] = (newsArticles || []).map((item) => ({
     id: item.id,
@@ -49,7 +42,7 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({
             : "bg-emerald-50 text-emerald-600",
     imgSrc:
       item.image || "https://placehold.co/600x400/f1f5f9/94a3b8?text=News",
-    title: item.title,
+    title: stripHtml(item.title),
     description: stripHtml(
       item.excerpt ||
         item.content ||
@@ -151,11 +144,9 @@ const NewsStoriesSection: React.FC<NewsStoriesSectionProps> = ({
                     }}
                   />
                 </div>
-                <HoverTooltip label={card.title}>
-                  <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-brand-blue transition-all duration-300 tracking-tight mb-1 sm:mb-2 leading-snug line-clamp-2">
-                    {card.title}
-                  </h3>
-                </HoverTooltip>
+                <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-brand-blue transition-all duration-300 tracking-tight mb-1 sm:mb-2 leading-snug line-clamp-2">
+                  {card.title}
+                </h3>
                 <p className="text-xs sm:text-sm text-gray-500 mb-5 sm:mb-6 grow line-clamp-3 leading-relaxed">
                   {card.description}
                 </p>

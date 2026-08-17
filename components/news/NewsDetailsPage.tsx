@@ -12,6 +12,7 @@ import {
 } from "@/services/newsApi";
 import { fetchInstitutionNewsBySlug } from "@/services/institutionNewsApi";
 import { getPublicNewsBySlug } from "@/services/scholarshipProviderApi";
+import { stripHtml } from "@/services/api";
 import RichText from "@/components/RichText";
 
 function normalizeArticle(data: any): any {
@@ -187,8 +188,8 @@ const NewsDetailsPage: React.FC<{
           ...(instData?.data?.news || []).map((n: any) => ({
             id: `inst-${n.id}`,
             slug: n.slug || `inst-${n.id}`,
-            title: n.title,
-            excerpt: n.short_desc || "",
+            title: stripHtml(n.title || ""),
+            excerpt: stripHtml(n.short_desc || ""),
             image: n.image_url || "",
             category: n.news_type || "News",
             date: n.publish_date || n.created_at || "",
@@ -198,8 +199,8 @@ const NewsDetailsPage: React.FC<{
           ...(eduData?.data?.news || []).map((n: any) => ({
             id: `edu-${n.id}`,
             slug: n.slug || `edu-${n.id}`,
-            title: n.title,
-            excerpt: n.excerpt || "",
+            title: stripHtml(n.title || ""),
+            excerpt: stripHtml(n.excerpt || ""),
             image: n.image || "",
             category: n.category || "News",
             date: n.date || "",
@@ -207,21 +208,16 @@ const NewsDetailsPage: React.FC<{
             source: "edu",
           })),
         ];
-        const currentCategory = (article.category || "").toLowerCase();
         const currentTags = (article.tags || []).map((t: string) => t.toLowerCase());
         const currentTitle = (article.title || "").toLowerCase();
-        const stripHtml = (html: string) => html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").trim();
-        const filtered = allNews.filter((n) => {
-          if (n.id === article.id) return false;
-          if ((n.title || "").toLowerCase() === currentTitle) return false;
-          const nCat = (n.category || "").toLowerCase();
-          if (currentCategory && nCat === currentCategory) return true;
-          if (n.tags && currentTags.length > 0) {
-            const nTags = n.tags.map((t: string) => t.toLowerCase());
-            if (currentTags.some((t: string) => nTags.includes(t))) return true;
-          }
-          return false;
-        }).map((n) => ({ ...n, excerpt: stripHtml(n.excerpt || "") }));
+        const filtered = currentTags.length > 0
+          ? allNews.filter((n) => {
+              if (n.id === article.id) return false;
+              if ((n.title || "").toLowerCase() === currentTitle) return false;
+              const nTags = (n.tags || []).map((t: string) => t.toLowerCase());
+              return nTags.length > 0 && currentTags.some((t: string) => nTags.includes(t));
+            }).map((n) => ({ ...n, excerpt: stripHtml(n.excerpt || "") }))
+          : [];
         setRelated(filtered.slice(0, 5));
       } catch {}
     }
@@ -317,9 +313,9 @@ const NewsDetailsPage: React.FC<{
 
   return (
     <div className="bg-white text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900">
-      <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
+      <div className="max-w-350 mx-auto py-8 px-4 sm:px-6 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
-          <div className="flex items-center gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
             <span
               className={`${categoryBadgeClass} px-3 py-1 rounded-full flex items-center gap-1.5`}
             >
@@ -333,18 +329,18 @@ const NewsDetailsPage: React.FC<{
             </span>
 
             {article.views > 0 && (
-              <span className="flex items-center gap-1.5 ml-auto">
+              <span className="hidden sm:flex items-center gap-1.5 ml-auto">
                 <i className="fa-regular fa-eye"></i>
                 {article.views} views
               </span>
             )}
           </div>
 
-          <h1 className="text-3xl md:text-[2.5rem] font-bold leading-tight mb-6 text-gray-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-bold leading-tight mb-6 text-gray-900 tracking-tight">
             {article.title}
           </h1>
 
-          <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-gray-600 mb-8">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 sm:gap-4 text-sm text-gray-600 mb-8">
             <div className="flex items-center gap-2">
               <i className="fa-solid fa-user text-gray-800"></i>
 
@@ -356,27 +352,28 @@ const NewsDetailsPage: React.FC<{
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-calendar text-gray-800"></i>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <i className="fa-solid fa-calendar text-gray-800"></i>
 
-              <span>
-                Latest Update:{" "}
-                <strong className="text-gray-900 font-semibold">
-                  {formatDate(article.date)}
-                </strong>
-              </span>
+                <span>
+                  Latest Update:{" "}
+                  <strong className="text-gray-900 font-semibold">
+                    {formatDate(article.date)}
+                  </strong>
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsShareModalOpen(true)}
+                className="shrink-0 flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2 text-gray-700 transition-colors hover:bg-gray-50"
+                aria-label="Share article"
+              >
+                <i className="fa-solid fa-share-nodes"></i>
+                <span className="text-sm font-medium">Share</span>
+              </button>
             </div>
-          </div>
-
-          <div className="flex items-center gap-3 mb-8">
-            <button
-              type="button"
-              onClick={() => setIsShareModalOpen(true)}
-              className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50"
-              aria-label="Share article"
-            >
-              <i className="fa-solid fa-share-nodes"></i>
-            </button>
           </div>
 
           {getImageUrl(article.image) && (
@@ -446,7 +443,7 @@ const NewsDetailsPage: React.FC<{
                 readOnly={!isAuthenticated}
               ></textarea>
 
-              <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-100">
+              <div className="bg-gray-50 px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-gray-100">
                 <div className="flex items-center gap-1.5 text-xs text-gray-500">
                   <i className="fa-solid fa-circle-info text-gray-400"></i>
 
@@ -530,7 +527,7 @@ const NewsDetailsPage: React.FC<{
               </h2>
             </div>
 
-            <div className="space-y-6">
+            <div className="flex overflow-x-auto gap-4 pb-4 lg:pb-0 lg:block lg:space-y-6 lg:overflow-visible -mx-4 px-4 sm:mx-0 sm:px-0 snap-x snap-mandatory">
               {related.length > 0 ? (
                 related.map((rel, idx) => {
                   const relCat = (rel.category || "").toLowerCase();
@@ -579,7 +576,7 @@ const NewsDetailsPage: React.FC<{
                                   : "bg-slate-100 text-slate-700";
 
                   return (
-                    <div key={rel.id}>
+                    <div key={rel.id} className="min-w-[260px] sm:min-w-0 shrink-0 lg:shrink snap-start">
                       <Link
                         href={`/news/${(rel as any).slug || rel.id}`}
                         className="group cursor-pointer block"
@@ -589,7 +586,7 @@ const NewsDetailsPage: React.FC<{
                             <img
                               src={getImageUrl(rel.image)!}
                               alt={rel.title}
-                              className="w-full h-[150px] object-cover group-hover:scale-105 transition-transform duration-300"
+                              className="w-full h-[120px] sm:h-[150px] object-cover group-hover:scale-105 transition-transform duration-300"
                             />
                           </div>
                         )}
@@ -618,7 +615,7 @@ const NewsDetailsPage: React.FC<{
                       </Link>
 
                       {idx !== related.length - 1 && (
-                        <hr className="border-gray-100 mt-6" />
+                        <hr className="border-gray-100 mt-6 hidden lg:block" />
                       )}
                     </div>
                   );

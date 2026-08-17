@@ -2079,7 +2079,7 @@ export default function SuperadminAddCourseSection({
                         />
                         <input
                           type="text"
-                          className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none transition-colors bg-white min-w-0 flex-1"
+                          className={`${inputClass} flex-1 min-w-0`}
                           placeholder="Subject name"
                           value={subject.name}
                           onChange={(e) =>
@@ -2216,7 +2216,7 @@ export default function SuperadminAddCourseSection({
                           />
                           <input
                             type="text"
-                            className="px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:border-blue-600 outline-none transition-colors bg-white min-w-0 flex-1"
+                            className={`${inputClass} flex-1 min-w-0`}
                             placeholder="Elective name"
                             value={ele.name}
                             onChange={(e) =>

@@ -11,8 +11,31 @@ import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
+function quillImageHandler(this: any) {
+  const quill = this.quill;
+  const input = document.createElement("input");
+  input.setAttribute("type", "file");
+  input.setAttribute("accept", "image/*");
+  input.click();
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const url = await adminNewsApi.uploadImage(file);
+      const range = quill.getSelection(true);
+      quill.insertEmbed(range.index, "image", url);
+      quill.setSelection(range.index + 1);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    }
+  };
+}
+
 const quillModules = {
-  toolbar: [["bold", "italic", "underline", "strike"], [{ list: "ordered" }, { list: "bullet" }], [{ align: [] }], ["link", "image"], ["clean"]],
+  toolbar: {
+    handlers: { image: quillImageHandler },
+    container: [["bold", "italic", "underline", "strike"], [{ list: "ordered" }, { list: "bullet" }], [{ align: [] }], ["link", "image"], ["clean"]],
+  },
 };
 const quillFormats = ["bold", "italic", "underline", "strike", "list", "align", "link", "image"];
 

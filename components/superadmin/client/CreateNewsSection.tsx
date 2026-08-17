@@ -2,7 +2,7 @@
 
 import "react-quill-new/dist/quill.snow.css";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { Home, PlusCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -11,14 +11,37 @@ import FileUpload from "@/components/ScholarshipProvider/common/FileUpload";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
+function quillImageHandler(this: any) {
+  const quill = this.quill;
+  const input = document.createElement("input");
+  input.setAttribute("type", "file");
+  input.setAttribute("accept", "image/*");
+  input.click();
+  input.onchange = async () => {
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      const url = await adminNewsApi.uploadImage(file);
+      const range = quill.getSelection(true);
+      quill.insertEmbed(range.index, "image", url);
+      quill.setSelection(range.index + 1);
+    } catch (err) {
+      console.error("Image upload failed:", err);
+    }
+  };
+}
+
 const quillModules = {
-  toolbar: [
-    ["bold", "italic", "underline", "strike"],
-    [{ list: "ordered" }, { list: "bullet" }],
-    [{ align: [] }],
-    ["link", "image"],
-    ["clean"],
-  ],
+  toolbar: {
+    handlers: { image: quillImageHandler },
+    container: [
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      ["link", "image"],
+      ["clean"],
+    ],
+  },
 };
 
 const quillFormats = [
@@ -284,7 +307,7 @@ export default function CreateNewsSection({
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Short Description
             </label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-visible">
               <ReactQuill
                 theme="snow"
                 value={excerpt}
@@ -303,7 +326,7 @@ export default function CreateNewsSection({
             <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Full Content <span className="text-red-500">*</span>
             </label>
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-gray-200 rounded-lg overflow-visible">
               <ReactQuill
                 theme="snow"
                 value={content}
