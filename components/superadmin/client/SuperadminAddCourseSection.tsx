@@ -168,9 +168,7 @@ export default function SuperadminAddCourseSection({
   const [admissionSteps, setAdmissionSteps] = useState<WithId<AdmissionStep>[]>([]);
   const [subjectGroups, setSubjectGroups] = useState<WithId<SubjectGroup>[]>([]);
   const [fullTimeCourses, setFullTimeCourses] = useState<WithId<FullTimeCourse>[]>([]);
-  const [scholarshipDesc, setScholarshipDesc] = useState("");
-  const [scholarshipNotes, setScholarshipNotes] = useState("");
-  const [scholarships, setScholarships] = useState<WithId<ScholarshipItem>[]>([]);
+  const [scholarshipText, setScholarshipText] = useState("");
   const [features, setFeatures] = useState<WithId<FeatureItem>[]>([]);
   const [whoShouldChoose, setWhoShouldChoose] = useState<WithId<PersonaItem>[]>([]);
   const [faqs, setFaqs] = useState<WithId<FaqItem>[]>([]);
@@ -242,9 +240,21 @@ export default function SuperadminAddCourseSection({
         setBadges(Array.isArray(res.badges) ? res.badges.join(", ") : res.badges || "");
         setBannerUrl(res.bannerUrl || "");
         setShortTitle(res.shortTitle || "");
-        setScholarshipDesc(res.scholarshipDesc || "");
-        setScholarshipNotes(res.scholarshipNotes || "");
         setNonUniversityAffiliation(res.nonUniversityAffiliation || "");
+        let sText = res.scholarshipDesc || "";
+        if (res.scholarships?.length) {
+          sText += "\n\n" + res.scholarships.map((s: any) => {
+            let item = `• ${s.title}`;
+            if (s.subtitle) item += ` — ${s.subtitle}`;
+            if (s.coverage) item += `\n  Coverage: ${s.coverage}`;
+            if (s.requirement) item += `\n  Requirement: ${s.requirement}`;
+            return item;
+          }).join("\n");
+        }
+        if (res.scholarshipNotes) {
+          sText += "\n\n" + res.scholarshipNotes;
+        }
+        setScholarshipText(sText);
         if (res.whoShouldChoose)
           setWhoShouldChoose(
             res.whoShouldChoose.map((x: any, i: number) => ({
@@ -276,10 +286,6 @@ export default function SuperadminAddCourseSection({
           );
         if (res.feeStructure) setFeeStructureText(res.feeStructure);
         if (res.eligibilityText) setEligibilityText(res.eligibilityText);
-        if (res.scholarships)
-          setScholarships(
-            res.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })),
-          );
         if (res.faqs)
           setFaqs(res.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
         if (res.careers)
@@ -396,8 +402,7 @@ export default function SuperadminAddCourseSection({
     careerPath,
     location,
     bannerUrl,
-    scholarshipDesc,
-    scholarshipNotes,
+    scholarshipText: scholarshipText || undefined,
     whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
     features: features.map(({ id, ...rest }) => rest),
     admissionSteps: admissionSteps.map(({ id, ...rest }) => rest),
@@ -405,7 +410,6 @@ export default function SuperadminAddCourseSection({
     subjectGroups: subjectGroups.map(({ id, ...rest }) => rest),
     feeStructure: feeStructureText,
     eligibilityText: eligibilityText,
-    scholarships: scholarships.map(({ id, ...rest }) => rest),
     faqs: faqs.map(({ id, ...rest }) => rest),
     careers: careers.map(({ id, ...rest }) => rest),
     downloads: downloads.map(({ id, ...rest }) => rest),
@@ -1621,159 +1625,17 @@ export default function SuperadminAddCourseSection({
 
         {/* 9. Scholarships Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-gray-800">
-                Scholarships Overview
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Available scholarships and detailed requirements
-              </p>
-            </div>
-          </div>
-          <div className="p-6 space-y-5">
-            <div>
-              <label className={labelClass}>Short Description (Overview)</label>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="e.g. We offer various scholarships to support deserving students"
-                value={scholarshipDesc}
-                onChange={(e) => setScholarshipDesc(e.target.value)}
-              />
-            </div>
-            <div className="space-y-4">
-              {scholarships.map((s) => (
-                <div
-                  key={s.id}
-                  className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-                >
-                  <button
-                    onClick={() =>
-                      setScholarships((prev) =>
-                        prev.filter((x) => x.id !== s.id),
-                      )
-                    }
-                    className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-12">
-                    <div>
-                      <label className={labelClass}>
-                        Title <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Merit Scholarship"
-                        value={s.title}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, title: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Subtitle</label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. For Top 10% Students"
-                        value={s.subtitle}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, subtitle: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Coverage</label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. 50% Tuition Fee"
-                        value={s.coverage}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, coverage: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Requirement</label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Minimum 3.5 GPA"
-                        value={s.requirement}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, requirement: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className={labelClass}>
-                Scholarship Notes (important details, bullet points)
-              </label>
-              <textarea
-                className={`${inputClass} min-h-[120px]`}
-                rows={5}
-                placeholder={`• Scholarship is awarded based on merit\n• Students must maintain 3.0 GPA\n• Apply before admission deadline`}
-                value={scholarshipNotes}
-                onChange={(e) => setScholarshipNotes(e.target.value)}
+          <div className="p-6">
+            <label className={labelClass}>Scholarships Overview</label>
+            <p className="text-xs text-gray-500 mb-2">Describe scholarships, coverage, and requirements using rich text</p>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <QuillEditor
+                theme="snow"
+                value={scholarshipText}
+                onChange={setScholarshipText}
+                modules={quillModules}
+                placeholder="Describe available scholarships, coverage details, eligibility requirements..."
+                className="bg-white"
               />
             </div>
           </div>
@@ -2079,7 +1941,7 @@ export default function SuperadminAddCourseSection({
                         />
                         <input
                           type="text"
-                          className={`${inputClass} flex-1 min-w-0`}
+                          className={`${inputClass} flex-1`}
                           placeholder="Subject name"
                           value={subject.name}
                           onChange={(e) =>
@@ -2216,7 +2078,7 @@ export default function SuperadminAddCourseSection({
                           />
                           <input
                             type="text"
-                            className={`${inputClass} flex-1 min-w-0`}
+                            className={`${inputClass} flex-1`}
                             placeholder="Elective name"
                             value={ele.name}
                             onChange={(e) =>

@@ -78,14 +78,6 @@ interface AdmissionStep {
   description: string;
 }
 
-interface ScholarshipItem {
-  id: number;
-  title: string;
-  subtitle: string;
-  coverage: string;
-  requirement: string;
-}
-
 interface FeatureItem {
   id: number;
   title: string;
@@ -177,9 +169,8 @@ const CourseCreatePage: React.FC = () => {
   const [eligibilityText, setEligibilityText] = useState("");
   const [admissionSteps, setAdmissionSteps] = useState<AdmissionStep[]>([]);
   const [feeStructureText, setFeeStructureText] = useState("");
-  const [scholarshipDesc, setScholarshipDesc] = useState("");
-  const [scholarshipNotes, setScholarshipNotes] = useState("");
-  const [scholarships, setScholarships] = useState<ScholarshipItem[]>([]);
+  const [scholarshipText, setScholarshipText] = useState("");
+  const [curriculum, setCurriculum] = useState<any[]>([]);
   const [features, setFeatures] = useState<FeatureItem[]>([]);
   const [whoShouldChoose, setWhoShouldChoose] = useState<WhoShouldChoose[]>([]);
   const [faqs, setFaqs] = useState<FaqItem[]>([]);
@@ -321,9 +312,6 @@ const CourseCreatePage: React.FC = () => {
     if (normalized.admissionSteps?.length) {
       setAdmissionSteps(normalized.admissionSteps.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (normalized.scholarships?.length) {
-      setScholarships(normalized.scholarships.map((x: any, i: number) => ({ ...x, id: i + 1 })));
-    }
     if (normalized.faqs?.length) {
       setFaqs(normalized.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
@@ -336,11 +324,24 @@ const CourseCreatePage: React.FC = () => {
     if (normalized.feeStructure) {
       setFeeStructureText(normalized.feeStructure);
     }
-    if (normalized.scholarshipDesc) {
-      setScholarshipDesc(normalized.scholarshipDesc);
+    if (normalized.scholarshipDesc || normalized.scholarships?.length || normalized.scholarshipNotes) {
+      let text = normalized.scholarshipDesc || "";
+      if (normalized.scholarships?.length) {
+        text += "\n\n" + normalized.scholarships.map((s: any) => {
+          let item = `• ${s.title}`;
+          if (s.subtitle) item += ` — ${s.subtitle}`;
+          if (s.coverage) item += `\n  Coverage: ${s.coverage}`;
+          if (s.requirement) item += `\n  Requirement: ${s.requirement}`;
+          return item;
+        }).join("\n");
+      }
+      if (normalized.scholarshipNotes) {
+        text += "\n\n" + normalized.scholarshipNotes;
+      }
+      setScholarshipText(text);
     }
-    if (normalized.scholarshipNotes) {
-      setScholarshipNotes(normalized.scholarshipNotes);
+    if (normalized.curriculum?.length) {
+      setCurriculum(normalized.curriculum.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
   };
 
@@ -368,6 +369,8 @@ const CourseCreatePage: React.FC = () => {
     whoShouldChoose: whoShouldChoose.map(({ id, ...rest }) => rest),
     features: features.map(({ id, ...rest }) => rest),
     feeStructureText: feeStructureText || undefined,
+    scholarshipText: scholarshipText || undefined,
+    curriculum: curriculum.map(({ id, ...rest }) => rest),
     overrides: {
       description: description || undefined,
       bannerUrl: bannerUrl || undefined,
@@ -1137,159 +1140,17 @@ const CourseCreatePage: React.FC = () => {
 
         {/* 7. Scholarships Overview */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="border-b border-gray-200 bg-gray-50/50 px-6 py-4 flex items-center gap-3">
-            <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                <path d="M6 12v5c3 3 9 3 12 0v-5" />
-              </svg>
-            </div>
-            <div>
-              <h2 className="text-base font-semibold text-gray-800">
-                Scholarships Overview
-              </h2>
-              <p className="text-sm text-gray-500 mt-0.5">
-                Available scholarships and detailed requirements
-              </p>
-            </div>
-          </div>
-          <div className="p-6 space-y-5">
-            <div>
-              <label className={labelClass}>Short Description (Overview)</label>
-              <input
-                type="text"
-                className={inputClass}
-                placeholder="e.g. We offer various scholarships to support deserving students"
-                value={scholarshipDesc}
-                onChange={(e) => setScholarshipDesc(e.target.value)}
-              />
-            </div>
-            <div className="space-y-4">
-              {scholarships.map((s) => (
-                <div
-                  key={s.id}
-                  className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
-                >
-                  <button
-                    onClick={() =>
-                      setScholarships((prev) =>
-                        prev.filter((x) => x.id !== s.id),
-                      )
-                    }
-                    className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <svg
-                      width="18"
-                      height="18"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <polyline points="3 6 5 6 21 6" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pr-12">
-                    <div>
-                      <label className={labelClass}>
-                        Title <span className="text-red-500">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Merit Scholarship"
-                        value={s.title}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, title: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Subtitle</label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. For Top 10% Students"
-                        value={s.subtitle}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, subtitle: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Coverage</label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. 50% Tuition Fee"
-                        value={s.coverage}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, coverage: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                    <div>
-                      <label className={labelClass}>Requirement</label>
-                      <input
-                        type="text"
-                        className={inputClass}
-                        placeholder="e.g. Minimum 3.5 GPA"
-                        value={s.requirement}
-                        onChange={(e) =>
-                          setScholarships((prev) =>
-                            prev.map((x) =>
-                              x.id === s.id
-                                ? { ...x, requirement: e.target.value }
-                                : x,
-                            ),
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div>
-              <label className={labelClass}>
-                Scholarship Notes (important details, bullet points)
-              </label>
-              <textarea
-                className={`${inputClass} min-h-[120px]`}
-                rows={5}
-                placeholder={`• Scholarship is awarded based on merit\n• Students must maintain 3.0 GPA\n• Apply before admission deadline`}
-                value={scholarshipNotes}
-                onChange={(e) => setScholarshipNotes(e.target.value)}
+          <div className="p-6">
+            <label className={labelClass}>Scholarships Overview</label>
+            <p className="text-xs text-gray-500 mb-2">Describe scholarships, coverage, and requirements using rich text</p>
+            <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <QuillEditor
+                theme="snow"
+                value={scholarshipText}
+                onChange={setScholarshipText}
+                modules={quillModules}
+                placeholder="Describe available scholarships, coverage details, eligibility requirements..."
+                className="bg-white"
               />
             </div>
           </div>
@@ -1372,6 +1233,128 @@ const CourseCreatePage: React.FC = () => {
                       )
                     }
                   />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 9. Curriculum */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <SectionItemHeader
+            icon="book-open"
+            title="Curriculum"
+            subtitle="Semester or year-wise course structure"
+            onAdd={() =>
+              setCurriculum((prev) => [
+                ...prev,
+                {
+                  id: nextId(prev),
+                  semester: prev.length + 1,
+                  title: `Semester ${prev.length + 1}`,
+                  subjects: [{ code: "", name: "", credits: "" }],
+                  electives: [],
+                },
+              ])
+            }
+            addLabel="Add Section"
+          />
+          <div className="p-6 space-y-6">
+            {curriculum.map((sec) => (
+              <div
+                key={sec.id}
+                className="p-5 bg-gray-50 rounded-lg border border-gray-200 relative group"
+              >
+                <button
+                  onClick={() =>
+                    setCurriculum((prev) => prev.filter((x) => x.id !== sec.id))
+                  }
+                  className="absolute top-4 right-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                  </svg>
+                </button>
+                <div className="mb-4">
+                  <div className="pr-12 mb-4">
+                    <label className={labelClass}>
+                      Section Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      className={inputClass}
+                      placeholder='e.g. "Semester I" or "Year 1"'
+                      value={sec.title}
+                      onChange={(e) =>
+                        setCurriculum((prev) =>
+                          prev.map((x) =>
+                            x.id === sec.id ? { ...x, title: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <label className={labelClass}>Subjects</label>
+                  <div className="space-y-2">
+                    {sec.subjects.map((subject: any, subIdx: number) => (
+                      <div key={subIdx} className="flex items-center gap-2">
+                        <span className="w-6 text-right text-xs font-semibold text-gray-400">{subIdx + 1}.</span>
+                        <input type="text" className={`${inputClass} w-24`} placeholder="Code" value={subject.code}
+                          onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, code: e.target.value } : s) } : x))}
+                        />
+                        <input type="text" className={`${inputClass} flex-1`} placeholder="Subject name" value={subject.name}
+                          onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, name: e.target.value } : s) } : x))}
+                        />
+                        <input type="text" className={`${inputClass} w-20`} placeholder="Credits" value={subject.credits}
+                          onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, credits: e.target.value } : s) } : x))}
+                        />
+                        {sec.subjects.length > 1 && (
+                          <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.filter((_: any, i: number) => i !== subIdx) } : x))}
+                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                  <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: [...x.subjects, { code: "", name: "", credits: "" }] } : x))}
+                    className="mt-2 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>{" "}Add Subject
+                  </button>
+                </div>
+                <div>
+                  <label className={labelClass}>Electives <span className="text-gray-400 font-normal">(optional)</span></label>
+                  {sec.electives.length > 0 && (
+                    <div className="space-y-2 mb-2">
+                      {sec.electives.map((ele: any, ei: number) => (
+                        <div key={ei} className="flex items-center gap-2">
+                          <input type="text" className={`${inputClass} w-24`} placeholder="Code" value={ele.code}
+                            onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.map((el: any, j: number) => j === ei ? { ...el, code: e.target.value } : el) } : x))}
+                          />
+                          <input type="text" className={`${inputClass} flex-1`} placeholder="Elective name" value={ele.name}
+                            onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.map((el: any, j: number) => j === ei ? { ...el, name: e.target.value } : el) } : x))}
+                          />
+                          <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.filter((_: any, j: number) => j !== ei) } : x))}
+                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: [...x.electives, { code: "", name: "" }] } : x))}
+                    className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>{" "}Add Elective
+                  </button>
                 </div>
               </div>
             ))}
