@@ -1915,33 +1915,35 @@ export default function SuperadminAddCourseSection({
                   <label className={labelClass}>Subjects</label>
                   <div className="space-y-2">
                     {sec.subjects.map((subject, subIdx) => (
-                      <div key={subIdx} className="flex items-center gap-2">
-                        <span className="w-6 text-right text-xs font-semibold text-gray-400">
-                          {subIdx + 1}.
-                        </span>
+                      <div key={subIdx} className="grid grid-cols-3 gap-2 items-center">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 text-right text-xs font-semibold text-gray-400">
+                            {subIdx + 1}.
+                          </span>
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="Code"
+                            value={subject.code}
+                            onChange={(e) =>
+                              setCurriculum((prev) =>
+                                prev.map((x) =>
+                                  x.id === sec.id
+                                    ? {
+                                        ...x,
+                                        subjects: x.subjects.map((s, i) =>
+                                          i === subIdx ? { ...s, code: e.target.value } : s,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                          />
+                        </div>
                         <input
                           type="text"
-                          className={`${inputClass} w-24`}
-                          placeholder="Code"
-                          value={subject.code}
-                          onChange={(e) =>
-                            setCurriculum((prev) =>
-                              prev.map((x) =>
-                                x.id === sec.id
-                                  ? {
-                                      ...x,
-                                      subjects: x.subjects.map((s, i) =>
-                                        i === subIdx ? { ...s, code: e.target.value } : s,
-                                      ),
-                                    }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                        <input
-                          type="text"
-                          className={`${inputClass} flex-1`}
+                          className={inputClass}
                           placeholder="Subject name"
                           value={subject.name}
                           onChange={(e) =>
@@ -1959,27 +1961,28 @@ export default function SuperadminAddCourseSection({
                             )
                           }
                         />
-                        <input
-                          type="text"
-                          className={`${inputClass} w-20`}
-                          placeholder="Credits"
-                          value={subject.credits}
-                          onChange={(e) =>
-                            setCurriculum((prev) =>
-                              prev.map((x) =>
-                                x.id === sec.id
-                                  ? {
-                                      ...x,
-                                      subjects: x.subjects.map((s, i) =>
-                                        i === subIdx ? { ...s, credits: e.target.value } : s,
-                                      ),
-                                    }
-                                  : x,
-                              ),
-                            )
-                          }
-                        />
-                        {sec.subjects.length > 1 && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            className={inputClass}
+                            placeholder="Credits"
+                            value={subject.credits}
+                            onChange={(e) =>
+                              setCurriculum((prev) =>
+                                prev.map((x) =>
+                                  x.id === sec.id
+                                    ? {
+                                        ...x,
+                                        subjects: x.subjects.map((s, i) =>
+                                          i === subIdx ? { ...s, credits: e.target.value } : s,
+                                        ),
+                                      }
+                                    : x,
+                                ),
+                              )
+                            }
+                          />
+                          {sec.subjects.length > 1 && (
                           <button
                             onClick={() =>
                               setCurriculum((prev) =>
@@ -2053,10 +2056,10 @@ export default function SuperadminAddCourseSection({
                   {sec.electives.length > 0 && (
                     <div className="space-y-2 mb-2">
                       {sec.electives.map((ele, ei) => (
-                        <div key={ei} className="flex items-center gap-2">
+                        <div key={ei} className="grid grid-cols-2 gap-2 items-center">
                           <input
                             type="text"
-                            className={`${inputClass} w-24`}
+                            className={inputClass}
                             placeholder="Code"
                             value={ele.code}
                             onChange={(e) =>
@@ -2076,59 +2079,61 @@ export default function SuperadminAddCourseSection({
                               )
                             }
                           />
-                          <input
-                            type="text"
-                            className={`${inputClass} flex-1`}
-                            placeholder="Elective name"
-                            value={ele.name}
-                            onChange={(e) =>
-                              setCurriculum((prev) =>
-                                prev.map((x) =>
-                                  x.id === sec.id
-                                    ? {
-                                        ...x,
-                                        electives: x.electives.map((el, j) =>
-                                          j === ei
-                                            ? { ...el, name: e.target.value }
-                                            : el,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                          />
-                          <button
-                            onClick={() =>
-                              setCurriculum((prev) =>
-                                prev.map((x) =>
-                                  x.id === sec.id
-                                    ? {
-                                        ...x,
-                                        electives: x.electives.filter(
-                                          (_, j) => j !== ei,
-                                        ),
-                                      }
-                                    : x,
-                                ),
-                              )
-                            }
-                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
-                          >
-                            <svg
-                              width="14"
-                              height="14"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              className={inputClass}
+                              placeholder="Elective name"
+                              value={ele.name}
+                              onChange={(e) =>
+                                setCurriculum((prev) =>
+                                  prev.map((x) =>
+                                    x.id === sec.id
+                                      ? {
+                                          ...x,
+                                          electives: x.electives.map((el, j) =>
+                                            j === ei
+                                              ? { ...el, name: e.target.value }
+                                              : el,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
+                                )
+                              }
+                            />
+                            <button
+                              onClick={() =>
+                                setCurriculum((prev) =>
+                                  prev.map((x) =>
+                                    x.id === sec.id
+                                      ? {
+                                          ...x,
+                                          electives: x.electives.filter(
+                                            (_, j) => j !== ei,
+                                          ),
+                                        }
+                                      : x,
+                                  ),
+                                )
+                              }
+                              className="p-1.5 text-red-400 hover:text-red-600 transition-colors"
                             >
-                              <line x1="18" y1="6" x2="6" y2="18" />
-                              <line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
+                              <svg
+                                width="14"
+                                height="14"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>

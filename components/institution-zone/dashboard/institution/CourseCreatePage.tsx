@@ -1298,25 +1298,29 @@ const CourseCreatePage: React.FC = () => {
                   <label className={labelClass}>Subjects</label>
                   <div className="space-y-2">
                     {sec.subjects.map((subject: any, subIdx: number) => (
-                      <div key={subIdx} className="flex items-center gap-2">
-                        <span className="w-6 text-right text-xs font-semibold text-gray-400">{subIdx + 1}.</span>
-                        <input type="text" className={`${inputClass} w-24`} placeholder="Code" value={subject.code}
-                          onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, code: e.target.value } : s) } : x))}
-                        />
-                        <input type="text" className={`${inputClass} flex-1`} placeholder="Subject name" value={subject.name}
+                      <div key={subIdx} className="grid grid-cols-3 gap-2 items-center">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 text-right text-xs font-semibold text-gray-400">{subIdx + 1}.</span>
+                          <input type="text" className={inputClass} placeholder="Code" value={subject.code}
+                            onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, code: e.target.value } : s) } : x))}
+                          />
+                        </div>
+                        <input type="text" className={inputClass} placeholder="Subject name" value={subject.name}
                           onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, name: e.target.value } : s) } : x))}
                         />
-                        <input type="text" className={`${inputClass} w-20`} placeholder="Credits" value={subject.credits}
-                          onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, credits: e.target.value } : s) } : x))}
-                        />
-                        {sec.subjects.length > 1 && (
-                          <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.filter((_: any, i: number) => i !== subIdx) } : x))}
-                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <input type="text" className={inputClass} placeholder="Credits" value={subject.credits}
+                            onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.map((s: any, i: number) => i === subIdx ? { ...s, credits: e.target.value } : s) } : x))}
+                          />
+                          {sec.subjects.length > 1 && (
+                            <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, subjects: x.subjects.filter((_: any, i: number) => i !== subIdx) } : x))}
+                              className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -1332,19 +1336,21 @@ const CourseCreatePage: React.FC = () => {
                   {sec.electives.length > 0 && (
                     <div className="space-y-2 mb-2">
                       {sec.electives.map((ele: any, ei: number) => (
-                        <div key={ei} className="flex items-center gap-2">
-                          <input type="text" className={`${inputClass} w-24`} placeholder="Code" value={ele.code}
+                        <div key={ei} className="grid grid-cols-2 gap-2 items-center">
+                          <input type="text" className={inputClass} placeholder="Code" value={ele.code}
                             onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.map((el: any, j: number) => j === ei ? { ...el, code: e.target.value } : el) } : x))}
                           />
-                          <input type="text" className={`${inputClass} flex-1`} placeholder="Elective name" value={ele.name}
-                            onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.map((el: any, j: number) => j === ei ? { ...el, name: e.target.value } : el) } : x))}
-                          />
-                          <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.filter((_: any, j: number) => j !== ei) } : x))}
-                            className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <input type="text" className={inputClass} placeholder="Elective name" value={ele.name}
+                              onChange={(e) => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.map((el: any, j: number) => j === ei ? { ...el, name: e.target.value } : el) } : x))}
+                            />
+                            <button onClick={() => setCurriculum((prev) => prev.map((x) => x.id === sec.id ? { ...x, electives: x.electives.filter((_: any, j: number) => j !== ei) } : x))}
+                              className="p-1.5 text-red-400 hover:text-red-600 transition-colors">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                              </svg>
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>
