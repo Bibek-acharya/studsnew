@@ -7,6 +7,24 @@ import {
   ChevronLeft,
   ChevronDown,
   ArrowRight,
+  GraduationCap,
+  Users,
+  Brain,
+  Briefcase,
+  Globe,
+  Heart,
+  Star,
+  Target,
+  TrendingUp,
+  Lightbulb,
+  Compass,
+  Zap,
+  Shield,
+  Rocket,
+  Award,
+  BookOpen,
+  Clock,
+  MapPin,
 } from "lucide-react";
 import { fetchCourseDetailsById } from "@/services/course-api";
 import EmptyTabState from "@/components/course-finder/EmptyTabState";
@@ -42,10 +60,32 @@ function stripHtml(html: string): string {
     .trim();
 }
 
+const iconMap: Record<string, React.ComponentType<any>> = {
+  "graduation-cap": GraduationCap,
+  "users": Users,
+  "brain": Brain,
+  "briefcase": Briefcase,
+  "globe": Globe,
+  "heart": Heart,
+  "star": Star,
+  "target": Target,
+  "trending-up": TrendingUp,
+  "lightbulb": Lightbulb,
+  "compass": Compass,
+  "zap": Zap,
+  "shield": Shield,
+  "rocket": Rocket,
+  "award": Award,
+  "book-open": BookOpen,
+  "clock": Clock,
+  "map-pin": MapPin,
+};
+
 const getIcon = (iconName: string | undefined) => {
-  if (!iconName) return <i className="fa-solid fa-circle-question text-white"></i>;
+  if (!iconName) return <GraduationCap className="w-6 h-6" />;
   const clean = iconName.replace(/^fa-solid\s*/, "").replace(/^fa-/, "");
-  return <i className={`fa-solid fa-${clean} text-white`}></i>;
+  const IconComponent = iconMap[clean] || GraduationCap;
+  return <IconComponent className="w-6 h-6" />;
 };
 
 export default function CourseDetailPage({

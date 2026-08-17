@@ -15,7 +15,49 @@ import {
   MapPin,
   GraduationCap,
   ArrowRight,
+  Users,
+  Brain,
+  Briefcase,
+  Globe,
+  Heart,
+  Star,
+  Target,
+  TrendingUp,
+  Lightbulb,
+  Compass,
+  Zap,
+  Shield,
+  Rocket,
+  AwardIcon,
 } from "lucide-react";
+
+const iconMap: Record<string, React.ComponentType<any>> = {
+  "graduation-cap": GraduationCap,
+  "users": Users,
+  "brain": Brain,
+  "briefcase": Briefcase,
+  "globe": Globe,
+  "heart": Heart,
+  "star": Star,
+  "target": Target,
+  "trending-up": TrendingUp,
+  "lightbulb": Lightbulb,
+  "compass": Compass,
+  "zap": Zap,
+  "shield": Shield,
+  "rocket": Rocket,
+  "award": Award,
+  "book-open": BookOpen,
+  "clock": Clock,
+  "map-pin": MapPin,
+};
+
+const getIcon = (iconName: string | undefined) => {
+  if (!iconName) return <GraduationCap className="w-6 h-6" />;
+  const clean = iconName.replace(/^fa-solid\s*/, "").replace(/^fa-/, "");
+  const IconComponent = iconMap[clean] || GraduationCap;
+  return <IconComponent className="w-6 h-6" />;
+};
 
 interface CourseDetailsPageProps {
   courseId: string | number;
@@ -299,7 +341,7 @@ const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
                             className="border border-gray-200 rounded-xl p-6 bg-white"
                           >
                             <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white mb-4">
-                              <GraduationCap className="w-6 h-6" />
+                              {getIcon(item.icon)}
                             </div>
                             <h3 className="font-bold text-gray-900 mb-2 text-[17px]">
                               {item.title}
