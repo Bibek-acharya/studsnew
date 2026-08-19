@@ -78,7 +78,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
 
       // Field of Study Filter — match against full field string
       if (filters.fields.length > 0) {
-        const field = (course.field || "").toLowerCase();
+        const field = (course.fieldOfStudy || course.field || "").toLowerCase();
         const matchesField = filters.fields.some((f) => {
           const filterLabel = f.toLowerCase();
           return field.includes(filterLabel) || filterLabel.includes(field);
