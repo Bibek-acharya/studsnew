@@ -15,9 +15,9 @@ import { apiService } from "../../services/api";
 import { useAuth } from "@/services/AuthContext";
 import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
-import CourseCarouselAd from "./ads/CourseCarouselAd";
-import KistProgramsAd from "./ads/KistProgramsAd";
-import SudsphereBannerAd from "./ads/SudsphereBannerAd";
+// import CourseCarouselAd from "./ads/CourseCarouselAd";
+// import KistProgramsAd from "./ads/KistProgramsAd";
+// import SudsphereBannerAd from "./ads/SudsphereBannerAd";
 
 interface CourseGridProps {
   onNavigate: (view: any, data?: any) => void;
@@ -59,11 +59,11 @@ const CourseGrid: React.FC<CourseGridProps> = ({
     Record<number, boolean>
   >({});
 
-  const ads = [
-    <CourseCarouselAd key="0" />,
-    <KistProgramsAd key="1" />,
-    <SudsphereBannerAd key="2" />,
-  ];
+  // const ads = [
+  //   <CourseCarouselAd key="0" />,
+  //   <KistProgramsAd key="1" />,
+  //   <SudsphereBannerAd key="2" />,
+  // ];
 
   const toggleSaved = async (courseId: number) => {
     if (!isAuthenticated) {
@@ -310,11 +310,11 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   </button>
                 </div>
               </div>
-              {(index + 1) % 6 === 0 && index !== currentCourses.length - 1 && (
+              {/* {(index + 1) % 6 === 0 && index !== currentCourses.length - 1 && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
                   {ads[Math.floor(index / 6) % 3]}
                 </div>
-              )}
+              )} */}
             </React.Fragment>
           );
         })}
