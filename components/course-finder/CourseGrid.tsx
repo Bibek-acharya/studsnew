@@ -15,9 +15,9 @@ import { apiService } from "../../services/api";
 import { useAuth } from "@/services/AuthContext";
 import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
-import CourseCarouselAd from "./ads/CourseCarouselAd";
-import KistProgramsAd from "./ads/KistProgramsAd";
-import SudsphereBannerAd from "./ads/SudsphereBannerAd";
+// import CourseCarouselAd from "./ads/CourseCarouselAd";
+// import KistProgramsAd from "./ads/KistProgramsAd";
+// import SudsphereBannerAd from "./ads/SudsphereBannerAd";
 
 interface CourseGridProps {
   onNavigate: (view: any, data?: any) => void;
@@ -59,11 +59,11 @@ const CourseGrid: React.FC<CourseGridProps> = ({
     Record<number, boolean>
   >({});
 
-  const ads = [
-    <CourseCarouselAd key="0" />,
-    <KistProgramsAd key="1" />,
-    <SudsphereBannerAd key="2" />,
-  ];
+  // const ads = [
+  //   <CourseCarouselAd key="0" />,
+  //   <KistProgramsAd key="1" />,
+  //   <SudsphereBannerAd key="2" />,
+  // ];
 
   const toggleSaved = async (courseId: number) => {
     if (!isAuthenticated) {
@@ -204,12 +204,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
 
                 {/* Details List */}
                 <div className="space-y-2.5 mb-5">
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <Building2 className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Affiliation:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Affiliation:</span>{" "}
                       <span
                         title={course.affiliationName || course.nonUniversityAffiliation || "-"}
                         className="text-gray-500 truncate"
@@ -218,12 +218,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <GraduationCap className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Field:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Field:</span>{" "}
                       <span
                         title={course.fieldOfStudy || course.field || "-"}
                         className="text-gray-500 truncate"
@@ -232,12 +232,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <CreditCard className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Est. Fee:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Est. Fee:</span>{" "}
                       <span
                         title={course.estFee || "-"}
                         className="font-bold text-[#0014FF] truncate"
@@ -246,12 +246,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <Users className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Seats:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Seats:</span>{" "}
                       <span
                         title={String(course.fullTimeCourses?.[0]?.seats || "-")}
                         className="text-gray-500 truncate"
@@ -310,11 +310,11 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   </button>
                 </div>
               </div>
-              {(index + 1) % 6 === 0 && index !== currentCourses.length - 1 && (
+              {/* {(index + 1) % 6 === 0 && index !== currentCourses.length - 1 && (
                 <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
                   {ads[Math.floor(index / 6) % 3]}
                 </div>
-              )}
+              )} */}
             </React.Fragment>
           );
         })}
