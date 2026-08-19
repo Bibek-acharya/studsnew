@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
-import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft } from "lucide-react";
+import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, MessageSquare, Repeat2, Share2, MoreVertical } from "lucide-react";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -82,7 +82,8 @@ const PostCard: React.FC<{
   onLightbox: (url: string, type: "image" | "video") => void;
   comments?: CommentData[];
   commentsOpen?: boolean;
-}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen }) => {
+  onJoinCommunity?: (communityId: number) => void;
+}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen, onJoinCommunity }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -90,57 +91,117 @@ const PostCard: React.FC<{
   const avatarUrl = user?.image_url;
   const communityName = post.community?.name || "";
   const isGeneral = post.community?.is_general || communityName === "General";
+  const userRole = (user as any)?.role || "Student";
+  const [isJoined, setIsJoined] = useState(post.community?.is_member || false);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const contentLength = post.content?.length || 0;
+  const shouldTruncate = contentLength > 150;
+  const displayContent = shouldTruncate && !isExpanded
+    ? post.content?.slice(0, 150) + "..."
+    : post.content;
+
+  const handleJoinToggle = () => {
+    if (onJoinCommunity && post.community) {
+      onJoinCommunity(post.community.id);
+      setIsJoined(!isJoined);
+    }
+  };
 
   return (
-    <div className="bg-white lg:rounded-lg lg:border lg:border-slate-200/80 rounded-none border-0 border-b border-slate-100 px-4 py-3 lg:px-5 lg:py-5 space-y-3">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
-            {avatarUrl ? (
-              <img src={imageUrl(avatarUrl)} alt="" className="w-full h-full object-cover" />
+    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 shadow-sm font-sans text-gray-900">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm tracking-wide shrink-0"
+            style={{ backgroundColor: post.community?.bg_color || "#0d9488" }}
+          >
+            {post.community?.icon ? (
+              <DynamicIcon name={post.community.icon} size={14} />
             ) : (
-              avatarLetter
+              communityName.substring(0, 3).toUpperCase() || "U"
             )}
           </div>
           <div>
-            <h4 className="text-xs font-bold text-slate-900 leading-snug">
-              {user ? `${user.first_name} ${user.last_name}` : "Anonymous"}
-            </h4>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-400 font-medium">
-              {communityName && !isGeneral && (
-                <span className="text-blue-600 font-bold">{communityName}</span>
-              )}
-              {communityName && !isGeneral && <span>·</span>}
-              <span>{relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}</span>
+            <div className="flex items-center space-x-1.5 text-sm">
+              <span className="font-semibold text-gray-900 hover:underline cursor-pointer">
+                {communityName || "General"}
+              </span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-500 text-xs">{relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}</span>
+            </div>
+            <div className="text-xs text-gray-500">
+              <span className="hover:underline cursor-pointer">{user ? `${user.first_name} ${user.last_name}` : "Anonymous"}</span>
+              <span className="mx-1">•</span>
+              <span>{userRole}</span>
             </div>
           </div>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          {onJoinCommunity && post.community && (
+            <button
+              onClick={handleJoinToggle}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                isJoined
+                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "border border-blue-500 text-blue-500 hover:bg-blue-50"
+              }`}
+            >
+              {isJoined ? "Joined" : "Join"}
+            </button>
+          )}
+          <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full">
+            <MoreVertical size={18} />
+          </button>
         </div>
       </div>
 
       {post.title && (
-        <h3 className="text-sm font-bold text-slate-900 leading-snug">{post.title}</h3>
+        <h2 className="text-base font-bold text-gray-900 mb-2 leading-snug">{post.title}</h2>
       )}
 
       {post.content && (
-        <p className="text-xs text-slate-800 leading-relaxed font-medium">{post.content}</p>
+        <p className="text-sm text-gray-700 leading-relaxed mb-3">
+          {displayContent}
+          {shouldTruncate && (
+            <span
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="text-gray-400 cursor-pointer hover:underline ml-1"
+            >
+              {isExpanded ? "less" : "more"}
+            </span>
+          )}
+        </p>
       )}
 
       {images.length > 0 && (
-        <div className={`grid gap-2 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-          {images.map((url, i) => (
-            <div key={i} className="relative rounded-xl overflow-hidden border border-slate-100 cursor-pointer group" onClick={() => onLightbox(imageUrl(url), "image")}>
-              <img src={imageUrl(url)} alt="" className="w-full max-h-60 object-cover" />
+        <div className="mb-4 rounded-xl overflow-hidden bg-gray-100 max-h-80">
+          {images.length === 1 ? (
+            <div className="relative cursor-pointer group" onClick={() => onLightbox(imageUrl(images[0]), "image")}>
+              <img src={imageUrl(images[0])} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
-          ))}
+          ) : (
+            <div className={`grid gap-1 ${images.length === 2 ? "grid-cols-2" : "grid-cols-2"}`}>
+              {images.slice(0, 4).map((url, i) => (
+                <div key={i} className="relative cursor-pointer group" onClick={() => onLightbox(imageUrl(url), "image")}>
+                  <img src={imageUrl(url)} alt="" className="w-full h-40 object-cover" />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                    <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {post.video_url && (
-        <div className="relative rounded-xl overflow-hidden border border-slate-100 bg-black cursor-pointer group" onClick={() => onLightbox(imageUrl(post.video_url), "video")}>
-          <video src={imageUrl(post.video_url)} className="w-full max-h-60 object-contain" />
+        <div className="mb-4 rounded-xl overflow-hidden bg-gray-100 max-h-80 relative cursor-pointer group" onClick={() => onLightbox(imageUrl(post.video_url), "video")}>
+          <video src={imageUrl(post.video_url)} className="w-full max-h-80 object-contain" />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
             <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
@@ -148,46 +209,62 @@ const PostCard: React.FC<{
       )}
 
       {post.is_poll && pollOptions.length > 0 && (
-        <div className="space-y-2 bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
-          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800">
-            <BarChart2 className="h-3.5 w-3.5 text-[#0000ff]" />
-            Poll {post.total_votes != null && `(${post.total_votes} votes)`}
-          </div>
+        <div className="mb-4 space-y-2">
           {pollOptions.map((opt: any, idx: number) => {
             const total = post.total_votes || 1;
             const pct = Math.round(((opt.votes || 0) / total) * 100);
             return (
-              <div key={idx} className="relative overflow-hidden rounded-lg border border-slate-200 bg-white">
-                <div className="absolute inset-0 bg-blue-50/60 rounded-lg transition-all" style={{ width: `${pct}%` }} />
-                <div className="relative flex items-center justify-between px-3 py-2 text-xs font-semibold text-slate-700">
+              <div key={idx} className="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
+                <div className="absolute inset-0 bg-blue-100 rounded-lg transition-all" style={{ width: `${pct}%` }} />
+                <div className="relative flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700">
                   <span>{opt.text}</span>
-                  <span className="text-slate-400 font-normal">{pct}%</span>
+                  <span className="text-gray-500">{pct}%</span>
                 </div>
               </div>
             );
           })}
+          <p className="text-xs text-gray-500 font-medium">{post.total_votes || 0} votes</p>
         </div>
       )}
 
-      <div className="flex items-center gap-6 pt-2 border-t border-slate-100 text-xs font-semibold text-slate-500">
-        <button
-          onClick={() => onLike(post.id)}
-          className={`flex items-center gap-1.5 transition-colors cursor-pointer ${post.is_liked ? "text-rose-500" : "hover:text-slate-800"}`}
-        >
-          <Heart className={`h-3.5 w-3.5 ${post.is_liked ? "fill-current" : ""}`} />
-          <span>{post.upvotes || 0}</span>
-        </button>
+      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+        <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 px-1 py-1">
+          <button
+            onClick={() => onLike(post.id)}
+            className={`p-1.5 rounded-full hover:bg-gray-200 transition-colors ${post.is_liked ? "text-blue-600" : "text-gray-600"}`}
+          >
+            <ArrowUp size={16} />
+          </button>
+          <span className="text-xs font-semibold px-2 text-gray-800">{post.upvotes || 0}</span>
+          <div className="h-4 w-[1px] bg-gray-300 mx-0.5"></div>
+          <button className="p-1.5 rounded-full text-gray-600">
+            <ArrowDown size={16} />
+          </button>
+        </div>
+
         <button
           onClick={() => onCommentClick(post.id)}
-          className="flex items-center gap-1.5 hover:text-slate-800 transition-colors cursor-pointer"
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors"
         >
-          <MessageCircle className="h-3.5 w-3.5" />
-          <span>{post.comment_count || 0} Comments</span>
+          <MessageSquare size={16} />
+          <span>{post.comment_count || 0} Comment</span>
+        </button>
+
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <Repeat2 size={16} />
+          <span>Repost</span>
+        </button>
+
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <Share2 size={16} />
+          <span>Share</span>
         </button>
       </div>
 
       {commentsOpen && (
-        <CommentSection postId={post.id} comments={comments} />
+        <div className="mt-4 border-t border-gray-100 pt-4">
+          <CommentSection postId={post.id} comments={comments} />
+        </div>
       )}
     </div>
   );
@@ -1110,6 +1187,7 @@ const CampusForumPage: React.FC = () => {
                     onLightbox={handleLightbox}
                     comments={commentsData[post.id]}
                     commentsOpen={openComments[post.id]}
+                    onJoinCommunity={handleJoinToggle}
                   />
                 ))}
               </div>
