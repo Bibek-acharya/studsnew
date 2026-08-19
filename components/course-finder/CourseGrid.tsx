@@ -204,12 +204,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
 
                 {/* Details List */}
                 <div className="space-y-2.5 mb-5">
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <Building2 className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Affiliation:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Affiliation:</span>{" "}
                       <span
                         title={course.affiliationName || course.nonUniversityAffiliation || "-"}
                         className="text-gray-500 truncate"
@@ -218,12 +218,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <GraduationCap className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Field:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Field:</span>{" "}
                       <span
                         title={course.fieldOfStudy || course.field || "-"}
                         className="text-gray-500 truncate"
@@ -232,12 +232,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <CreditCard className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Est. Fee:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Est. Fee:</span>{" "}
                       <span
                         title={course.estFee || "-"}
                         className="font-bold text-[#0014FF] truncate"
@@ -246,12 +246,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-start">
-                    <div className="w-6 flex justify-center mt-0.5">
+                  <div className="flex items-center whitespace-nowrap overflow-hidden">
+                    <div className="w-6 flex justify-center shrink-0">
                       <Users className="w-4 h-4 text-gray-400" />
                     </div>
-                    <div className="text-[0.8rem] min-w-0">
-                      <span className="font-semibold text-gray-800">Seats:</span>{" "}
+                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
+                      <span className="font-semibold text-gray-800 shrink-0">Seats:</span>{" "}
                       <span
                         title={String(course.fullTimeCourses?.[0]?.seats || "-")}
                         className="text-gray-500 truncate"

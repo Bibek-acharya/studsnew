@@ -342,10 +342,12 @@ export default function CourseDetailPage({
             <div className="banner-gradient rounded-2xl p-6 relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[200px] md:min-h-[280px]">
               <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-xl"></div>
               <div className="absolute bottom-0 left-0 w-56 h-56 bg-white opacity-5 rounded-full -ml-20 -mb-20 blur-2xl"></div>
-              <h2 className="text-white text-xl md:text-2xl font-bold leading-tight relative z-10 mb-2">
-                {courseTitle}
-              </h2>
-              <div className="text-white/80 text-xs relative z-10 mt-auto pt-2 tracking-wide font-medium">
+              <div className="flex-1 flex items-center justify-center w-full relative z-10">
+                <h2 className="text-white text-xl md:text-2xl font-bold leading-tight">
+                  {courseTitle}
+                </h2>
+              </div>
+              <div className="text-white/80 text-xs relative z-10 pt-2 tracking-wide font-medium">
                 studsphere.com
               </div>
             </div>
@@ -402,7 +404,7 @@ export default function CourseDetailPage({
 
         <div className="mx-auto max-w-350 px-4 md:px-0 py-8 md:py-12 bg-white grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
           {/* Main Content */}
-          <div className="lg:col-span-2 min-h-[500px]">
+          <div className={`${sponsoredInsts.length > 0 ? "lg:col-span-2" : "lg:col-span-3"} min-h-[500px]`}>
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="tab-content">
@@ -1080,6 +1082,7 @@ export default function CourseDetailPage({
           </div>
 
           {/* Right Sidebar */}
+          {sponsoredInsts.length > 0 && (
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-32 space-y-6">
               {sponsoredInsts.length > 0 && (
@@ -1135,6 +1138,7 @@ export default function CourseDetailPage({
               )}
             </div>
           </div>
+          )}
         </div>
       </div>
     </>
