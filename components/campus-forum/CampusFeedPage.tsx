@@ -173,6 +173,7 @@ const PostCardComponent: React.FC<{
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isJoined, setIsJoined] = useState(post.community?.is_member || false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -188,6 +189,10 @@ const PostCardComponent: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setIsJoined(post.community?.is_member || false);
+  }, [post.community?.is_member]);
+
   const community = post.community;
   const user = post.user;
   const communityName = community?.name || "General";
@@ -199,13 +204,20 @@ const PostCardComponent: React.FC<{
     ? post.content?.slice(0, 150) + "..."
     : post.content;
 
+  const handleJoinToggle = () => {
+    if (onJoinCommunity && community) {
+      onJoinCommunity(community.id);
+      setIsJoined(!isJoined);
+    }
+  };
+
   return (
-    <div className="max-w-xl mx-auto bg-white rounded-2xl border border-gray-100 p-4 shadow-sm font-sans">
+    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 shadow-sm font-sans text-gray-900">
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center space-x-3">
           <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold shrink-0"
-            style={{ backgroundColor: community?.bg_color || "#00897B" }}
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm tracking-wide"
+            style={{ backgroundColor: community?.bg_color || "#0d9488" }}
           >
             {community?.icon ? (
               <DynamicIcon name={community.icon} size={14} />
@@ -214,32 +226,38 @@ const PostCardComponent: React.FC<{
             )}
           </div>
           <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-gray-900 text-sm">{communityName}</span>
-              <span className="text-gray-400 text-xs">•</span>
-              <span className="text-gray-400 text-xs">{formatRelativeTime(post.created_at)}</span>
+            <div className="flex items-center space-x-1.5 text-sm">
+              <span className="font-semibold text-gray-900 hover:underline cursor-pointer">
+                {communityName}
+              </span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-500 text-xs">{formatRelativeTime(post.created_at)}</span>
             </div>
-            <div className="flex items-center gap-1 text-xs text-gray-500">
-              <span>{username}</span>
-              <span>•</span>
+            <div className="text-xs text-gray-500">
+              <span className="hover:underline cursor-pointer">{username}</span>
+              <span className="mx-1">•</span>
               <span>{userRole}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {community && !community.is_member && onJoinCommunity && (
+        <div className="flex items-center space-x-2">
+          {onJoinCommunity && (
             <button
-              onClick={() => onJoinCommunity(community.id)}
-              className="px-4 py-1 border border-blue-500 text-blue-600 rounded-full font-medium text-sm hover:bg-blue-50 transition-colors"
+              onClick={handleJoinToggle}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                isJoined
+                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  : "border border-blue-500 text-blue-500 hover:bg-blue-50"
+              }`}
             >
-              Join
+              {isJoined ? "Joined" : "Join"}
             </button>
           )}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="text-gray-400 hover:text-gray-600 p-1"
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
             >
               <MoreVertical size={18} />
             </button>
@@ -260,42 +278,42 @@ const PostCardComponent: React.FC<{
         </div>
       </div>
 
-      <h2 className="text-base font-bold text-gray-900 mb-1.5 leading-snug">{post.title}</h2>
-      <p className="text-gray-600 text-sm leading-relaxed mb-3">
+      <h2 className="text-base font-bold text-gray-900 mb-2 leading-snug">{post.title}</h2>
+      <p className="text-sm text-gray-700 leading-relaxed mb-3">
         {displayContent}
         {shouldTruncate && (
-          <button
+          <span
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-gray-400 font-medium hover:underline ml-1"
+            className="text-gray-400 cursor-pointer hover:underline ml-1"
           >
             {isExpanded ? "less" : "more"}
-          </button>
+          </span>
         )}
       </p>
 
       {post.image_url && (
-        <div className="rounded-2xl overflow-hidden mb-4">
+        <div className="mb-4 rounded-xl overflow-hidden bg-gray-100 max-h-80">
           <img
             src={post.image_url}
-            alt="Post"
-            className="w-full h-64 object-cover"
+            alt="Post attachment"
+            className="w-full h-full object-cover"
           />
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-gray-600 text-xs font-medium">
-        <div className="flex items-center bg-[#F2F4F7] rounded-full px-3 py-2 gap-2">
+      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+        <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 px-1 py-1">
           <button
             onClick={() => onLike(post.id)}
-            className={`transition-colors ${post.is_liked ? "text-blue-600" : "text-gray-500 hover:text-blue-600"}`}
+            className={`p-1.5 rounded-full hover:bg-gray-200 transition-colors ${post.is_liked ? "text-blue-600" : "text-gray-600"}`}
           >
             <ArrowUp size={16} />
           </button>
-          <span className="font-semibold text-gray-800 text-sm">{post.upvotes || 0}</span>
-          <span className="text-gray-300">|</span>
+          <span className="text-xs font-semibold px-2 text-gray-800">{post.upvotes || 0}</span>
+          <div className="h-4 w-[1px] bg-gray-300 mx-0.5"></div>
           <button
             onClick={() => onDislike(post.id)}
-            className={`transition-colors ${post.is_disliked ? "text-red-500" : "text-gray-500 hover:text-blue-600"}`}
+            className={`p-1.5 rounded-full hover:bg-gray-200 transition-colors ${post.is_disliked ? "text-red-600" : "text-gray-600"}`}
           >
             <ArrowDown size={16} />
           </button>
@@ -303,20 +321,20 @@ const PostCardComponent: React.FC<{
 
         <button
           onClick={() => onCommentToggle(post.id)}
-          className="flex items-center gap-1.5 bg-[#F2F4F7] hover:bg-gray-200 px-3.5 py-2 rounded-full transition-colors"
+          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors"
         >
-          <MessageSquare size={16} className="text-gray-500" />
-          <span className="text-xs font-semibold text-gray-700">{post.comment_count || 0} Comment</span>
+          <MessageSquare size={16} />
+          <span>{post.comment_count || 0} Comment</span>
         </button>
 
-        <button className="flex items-center gap-1.5 bg-[#F2F4F7] hover:bg-gray-200 px-3.5 py-2 rounded-full transition-colors">
-          <Repeat2 size={16} className="text-gray-500" />
-          <span className="text-xs font-semibold text-gray-700">Repost</span>
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <Repeat2 size={16} />
+          <span>Repost</span>
         </button>
 
-        <button className="flex items-center gap-1.5 bg-[#F2F4F7] hover:bg-gray-200 px-3.5 py-2 rounded-full transition-colors">
-          <Share2 size={16} className="text-gray-500" />
-          <span className="text-xs font-semibold text-gray-700">Share</span>
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <Share2 size={16} />
+          <span>Share</span>
         </button>
       </div>
 
@@ -376,6 +394,7 @@ const PollPostComponent: React.FC<{
   onVote: (postId: number, optionIdx: number) => void;
 }> = ({ post, onVote }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isJoined, setIsJoined] = useState(post.community?.is_member || false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -391,10 +410,15 @@ const PollPostComponent: React.FC<{
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setIsJoined(post.community?.is_member || false);
+  }, [post.community?.is_member]);
+
   const community = post.community;
   const user = post.user;
   const communityName = community?.name || "General";
   const username = user ? `${user.first_name} ${user.last_name}` : "Anonymous";
+  const userRole = (user as any)?.role || "Student";
 
   let pollOptions: { label: string; percentage: number }[] = [];
   try {
@@ -411,12 +435,12 @@ const PollPostComponent: React.FC<{
   } catch {}
 
   return (
-    <div className="bg-white rounded-md border border-gray-100 p-4 sm:p-5">
+    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 shadow-sm font-sans text-gray-900">
       <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center space-x-3">
           <div
-            className="w-10 h-10 rounded-md flex items-center justify-center text-white font-bold shrink-0"
-            style={{ backgroundColor: community?.bg_color || "#6366f1" }}
+            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm tracking-wide"
+            style={{ backgroundColor: community?.bg_color || "#0d9488" }}
           >
             {community?.icon ? (
               <DynamicIcon name={community.icon} size={14} />
@@ -425,45 +449,50 @@ const PollPostComponent: React.FC<{
             )}
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-bold text-gray-900 text-sm">
+            <div className="flex items-center space-x-1.5 text-sm">
+              <span className="font-semibold text-gray-900 hover:underline cursor-pointer">
                 {communityName}
-              </h3>
-              <span className="text-xs text-gray-400 font-medium">
-                • {formatRelativeTime(post.created_at)}
               </span>
+              <span className="text-gray-400">•</span>
+              <span className="text-gray-500 text-xs">{formatRelativeTime(post.created_at)}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">{username}</p>
+            <div className="text-xs text-gray-500">
+              <span className="hover:underline cursor-pointer">{username}</span>
+              <span className="mx-1">•</span>
+              <span>{userRole}</span>
+            </div>
           </div>
         </div>
 
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="text-gray-400 hover:bg-gray-100 p-1.5 rounded-full transition"
-          >
-            <MoreVertical className="w-5 h-5" />
-          </button>
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-100 z-50 py-2">
-              <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
-                <Share className="w-5 h-5 text-gray-400" /> Share via...
-              </button>
-              <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
-                <EyeOff className="w-5 h-5 text-gray-400" /> Not interested
-              </button>
-              <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
-                <Flag className="w-5 h-5 text-red-500" /> Report
-              </button>
-            </div>
-          )}
+        <div className="flex items-center space-x-2">
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+            >
+              <MoreVertical size={18} />
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-100 z-50 py-2">
+                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                  <Share className="w-5 h-5 text-gray-400" /> Share via...
+                </button>
+                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                  <EyeOff className="w-5 h-5 text-gray-400" /> Not interested
+                </button>
+                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
+                  <Flag className="w-5 h-5 text-red-500" /> Report
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <h2 className="font-bold text-gray-900 text-base mb-2">{post.title}</h2>
-      <p className="text-sm text-gray-700 mb-4">{post.content}</p>
+      <h2 className="text-base font-bold text-gray-900 mb-2 leading-snug">{post.title}</h2>
+      <p className="text-sm text-gray-700 leading-relaxed mb-3">{post.content}</p>
 
-      <div className="space-y-2">
+      <div className="space-y-2 mb-4">
         {pollOptions.map((option, idx) => {
           const hasVoted =
             post.voted_option !== undefined && post.voted_option !== null;
@@ -491,24 +520,35 @@ const PollPostComponent: React.FC<{
           );
         })}
       </div>
-      <div className="text-xs text-gray-500 mt-3 font-medium">
+      <div className="text-xs text-gray-500 font-medium mb-3">
         {post.total_votes || 0} votes
       </div>
 
-      <div className="flex items-center flex-wrap gap-2 mt-4">
-        <div className="flex items-center bg-[#F2F4F7] rounded-full">
-          <button className="flex items-center gap-1.5 px-3.5 py-1.5 text-[#5C607A] hover:bg-gray-200 rounded-l-full font-semibold text-[13px] transition">
-            <ArrowUp className="w-4 h-4" /> {post.upvotes}
+      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
+        <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 px-1 py-1">
+          <button className="p-1.5 rounded-full text-gray-600">
+            <ArrowUp size={16} />
           </button>
-          <div className="w-px h-4 bg-gray-300" />
-          <button className="px-3.5 py-1.5 text-[#5C607A] hover:bg-gray-200 rounded-r-full transition">
-            <ArrowDown className="w-4 h-4" />
+          <span className="text-xs font-semibold px-2 text-gray-800">{post.upvotes || 0}</span>
+          <div className="h-4 w-[1px] bg-gray-300 mx-0.5"></div>
+          <button className="p-1.5 rounded-full text-gray-600">
+            <ArrowDown size={16} />
           </button>
         </div>
 
-        <button className="flex items-center gap-1.5 px-4 py-1.5 bg-[#F2F4F7] hover:bg-gray-200 rounded-full text-[#5C607A] font-semibold text-[13px] transition">
-          <MessageSquare className="w-4 h-4 text-[#7A809D]" />{" "}
-          {post.comment_count} Comment
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <MessageSquare size={16} />
+          <span>{post.comment_count || 0} Comment</span>
+        </button>
+
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <Repeat2 size={16} />
+          <span>Repost</span>
+        </button>
+
+        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
+          <Share2 size={16} />
+          <span>Share</span>
         </button>
       </div>
     </div>
