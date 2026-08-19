@@ -438,7 +438,16 @@ const CreatePostModal: React.FC<{
               <h2 className="text-[1.1rem] font-bold text-gray-900 leading-snug tracking-tight">
                 {user ? `${user.first_name} ${user.last_name}` : "Guest"}
               </h2>
-              <span className="text-[0.875rem] text-gray-500 font-medium">Student</span>
+              <select
+                value={selectedCommunityId || 0}
+                onChange={(e) => onCommunityChange(Number(e.target.value))}
+                className="text-[0.875rem] text-gray-500 font-medium bg-transparent border-none outline-none cursor-pointer hover:text-gray-700"
+              >
+                <option value={0} disabled>Joined Community</option>
+                {communities.filter(c => c.is_member || c.is_general).map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </div>
           </div>
           <div className="flex-1" />
