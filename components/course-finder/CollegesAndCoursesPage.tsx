@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check, FolderOpen } from "lucide-react";
+import { ChevronDown, Check, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiService, College as ApiCollege } from "../../services/api";
 import {
   CollegeFilters,
@@ -181,6 +181,36 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
   const [isInquirySingleSent, setIsInquirySingleSent] = useState(false);
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 2);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 2);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    window.addEventListener("resize", checkScroll);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      window.removeEventListener("resize", checkScroll);
+    };
+  }, [checkScroll, backendCourses]);
+
+  const scrollCourses = (direction: "left" | "right") => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const scrollAmount = 240;
+    el.scrollBy({ left: direction === "left" ? -scrollAmount : scrollAmount, behavior: "smooth" });
+  };
+
   const addToast = (msg: string) => {
     setToasts((prev) => [...prev, msg]);
     setTimeout(() => setToasts((prev) => prev.slice(1)), 3000);
@@ -293,8 +323,19 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
     <div className="min-h-screen p-4 text-gray-800 md:p-6 lg:p-8">
       {/* Top Bar for Courses */}
       <div className="mx-auto max-w-350 mb-6">
-        <div className="bg-blue-50 w-full rounded-md py-5 px-6 md:py-6 md:px-8 overflow-hidden border border-blue-100">
-          <div className="flex gap-4 md:gap-5 overflow-x-auto snap-x pb-2 no-scrollbar">
+        <div className="relative bg-blue-50 w-full rounded-md py-5 px-6 md:py-6 md:px-8 overflow-hidden border border-blue-100">
+          {canScrollLeft && (
+            <button
+              onClick={() => scrollCourses("left")}
+              className="absolute left-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 shadow-md border border-gray-200 text-gray-600 hover:bg-white hover:text-gray-900 transition-all"
+            >
+              <ChevronLeft size={18} />
+            </button>
+          )}
+          <div
+            ref={scrollContainerRef}
+            className="flex gap-4 md:gap-5 overflow-x-auto snap-x pb-2 no-scrollbar"
+          >
             {backendCourses.map((course: any) => {
               const isSelected =
                 String(course.id) === String(activeCourseId);
@@ -312,7 +353,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                     {course.title}
                   </h3>
                   <div className="mt-1.5 text-blue-600 text-[11px] font-medium flex items-center">
-                    {course.colleges || "10+"} colleges{" "}
+                    {isSelected ? `${totalResults || 0} colleges` : `${course.colleges || "—"}`}
                     <ChevronDown size={10} className="-rotate-90 ml-1" />
                   </div>
                   {isSelected && (
@@ -327,6 +368,14 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
               );
             })}
           </div>
+          {canScrollRight && (
+            <button
+              onClick={() => scrollCourses("right")}
+              className="absolute right-1 top-1/2 -translate-y-1/2 z-10 w-8 h-8 flex items-center justify-center rounded-full bg-white/90 shadow-md border border-gray-200 text-gray-600 hover:bg-white hover:text-gray-900 transition-all"
+            >
+              <ChevronRight size={18} />
+            </button>
+          )}
         </div>
       </div>
 

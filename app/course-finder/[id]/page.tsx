@@ -8,27 +8,13 @@ import {
   ChevronDown,
   ArrowRight,
   GraduationCap,
-  Users,
-  Brain,
-  Briefcase,
-  Globe,
-  Heart,
-  Star,
-  Target,
-  TrendingUp,
-  Lightbulb,
-  Compass,
-  Zap,
-  Shield,
-  Rocket,
-  Award,
-  BookOpen,
-  Clock,
-  MapPin,
 } from "lucide-react";
+import * as LucideIcons from "lucide-react";
 import { fetchCourseDetailsById } from "@/services/course-api";
+import { apiService } from "@/services/api";
 import EmptyTabState from "@/components/course-finder/EmptyTabState";
 import RichText from "@/components/RichText";
+import Link from "next/link";
 
 type TabKey =
   | "overview"
@@ -60,32 +46,31 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-const iconMap: Record<string, React.ComponentType<any>> = {
-  "graduation-cap": GraduationCap,
-  "users": Users,
-  "brain": Brain,
-  "briefcase": Briefcase,
-  "globe": Globe,
-  "heart": Heart,
-  "star": Star,
-  "target": Target,
-  "trending-up": TrendingUp,
-  "lightbulb": Lightbulb,
-  "compass": Compass,
-  "zap": Zap,
-  "shield": Shield,
-  "rocket": Rocket,
-  "award": Award,
-  "book-open": BookOpen,
-  "clock": Clock,
-  "map-pin": MapPin,
-};
+const kebabToPascal = (name: string): string =>
+  name
+    .replace(/-./g, (m) => m[1].toUpperCase())
+    .replace(/^./, (m) => m.toUpperCase());
 
-const getIcon = (iconName: string | undefined) => {
-  if (!iconName) return <GraduationCap className="w-6 h-6" />;
-  const clean = iconName.replace(/^fa-solid\s*/, "").replace(/^fa-/, "");
-  const IconComponent = iconMap[clean] || GraduationCap;
-  return <IconComponent className="w-6 h-6" />;
+const DynamicIcon = ({
+  name,
+  size = 24,
+  className = "",
+}: {
+  name: string;
+  size?: number;
+  className?: string;
+}) => {
+  const IconComponent = (
+    LucideIcons.icons as Record<
+      string,
+      React.ComponentType<{ size?: number; className?: string }>
+    >
+  )[kebabToPascal(name)];
+  return IconComponent ? (
+    <IconComponent size={size} className={className} />
+  ) : (
+    <GraduationCap size={size} className={className} />
+  );
 };
 
 export default function CourseDetailPage({
@@ -99,6 +84,7 @@ export default function CourseDetailPage({
 
   const tabsScrollRef = useRef<HTMLDivElement | null>(null);
   const tabsNavRef = useRef<HTMLElement | null>(null);
+  const tabBarRef = useRef<HTMLDivElement | null>(null);
   const [isTabsOverflowing, setIsTabsOverflowing] = useState(false);
   const [canScrollTabsLeft, setCanScrollTabsLeft] = useState(false);
   const [canScrollTabsRight, setCanScrollTabsRight] = useState(false);
@@ -107,6 +93,16 @@ export default function CourseDetailPage({
     queryKey: ["course-details", id],
     queryFn: () => fetchCourseDetailsById(id),
   });
+
+  const [sponsoredInsts, setSponsoredInsts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const affiliationId = details?.course?.affiliationId;
+    if (!affiliationId) return;
+    apiService.getSponsoredInstitutions(affiliationId).then((res) => {
+      setSponsoredInsts(res?.data?.institutions || res?.institutions || []);
+    }).catch(() => {});
+  }, [details?.course?.affiliationId]);
 
   const updateTabScrollState = useCallback(() => {
     const container = tabsScrollRef.current;
@@ -167,7 +163,8 @@ export default function CourseDetailPage({
 
   const handleTabClick = (tab: TabKey) => {
     setActiveTab(tab);
-    window.scrollTo({ top: 520, behavior: "smooth" });
+    const offset = tabBarRef.current?.offsetTop || 200;
+    window.scrollTo({ top: offset, behavior: "smooth" });
   };
 
   const toggleFaq = (index: number) => {
@@ -258,15 +255,16 @@ export default function CourseDetailPage({
   const hasDownloadsData = downloads.length > 0;
   const hasFaqData = faqs.length > 0;
 
-  const bannerImage =
-    courseImage ||
-    "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=1200&h=600&fit=crop";
+  const bannerImage = courseImage || "";
 
   return (
     <>
       <style>{`
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .tab-content { animation: fadeIn 0.4s ease-in-out; }
+        .table-scroll-wrapper { position: relative; }
+        .table-scroll-wrapper::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 40px; background: linear-gradient(to right, transparent, white); pointer-events: none; }
+        @media (min-width: 768px) { .table-scroll-wrapper::after { display: none; } }
          .ql-editor { padding: 0; max-width: 100%; overflow-x: hidden; word-break: normal; hyphens: none; line-break: strict; }
          .ql-editor p, .ql-editor li { font-size: 15px; line-height: 1.8; color: #4b5563; word-break: normal; overflow-wrap: break-word; hyphens: none; line-break: strict; }
         .ql-editor strong { font-weight: 700; color: #111827; }
@@ -275,10 +273,17 @@ export default function CourseDetailPage({
         .ql-editor table { max-width: 100%; overflow-x: auto; display: block; }
         details[open] summary ~ * { animation: slideDown 0.3s ease-out; }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .banner-gradient {
+          background: linear-gradient(135deg, #0d21e0 0%, #0014ff 100%);
+          background-image:
+            radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 40%),
+            radial-gradient(circle at bottom left, rgba(255,255,255,0.1) 0%, transparent 40%),
+            linear-gradient(135deg, #1126ef 0%, #0014FF 100%);
+        }
       `}</style>
 
       <div className="w-full bg-white text-gray-800">
-        <div className="mx-auto max-w-350 pt-12 pb-8">
+        <div className="mx-auto max-w-350 pt-8 md:pt-12 pb-6 md:pb-8">
           <nav className="flex items-center text-sm text-gray-500 mb-6 gap-1 overflow-x-auto whitespace-nowrap">
             <a
               href="/"
@@ -321,19 +326,32 @@ export default function CourseDetailPage({
             )}
           </div>
 
-          <div
-            className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-2xl overflow-hidden"
-            style={{
-              backgroundImage: `url('${bannerImage}')`,
-              backgroundPosition: "center 20%",
-            }}
-          >
-            <div className="absolute inset-0 bg-black/10"></div>
-          </div>
+          {bannerImage ? (
+            <div
+              className="relative w-full h-[280px] md:h-[380px] max-md:bg-contain bg-cover bg-center bg-no-repeat rounded-2xl overflow-hidden"
+              style={{
+                backgroundImage: `url('${bannerImage}')`,
+                backgroundPosition: "center 20%",
+              }}
+            >
+              <div className="absolute inset-0 bg-black/10"></div>
+            </div>
+          ) : (
+            <div className="banner-gradient rounded-2xl p-6 relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[200px] md:min-h-[280px]">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full -mr-16 -mt-16 blur-xl"></div>
+              <div className="absolute bottom-0 left-0 w-56 h-56 bg-white opacity-5 rounded-full -ml-20 -mb-20 blur-2xl"></div>
+              <h2 className="text-white text-xl md:text-2xl font-bold leading-tight relative z-10 mb-2">
+                {courseTitle}
+              </h2>
+              <div className="text-white/80 text-xs relative z-10 mt-auto pt-2 tracking-wide font-medium">
+                studsphere.com
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="mx-auto max-w-350 sticky top-0 z-40 bg-white border-b border-gray-100">
-          <div className="relative overflow-hidden">
+        <div ref={tabBarRef} className="mx-auto max-w-350 sticky top-0 z-40 bg-white border-b border-gray-100">
+          <div className="relative">
             {isTabsOverflowing && canScrollTabsLeft && (
               <button
                 type="button"
@@ -360,7 +378,7 @@ export default function CourseDetailPage({
             >
               <nav
                 ref={tabsNavRef}
-                className="flex w-max space-x-8 whitespace-nowrap"
+                className="flex w-max space-x-4 md:space-x-8 whitespace-nowrap"
               >
                 {tabs.map((tab) => (
                   <button
@@ -380,7 +398,9 @@ export default function CourseDetailPage({
           </div>
         </div>
 
-        <div className="mx-auto max-w-350 py-8 md:py-12 bg-white">
+        <div className="mx-auto max-w-350 py-8 md:py-12 bg-white grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
+          {/* Main Content */}
+          <div className="lg:col-span-2 min-h-[500px]">
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="tab-content">
@@ -426,7 +446,7 @@ export default function CourseDetailPage({
                         className="border border-gray-200 rounded-xl p-6 bg-white"
                       >
                         <div className="w-12 h-12 rounded-xl bg-[#0000ff] flex items-center justify-center text-white mb-4">
-                          {getIcon(item.icon)}
+                          <DynamicIcon name={item.icon || ""} size={24} className="w-6 h-6" />
                         </div>
                         <h3 className="font-bold text-gray-900 mb-2 text-[17px]">
                           {item.title != null ? String(item.title) : ""}
@@ -532,7 +552,7 @@ export default function CourseDetailPage({
                           </summary>
                           <div className="border-t border-gray-200">
                             {subjects.length > 0 && (
-                              <div className="overflow-x-auto">
+                              <div className="overflow-x-auto table-scroll-wrapper">
                                 <table className="w-full text-left border-collapse min-w-[500px]">
                                   <thead>
                                     <tr className="bg-[#eff4fc] text-gray-700">
@@ -597,9 +617,12 @@ export default function CourseDetailPage({
                                     </li>
                                   ))}
                                 </ol>
-                              </div>
-                            )}
-                          </div>
+            </div>
+          )}
+
+          </div>
+
+        </div>
                         </details>
                       );
                     })}
@@ -625,7 +648,7 @@ export default function CourseDetailPage({
                       dangerouslySetInnerHTML={{ __html: eligibilityText }}
                     />
                   ) : (
-                    <div className="overflow-x-auto rounded border border-gray-200">
+                    <div className="overflow-x-auto rounded border border-gray-200 table-scroll-wrapper">
                       <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                           <tr className="bg-[#eff4fc] border-b border-gray-200">
@@ -754,7 +777,7 @@ export default function CourseDetailPage({
                   ) : (
                     <>
                       {feeItems.some((fi: any) => fi.particular || fi.amount) && (
-                        <div className="overflow-x-auto rounded border border-gray-200 mb-6">
+                        <div className="overflow-x-auto rounded border border-gray-200 mb-6 table-scroll-wrapper">
                           <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead>
                               <tr className="bg-[#eff4fc] border-b border-gray-200">
@@ -1052,6 +1075,65 @@ export default function CourseDetailPage({
               )}
             </div>
           )}
+
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="lg:sticky lg:top-32 space-y-6">
+              {sponsoredInsts.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-[20px] font-bold text-gray-900">Sponsored Colleges</h3>
+                    <span className="text-[11px] font-bold text-gray-400 tracking-wider">AD</span>
+                  </div>
+                  <div className="space-y-4">
+                    {sponsoredInsts.map((inst: any) => (
+                      <Link
+                        key={inst.id}
+                        href={`/find-college/${inst.college_id || inst.id}`}
+                        className="bg-white border border-gray-200 rounded-[14px] p-5 flex items-center gap-4 hover:shadow-md transition-shadow cursor-pointer"
+                      >
+                        <div className="w-[60px] h-[60px] rounded-lg bg-white border border-gray-100 flex items-center justify-center shrink-0 p-1">
+                          {inst.logo_url ? (
+                            <img src={inst.logo_url} alt={inst.institution_name} className="w-full h-full object-contain rounded" />
+                          ) : (
+                            <div className="w-full h-full bg-brand-blue rounded" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <h4 className="text-[17px] font-bold text-gray-900 truncate">{inst.institution_name}</h4>
+                            {inst.is_verified && (
+                              <svg className="w-4 h-4 text-[#1678e3] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path></svg>
+                            )}
+                          </div>
+                          {inst.district && (
+                            <div className="flex items-center gap-1.5 text-gray-500 text-[13px] mb-1.5">
+                              <MapPin className="w-3.5 h-3.5 shrink-0" />
+                              <span className="truncate">{inst.district}</span>
+                            </div>
+                          )}
+                          {inst.website_url && (
+                            <a
+                              href={inst.website_url.startsWith("http") ? inst.website_url : `https://${inst.website_url}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1 text-[#1678e3] text-[13px] font-medium hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <Globe className="w-3.5 h-3.5 shrink-0" />
+                              {inst.website_url.replace(/^https?:\/\//, "")}
+                            </a>
+                          )}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </>
