@@ -172,10 +172,12 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                   <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
                   <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full -ml-16 -mb-16 blur-2xl"></div>
 
-                  <h2 className="text-white text-[1.1rem] font-bold leading-tight relative z-10 mb-2">
-                    {course.title}
-                  </h2>
-                  <div className="text-white/80 text-[0.55rem] relative z-10 mt-auto pt-2 tracking-wide font-medium">
+                  <div className="flex-1 flex items-center justify-center w-full relative z-10">
+                    <h2 className="text-white text-[1.1rem] font-bold leading-tight">
+                      {course.title}
+                    </h2>
+                  </div>
+                  <div className="text-white/80 text-[0.55rem] relative z-10 pt-2 tracking-wide font-medium">
                     studsphere.com
                   </div>
                 </div>
@@ -210,7 +212,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       <span className="font-semibold text-gray-800">Affiliation:</span>{" "}
                       <span
                         title={course.affiliationName || course.nonUniversityAffiliation || "-"}
-                        className="text-gray-500 truncate block"
+                        className="text-gray-500 truncate"
                       >
                         {course.affiliationName || course.nonUniversityAffiliation || "-"}
                       </span>
@@ -224,7 +226,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       <span className="font-semibold text-gray-800">Field:</span>{" "}
                       <span
                         title={course.fieldOfStudy || course.field || "-"}
-                        className="text-gray-500 truncate block"
+                        className="text-gray-500 truncate"
                       >
                         {course.fieldOfStudy || course.field || "-"}
                       </span>
@@ -238,7 +240,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       <span className="font-semibold text-gray-800">Est. Fee:</span>{" "}
                       <span
                         title={course.estFee || "-"}
-                        className="font-bold text-[#0014FF] truncate block"
+                        className="font-bold text-[#0014FF] truncate"
                       >
                         {course.estFee || "-"}
                       </span>
@@ -252,7 +254,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                       <span className="font-semibold text-gray-800">Seats:</span>{" "}
                       <span
                         title={String(course.fullTimeCourses?.[0]?.seats || "-")}
-                        className="text-gray-500 truncate block"
+                        className="text-gray-500 truncate"
                       >
                         {course.fullTimeCourses?.[0]?.seats || "-"}
                       </span>

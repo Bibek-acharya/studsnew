@@ -353,7 +353,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                     {course.title}
                   </h3>
                   <div className="mt-1.5 text-blue-600 text-[11px] font-medium flex items-center">
-                    {isSelected ? `${totalResults || 0} colleges` : `${course.colleges || "—"}`}
+                    {isSelected ? `${totalResults || 0} colleges` : `${course.colleges || 0} colleges`}
                     <ChevronDown size={10} className="-rotate-90 ml-1" />
                   </div>
                   {isSelected && (
