@@ -202,7 +202,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
       el.removeEventListener("scroll", checkScroll);
       window.removeEventListener("resize", checkScroll);
     };
-  }, [checkScroll, backendCourses]);
+  }, [checkScroll]);
 
   const scrollCourses = (direction: "left" | "right") => {
     const el = scrollContainerRef.current;

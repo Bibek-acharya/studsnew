@@ -14,6 +14,7 @@ import {
   Award,
   BookOpen,
   MapPin,
+  Globe,
   GraduationCap,
   ArrowRight,
 } from "lucide-react";

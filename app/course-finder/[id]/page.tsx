@@ -8,6 +8,8 @@ import {
   ChevronDown,
   ArrowRight,
   GraduationCap,
+  MapPin,
+  Globe,
 } from "lucide-react";
 import * as LucideIcons from "lucide-react";
 import { fetchCourseDetailsById } from "@/services/course-api";
@@ -622,7 +624,6 @@ export default function CourseDetailPage({
 
           </div>
 
-        </div>
                         </details>
                       );
                     })}
