@@ -337,6 +337,7 @@ const CreatePostModal: React.FC<{
   const [pollQuestion, setPollQuestion] = useState("");
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
   const [pollDuration, setPollDuration] = useState("2 Weeks");
+  const [error, setError] = useState<string | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
@@ -354,6 +355,7 @@ const CreatePostModal: React.FC<{
     setPollQuestion("");
     setPollOptions(["", ""]);
     setPollDuration("2 Weeks");
+    setError(null);
   };
 
   const handleClose = () => {
@@ -400,6 +402,18 @@ const CreatePostModal: React.FC<{
   };
 
   const handleSubmit = () => {
+    if (!selectedCommunityId) {
+      setError("Please select a community before publishing.");
+      return;
+    }
+
+    if (!title.trim() && !content.trim() && images.length === 0 && !video) {
+      setError("Please enter a title or post content.");
+      return;
+    }
+
+    setError(null);
+
     const poll =
       showPoll && pollOptions.filter((o) => o.trim()).length >= 2
         ? {
@@ -418,79 +432,94 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-[250] flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
       onClick={handleClose}
     >
       <div
-        className="bg-white rounded-md w-full max-w-lg shadow-2xl flex flex-col max-h-[85vh] overflow-hidden p-6 sm:p-7"
+        className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between pb-2">
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-lg font-bold overflow-hidden">
-              {user?.image_url ? (
-                <img src={imageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
-              ) : (
-                avatarLetter
-              )}
+        <button
+          type="button"
+          onClick={handleClose}
+          aria-label="Close form"
+          className="absolute right-4 top-4 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="mb-4 flex items-center space-x-3">
+          {user?.image_url ? (
+            <img
+              src={imageUrl(user.image_url)}
+              alt={user?.first_name}
+              className="h-12 w-12 rounded-full object-cover"
+            />
+          ) : (
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-600 font-semibold">
+              {avatarLetter}
             </div>
-            <div className="flex flex-col">
-              <h2 className="text-[1.1rem] font-bold text-gray-900 leading-snug tracking-tight">
-                {user ? `${user.first_name} ${user.last_name}` : "Guest"}
-              </h2>
-              <select
-                value={selectedCommunityId || 0}
-                onChange={(e) => onCommunityChange(Number(e.target.value))}
-                className="text-[0.875rem] text-gray-500 font-medium bg-transparent border-none outline-none cursor-pointer hover:text-gray-700"
-              >
-                <option value={0} disabled>Joined Community</option>
-                {communities.filter(c => c.is_member || c.is_general).map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
+          )}
+          <div>
+            <h2 className="text-lg font-bold leading-tight text-slate-800">
+              {user ? `${user.first_name} ${user.last_name}` : "Guest"}
+            </h2>
+            <p className="text-sm text-slate-500">Student</p>
           </div>
-          <div className="flex-1" />
-          <select
-            value={selectedCommunityId || 0}
-            onChange={(e) => onCommunityChange(Number(e.target.value))}
-            className="text-xs font-bold text-slate-600 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 outline-none focus:border-[#0000ff]"
-          >
-            <option value={0} disabled>Select community</option>
-            {communities.filter(c => c.is_member || c.is_general).map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          <button
-            onClick={handleClose}
-            className="text-gray-800 hover:text-black hover:bg-gray-100 p-2 rounded-full transition-colors w-9 h-9 flex items-center justify-center"
-          >
-            <X className="h-[18px] w-[18px]" />
-          </button>
         </div>
 
-        <div className="flex-1 my-3 flex flex-col overflow-y-auto pr-1">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Post title"
-            className="w-full text-[1rem] font-bold text-gray-900 placeholder-gray-400 bg-transparent border-none py-1 outline-none"
-          />
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Tell others about yourself..."
-            className="w-full text-[0.95rem] text-gray-800 placeholder-gray-400 bg-transparent border-none py-1 outline-none font-medium leading-relaxed resize-none min-h-[60px]"
-          />
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
+          {error && (
+            <div className="mb-4 rounded-lg bg-red-50 p-3 text-xs font-medium text-red-600">
+              {error}
+            </div>
+          )}
 
-          <div className="mt-2 space-y-3">
+          <div className="mb-4">
+            <select
+              value={selectedCommunityId || ""}
+              onChange={(e) => {
+                onCommunityChange(Number(e.target.value));
+                if (error) setError(null);
+              }}
+              className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-600 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+            >
+              <option value="" disabled>
+                Select a community
+              </option>
+              {communities.filter(c => c.is_member || c.is_general).map((c) => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-6 space-y-2">
+            <input
+              type="text"
+              placeholder="Post title"
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                if (error) setError(null);
+              }}
+              className="w-full bg-transparent text-lg font-semibold text-slate-800 placeholder-slate-400 outline-none"
+            />
+            <textarea
+              placeholder="Tell others about yourself..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="h-28 w-full resize-none bg-transparent text-slate-700 placeholder-slate-400 outline-none"
+            />
+          </div>
+
+          <div className="mb-4 space-y-3">
             {imagePreviews.length > 0 && (
               <div className="grid gap-2 grid-cols-2">
                 {imagePreviews.map((url, i) => (
                   <div key={i} className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 group">
                     <img src={imageUrl(url)} alt={`Preview ${i + 1}`} className="w-full h-32 object-cover" />
                     <button
+                      type="button"
                       onClick={() => removeImage(i)}
                       className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
                     >
@@ -505,6 +534,7 @@ const CreatePostModal: React.FC<{
               <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-black">
                 <video src={videoPreview} controls className="w-full max-h-[200px] object-contain" />
                 <button
+                  type="button"
                   onClick={removeVideo}
                   className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm z-10"
                 >
@@ -514,12 +544,13 @@ const CreatePostModal: React.FC<{
             )}
 
             {showPoll && (
-              <div className="space-y-3 bg-slate-50 rounded-2xl p-4 border border-gray-200">
+              <div className="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Create a poll</span>
+                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Create a poll</span>
                   <button
+                    type="button"
                     onClick={() => setShowPoll(false)}
-                    className="text-[10px] font-bold text-gray-400 hover:text-red-500"
+                    className="text-[10px] font-bold text-slate-400 hover:text-red-500"
                   >
                     Remove
                   </button>
@@ -528,7 +559,7 @@ const CreatePostModal: React.FC<{
                   value={pollQuestion}
                   onChange={(e) => setPollQuestion(e.target.value)}
                   placeholder="Ask a question..."
-                  className="w-full border border-gray-200 rounded-lg p-3 text-sm text-gray-800 placeholder-gray-400 focus:border-[#0000ff] outline-none transition-all resize-y min-h-[60px]"
+                  className="w-full border border-slate-200 rounded-lg p-3 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-600 outline-none transition-all resize-y min-h-[60px]"
                 />
                 <div className="flex flex-col gap-2">
                   {pollOptions.map((opt, i) => (
@@ -540,12 +571,13 @@ const CreatePostModal: React.FC<{
                           setPollOptions((p) => p.map((o, idx) => (idx === i ? e.target.value : o)))
                         }
                         placeholder={`Option ${i + 1}`}
-                        className="w-full border border-gray-200 rounded-lg px-4 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-400 focus:border-[#0000ff] outline-none transition-all"
+                        className="w-full border border-slate-200 rounded-lg px-4 py-2.5 pr-10 text-sm text-slate-800 placeholder-slate-400 focus:border-blue-600 outline-none transition-all"
                       />
                       {pollOptions.length > 2 && (
                         <button
+                          type="button"
                           onClick={() => removePollOption(i)}
-                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-red-500 rounded-full hover:bg-red-50 transition-colors"
                         >
                           <X className="h-3.5 w-3.5" />
                         </button>
@@ -555,20 +587,21 @@ const CreatePostModal: React.FC<{
                 </div>
                 {pollOptions.length < 5 && (
                   <button
+                    type="button"
                     onClick={addPollOption}
-                    className="text-[#0000ff] font-semibold text-sm flex items-center gap-1.5 hover:underline"
+                    className="text-blue-600 font-semibold text-sm flex items-center gap-1.5 hover:underline"
                   >
                     <Plus className="h-3.5 w-3.5" /> Add option
                   </button>
                 )}
-                <div className="relative border border-gray-200 rounded-lg px-3.5 py-3 focus-within:border-[#0000ff] transition-all">
-                  <label className="absolute -top-2.5 left-3 bg-slate-50 px-1 text-[11px] font-semibold text-gray-400">
+                <div className="relative border border-slate-200 rounded-lg px-3.5 py-3 focus-within:border-blue-600 transition-all">
+                  <label className="absolute -top-2.5 left-3 bg-slate-50 px-1 text-[11px] font-semibold text-slate-400">
                     Poll Duration
                   </label>
                   <select
                     value={pollDuration}
                     onChange={(e) => setPollDuration(e.target.value)}
-                    className="w-full bg-transparent border-none outline-none text-gray-800 text-sm cursor-pointer font-medium"
+                    className="w-full bg-transparent border-none outline-none text-slate-800 text-sm cursor-pointer font-medium"
                   >
                     <option value="1 Day">1 Day</option>
                     <option value="3 Days">3 Days</option>
@@ -579,7 +612,60 @@ const CreatePostModal: React.FC<{
               </div>
             )}
           </div>
-        </div>
+
+          <hr className="mb-4 border-slate-200" />
+
+          <div className="flex items-center justify-between">
+            <div className="flex space-x-2 text-sm font-medium text-slate-700">
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 transition-colors ${
+                  images.length > 0
+                    ? "bg-blue-50 text-blue-600"
+                    : "hover:bg-slate-100 hover:text-blue-600"
+                }`}
+              >
+                <Image className="h-4 w-4" />
+                <span>Image</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowPoll((p) => !p)}
+                className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 transition-colors ${
+                  showPoll
+                    ? "bg-blue-50 text-blue-600"
+                    : "hover:bg-slate-100 hover:text-blue-600"
+                }`}
+              >
+                <BarChart2 className="h-4 w-4" />
+                <span>Poll</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => videoInputRef.current?.click()}
+                className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 transition-colors ${
+                  video
+                    ? "bg-blue-50 text-blue-600"
+                    : "hover:bg-slate-100 hover:text-blue-600"
+                }`}
+              >
+                <Video className="h-4 w-4" />
+                <span>Video</span>
+              </button>
+            </div>
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-full bg-blue-600 px-6 py-2 font-semibold text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 active:scale-95 disabled:opacity-50"
+            >
+              {isSubmitting ? "Publishing..." : "Publish"}
+            </button>
+          </div>
+        </form>
 
         <input
           ref={imageInputRef}
@@ -596,47 +682,6 @@ const CreatePostModal: React.FC<{
           className="hidden"
           onChange={handleVideoPick}
         />
-
-        <div className="pt-4 border-t border-gray-100 flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-1 sm:gap-2 text-gray-600">
-            <button
-              onClick={() => imageInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#0000ff] transition-all group"
-              title="Add Image"
-            >
-              <Image className="h-[18px] w-[18px] group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-semibold hidden sm:inline">Image</span>
-            </button>
-            <button
-              onClick={() => setShowPoll((p) => !p)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-full transition-all group ${
-                showPoll
-                  ? "bg-blue-50 text-[#0000ff]"
-                  : "hover:bg-gray-100 text-gray-600 hover:text-[#0000ff]"
-              }`}
-              title="Create Poll"
-            >
-              <BarChart2 className="h-[18px] w-[18px] group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-semibold hidden sm:inline">Poll</span>
-            </button>
-            <button
-              onClick={() => videoInputRef.current?.click()}
-              className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 text-gray-600 hover:text-[#0000ff] transition-all group"
-              title="Add Video"
-            >
-              <Video className="h-[18px] w-[18px] group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-semibold hidden sm:inline">Video</span>
-            </button>
-          </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-[#0000ff] text-white font-bold py-2.5 px-7 rounded-full text-[15px] hover:opacity-90 active:scale-95 transition-all shadow-sm disabled:opacity-50"
-          >
-            {isSubmitting ? "Publishing..." : "Publish"}
-          </button>
-        </div>
       </div>
     </div>
   );
