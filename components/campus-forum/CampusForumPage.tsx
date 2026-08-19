@@ -83,7 +83,8 @@ const PostCard: React.FC<{
   comments?: CommentData[];
   commentsOpen?: boolean;
   onJoinCommunity?: (communityId: number) => void;
-}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen, onJoinCommunity }) => {
+  onCommentAdded?: (postId: number) => void;
+}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -109,12 +110,12 @@ const PostCard: React.FC<{
   };
 
   return (
-    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 shadow-sm font-sans text-gray-900">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center space-x-3">
+    <div className="max-w-[580px] bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm font-sans text-gray-900">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm tracking-wide shrink-0"
-            style={{ backgroundColor: post.community?.bg_color || "#0d9488" }}
+            className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs tracking-wider shrink-0"
+            style={{ backgroundColor: post.community?.bg_color || "#0f8b8d" }}
           >
             {post.community?.icon ? (
               <DynamicIcon name={post.community.icon} size={14} />
@@ -123,29 +124,25 @@ const PostCard: React.FC<{
             )}
           </div>
           <div>
-            <div className="flex items-center space-x-1.5 text-sm">
-              <span className="font-semibold text-gray-900 hover:underline cursor-pointer">
-                {communityName || "General"}
-              </span>
-              <span className="text-gray-400">•</span>
-              <span className="text-gray-500 text-xs">{relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-sm text-gray-900">{communityName || "General"}</span>
+              <span className="text-gray-400 text-xs">•</span>
+              <span className="text-gray-400 text-xs">{relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}</span>
             </div>
-            <div className="text-xs text-gray-500">
-              <span className="hover:underline cursor-pointer">{user ? `${user.first_name} ${user.last_name}` : "Anonymous"}</span>
-              <span className="mx-1">•</span>
-              <span>{userRole}</span>
+            <div className="text-xs text-gray-500 font-normal">
+              {user ? `${user.first_name} ${user.last_name}` : "Anonymous"} <span className="mx-0.5">•</span> {userRole}
             </div>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           {onJoinCommunity && post.community && (
             <button
               onClick={handleJoinToggle}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              className={`px-4 py-1 rounded-full text-xs font-semibold transition-colors ${
                 isJoined
                   ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  : "border border-blue-500 text-blue-500 hover:bg-blue-50"
+                  : "border border-[#2563eb] text-[#2563eb] hover:bg-blue-50"
               }`}
             >
               {isJoined ? "Joined" : "Join"}
@@ -158,16 +155,16 @@ const PostCard: React.FC<{
       </div>
 
       {post.title && (
-        <h2 className="text-base font-bold text-gray-900 mb-2 leading-snug">{post.title}</h2>
+        <h2 className="text-base font-bold text-gray-900 leading-snug mb-2">{post.title}</h2>
       )}
 
       {post.content && (
-        <p className="text-sm text-gray-700 leading-relaxed mb-3">
+        <p className="text-sm text-gray-600 leading-relaxed mb-3">
           {displayContent}
           {shouldTruncate && (
             <span
               onClick={() => setIsExpanded(!isExpanded)}
-              className="text-gray-400 cursor-pointer hover:underline ml-1"
+              className="text-gray-400 font-medium cursor-pointer hover:underline ml-1"
             >
               {isExpanded ? "less" : "more"}
             </span>
@@ -176,19 +173,19 @@ const PostCard: React.FC<{
       )}
 
       {images.length > 0 && (
-        <div className="mb-4 rounded-xl overflow-hidden bg-gray-100 max-h-80">
+        <div className="w-full h-72 rounded-xl overflow-hidden mb-3 bg-gray-100">
           {images.length === 1 ? (
-            <div className="relative cursor-pointer group" onClick={() => onLightbox(imageUrl(images[0]), "image")}>
+            <div className="relative cursor-pointer group h-full" onClick={() => onLightbox(imageUrl(images[0]), "image")}>
               <img src={imageUrl(images[0])} alt="" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
             </div>
           ) : (
-            <div className={`grid gap-1 ${images.length === 2 ? "grid-cols-2" : "grid-cols-2"}`}>
+            <div className="grid grid-cols-2 gap-1 h-full">
               {images.slice(0, 4).map((url, i) => (
                 <div key={i} className="relative cursor-pointer group" onClick={() => onLightbox(imageUrl(url), "image")}>
-                  <img src={imageUrl(url)} alt="" className="w-full h-40 object-cover" />
+                  <img src={imageUrl(url)} alt="" className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -200,8 +197,8 @@ const PostCard: React.FC<{
       )}
 
       {post.video_url && (
-        <div className="mb-4 rounded-xl overflow-hidden bg-gray-100 max-h-80 relative cursor-pointer group" onClick={() => onLightbox(imageUrl(post.video_url), "video")}>
-          <video src={imageUrl(post.video_url)} className="w-full max-h-80 object-contain" />
+        <div className="w-full h-72 rounded-xl overflow-hidden mb-3 bg-gray-100 relative cursor-pointer group" onClick={() => onLightbox(imageUrl(post.video_url), "video")}>
+          <video src={imageUrl(post.video_url)} className="w-full h-full object-contain" />
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
             <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
           </div>
@@ -209,7 +206,7 @@ const PostCard: React.FC<{
       )}
 
       {post.is_poll && pollOptions.length > 0 && (
-        <div className="mb-4 space-y-2">
+        <div className="mb-3 space-y-2">
           {pollOptions.map((opt: any, idx: number) => {
             const total = post.total_votes || 1;
             const pct = Math.round(((opt.votes || 0) / total) * 100);
@@ -227,43 +224,38 @@ const PostCard: React.FC<{
         </div>
       )}
 
-      <div className="flex items-center justify-between pt-1 border-t border-gray-100">
-        <div className="flex items-center bg-gray-50 rounded-full border border-gray-200 px-1 py-1">
+      <div className="flex items-center gap-2 text-xs font-medium text-[#52525e]">
+        <div className="flex items-center bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3 py-2 text-gray-700 transition-colors">
           <button
             onClick={() => onLike(post.id)}
-            className={`p-1.5 rounded-full hover:bg-gray-200 transition-colors ${post.is_liked ? "text-blue-600" : "text-gray-600"}`}
+            className={`flex items-center gap-1.5 hover:text-black ${post.is_liked ? "text-blue-600" : ""}`}
           >
-            <ArrowUp size={16} />
+            <ArrowUp size={16} className={post.is_liked ? "text-indigo-500" : "text-gray-500"} />
+            <span className="font-semibold text-gray-800">{post.upvotes || 0}</span>
           </button>
-          <span className="text-xs font-semibold px-2 text-gray-800">{post.upvotes || 0}</span>
-          <div className="h-4 w-[1px] bg-gray-300 mx-0.5"></div>
-          <button className="p-1.5 rounded-full text-gray-600">
-            <ArrowDown size={16} />
+          <span className="mx-2 text-gray-300">|</span>
+          <button className="hover:text-black">
+            <ArrowDown size={16} className="text-gray-500" />
           </button>
         </div>
 
         <button
           onClick={() => onCommentClick(post.id)}
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors"
+          className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold"
         >
-          <MessageSquare size={16} />
-          <span>{post.comment_count || 0} Comment</span>
+          <MessageSquare size={16} className="text-gray-500" />
+          {post.comment_count || 0} Comment
         </button>
 
-        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
-          <Repeat2 size={16} />
-          <span>Repost</span>
-        </button>
-
-        <button className="flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-gray-600 hover:bg-gray-100 text-xs font-medium transition-colors">
-          <Share2 size={16} />
-          <span>Share</span>
+        <button className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold">
+          <Repeat2 size={16} className="text-gray-500" />
+          Repost
         </button>
       </div>
 
       {commentsOpen && (
         <div className="mt-4 border-t border-gray-100 pt-4">
-          <CommentSection postId={post.id} comments={comments} />
+          <CommentSection postId={post.id} comments={comments} onCommentAdded={onCommentAdded} />
         </div>
       )}
     </div>
@@ -341,41 +333,61 @@ const CommentItem: React.FC<{
 const CommentSection: React.FC<{
   postId: number;
   comments: CommentData[];
-}> = ({ postId, comments }) => {
+  onCommentAdded?: (postId: number) => void;
+}> = ({ postId, comments, onCommentAdded }) => {
   const [newComment, setNewComment] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const token = apiService.getToken();
 
   const handleAddComment = async () => {
-    if (!token || !newComment.trim()) return;
+    if (!token || !newComment.trim() || isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await apiService.createForumComment(token, postId, { content: newComment.trim() });
       setNewComment("");
-    } catch {}
+      if (onCommentAdded) {
+        onCommentAdded(postId);
+      }
+    } catch (e) {
+      console.error("Failed to post comment:", e);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReply = async (pId: number, parentId: number, content: string) => {
     if (!token) return;
     try {
       await apiService.createForumComment(token, pId, { content, parent_id: parentId });
-    } catch {}
+      if (onCommentAdded) {
+        onCommentAdded(pId);
+      }
+    } catch (e) {
+      console.error("Failed to post reply:", e);
+    }
   };
 
   return (
-    <div className="border-t border-slate-100 pt-3 space-y-3">
+    <div className="pt-3 space-y-3">
       <div className="flex gap-2">
         <input
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
           placeholder="Write a comment..."
-          className="flex-1 border border-slate-200 rounded-md px-3 py-2 text-xs outline-none focus:border-[#0000ff]"
+          className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-500"
           onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+          disabled={isSubmitting}
         />
-        <button onClick={handleAddComment} className="bg-[#0000ff] text-white rounded-md px-3 py-2 text-xs font-bold hover:opacity-90">
-          <Send className="h-3.5 w-3.5" />
+        <button
+          onClick={handleAddComment}
+          disabled={isSubmitting || !newComment.trim()}
+          className="bg-[#2563eb] text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+        >
+          {isSubmitting ? "..." : "Post"}
         </button>
       </div>
       {!Array.isArray(comments) || comments.length === 0 ? (
-        <p className="text-[11px] text-slate-400 text-center py-2">No comments yet. Be the first!</p>
+        <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
       ) : (
         <div className="space-y-3">
           {(comments as CommentData[]).map((c) => (
@@ -1016,6 +1028,15 @@ const CampusForumPage: React.FC = () => {
     }
   };
 
+  const handleCommentAdded = async (postId: number) => {
+    try {
+      const raw = await apiService.getForumPostComments(postId, 50, 0);
+      const cmts = Array.isArray(raw?.comments) ? raw.comments : Array.isArray(raw) ? raw : [];
+      setCommentsData((p) => ({ ...p, [postId]: cmts }));
+      setPosts((p) => p.map((post) => post.id === postId ? { ...post, comment_count: (post.comment_count || 0) + 1 } : post));
+    } catch {}
+  };
+
   const handleLightbox = (url: string, type: "image" | "video") => {
     setLightboxUrl(url);
     setLightboxType(type);
@@ -1188,6 +1209,7 @@ const CampusForumPage: React.FC = () => {
                     comments={commentsData[post.id]}
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
+                    onCommentAdded={handleCommentAdded}
                   />
                 ))}
               </div>
