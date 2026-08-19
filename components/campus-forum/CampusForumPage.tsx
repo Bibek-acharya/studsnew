@@ -305,7 +305,7 @@ const CommentItem: React.FC<{
           </svg>
           <span className="text-gray-400 text-xs">• {relativeTime(comment.created_at)}</span>
         </div>
-        <p className="text-xs text-gray-500 mb-2">{comment.user?.role || "Student"}</p>
+        <p className="text-xs text-gray-500 mb-2">Student</p>
 
         <p className="text-sm text-gray-800 leading-relaxed mb-3">{comment.content}</p>
 
