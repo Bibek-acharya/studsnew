@@ -266,11 +266,13 @@ const CommentItem: React.FC<{
   comment: CommentData;
   postId: number;
   onReply: (postId: number, parentId: number, content: string) => void;
-}> = ({ comment, postId, onReply }) => {
+  isAuthor?: boolean;
+}> = ({ comment, postId, onReply, isAuthor = false }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [likes, setLikes] = useState(0);
 
   const handleReply = async () => {
     if (!replyContent.trim()) return;
@@ -284,48 +286,65 @@ const CommentItem: React.FC<{
     }
   };
 
+  const userInitial = comment.user_name?.[0]?.toUpperCase() || "U";
+  const bgColor = comment.user_name?.[0] === "s" ? "bg-pink-100" : "bg-gray-100";
+  const emojis = ["🍇", "🎳", "🎯", "🎮", "🎲", "🧩"];
+  const avatarEmoji = emojis[comment.id % emojis.length];
+
   return (
-    <div className="text-xs">
-      <div className="flex items-start gap-2">
-        <button onClick={() => setCollapsed(!collapsed)} className="mt-0.5 text-slate-400 hover:text-slate-600">
-          {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-        </button>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-slate-800 text-[11px]">{comment.user_name}</span>
-            <span className="text-[10px] text-slate-400">{relativeTime(comment.created_at)}</span>
-          </div>
-          {!collapsed && (
-            <>
-              <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
-              <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff] mt-1">
-                Reply
-              </button>
-              {showReply && (
-                <div className="mt-2 flex gap-2">
-                  <input
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder="Write a reply..."
-                    className="flex-1 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
-                    onKeyDown={(e) => e.key === "Enter" && handleReply()}
-                  />
-                  <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
-                    {submitting ? "..." : "Reply"}
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+    <div className="flex gap-3">
+      <div className={`w-8 h-8 rounded-full ${bgColor} flex items-center justify-center text-sm shrink-0`}>
+        {avatarEmoji}
       </div>
-      {!collapsed && Array.isArray(comment.replies) && comment.replies.length > 0 && (
-        <div className="ml-4 mt-2 pl-3 border-l-2 border-slate-200 space-y-3">
-          {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} />
-          ))}
+
+      <div className="flex-1">
+        <div className="flex items-center gap-1.5 text-xs mb-0.5">
+          <span className="font-bold text-gray-900 text-sm">{comment.user_name}</span>
+          <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+          </svg>
+          <span className="text-gray-400 text-xs">• {relativeTime(comment.created_at)}</span>
         </div>
-      )}
+        <p className="text-xs text-gray-500 mb-2">{comment.user?.role || "Student"}</p>
+
+        <p className="text-sm text-gray-800 leading-relaxed mb-3">{comment.content}</p>
+
+        <div className="flex items-center gap-4 text-xs text-gray-500 font-semibold mb-3">
+          <div className="flex items-center gap-2">
+            <button className="hover:text-black">
+              <ArrowUp size={16} />
+            </button>
+            <span className="text-gray-800 font-bold">{likes}</span>
+            <button className="hover:text-black">
+              <ArrowDown size={16} />
+            </button>
+          </div>
+          <button onClick={() => setShowReply(!showReply)} className="hover:text-black font-semibold">Reply</button>
+        </div>
+
+        {showReply && (
+          <div className="mb-3 flex gap-2">
+            <input
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+              placeholder="Write a reply..."
+              className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-500"
+              onKeyDown={(e) => e.key === "Enter" && handleReply()}
+            />
+            <button onClick={handleReply} disabled={submitting} className="text-[#2563eb] font-semibold text-sm disabled:opacity-50">
+              {submitting ? "..." : "Reply"}
+            </button>
+          </div>
+        )}
+
+        {!collapsed && Array.isArray(comment.replies) && comment.replies.length > 0 && (
+          <div className="relative pl-6 before:absolute before:left-0 before:top-2 before:bottom-3 before:w-[2px] before:bg-gray-100">
+            {comment.replies.map((reply) => (
+              <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} isAuthor={false} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
@@ -337,6 +356,7 @@ const CommentSection: React.FC<{
 }> = ({ postId, comments, onCommentAdded }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<"popularity" | "newest">("popularity");
   const token = apiService.getToken();
 
   const handleAddComment = async () => {
@@ -368,33 +388,50 @@ const CommentSection: React.FC<{
   };
 
   return (
-    <div className="pt-3 space-y-3">
-      <div className="flex gap-2">
-        <input
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
-          className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-500"
-          onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-          disabled={isSubmitting}
-        />
+    <div>
+      <div className="flex items-center gap-2 mb-5">
+        <span className="text-xl">✍️</span>
+        <div className="flex-1 flex items-center justify-between border border-gray-300 rounded-full px-4 py-2 bg-white focus-within:border-gray-400">
+          <input
+            type="text"
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+            placeholder="Add a comment anonymously"
+            className="w-full bg-transparent text-sm text-gray-700 placeholder-gray-400 focus:outline-none"
+            disabled={isSubmitting}
+          />
+          <div className="flex items-center gap-2 text-gray-400 font-semibold text-xs ml-2">
+            <span className="cursor-pointer hover:text-gray-600">GIF</span>
+            <svg className="w-5 h-5 cursor-pointer hover:text-gray-600" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-bold text-gray-900 text-sm">Comments</h3>
         <button
-          onClick={handleAddComment}
-          disabled={isSubmitting || !newComment.trim()}
-          className="bg-[#2563eb] text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+          onClick={() => setSortBy(sortBy === "popularity" ? "newest" : "popularity")}
+          className="flex items-center gap-1 text-xs font-bold text-gray-700 hover:text-black"
         >
-          {isSubmitting ? "..." : "Post"}
+          {sortBy === "popularity" ? "Popularity" : "Newest"}
+          <svg className="w-3.5 h-3.5 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
         </button>
       </div>
-      {!Array.isArray(comments) || comments.length === 0 ? (
-        <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
-      ) : (
-        <div className="space-y-3">
-          {(comments as CommentData[]).map((c) => (
+
+      <div className="space-y-4">
+        {!Array.isArray(comments) || comments.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
+        ) : (
+          (comments as CommentData[]).map((c) => (
             <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };
