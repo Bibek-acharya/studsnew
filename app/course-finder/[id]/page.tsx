@@ -176,18 +176,18 @@ export default function CourseDetailPage({
   if (isLoading) {
     return (
       <div className="w-full animate-pulse">
-        <div className="mx-auto max-w-350 pt-12 pb-8">
+        <div className="mx-auto max-w-350 px-4 md:px-0 pt-12 pb-8">
           <div className="h-4 w-64 rounded bg-gray-200 mb-6" />
           <div className="h-9 w-80 rounded bg-gray-200 mb-2" />
           <div className="h-4 w-48 rounded bg-gray-200 mb-6" />
           <div className="h-[280px] md:h-[380px] rounded-md bg-gray-200" />
         </div>
-        <div className="mx-auto max-w-350 flex gap-8 border-b border-gray-100">
+        <div className="mx-auto max-w-350 px-4 md:px-0 flex gap-8 border-b border-gray-100">
           {[1, 2, 3, 4, 5, 6, 7].map((i) => (
             <div key={i} className="h-10 w-20 rounded bg-gray-200 mb-0" />
           ))}
         </div>
-        <div className="mx-auto max-w-350 py-8 md:py-12">
+        <div className="mx-auto max-w-350 px-4 md:px-0 py-8 md:py-12">
           <div className="space-y-4">
             <div className="h-6 w-48 rounded bg-gray-200" />
             <div className="h-4 w-full rounded bg-gray-200" />
@@ -285,7 +285,7 @@ export default function CourseDetailPage({
       `}</style>
 
       <div className="w-full bg-white text-gray-800">
-        <div className="mx-auto max-w-350 pt-8 md:pt-12 pb-6 md:pb-8">
+        <div className="mx-auto max-w-350 px-4 md:px-0 pt-8 md:pt-12 pb-6 md:pb-8">
           <nav className="flex items-center text-sm text-gray-500 mb-6 gap-1 overflow-x-auto whitespace-nowrap">
             <a
               href="/"
@@ -352,7 +352,7 @@ export default function CourseDetailPage({
           )}
         </div>
 
-        <div ref={tabBarRef} className="mx-auto max-w-350 sticky top-0 z-40 bg-white border-b border-gray-100">
+        <div ref={tabBarRef} className="mx-auto max-w-350 px-4 md:px-0 sticky top-0 z-40 bg-white border-b border-gray-100">
           <div className="relative">
             {isTabsOverflowing && canScrollTabsLeft && (
               <button
@@ -400,7 +400,7 @@ export default function CourseDetailPage({
           </div>
         </div>
 
-        <div className="mx-auto max-w-350 py-8 md:py-12 bg-white grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
+        <div className="mx-auto max-w-350 px-4 md:px-0 py-8 md:py-12 bg-white grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
           {/* Main Content */}
           <div className="lg:col-span-2 min-h-[500px]">
           {/* Overview Tab */}
