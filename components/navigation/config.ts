@@ -81,6 +81,13 @@ export const desktopMenuSections: DesktopMenuSection[] = [
         desc: "Get personalized college recommendations based on your preferences.",
         viewKey: "collegeRecommenderTool",
       },
+      {
+        icon: "fa-scale-balanced",
+        color: "text-blue-500",
+        title: "Compare Colleges",
+        desc: "Compare colleges side by side on fees, courses, and ratings.",
+        viewKey: "compareColleges",
+      },
     ],
   },
   {
@@ -249,6 +256,12 @@ export const mobileMenuSections: MobileMenuSection[] = [
         icon: "fa-wand-magic-sparkles",
         color: "text-emerald-500",
         viewKey: "collegeRecommenderTool",
+      },
+      {
+        label: "Compare Colleges",
+        icon: "fa-scale-balanced",
+        color: "text-blue-500",
+        viewKey: "compareColleges",
       },
     ],
   },

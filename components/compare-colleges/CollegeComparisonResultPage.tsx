@@ -1,17 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-
-interface ComparisonCollege {
-  name?: string;
-  logo?: string;
-  location?: string;
-  rating?: number;
-  reviews_count?: number;
-}
+import React, { useMemo, useState } from "react";
+import type { College } from "@/services/api";
 
 interface CollegeComparisonResultPageProps {
-  onNavigate: (view: any, data?: any) => void;
-  college1?: ComparisonCollege | string;
-  college2?: ComparisonCollege | string;
+  onNavigate: (view: string, data?: { college1: Partial<College> | string; college2: Partial<College> | string }) => void;
+  college1?: Partial<College> | string;
+  college2?: Partial<College> | string;
+  loading?: boolean;
 }
 
 type TabKey =
@@ -34,6 +28,35 @@ interface CompareSection {
   rows: CompareRow[];
 }
 
+interface CollegeReview {
+  rating?: number;
+  likes?: string;
+  dislikes?: string;
+  program?: string;
+  created_at?: string;
+}
+
+interface GalleryImage {
+  url?: string;
+  src?: string;
+}
+
+interface CollegeAbout {
+  campus_size?: string;
+  class_mode?: string;
+  wifi?: string;
+  library?: string;
+  lab?: string;
+  [key: string]: string | undefined;
+}
+
+interface CollegeAdmission {
+  fee_range?: string;
+  admission_fee?: string;
+  payment_options?: string;
+  [key: string]: string | undefined;
+}
+
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "overview", label: "Overview" },
   { key: "academics", label: "Academics" },
@@ -44,26 +67,25 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "photos", label: "Photos & Video" },
 ];
 
-const leftCourseOptions = [
-  "BSc. CSIT",
-  "BCA",
-  "BBA",
-  "BIM",
-  "BBS",
-  "BIT",
-];
+const safeStr = (val: unknown, fallback = "N/A"): string => {
+  if (val === null || val === undefined || val === "") return fallback;
+  return String(val);
+};
 
-const rightCourseOptions = [
-  "All Courses",
-  "BSc. CSIT",
-  "BCA",
-  "BBA",
-  "BBS",
-  "BA",
-];
+const safeJsonParse = <T,>(val: unknown, fallback: T): T => {
+  if (!val) return fallback;
+  if (typeof val === "string") {
+    try {
+      return JSON.parse(val) as T;
+    } catch {
+      return fallback;
+    }
+  }
+  return val as T;
+};
 
 const renderComparisonRows = (rows: CompareRow[]) => (
-  <div className="border border-gray-200 rounded-md overflow-hidden bg-white ">
+  <div className="border border-gray-200 rounded-md overflow-hidden bg-white">
     {rows.map((row, index) => {
       const isLast = index === rows.length - 1;
       return (
@@ -80,11 +102,11 @@ const renderComparisonRows = (rows: CompareRow[]) => (
               isLast ? "" : "border-b border-gray-200"
             }`}
           >
-            <div className="p-4 md:px-6 border-r border-gray-200">
-              <span className="text-gray-900 font-semibold text-[15px]">{row.left}</span>
+            <div className="p-4 md:px-6 border-r border-gray-200 min-w-0">
+              <span className="text-gray-900 font-semibold text-[15px] break-words">{row.left}</span>
             </div>
-            <div className="p-4 md:px-6">
-              <span className="text-gray-900 font-semibold text-[15px]">{row.right}</span>
+            <div className="p-4 md:px-6 min-w-0">
+              <span className="text-gray-900 font-semibold text-[15px] break-words">{row.right}</span>
             </div>
           </div>
         </div>
@@ -104,428 +126,206 @@ const renderGroupedSections = (sections: CompareSection[]) => (
   </>
 );
 
-const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = ({ 
+const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = ({
   onNavigate,
   college1,
-  college2
+  college2,
+  loading = false,
 }) => {
-  const college1Obj: ComparisonCollege =
-    typeof college1 === "string"
-      ? { name: college1 }
-      : college1 || {};
-  const college2Obj: ComparisonCollege =
-    typeof college2 === "string"
-      ? { name: college2 }
-      : college2 || {};
+  const c1: Partial<College> | null =
+    typeof college1 === "string" ? null : college1 || null;
+  const c2: Partial<College> | null =
+    typeof college2 === "string" ? null : college2 || null;
 
-  const c1Name = college1Obj.name || "KIST College";
-  const c2Name = college2Obj.name || "GoldenGate Int'l";
+  const c1Name = c1?.name || "College A";
+  const c2Name = c2?.name || "College B";
 
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
-  const [leftCourse, setLeftCourse] = useState("BSc. CSIT");
-  const [rightCourse, setRightCourse] = useState("All Courses");
-  const [leftSearch, setLeftSearch] = useState("");
-  const [rightSearch, setRightSearch] = useState("");
-  const [leftDropdownOpen, setLeftDropdownOpen] = useState(false);
-  const [rightDropdownOpen, setRightDropdownOpen] = useState(false);
 
-  const leftDropdownRef = useRef<HTMLDivElement>(null);
-  const rightDropdownRef = useRef<HTMLDivElement>(null);
+  const overviewRows: CompareRow[] = useMemo(() => {
+    if (!c1 && !c2) return [];
+    return [
+      { label: "Year Established", left: safeStr(c1?.established), right: safeStr(c2?.established) },
+      { label: "Type", left: safeStr(c1?.type), right: safeStr(c2?.type) },
+      { label: "Affiliated University", left: safeStr(c1?.affiliation), right: safeStr(c2?.affiliation) },
+      { label: "Total Students", left: safeStr(c1?.students), right: safeStr(c2?.students) },
+      { label: "Location", left: safeStr(c1?.location), right: safeStr(c2?.location) },
+      { label: "Total Programs", left: safeStr(c1?.programs), right: safeStr(c2?.programs) },
+      { label: "Verified", left: c1?.verified ? "Yes" : "No", right: c2?.verified ? "Yes" : "No" },
+    ];
+  }, [c1, c2]);
 
-  useEffect(() => {
-    const onOutsideClick = (event: MouseEvent) => {
-      if (
-        leftDropdownRef.current &&
-        !leftDropdownRef.current.contains(event.target as Node)
-      ) {
-        setLeftDropdownOpen(false);
-      }
+  const academicsSections: CompareSection[] = useMemo(() => {
+    if (!c1 && !c2) return [];
 
-      if (
-        rightDropdownRef.current &&
-        !rightDropdownRef.current.contains(event.target as Node)
-      ) {
-        setRightDropdownOpen(false);
-      }
+    const getPrograms = (c: Partial<College> | null): string => {
+      if (!c) return "N/A";
+      const featured = safeJsonParse<string[]>(c.featured_programs, []);
+      if (featured.length > 0) return featured.join(", ");
+      return safeStr(c.description, "N/A");
     };
 
-    document.addEventListener("mousedown", onOutsideClick);
-    return () => document.removeEventListener("mousedown", onOutsideClick);
-  }, []);
+    const getOfferedPrograms = (c: Partial<College> | null): string => {
+      if (!c) return "N/A";
+      const offered = safeJsonParse<Array<{ name?: string; title?: string } | string>>(c.offered_programs, []);
+      if (Array.isArray(offered) && offered.length > 0) {
+        return offered.map((p) => (typeof p === "string" ? p : p.name || p.title || "")).filter(Boolean).join(", ");
+      }
+      return "N/A";
+    };
 
-  const filteredLeftCourses = useMemo(
-    () =>
-      leftCourseOptions.filter((option) =>
-        option.toLowerCase().includes(leftSearch.toLowerCase()),
-      ),
-    [leftSearch],
-  );
+    const getDepartments = (c: Partial<College> | null): string => {
+      if (!c) return "N/A";
+      const depts = safeJsonParse<Array<{ name?: string } | string>>(c.departments, []);
+      if (Array.isArray(depts) && depts.length > 0) {
+        return depts.map((d) => (typeof d === "string" ? d : d.name || "")).filter(Boolean).join(", ");
+      }
+      return "N/A";
+    };
 
-  const filteredRightCourses = useMemo(
-    () =>
-      rightCourseOptions.filter((option) =>
-        option.toLowerCase().includes(rightSearch.toLowerCase()),
-      ),
-    [rightSearch],
-  );
+    return [
+      {
+        title: "Programs Offered",
+        rows: [
+          { label: "Featured Programs", left: getPrograms(c1), right: getPrograms(c2) },
+          { label: "All Offered Programs", left: getOfferedPrograms(c1), right: getOfferedPrograms(c2) },
+        ],
+      },
+      {
+        title: "Departments",
+        rows: [{ label: "Departments", left: getDepartments(c1), right: getDepartments(c2) }],
+      },
+      {
+        title: "Fit Scores",
+        rows: [
+          { label: "Academic Fit", left: safeStr(c1?.academic_fit_score), right: safeStr(c2?.academic_fit_score) },
+          { label: "Campus Life", left: safeStr(c1?.campus_life_score), right: safeStr(c2?.campus_life_score) },
+          { label: "Career Fit", left: safeStr(c1?.career_fit_score), right: safeStr(c2?.career_fit_score) },
+          { label: "Balanced Fit", left: safeStr(c1?.balanced_fit_score), right: safeStr(c2?.balanced_fit_score) },
+        ],
+      },
+    ];
+  }, [c1, c2]);
 
-  const overviewRows: CompareRow[] = [
-    { label: "Year Established", left: "1995", right: "2007" },
-    {
-      label: "Type (Private / Public / Community)",
-      left: "Private",
-      right: "Private",
-    },
-    {
-      label: "Affiliated University",
-      left: "Pokhara University (PU)",
-      right: "Tribhuvan University (TU)",
-    },
-    { label: "Total Students (Approx.)", left: "3,500+", right: "2,800+" },
-    { label: "Campus Size", left: "3 Acres", right: "2.5 Acres" },
-    {
-      label: "Class Mode (Physical / Hybrid / Online)",
-      left: "Physical / Hybrid",
-      right: "Physical",
-    },
-  ];
+  const facilitiesSections: CompareSection[] = useMemo(() => {
+    if (!c1 && !c2) return [];
 
-  const academicsSections: CompareSection[] = [
-    {
-      title: "Programs Offered",
-      rows: [
-        {
-          label: "+2 Programs",
-          left: "Science, Management",
-          right: "Science, Management, Humanities",
-        },
-        {
-          label: "Bachelor Programs",
-          left: "BBA, BIM, BIT, BBS",
-          right: "BSc. CSIT, BCA, BBA, BA",
-        },
-        {
-          label: "Master Programs",
-          left: "MBS, MIT",
-          right: "MSc, MA, MBS",
-        },
-      ],
-    },
-    {
-      title: "Academic Structure",
-      rows: [
-        {
-          label: "Semester / Annual System",
-          left: "Semester Based",
-          right: "Semester Based",
-        },
-        {
-          label: "Credit System (Yes/No)",
-          left: "Yes (120 Credits)",
-          right: "Yes (120 Credits)",
-        },
-        {
-          label: "Internship Included (Yes/No)",
-          left: "Yes (Mandatory in 8th Sem)",
-          right: "Yes",
-        },
-      ],
-    },
-    {
-      title: "Faculty Information",
-      rows: [
-        { label: "Total Faculty", left: "120+", right: "100+" },
-        {
-          label: "% with Masters / PhD",
-          left: "85% Masters / 15% PhD",
-          right: "80% Masters / 12% PhD",
-        },
-        {
-          label: "Industry Experience (Yes/No)",
-          left: "Yes (IT & Mgmt Experts)",
-          right: "Yes",
-        },
-      ],
-    },
-    {
-      title: "Academic Performance",
-      rows: [
-        { label: "Board / University Pass Rate", left: "88%", right: "85%" },
-        { label: "Distinction / GPA Holders", left: "22%", right: "18%" },
-        {
-          label: "Research / Project-Based Learning",
-          left: "High Emphasis (Annual IT Fests)",
-          right: "Moderate",
-        },
-      ],
-    },
-  ];
+    const getAmenities = (c: Partial<College> | null): string => {
+      if (!c) return "N/A";
+      const items = safeJsonParse<string[]>(c.amenities, []);
+      if (Array.isArray(items) && items.length > 0) return items.join(", ");
+      return "N/A";
+    };
 
-  const facilitiesSections: CompareSection[] = [
-    {
-      title: "Academic Facilities",
-      rows: [
-        {
-          label: "Computer Labs (No. of Labs)",
-          left: "5 Labs (200+ PCs)",
-          right: "4 Labs (150+ PCs)",
-        },
-        {
-          label: "Science Labs",
-          left: "Physics, Chemistry, Biology",
-          right: "Physics, Chemistry, Biology",
-        },
-        {
-          label: "Engineering Workshops",
-          left: "No",
-          right: "Yes (Basic Electronics)",
-        },
-        {
-          label: "Library (No. of Books)",
-          left: "15,000+ Books",
-          right: "12,000+ Books",
-        },
-        {
-          label: "E-Library Access",
-          left: "Yes (ProQuest, IEEE)",
-          right: "Yes (HINARI, Local Portal)",
-        },
-      ],
-    },
-    {
-      title: "Student Facilities",
-      rows: [
-        {
-          label: "Hostel (Boys / Girls)",
-          left: "Available (Both)",
-          right: "Available (Both)",
-        },
-        {
-          label: "Transportation",
-          left: "Valley-wide Service",
-          right: "Limited Routes",
-        },
-        {
-          label: "Cafeteria",
-          left: "2 Hygienic Canteens",
-          right: "Standard Cafeteria",
-        },
-        {
-          label: "Sports (Indoor / Outdoor)",
-          left: "Basketball, TT, Futsal",
-          right: "Basketball, TT, Badminton",
-        },
-        {
-          label: "Clubs",
-          left: "IT, Robotics, Management, Debate",
-          right: "IT, Sports, Arts & Culture",
-        },
-        {
-          label: "Healthcare / First Aid",
-          left: "On-campus Clinic & Nurse",
-          right: "Basic First Aid",
-        },
-        {
-          label: "Counseling Services",
-          left: "Weekly Sessions",
-          right: "On-demand",
-        },
-      ],
-    },
-    {
-      title: "Digital Infrastructure",
-      rows: [
-        {
-          label: "Student Portal",
-          left: "Yes (Attendance, Grades, Notes)",
-          right: "Yes (Basic Portal)",
-        },
-        {
-          label: "WiFi Access",
-          left: "Campus-wide (High-speed)",
-          right: "Limited Zones",
-        },
-        {
-          label: "Online Exam System",
-          left: "Moodle Based",
-          right: "Custom Portal",
-        },
-      ],
-    },
-  ];
+    const getAbout = (c: Partial<College> | null, key: string): string => {
+      if (!c) return "N/A";
+      const about = safeJsonParse<CollegeAbout>(c.about, {});
+      return safeStr(about[key], "N/A");
+    };
 
-  const financialSections: CompareSection[] = [
-    {
-      title: "Fee Structure",
-      rows: [
-        {
-          label: "Total Fee Range (Approx.)",
-          left: "NPR 6,00,000 - 12,00,000",
-          right: "NPR 5,50,000 - 10,00,000",
-        },
-        {
-          label: "Admission Fee",
-          left: "NPR 50,000 (One-time)",
-          right: "NPR 40,000 (One-time)",
-        },
-        {
-          label: "Exam Fee (if separate)",
-          left: "As per University Norms",
-          right: "As per University Norms",
-        },
-      ],
-    },
-    {
-      title: "Payment Options",
-      rows: [
-        {
-          label: "Installment Available",
-          left: "Yes (Semester-wise)",
-          right: "Yes (Quarterly)",
-        },
-        {
-          label: "EMI Option",
-          left: "Available via Nabil Bank",
-          right: "Not Available",
-        },
-        {
-          label: "Payment Mode (Bank / Online)",
-          left: "eSewa, ConnectIPS, Bank Deposit",
-          right: "Bank Deposit Only",
-        },
-      ],
-    },
-    {
-      title: "Scholarship Types",
-      rows: [
-        {
-          label: "Merit-Based",
-          left: "Up to 100% (GPA 3.6+)",
-          right: "Up to 75% (GPA 3.6+)",
-        },
-        {
-          label: "Need-Based",
-          left: "Yes (Up to 50% waiver)",
-          right: "Yes (Subject to verification)",
-        },
-        {
-          label: "Entrance-Based",
-          left: "Top 10 Rankers",
-          right: "Top 5 Rankers",
-        },
-        {
-          label: "Government Quota",
-          left: "10% seats reserved",
-          right: "10% seats reserved",
-        },
-        {
-          label: "Special Category (Dalit / Remote Area / etc.)",
-          left: "As per TU/PU regulations",
-          right: "As per TU regulations",
-        },
-      ],
-    },
-    {
-      title: "Financial Transparency",
-      rows: [
-        {
-          label: "Refund Policy",
-          left: "Security Deposit only",
-          right: "Strict (No tuition refund)",
-        },
-        {
-          label: "Hidden Charges (If Reported)",
-          left: "Field trips / Events extra",
-          right: "Handouts / Printed materials extra",
-        },
-      ],
-    },
-  ];
+    return [
+      {
+        title: "Amenities & Facilities",
+        rows: [
+          { label: "Amenities", left: getAmenities(c1), right: getAmenities(c2) },
+          { label: "Campus Size", left: getAbout(c1, "campus_size"), right: getAbout(c2, "campus_size") },
+          { label: "Class Mode", left: getAbout(c1, "class_mode"), right: getAbout(c2, "class_mode") },
+          { label: "WiFi", left: getAbout(c1, "wifi"), right: getAbout(c2, "wifi") },
+          { label: "Library", left: getAbout(c1, "library"), right: getAbout(c2, "library") },
+          { label: "Lab", left: getAbout(c1, "lab"), right: getAbout(c2, "lab") },
+        ],
+      },
+    ];
+  }, [c1, c2]);
 
-  const careerSections: CompareSection[] = [
-    {
-      title: "Career Support",
-      rows: [
-        {
-          label: "Career Counseling (Yes/No)",
-          left: "Yes (Dedicated Placement Cell)",
-          right: "Yes (Faculty Advised)",
-        },
-        {
-          label: "CV / Interview Training",
-          left: "Regular Workshops & Mock Tests",
-          right: "Occasional Seminars",
-        },
-        {
-          label: "Internship Placement Assistance",
-          left: "Strong (IT & Banking Sector)",
-          right: "Moderate Support",
-        },
-        {
-          label: "Job Fair Organized",
-          left: "Yes (Annual IT & Mgmt Fest)",
-          right: "Yes",
-        },
-      ],
-    },
-    {
-      title: "Placement Information",
-      rows: [
-        {
-          label: "MoU Companies",
-          left: "F1Soft, Leapfrog, Nabil Bank",
-          right: "Local IT Firms, Commercial Banks",
-        },
-        { label: "Placement Support (Yes/No)", left: "Yes", right: "Yes" },
-        { label: "Placement Rate", left: "~75% (Specifically in IT)", right: "~65%" },
-        {
-          label: "Average Salary Range (Entry-level)",
-          left: "NPR 25,000 - 45,000 / month",
-          right: "NPR 20,000 - 35,000 / month",
-        },
-      ],
-    },
-    {
-      title: "Alumni Network",
-      rows: [
-        {
-          label: "Notable Alumni",
-          left: "Tech Entrepreneurs, Senior Bankers",
-          right: "Government Officials, Entrepreneurs",
-        },
-        {
-          label: "Alumni Association",
-          left: "Highly Active (KIST Alumni Society)",
-          right: "Registered & Active",
-        },
-        {
-          label: "Alumni Mentorship",
-          left: "Yes (Frequent Guest Lectures)",
-          right: "Informal Networking",
-        },
-      ],
-    },
-    {
-      title: "Higher Study Support",
-      rows: [
-        {
-          label: "Abroad Counseling",
-          left: "Yes (In-house Guidance Cell)",
-          right: "Basic General Guidance",
-        },
-        {
-          label: "Recommendation Letters",
-          left: "Standardized & Prompt Process",
-          right: "Provided Upon Request",
-        },
-        {
-          label: "Test Preparation Support",
-          left: "Tie-ups with Top Consultancies",
-          right: "Not Specifically Provided",
-        },
-      ],
-    },
-  ];
+  const financialSections: CompareSection[] = useMemo(() => {
+    if (!c1 && !c2) return [];
+
+    const getAdmissions = (c: Partial<College> | null, key: string): string => {
+      if (!c) return "N/A";
+      const admissions = safeJsonParse<CollegeAdmission>(c.admissions, {});
+      return safeStr(admissions[key], "N/A");
+    };
+
+    const getScholarships = (c: Partial<College> | null): string => {
+      if (!c) return "N/A";
+      const items = safeJsonParse<Array<{ name?: string; title?: string } | string>>(c.scholarships, []);
+      if (Array.isArray(items) && items.length > 0) {
+        return items.map((s) => (typeof s === "string" ? s : s.name || s.title || "")).filter(Boolean).join(", ");
+      }
+      return "N/A";
+    };
+
+    return [
+      {
+        title: "Fee Structure",
+        rows: [
+          { label: "Fee Range", left: getAdmissions(c1, "fee_range"), right: getAdmissions(c2, "fee_range") },
+          { label: "Admission Fee", left: getAdmissions(c1, "admission_fee"), right: getAdmissions(c2, "admission_fee") },
+          { label: "Payment Options", left: getAdmissions(c1, "payment_options"), right: getAdmissions(c2, "payment_options") },
+        ],
+      },
+      {
+        title: "Scholarships",
+        rows: [{ label: "Available Scholarships", left: getScholarships(c1), right: getScholarships(c2) }],
+      },
+    ];
+  }, [c1, c2]);
+
+  const careerSections: CompareSection[] = useMemo(() => {
+    if (!c1 && !c2) return [];
+
+    const getAlumni = (c: Partial<College> | null): string => {
+      if (!c) return "N/A";
+      const alumni = safeJsonParse<Array<{ name?: string } | string>>(c.alumni, []);
+      if (Array.isArray(alumni) && alumni.length > 0) {
+        return alumni.map((a) => (typeof a === "string" ? a : a.name || "")).filter(Boolean).join(", ");
+      }
+      return "N/A";
+    };
+
+    return [
+      {
+        title: "Alumni Network",
+        rows: [{ label: "Alumni", left: getAlumni(c1), right: getAlumni(c2) }],
+      },
+      {
+        title: "Career Scores",
+        rows: [
+          { label: "Career Fit Score", left: safeStr(c1?.career_fit_score), right: safeStr(c2?.career_fit_score) },
+          { label: "Campus Life Score", left: safeStr(c1?.campus_life_score), right: safeStr(c2?.campus_life_score) },
+        ],
+      },
+    ];
+  }, [c1, c2]);
+
+  const reviewRows: CompareRow[] = useMemo(() => {
+    if (!c1 && !c2) return [];
+    return [
+      { label: "Overall Rating", left: c1?.rating ? `${c1.rating} ★` : "N/A", right: c2?.rating ? `${c2.rating} ★` : "N/A" },
+      { label: "Total Reviews", left: safeStr(c1?.reviews), right: safeStr(c2?.reviews) },
+      { label: "Academic Fit", left: safeStr(c1?.academic_fit_score), right: safeStr(c2?.academic_fit_score) },
+      { label: "Campus Life", left: safeStr(c1?.campus_life_score), right: safeStr(c2?.campus_life_score) },
+      { label: "Career Fit", left: safeStr(c1?.career_fit_score), right: safeStr(c2?.career_fit_score) },
+      { label: "Balanced Fit", left: safeStr(c1?.balanced_fit_score), right: safeStr(c2?.balanced_fit_score) },
+    ];
+  }, [c1, c2]);
+
+  const getReviews = (c: Partial<College> | null): CollegeReview[] => {
+    if (!c) return [];
+    return safeJsonParse<CollegeReview[]>(c.college_reviews, []);
+  };
+
+  const c1Reviews = useMemo(() => getReviews(c1), [c1]);
+  const c2Reviews = useMemo(() => getReviews(c2), [c2]);
+
+  const getGallery = (c: Partial<College> | null): GalleryImage[] => {
+    if (!c) return [];
+    return safeJsonParse<GalleryImage[]>(c.gallery, []);
+  };
+
+  const c1Gallery = useMemo(() => getGallery(c1), [c1]);
+  const c2Gallery = useMemo(() => getGallery(c2), [c2]);
 
   const initials = (name: string) =>
     name
@@ -534,6 +334,33 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
       .slice(0, 2)
       .map((part) => part[0]?.toUpperCase())
       .join("");
+
+  if (loading) {
+    return (
+      <div className="bg-gray-50/50 min-h-screen p-4 md:p-8 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c51c6] mx-auto mb-4"></div>
+          <p className="text-gray-500 font-medium">Loading college data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!c1 && !c2) {
+    return (
+      <div className="bg-gray-50/50 min-h-screen p-4 md:p-8 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500 font-medium mb-4">No colleges selected for comparison.</p>
+          <button
+            onClick={() => onNavigate("search")}
+            className="text-[#2c51c6] font-semibold hover:underline"
+          >
+            Go back to search
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gray-50/50 text-gray-800 min-h-screen p-4 md:p-8">
@@ -548,79 +375,77 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
           </button>
         </div>
 
-        <div className="relative border border-gray-200 rounded-md bg-white  flex flex-col md:flex-row overflow-visible">
-          <div className="absolute left-1/2 top-[100px] md:top-24 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white  hidden md:flex">
+        <div className="relative border border-gray-200 rounded-md bg-white flex flex-col md:flex-row overflow-visible">
+          <div className="absolute left-1/2 top-[100px] md:top-24 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white hidden md:flex">
             VS
           </div>
 
           <div className="flex-1 flex flex-col md:border-r border-gray-200">
             <div className="p-5 md:p-6 relative flex gap-4 rounded-tl-xl md:rounded-bl-none">
-              <button 
+              <button
                 onClick={() => onNavigate("search")}
                 className="absolute top-4 right-4 p-1.5 border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
               >
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
 
-              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white  overflow-hidden">
-                {college1Obj.logo ? (
-                  <img src={college1Obj.logo} alt={c1Name} className="w-full h-full object-contain" />
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white overflow-hidden">
+                {c1?.image_url || c1?.logo_url ? (
+                  <img src={c1.image_url || c1.logo_url} alt={c1Name} className="w-full h-full object-contain" />
                 ) : (
                   <span className="text-sm font-bold text-indigo-700">{initials(c1Name)}</span>
                 )}
               </div>
 
-              <div className="flex-1">
-                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left">
+              <div className="flex-1 min-w-0">
+                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left truncate">
                   {c1Name}
                 </button>
-
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="bg-[#10b981] text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-sm font-bold">
                     <i className="fa-solid fa-star text-[11px]"></i>
-                    {college1Obj.rating?.toFixed(1) || "4.2"}
+                    {c1?.rating?.toFixed(1) || "N/A"}
                   </span>
-                  <span className="text-[#64748b] text-sm">
-                    ({college1Obj.reviews_count?.toLocaleString() || "1.2k"} Reviews)
-                  </span>
+                  <span className="text-[#64748b] text-sm">({safeStr(c1?.reviews, "0")} Reviews)</span>
                 </div>
+                <p className="text-gray-500 text-sm truncate">{safeStr(c1?.location)}</p>
               </div>
             </div>
           </div>
 
           <div className="flex-1 flex flex-col relative border-t md:border-t-0 border-gray-200">
-            <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white  md:hidden">
+            <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white md:hidden">
               VS
             </div>
 
             <div className="p-5 md:p-6 relative flex gap-4">
-              <button 
+              <button
                 onClick={() => onNavigate("search")}
                 className="absolute top-4 right-4 p-1.5 border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
               >
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
 
-              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white  overflow-hidden">
-                {college2Obj.logo ? (
-                  <img src={college2Obj.logo} alt={c2Name} className="w-full h-full object-contain" />
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white overflow-hidden">
+                {c2?.image_url || c2?.logo_url ? (
+                  <img src={c2.image_url || c2.logo_url} alt={c2Name} className="w-full h-full object-contain" />
                 ) : (
                   <span className="text-sm font-bold text-indigo-700">{initials(c2Name)}</span>
                 )}
               </div>
 
-              <div className="flex-1">
-                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left">
+              <div className="flex-1 min-w-0">
+                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left truncate">
                   {c2Name}
                 </button>
-
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1">
                   <span className="bg-[#f59e0b] text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-sm font-bold">
                     <i className="fa-solid fa-star text-[11px]"></i>
-                    {college2Obj.rating?.toFixed(1) || "4.0"}
+                    {c2?.rating?.toFixed(1) || "N/A"}
                   </span>
-                  <span className="text-[#64748b] text-sm">(980 Reviews)</span>
+                  <span className="text-[#64748b] text-sm">({safeStr(c2?.reviews, "0")} Reviews)</span>
                 </div>
+                <p className="text-gray-500 text-sm truncate">{safeStr(c2?.location)}</p>
               </div>
             </div>
           </div>
@@ -703,118 +528,154 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <h2 className="text-xl font-bold text-[#1b254b]">Reviews & Reputation</h2>
               </div>
 
-              <h3 className="text-[17px] font-bold text-gray-800 mb-3 mt-6 pl-1">Student Ratings (Out of 5)</h3>
-              {renderComparisonRows([
-                { label: "Teaching Quality", left: "4.4 ★", right: "4.1 ★" },
-                { label: "Infrastructure", left: "4.0 ★", right: "3.8 ★" },
-                { label: "Administration", left: "3.9 ★", right: "3.5 ★" },
-                { label: "Value for Money", left: "4.2 ★", right: "4.0 ★" },
-                { label: "Campus Life", left: "4.5 ★", right: "3.9 ★" },
-                { label: "Overall Rating", left: "4.2 ★", right: "4.0 ★" },
-              ])}
+              <h3 className="text-[17px] font-bold text-gray-800 mb-3 mt-6 pl-1">Ratings Comparison</h3>
+              {renderComparisonRows(reviewRows)}
 
               <div className="flex items-center gap-2 mb-4 mt-10 pl-1">
                 <i className="fa-regular fa-message text-[#1b254b]"></i>
-                <h3 className="text-[19px] font-bold text-[#1b254b]">Reviews</h3>
+                <h3 className="text-[19px] font-bold text-[#1b254b]">Recent Reviews</h3>
               </div>
 
-              <div className="border border-gray-200 rounded-md overflow-hidden bg-white  flex flex-col md:flex-row">
+              <div className="border border-gray-200 rounded-md overflow-hidden bg-white flex flex-col md:flex-row">
                 <div className="flex-1 flex flex-col md:border-r border-gray-200">
                   <div className="p-5 flex-1">
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex items-center">
-                        <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
-                        <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
-                          <i className="fa-solid fa-star text-[11px]"></i> 4.5
-                        </span>
-                      </div>
-                      <span className="text-[13px] text-gray-500 mt-1">updated on 15 Feb 2026</span>
-                    </div>
-                    <div className="mt-3 text-[13px]">
-                      <span className="text-gray-500">rated by a BSc. CSIT Student in Kathmandu</span>
-                      <div className="text-gray-900 font-semibold mt-0.5">Tribhuvan University (TU) · Full Time</div>
-                    </div>
-                    <div className="mt-5">
-                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
-                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
-                        Great faculty for core subjects, good library resources, and active student clubs organizing regular tech fests.
-                      </p>
-                    </div>
-                    <div className="mt-4 mb-2">
-                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
-                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
-                        Practical labs need hardware upgrades. Administration processes can be quite slow during exam form submissions.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="border-t border-gray-100 p-4 bg-white">
-                    <button className="text-blue-600 font-bold text-[14.5px] hover:underline">View all TU student reviews</button>
+                    {c1Reviews.length > 0 ? (
+                      c1Reviews.slice(0, 1).map((review, idx) => (
+                        <div key={idx}>
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex items-center">
+                              <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
+                              <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
+                                <i className="fa-solid fa-star text-[11px]"></i> {review.rating || "N/A"}
+                              </span>
+                            </div>
+                            {review.created_at && (
+                              <span className="text-[13px] text-gray-500 mt-1">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-3 text-[13px]">
+                            {review.program && (
+                              <>
+                                <span className="text-gray-500">rated by a {review.program} Student</span>
+                                <div className="text-gray-900 font-semibold mt-0.5">{c1Name}</div>
+                              </>
+                            )}
+                          </div>
+                          {review.likes && (
+                            <div className="mt-5">
+                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
+                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.likes}</p>
+                            </div>
+                          )}
+                          {review.dislikes && (
+                            <div className="mt-4 mb-2">
+                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
+                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.dislikes}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm italic">No reviews yet</p>
+                    )}
                   </div>
                 </div>
 
                 <div className="flex-1 flex flex-col">
                   <div className="p-5 flex-1">
-                    <div className="flex justify-between items-start gap-3">
-                      <div className="flex items-center">
-                        <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
-                        <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
-                          <i className="fa-solid fa-star text-[11px]"></i> 4.2
-                        </span>
-                      </div>
-                      <span className="text-[13px] text-gray-500 mt-1">updated on 28 Jan 2026</span>
-                    </div>
-                    <div className="mt-3 text-[13px]">
-                      <span className="text-gray-500">rated by a BCA Student in Pokhara</span>
-                      <div className="text-gray-900 font-semibold mt-0.5">Pokhara University (PU) · Full Time</div>
-                    </div>
-                    <div className="mt-5">
-                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
-                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
-                        Beautiful campus environment, updated modern curriculum for IT, and highly supportive professors.
-                      </p>
-                    </div>
-                    <div className="mt-4 mb-2">
-                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
-                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
-                        Extracurricular activities are somewhat limited compared to academics. Transportation to the main campus can be a hassle sometimes.
-                      </p>
-                    </div>
-                  </div>
-                  <div className="border-t border-gray-100 p-4 bg-white">
-                    <button className="text-blue-600 font-bold text-[14.5px] hover:underline">View all PU student reviews</button>
+                    {c2Reviews.length > 0 ? (
+                      c2Reviews.slice(0, 1).map((review, idx) => (
+                        <div key={idx}>
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="flex items-center">
+                              <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
+                              <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
+                                <i className="fa-solid fa-star text-[11px]"></i> {review.rating || "N/A"}
+                              </span>
+                            </div>
+                            {review.created_at && (
+                              <span className="text-[13px] text-gray-500 mt-1">
+                                {new Date(review.created_at).toLocaleDateString()}
+                              </span>
+                            )}
+                          </div>
+                          <div className="mt-3 text-[13px]">
+                            {review.program && (
+                              <>
+                                <span className="text-gray-500">rated by a {review.program} Student</span>
+                                <div className="text-gray-900 font-semibold mt-0.5">{c2Name}</div>
+                              </>
+                            )}
+                          </div>
+                          {review.likes && (
+                            <div className="mt-5">
+                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
+                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.likes}</p>
+                            </div>
+                          )}
+                          {review.dislikes && (
+                            <div className="mt-4 mb-2">
+                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
+                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.dislikes}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-400 text-sm italic">No reviews yet</p>
+                    )}
                   </div>
                 </div>
               </div>
-
-              <h3 className="text-[17px] font-bold text-gray-800 mb-3 mt-8 pl-1">Reputation Indicators</h3>
-              {renderComparisonRows([
-                {
-                  label: "Awards & Achievements",
-                  left: "Best IT College Award (2022)",
-                  right: "Excellence in Education (2020)",
-                },
-                {
-                  label: "Years of Operation Badge",
-                  left: "25+ Years of Excellence",
-                  right: "15+ Years Legacy",
-                },
-                {
-                  label: "Media Mentions",
-                  left: "Top 10 Colleges in Nepal",
-                  right: "Tech Fest Highlights",
-                },
-                {
-                  label: "Affiliation Recognition",
-                  left: "TU & PU Highly Recognized",
-                  right: "TU Recognized",
-                },
-              ])}
             </div>
           )}
 
           {activeTab === "photos" && (
-            <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-md">
-              Photos & Video content goes here...
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-images text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Photos & Video</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-gray-200 rounded-md overflow-hidden bg-white">
+                  <h3 className="font-bold text-gray-800 px-4 pt-4 pb-2">{c1Name}</h3>
+                  {c1Gallery.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2 p-4">
+                      {c1Gallery.slice(0, 4).map((img, idx) => (
+                        <div key={idx} className="aspect-video bg-gray-100 rounded overflow-hidden">
+                          <img
+                            src={img.url || img.src || ""}
+                            alt={`${c1Name} gallery ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm italic px-4 pb-4">No photos available</p>
+                  )}
+                </div>
+                <div className="border border-gray-200 rounded-md overflow-hidden bg-white">
+                  <h3 className="font-bold text-gray-800 px-4 pt-4 pb-2">{c2Name}</h3>
+                  {c2Gallery.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2 p-4">
+                      {c2Gallery.slice(0, 4).map((img, idx) => (
+                        <div key={idx} className="aspect-video bg-gray-100 rounded overflow-hidden">
+                          <img
+                            src={img.url || img.src || ""}
+                            alt={`${c2Name} gallery ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-sm italic px-4 pb-4">No photos available</p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
         </div>
