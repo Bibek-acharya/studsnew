@@ -115,7 +115,7 @@ const PostCard: React.FC<{
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-gray-200/80 p-4 font-sans text-gray-900">
+    <div className="max-w-[580px] bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm font-sans text-gray-900">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
@@ -898,6 +898,7 @@ const CampusForumPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
+  const [trending, setTrending] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(null);
   const [joinLoading, setJoinLoading] = useState<Record<number, boolean>>({});
@@ -950,9 +951,19 @@ const CampusForumPage: React.FC = () => {
     }
   }, [token, selectedCommunityId]);
 
+  const fetchTrending = useCallback(async () => {
+    try {
+      const data = await apiService.getTrendingForumPosts();
+      setTrending(isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   useEffect(() => {
     fetchCommunities();
-  }, [fetchCommunities]);
+    fetchTrending();
+  }, [fetchCommunities, fetchTrending]);
 
   useEffect(() => {
     fetchPosts();
@@ -1128,93 +1139,267 @@ const CampusForumPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased py-6">
-      <main className="w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Create Post Widget */}
-        <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all w-full mb-5">
-          <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
-            <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
-              {user?.image_url ? (
-                <img src={imageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
-              ) : (
-                (user?.first_name?.[0] || "🎓").toUpperCase()
-              )}
-            </div>
-            <input
-              type="text"
-              readOnly
-              onClick={handleCreatePostClick}
-              placeholder="Ask about courses, colleges, or exams..."
-              className="w-full bg-transparent text-slate-700 placeholder-slate-400 text-sm focus:outline-none font-medium cursor-pointer"
-            />
-          </div>
+      <main className="max-w-[1400px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-0 lg:px-8">
+          {/* ── LEFT SIDEBAR ── */}
+          <aside className="lg:col-span-3 space-y-5 order-1">
+            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
+              <div className="flex items-center justify-between mb-4 px-1">
+                <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
+                  Discover Communities
+                </h3>
+                {selectedCommunityId && (
+                  <button
+                    onClick={() => setSelectedCommunityId(null)}
+                    className="text-[10px] font-black text-blue-600 hover:underline"
+                  >
+                    Show all
+                  </button>
+                )}
+              </div>
 
-          <div className="flex items-center justify-start gap-4 pt-3 px-1">
-            <button
-              onClick={handleCreatePostClick}
-              className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-blue-50/50"
-            >
-              <Image className="h-[14px] w-[14px] text-blue-500" />
-              <span>Image</span>
-            </button>
-            <button
-              onClick={handleCreatePostClick}
-              className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-purple-50/50"
-            >
-              <BarChart2 className="h-[14px] w-[14px] text-purple-500" />
-              <span>Poll</span>
-            </button>
-            <button
-              onClick={handleCreatePostClick}
-              className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-rose-50/50"
-            >
-              <Video className="h-[14px] w-[14px] text-rose-500" />
-              <span>Video</span>
-            </button>
-          </div>
+              <div className="space-y-3.5">
+                {communities.filter((c) => !c.is_general).map((item) => (
+                  <div key={item.id} className="flex items-center justify-between py-1 group">
+                    <div
+                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                      onClick={() => handleCommunityClick(item.id)}
+                    >
+                      <div
+                        className={`w-9 h-9 rounded-md flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
+                          item.bg_color || "bg-blue-100/70"
+                        }`}
+                      >
+                        {item.icon ? (
+                          <DynamicIcon name={item.icon} size={20} />
+                        ) : (
+                          <span className="text-lg">🎓</span>
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <p
+                          className={`text-xs font-bold truncate leading-snug transition-colors ${
+                            selectedCommunityId === item.id
+                              ? "text-blue-600"
+                              : "text-slate-800 group-hover:text-blue-600"
+                          }`}
+                          title={item.name}
+                        >
+                          {item.name}
+                        </p>
+                        <p className="text-[11px] font-medium text-slate-400">
+                          {item.member_count ?? 0} members
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleJoinToggle(item.id);
+                      }}
+                      disabled={joinLoading[item.id]}
+                      className={`ml-2 px-4 py-1.5 text-xs font-bold rounded-full transition-all flex-shrink-0 ${
+                        item.is_member
+                          ? "bg-green-600 hover:bg-green-700 text-white"
+                          : "bg-[#0000ff] hover:opacity-90 text-white active:scale-95"
+                      }`}
+                    >
+                      {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          {/* ── MIDDLE ── */}
+          <section className="lg:col-span-6 space-y-5 order-2">
+            {/* Create Post Widget */}
+            <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all max-w-[580px]">
+              <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
+                <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
+                  {user?.image_url ? (
+                    <img src={imageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    (user?.first_name?.[0] || "🎓").toUpperCase()
+                  )}
+                </div>
+                <input
+                  type="text"
+                  readOnly
+                  onClick={handleCreatePostClick}
+                  placeholder="Ask about courses, colleges, or exams..."
+                  className="w-full bg-transparent text-slate-700 placeholder-slate-400 text-sm focus:outline-none font-medium cursor-pointer"
+                />
+              </div>
+
+              <div className="flex items-center justify-start gap-4 pt-3 px-1">
+                <button
+                  onClick={handleCreatePostClick}
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-blue-50/50"
+                >
+                  <Image className="h-[14px] w-[14px] text-blue-500" />
+                  <span>Image</span>
+                </button>
+                <button
+                  onClick={handleCreatePostClick}
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-purple-50/50"
+                >
+                  <BarChart2 className="h-[14px] w-[14px] text-purple-500" />
+                  <span>Poll</span>
+                </button>
+                <button
+                  onClick={handleCreatePostClick}
+                  className="flex items-center gap-2 text-slate-600 hover:text-[#0000ff] font-semibold text-xs transition-colors py-1 px-2.5 rounded-full hover:bg-rose-50/50"
+                >
+                  <Video className="h-[14px] w-[14px] text-rose-500" />
+                  <span>Video</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Trending in Education */}
+            <div className="max-w-[580px] w-full p-5 bg-white border border-gray-200/80 rounded-2xl">
+              <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-4">
+                Trending in Education
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {trending.slice(0, 2).map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col justify-between p-4 bg-white border border-gray-200 rounded-2xl transition-all duration-200"
+                  >
+                    <div>
+                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-md bg-purple-50 text-purple-600">
+                        {item.category || "Trending"}
+                      </span>
+                      <div className="flex items-start justify-between gap-3 mt-3 mb-4">
+                        <h3 className="text-sm font-bold text-gray-900 leading-snug">
+                          {item.title}
+                        </h3>
+                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-xl text-lg">
+                          🔥
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                      <span className="text-lg flex-shrink-0">👍</span>
+                      <p className="text-xs text-gray-600 font-medium leading-tight">
+                        {item.upvotes || 0} upvotes · {item.comment_count || 0} comments
+                      </p>
+                    </div>
+                  </div>
+                ))}
+                {trending.length === 0 && (
+                  <div className="col-span-2 text-center py-4 text-xs text-gray-400">
+                    No trending posts yet
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Posts Feed */}
+            {isLoading ? (
+              <div className="flex justify-center py-12">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0000ff] border-t-transparent" />
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center shadow-xs flex flex-col items-center justify-center min-h-[320px]">
+                <div className="w-14 h-14 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mb-4 text-2xl shadow-xs">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+                    />
+                  </svg>
+                </div>
+                <h3 className="text-slate-800 font-bold text-lg mb-1">
+                  No posts yet in this community.
+                </h3>
+                <button
+                  onClick={handleCreatePostClick}
+                  className="text-[#0000ff] hover:underline font-bold text-sm transition-all focus:outline-none mt-1"
+                >
+                  Be the first to post!
+                </button>
+              </div>
+            ) : (
+              <div className="lg:space-y-4 space-y-0 divide-y divide-slate-100">
+                {posts.map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
+                    onLike={handleLike}
+                    onDislike={handleDislike}
+                    onCommentClick={handleCommentClick}
+                    onShare={handleShare}
+                    onLightbox={handleLightbox}
+                    comments={commentsData[post.id]}
+                    commentsOpen={openComments[post.id]}
+                    onJoinCommunity={handleJoinToggle}
+                    onCommentAdded={handleCommentAdded}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
+
+          {/* ── RIGHT SIDEBAR ── */}
+          <aside className="lg:col-span-3 space-y-5 order-3">
+            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
+              <div className="flex items-center gap-2 mb-4 px-1">
+                <svg
+                  className="h-4 w-4 text-amber-500"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A8 8 0 0117.657 18.657z" />
+                  <path
+                    fillRule="evenodd"
+                    d="M10.5 20a.5.5 0 01-.5.5h-2a.5.5 0 01-.5-.5V19a.5.5 0 01.5-.5h.5v-1.5a.5.5 0 01.5-.5h1a.5.5 0 01.5.5V20z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
+                  Trending Discussions
+                </h3>
+              </div>
+
+              <div className="space-y-4">
+                {trending.length > 0 ? (
+                  trending.map((item, idx) => (
+                    <div key={item.id || idx}>
+                      <div className="group cursor-pointer">
+                        <p className="text-xs font-bold text-slate-800 group-hover:text-blue-600 transition-colors leading-relaxed">
+                          {item.title || item.content?.slice(0, 80)}
+                        </p>
+                        <div className="flex items-center justify-between mt-2 text-[11px]">
+                          <span className="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded uppercase tracking-wider">
+                            {item.category || item.community?.name || "General"}
+                          </span>
+                          <span className="text-slate-400 font-medium">
+                            {item.comment_count || 0} Replies
+                          </span>
+                        </div>
+                      </div>
+                      {idx < trending.length - 1 && <hr className="mt-4 border-slate-100" />}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-slate-400">No trending discussions yet.</p>
+                )}
+              </div>
+            </div>
+          </aside>
         </div>
-
-        {/* Posts Feed */}
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0000ff] border-t-transparent" />
-          </div>
-        ) : posts.length === 0 ? (
-          <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center flex flex-col items-center justify-center min-h-[320px]">
-            <div className="w-14 h-14 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mb-4 text-2xl">
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-              </svg>
-            </div>
-            <h3 className="text-slate-800 font-bold text-lg mb-1">
-              No posts yet in this community.
-            </h3>
-            <button
-              onClick={handleCreatePostClick}
-              className="text-[#0000ff] hover:underline font-bold text-sm transition-all focus:outline-none mt-1"
-            >
-              Be the first to post!
-            </button>
-          </div>
-        ) : (
-          <div className="space-y-4 divide-y divide-slate-100">
-            {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
-                onLike={handleLike}
-                onDislike={handleDislike}
-                onCommentClick={handleCommentClick}
-                onShare={handleShare}
-                onLightbox={handleLightbox}
-                comments={commentsData[post.id]}
-                commentsOpen={openComments[post.id]}
-                onJoinCommunity={handleJoinToggle}
-                onCommentAdded={handleCommentAdded}
-              />
-            ))}
-          </div>
-        )}
       </main>
 
       <CreatePostModal
