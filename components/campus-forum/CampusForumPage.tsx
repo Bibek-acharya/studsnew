@@ -78,6 +78,7 @@ interface CommentData {
 
 const PostCard: React.FC<{
   post: ForumPost;
+  currentUser: { first_name: string; last_name: string; image_url?: string } | null;
   onLike: (id: number) => void;
   onDislike: (id: number) => void;
   onCommentClick: (id: number) => void;
@@ -87,7 +88,7 @@ const PostCard: React.FC<{
   commentsOpen?: boolean;
   onJoinCommunity?: (communityId: number) => void;
   onCommentAdded?: (postId: number) => void;
-}> = ({ post, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
+}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -264,7 +265,7 @@ const PostCard: React.FC<{
 
       {commentsOpen && (
         <div className="mt-4 border-t border-gray-100 pt-4">
-          <CommentSection postId={post.id} comments={comments} user={user} onCommentAdded={onCommentAdded} />
+          <CommentSection postId={post.id} comments={comments} user={currentUser} onCommentAdded={onCommentAdded} />
         </div>
       )}
     </div>
@@ -1268,6 +1269,7 @@ const CampusForumPage: React.FC = () => {
                   <PostCard
                     key={post.id}
                     post={post}
+                    currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
                     onLike={handleLike}
                     onDislike={handleDislike}
                     onCommentClick={handleCommentClick}
