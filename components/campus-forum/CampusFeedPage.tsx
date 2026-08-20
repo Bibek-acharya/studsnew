@@ -212,7 +212,7 @@ const PostCardComponent: React.FC<{
   };
 
   return (
-    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 shadow-sm font-sans text-gray-900">
+    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 font-sans text-gray-900">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div
@@ -435,7 +435,7 @@ const PollPostComponent: React.FC<{
   } catch {}
 
   return (
-    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 shadow-sm font-sans text-gray-900">
+    <div className="max-w-xl bg-white border border-gray-200 rounded-2xl p-4 font-sans text-gray-900">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center space-x-3">
           <div
@@ -958,7 +958,7 @@ const CampusFeedPage: React.FC = () => {
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className="flex items-start gap-3 rounded-md border px-4 py-3 backdrop-blur-sm bg-white/95 shadow-lg"
+              className="flex items-start gap-3 rounded-md border px-4 py-3 backdrop-blur-sm bg-white/95"
             >
               <p className="flex-1 text-sm font-semibold text-gray-800">
                 {toast.message}
