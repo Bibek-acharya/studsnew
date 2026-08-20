@@ -275,11 +275,13 @@ const CommentItem: React.FC<{
   comment: CommentData;
   postId: number;
   onReply: (postId: number, parentId: number, content: string) => void;
-}> = ({ comment, postId, onReply }) => {
+  isAuthor?: boolean;
+}> = ({ comment, postId, onReply, isAuthor = false }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [likes, setLikes] = useState(0);
 
   const handleReply = async () => {
     if (!replyContent.trim()) return;
@@ -364,6 +366,7 @@ const CommentSection: React.FC<{
 }> = ({ postId, comments, user, onCommentAdded }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sortBy, setSortBy] = useState<"popularity" | "newest">("popularity");
   const token = apiService.getToken();
 
   const handleAddComment = async () => {
@@ -420,18 +423,19 @@ const CommentSection: React.FC<{
           disabled={isSubmitting || !newComment.trim()}
           className="text-[#2563eb] disabled:text-gray-300 transition hover:scale-110"
         >
-          <Send size={18} />
+          {isSubmitting ? "..." : "Post"}
         </button>
       </div>
-      {!Array.isArray(comments) || comments.length === 0 ? (
-        <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
-      ) : (
-        <div className="space-y-3">
-          {(comments as CommentData[]).map((c) => (
+
+      <div className="space-y-4">
+        {!Array.isArray(comments) || comments.length === 0 ? (
+          <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
+        ) : (
+          (comments as CommentData[]).map((c) => (
             <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} />
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 };
