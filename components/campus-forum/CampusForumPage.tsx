@@ -92,7 +92,7 @@ const PostCard: React.FC<{
   const pollOptions = parsePollOptions(post);
   const user = post.user;
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
-  const avatarUrl = user?.image_url;
+  const avatarUrl = user?.image_url ? imageUrl(user.image_url) : "";
   const communityName = post.community?.name || "";
   const isGeneral = post.community?.is_general || communityName === "General";
   const userRole = (user as any)?.role || "Student";
@@ -295,8 +295,8 @@ const CommentItem: React.FC<{
     }
   };
 
-  const avatarUrl = comment.user?.image_url;
   const avatarLetter = (comment.user?.first_name?.[0] || comment.user_name?.[0] || "U").toUpperCase();
+  const avatarUrl = comment.user?.image_url ? imageUrl(comment.user.image_url) : "";
 
   return (
     <div className="text-xs">
@@ -398,7 +398,7 @@ const CommentSection: React.FC<{
   };
 
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
-  const avatarUrl = user?.image_url;
+  const avatarUrl = user?.image_url ? imageUrl(user.image_url) : "";
 
   return (
     <div className="pt-3 space-y-3">
