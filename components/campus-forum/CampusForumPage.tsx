@@ -899,6 +899,7 @@ const CampusForumPage: React.FC = () => {
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
   const [trending, setTrending] = useState<any[]>([]);
+  const [recentNews, setRecentNews] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCommunityId, setSelectedCommunityId] = useState<number | null>(null);
   const [joinLoading, setJoinLoading] = useState<Record<number, boolean>>({});
@@ -960,10 +961,21 @@ const CampusForumPage: React.FC = () => {
     }
   }, []);
 
+  const fetchRecentNews = useCallback(async () => {
+    try {
+      const res = await apiService.getEducationNews({ limit: 2, sort: "newest" });
+      const news = res?.data?.news || [];
+      setRecentNews(news);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
   useEffect(() => {
     fetchCommunities();
     fetchTrending();
-  }, [fetchCommunities, fetchTrending]);
+    fetchRecentNews();
+  }, [fetchCommunities, fetchTrending, fetchRecentNews]);
 
   useEffect(() => {
     fetchPosts();
@@ -1264,53 +1276,76 @@ const CampusForumPage: React.FC = () => {
                 Trending in Education
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  {
-                    id: 1,
-                    tag: "Exam Update",
-                    tagStyle: "bg-blue-50 text-blue-600",
-                    title: "TU publishes BBS 1st year routine",
-                    icon: "📅",
-                    commentEmoji: "😭",
-                    commentText: "Only 2 weeks left and I haven't even bought the syllabus...",
-                  },
-                  {
-                    id: 2,
-                    tag: "Discussion",
-                    tagStyle: "bg-orange-50 text-orange-600",
-                    title: "Is taking a drop year for IOE worth it?",
-                    icon: "⏳",
-                    commentEmoji: "🧠",
-                    commentText: "Honestly, the mental pressure isn't worth saving the fee.",
-                  },
-                ].map((item) => (
+                {trending.slice(0, 2).map((item) => (
                   <div
                     key={item.id}
                     className="flex flex-col justify-between p-4 bg-white border border-gray-200 rounded-2xl transition-all duration-200"
                   >
                     <div>
-                      <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-md ${item.tagStyle}`}>
-                        {item.tag}
+                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-md bg-purple-50 text-purple-600">
+                        {item.category || "Trending"}
                       </span>
                       <div className="flex items-start justify-between gap-3 mt-3 mb-4">
                         <h3 className="text-sm font-bold text-gray-900 leading-snug">
                           {item.title}
                         </h3>
                         <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-xl text-lg">
-                          {item.icon}
+                          🔥
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
-                      <span className="text-lg flex-shrink-0">{item.commentEmoji}</span>
+                      <span className="text-lg flex-shrink-0">👍</span>
                       <p className="text-xs text-gray-600 font-medium leading-tight">
-                        {item.commentText}
+                        {item.upvotes || 0} upvotes · {item.comment_count || 0} comments
                       </p>
                     </div>
                   </div>
                 ))}
+                {trending.length === 0 && (
+                  <div className="col-span-2 text-center py-4 text-xs text-gray-400">
+                    No trending posts yet
+                  </div>
+                )}
               </div>
             </div>
+
+            {/* Recently Added */}
+            {recentNews.length > 0 && (
+              <div className="max-w-[580px] w-full p-5 bg-white border border-gray-200/80 rounded-2xl">
+                <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-4">
+                  Recently Added
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {recentNews.slice(0, 2).map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex flex-col justify-between p-4 bg-white border border-gray-200 rounded-2xl transition-all duration-200"
+                    >
+                      <div>
+                        <span className="inline-block px-3 py-1 text-xs font-semibold rounded-md bg-green-50 text-green-600">
+                          {item.category || "News"}
+                        </span>
+                        <div className="flex items-start justify-between gap-3 mt-3 mb-4">
+                          <h3 className="text-sm font-bold text-gray-900 leading-snug">
+                            {item.title}
+                          </h3>
+                          <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-xl text-lg">
+                            📰
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                        <span className="text-lg flex-shrink-0">📖</span>
+                        <p className="text-xs text-gray-600 font-medium leading-tight">
+                          {item.excerpt?.slice(0, 80) || "Read more about this story"}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Posts Feed */}
             {isLoading ? (
