@@ -1215,7 +1215,7 @@ const CampusForumPage: React.FC = () => {
           {/* ── MIDDLE ── */}
           <section className="lg:col-span-6 space-y-5 order-2">
             {/* Create Post Widget */}
-            <div className="bg-white rounded-lg p-4 border border-slate-200/80 shadow-xs input-glow transition-all">
+            <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all max-w-[580px]">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
                   {user?.image_url ? (
@@ -1255,6 +1255,60 @@ const CampusForumPage: React.FC = () => {
                   <Video className="h-[14px] w-[14px] text-rose-500" />
                   <span>Video</span>
                 </button>
+              </div>
+            </div>
+
+            {/* Trending in Education */}
+            <div className="max-w-[580px] w-full p-5 bg-white border border-gray-200/80 rounded-2xl">
+              <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-4">
+                Trending in Education
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  {
+                    id: 1,
+                    tag: "Exam Update",
+                    tagStyle: "bg-blue-50 text-blue-600",
+                    title: "TU publishes BBS 1st year routine",
+                    icon: "📅",
+                    commentEmoji: "😭",
+                    commentText: "Only 2 weeks left and I haven't even bought the syllabus...",
+                  },
+                  {
+                    id: 2,
+                    tag: "Discussion",
+                    tagStyle: "bg-orange-50 text-orange-600",
+                    title: "Is taking a drop year for IOE worth it?",
+                    icon: "⏳",
+                    commentEmoji: "🧠",
+                    commentText: "Honestly, the mental pressure isn't worth saving the fee.",
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex flex-col justify-between p-4 bg-white border border-gray-200 rounded-2xl transition-all duration-200"
+                  >
+                    <div>
+                      <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-md ${item.tagStyle}`}>
+                        {item.tag}
+                      </span>
+                      <div className="flex items-start justify-between gap-3 mt-3 mb-4">
+                        <h3 className="text-sm font-bold text-gray-900 leading-snug">
+                          {item.title}
+                        </h3>
+                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-xl text-lg">
+                          {item.icon}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
+                      <span className="text-lg flex-shrink-0">{item.commentEmoji}</span>
+                      <p className="text-xs text-gray-600 font-medium leading-tight">
+                        {item.commentText}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
 
