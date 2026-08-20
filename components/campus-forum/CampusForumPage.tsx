@@ -1258,46 +1258,6 @@ const CampusForumPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Trending in Education */}
-            <div className="max-w-[580px] w-full p-5 bg-white border border-gray-200/80 rounded-2xl">
-              <h2 className="text-xs font-bold tracking-wider text-slate-500 uppercase mb-4">
-                Trending in Education
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {trending.slice(0, 2).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex flex-col justify-between p-4 bg-white border border-gray-200 rounded-2xl transition-all duration-200"
-                  >
-                    <div>
-                      <span className="inline-block px-3 py-1 text-xs font-semibold rounded-md bg-purple-50 text-purple-600">
-                        {item.category || "Trending"}
-                      </span>
-                      <div className="flex items-start justify-between gap-3 mt-3 mb-4">
-                        <h3 className="text-sm font-bold text-gray-900 leading-snug">
-                          {item.title}
-                        </h3>
-                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center bg-gray-100 rounded-xl text-lg">
-                          🔥
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-xl border border-gray-100">
-                      <span className="text-lg flex-shrink-0">👍</span>
-                      <p className="text-xs text-gray-600 font-medium leading-tight">
-                        {item.upvotes || 0} upvotes · {item.comment_count || 0} comments
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {trending.length === 0 && (
-                  <div className="col-span-2 text-center py-4 text-xs text-gray-400">
-                    No trending posts yet
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Posts Feed */}
             {isLoading ? (
               <div className="flex justify-center py-12">
