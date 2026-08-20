@@ -115,7 +115,7 @@ const PostCard: React.FC<{
   };
 
   return (
-    <div className="max-w-[580px] bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm font-sans text-gray-900">
+    <div className="w-full bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm font-sans text-gray-900">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
@@ -1215,7 +1215,7 @@ const CampusForumPage: React.FC = () => {
           {/* ── MIDDLE ── */}
           <section className="lg:col-span-6 space-y-5 order-2">
             {/* Create Post Widget */}
-            <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all max-w-[580px]">
+            <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all w-full">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
                   {user?.image_url ? (
