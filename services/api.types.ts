@@ -606,6 +606,7 @@ export interface ForumComment {
   user_id: number;
   post_id: number;
   content: string;
+  image_url?: string;
   parent_id?: number;
   created_at: string;
   createdAt?: string;

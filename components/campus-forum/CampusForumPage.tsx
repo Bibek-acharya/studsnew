@@ -70,6 +70,7 @@ interface CommentData {
   user_id: number;
   user_name: string;
   user?: { id: number; first_name: string; last_name: string; image_url?: string };
+  image_url?: string;
   parent_id?: number;
   replies?: CommentData[];
   created_at: string;
@@ -78,13 +79,14 @@ interface CommentData {
 const PostCard: React.FC<{
   post: ForumPost;
   onLike: (id: number) => void;
+  onDislike: (id: number) => void;
   onCommentClick: (id: number) => void;
   onLightbox: (url: string, type: "image" | "video") => void;
   comments?: CommentData[];
   commentsOpen?: boolean;
   onJoinCommunity?: (communityId: number) => void;
   onCommentAdded?: (postId: number) => void;
-}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
+}> = ({ post, onLike, onDislike, onCommentClick, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -234,8 +236,11 @@ const PostCard: React.FC<{
             <span className="font-semibold text-gray-800">{post.upvotes || 0}</span>
           </button>
           <span className="mx-2 text-gray-300">|</span>
-          <button className="hover:text-black">
-            <ArrowDown size={16} className="text-gray-500" />
+          <button
+            onClick={() => onDislike(post.id)}
+            className={`hover:text-black ${post.is_disliked ? "text-red-500" : ""}`}
+          >
+            <ArrowDown size={16} className={post.is_disliked ? "text-red-500" : "text-gray-500"} />
           </button>
         </div>
 
@@ -309,6 +314,16 @@ const CommentItem: React.FC<{
 
         <p className="text-sm text-gray-800 leading-relaxed mb-3">{comment.content}</p>
 
+        {comment.image_url && (
+          <div className="mb-3">
+            <img
+              src={imageUrl(comment.image_url)}
+              alt="Comment attachment"
+              className="max-h-48 rounded-lg object-cover border border-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
+            />
+          </div>
+        )}
+
         <div className="flex items-center gap-4 text-xs text-gray-500 font-semibold mb-3">
           <div className="flex items-center gap-2">
             <button className="hover:text-black">
@@ -357,14 +372,40 @@ const CommentSection: React.FC<{
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<"popularity" | "newest">("popularity");
+  const [commentImage, setCommentImage] = useState<File | null>(null);
+  const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
+  const commentImageRef = useRef<HTMLInputElement>(null);
   const token = apiService.getToken();
 
+  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCommentImage(file);
+    setCommentImagePreview(URL.createObjectURL(file));
+    if (commentImageRef.current) commentImageRef.current.value = "";
+  };
+
+  const removeCommentImage = () => {
+    setCommentImage(null);
+    setCommentImagePreview(null);
+  };
+
   const handleAddComment = async () => {
-    if (!token || !newComment.trim() || isSubmitting) return;
+    if (!token || ((!newComment.trim()) && !commentImage) || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await apiService.createForumComment(token, postId, { content: newComment.trim() });
+      let imageUrl = "";
+      if (commentImage) {
+        const urls = await apiService.uploadForumMedia(token, [commentImage]);
+        imageUrl = urls[0] || "";
+      }
+      await apiService.createForumComment(token, postId, {
+        content: newComment.trim(),
+        image_url: imageUrl || undefined,
+      });
       setNewComment("");
+      setCommentImage(null);
+      setCommentImagePreview(null);
       if (onCommentAdded) {
         onCommentAdded(postId);
       }
@@ -403,12 +444,37 @@ const CommentSection: React.FC<{
           />
           <div className="flex items-center gap-2 text-gray-400 font-semibold text-xs ml-2">
             <span className="cursor-pointer hover:text-gray-600">GIF</span>
-            <svg className="w-5 h-5 cursor-pointer hover:text-gray-600" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+            <button
+              type="button"
+              onClick={() => commentImageRef.current?.click()}
+              className="cursor-pointer hover:text-gray-600"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <input
+              ref={commentImageRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleImagePick}
+            />
           </div>
         </div>
       </div>
+
+      {commentImagePreview && (
+        <div className="mb-3 relative inline-block">
+          <img src={commentImagePreview} alt="Comment attachment" className="h-20 rounded-lg object-cover border border-gray-200" />
+          <button
+            onClick={removeCommentImage}
+            className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-bold text-gray-900 text-sm">Comments</h3>
@@ -1051,6 +1117,25 @@ const CampusForumPage: React.FC = () => {
     }
   };
 
+  const handleDislike = async (postId: number) => {
+    if (!isAuthenticated || !token) {
+      showToast("Please login to dislike posts");
+      return;
+    }
+    try {
+      const updated = await apiService.dislikeForumPost(token, postId);
+      setPosts((p) =>
+        p.map((post) =>
+          post.id === postId
+            ? { ...post, upvotes: updated.upvotes, downvotes: updated.downvotes, is_liked: updated.is_liked, is_disliked: updated.is_disliked }
+            : post
+        )
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleCommentClick = async (postId: number) => {
     const isOpen = openComments[postId];
     if (isOpen) {
@@ -1241,6 +1326,7 @@ const CampusForumPage: React.FC = () => {
                     key={post.id}
                     post={post}
                     onLike={handleLike}
+                    onDislike={handleDislike}
                     onCommentClick={handleCommentClick}
                     onLightbox={handleLightbox}
                     comments={commentsData[post.id]}
