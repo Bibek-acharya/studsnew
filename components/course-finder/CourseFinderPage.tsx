@@ -114,7 +114,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   return (
     <div className="min-h-screen bg-gray-50 p-4 text-gray-800 md:p-6 lg:p-8 pt-24">
       <main className="mx-auto flex w-full max-w-350 flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8 items-start">
-        <aside className="hidden lg:block w-full shrink-0 lg:w-75 h-fit sticky top-24">
+        <aside className="hidden lg:block w-full shrink-0 lg:w-75 h-fit">
           <CourseFilters
             filters={filters}
             counts={filterCounts}

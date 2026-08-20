@@ -4,7 +4,8 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
-import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, MessageSquare, Repeat2, Share2, MoreVertical } from "lucide-react";
+import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, MessageSquare, Share2, MoreVertical } from "lucide-react";
+import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -78,13 +79,15 @@ interface CommentData {
 const PostCard: React.FC<{
   post: ForumPost;
   onLike: (id: number) => void;
+  onDislike: (id: number) => void;
   onCommentClick: (id: number) => void;
+  onShare: (post: ForumPost) => void;
   onLightbox: (url: string, type: "image" | "video") => void;
   comments?: CommentData[];
   commentsOpen?: boolean;
   onJoinCommunity?: (communityId: number) => void;
   onCommentAdded?: (postId: number) => void;
-}> = ({ post, onLike, onCommentClick, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
+}> = ({ post, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -234,8 +237,11 @@ const PostCard: React.FC<{
             <span className="font-semibold text-gray-800">{post.upvotes || 0}</span>
           </button>
           <span className="mx-2 text-gray-300">|</span>
-          <button className="hover:text-black">
-            <ArrowDown size={16} className="text-gray-500" />
+          <button
+            onClick={() => onDislike(post.id)}
+            className={`hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
+          >
+            <ArrowDown size={16} className={post.is_disliked ? "text-red-500" : "text-gray-500"} />
           </button>
         </div>
 
@@ -247,15 +253,18 @@ const PostCard: React.FC<{
           {post.comment_count || 0} Comment
         </button>
 
-        <button className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold">
-          <Repeat2 size={16} className="text-gray-500" />
-          Repost
+        <button
+          onClick={() => onShare(post)}
+          className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold"
+        >
+          <Share2 size={16} className="text-gray-500" />
+          Share
         </button>
       </div>
 
       {commentsOpen && (
         <div className="mt-4 border-t border-gray-100 pt-4">
-          <CommentSection postId={post.id} comments={comments} onCommentAdded={onCommentAdded} />
+          <CommentSection postId={post.id} comments={comments} user={user} onCommentAdded={onCommentAdded} />
         </div>
       )}
     </div>
@@ -284,12 +293,22 @@ const CommentItem: React.FC<{
     }
   };
 
+  const avatarUrl = comment.user?.image_url;
+  const avatarLetter = (comment.user?.first_name?.[0] || comment.user_name?.[0] || "U").toUpperCase();
+
   return (
     <div className="text-xs">
       <div className="flex items-start gap-2">
         <button onClick={() => setCollapsed(!collapsed)} className="mt-0.5 text-slate-400 hover:text-slate-600">
           {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
         </button>
+        <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            avatarLetter
+          )}
+        </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-slate-800 text-[11px]">{comment.user_name}</span>
@@ -302,7 +321,14 @@ const CommentItem: React.FC<{
                 Reply
               </button>
               {showReply && (
-                <div className="mt-2 flex gap-2">
+                <div className="mt-2 flex gap-2 items-center">
+                  <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      avatarLetter
+                    )}
+                  </div>
                   <input
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
@@ -333,8 +359,9 @@ const CommentItem: React.FC<{
 const CommentSection: React.FC<{
   postId: number;
   comments: CommentData[];
+  user?: { first_name: string; last_name: string; image_url?: string } | null;
   onCommentAdded?: (postId: number) => void;
-}> = ({ postId, comments, onCommentAdded }) => {
+}> = ({ postId, comments, user, onCommentAdded }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const token = apiService.getToken();
@@ -367,9 +394,19 @@ const CommentSection: React.FC<{
     }
   };
 
+  const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
+  const avatarUrl = user?.image_url;
+
   return (
     <div className="pt-3 space-y-3">
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
+        <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+          ) : (
+            avatarLetter
+          )}
+        </div>
         <input
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
@@ -381,9 +418,9 @@ const CommentSection: React.FC<{
         <button
           onClick={handleAddComment}
           disabled={isSubmitting || !newComment.trim()}
-          className="bg-[#2563eb] text-white rounded-full px-4 py-2 text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="text-[#2563eb] disabled:text-gray-300 transition hover:scale-110"
         >
-          {isSubmitting ? "..." : "Post"}
+          <Send size={18} />
         </button>
       </div>
       {!Array.isArray(comments) || comments.length === 0 ? (
@@ -841,6 +878,7 @@ const CampusForumPage: React.FC = () => {
   const [commentsData, setCommentsData] = useState<Record<number, CommentData[]>>({});
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [lightboxType, setLightboxType] = useState<"image" | "video">("image");
+  const [sharePost, setSharePost] = useState<ForumPost | null>(null);
 
   const token = apiService.getToken();
 
@@ -1012,6 +1050,29 @@ const CampusForumPage: React.FC = () => {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleDislike = async (postId: number) => {
+    if (!isAuthenticated || !token) {
+      showToast("Please login to dislike posts");
+      return;
+    }
+    try {
+      const updated = await apiService.dislikeForumPost(token, postId);
+      setPosts((p) =>
+        p.map((post) =>
+          post.id === postId
+            ? { ...post, upvotes: updated.upvotes, downvotes: updated.downvotes, is_liked: updated.is_liked, is_disliked: updated.is_disliked }
+            : post
+        )
+      );
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleShare = (post: ForumPost) => {
+    setSharePost(post);
   };
 
   const handleCommentClick = async (postId: number) => {
@@ -1204,7 +1265,9 @@ const CampusForumPage: React.FC = () => {
                     key={post.id}
                     post={post}
                     onLike={handleLike}
+                    onDislike={handleDislike}
                     onCommentClick={handleCommentClick}
+                    onShare={handleShare}
                     onLightbox={handleLightbox}
                     comments={commentsData[post.id]}
                     commentsOpen={openComments[post.id]}
@@ -1278,6 +1341,15 @@ const CampusForumPage: React.FC = () => {
       />
 
       <Lightbox url={lightboxUrl} type={lightboxType} onClose={() => setLightboxUrl(null)} />
+
+      <ShareCollegeModal
+        isOpen={!!sharePost}
+        onClose={() => setSharePost(null)}
+        shareUrl={sharePost ? `${typeof window !== "undefined" ? window.location.origin : ""}/campus-forum?post=${sharePost.id}` : ""}
+        shareTitle={sharePost?.title || "Campus Forum Post"}
+        shareText={sharePost?.content?.slice(0, 200) || "Check out this post on Campus Forum"}
+        collegeName={sharePost?.title || "Post"}
+      />
 
       <ToastContainer toasts={toasts} />
     </div>
