@@ -1143,7 +1143,7 @@ const CampusForumPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* ── LEFT SIDEBAR ── */}
           <aside className="lg:col-span-3 space-y-5 order-1">
-            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
+            <div className="bg-white rounded-lg p-5 sm:p-6 border border-slate-200/80 shadow-none">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
                   Discover Communities
@@ -1156,9 +1156,9 @@ const CampusForumPage: React.FC = () => {
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 sm:grid-cols-1 gap-2 sm:gap-0 sm:space-y-3.5">
-                {communities.filter((c) => !c.is_general).map((item) => (
-                  <div key={item.id} className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between py-1 group gap-1.5 sm:gap-0 border border-gray-200 rounded-lg p-2 sm:border-0 sm:p-0 sm:rounded-none">
+              <div className="grid grid-cols-3 sm:grid-cols-1 gap-3 sm:gap-0 sm:space-y-3.5">
+                {communities.filter((c) => !c.is_general).slice(0, 3).map((item) => (
+                  <div key={item.id} className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between py-1 group gap-1.5 sm:gap-0">
                     <div
                       className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 min-w-0 flex-1 cursor-pointer"
                       onClick={() => handleCommunityClick(item.id)}
