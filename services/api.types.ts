@@ -452,6 +452,11 @@ export interface College {
   offered_programs?: any;
   alumni?: any;
   gallery?: any;
+  departments?: any;
+  scholarships?: any;
+  college_reviews?: any;
+  courses?: any;
+  programs_list?: any;
 }
 
 // ─── Universities ────────────────────────────────────────────────────────────

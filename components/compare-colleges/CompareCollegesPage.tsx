@@ -1,27 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "@/services/api";
+import type { College } from "@/services/api";
 
 interface CompareCollegesPageProps {
-    onNavigate: (view: any, data?: any) => void;
+    onNavigate: (view: string, data?: { college1: Partial<College> | string; college2: Partial<College> | string }) => void;
 }
 
 const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate }) => {
     const [college1, setCollege1] = useState("");
     const [college2, setCollege2] = useState("");
+    const [selectedCollege1, setSelectedCollege1] = useState<College | null>(null);
+    const [selectedCollege2, setSelectedCollege2] = useState<College | null>(null);
     const [showDropdown1, setShowDropdown1] = useState(false);
     const [showDropdown2, setShowDropdown2] = useState(false);
 
     const wrapperRef1 = useRef<HTMLDivElement>(null);
     const wrapperRef2 = useRef<HTMLDivElement>(null);
 
-    const { data: collegesData } = useQuery({
+    const { data: collegesData, isLoading } = useQuery({
         queryKey: ["all-colleges-compare"],
         queryFn: () => apiService.getColleges({ pageSize: 100 })
     });
 
     const colleges = collegesData?.data?.colleges || [];
-    const collegesList = [...colleges].sort((a, b) => a.name.localeCompare(b.name)).map(c => c.name);
+    const collegesList = [...colleges].sort((a, b) => a.name.localeCompare(b.name));
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -38,85 +41,36 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
         };
     }, []);
 
-    const filtered1 = collegesList.filter(c => c.toLowerCase().includes(college1.toLowerCase()));
-    const filtered2 = collegesList.filter(c => c.toLowerCase().includes(college2.toLowerCase()));
+    const filtered1 = collegesList.filter(c => c.name.toLowerCase().includes(college1.toLowerCase()));
+    const filtered2 = collegesList.filter(c => c.name.toLowerCase().includes(college2.toLowerCase()));
 
-    const c1Obj = colleges.find(c => c.name === college1);
-    const c2Obj = colleges.find(c => c.name === college2);
+    const handleSelect1 = (college: College) => {
+        setCollege1(college.name);
+        setSelectedCollege1(college);
+        setShowDropdown1(false);
+    };
+
+    const handleSelect2 = (college: College) => {
+        setCollege2(college.name);
+        setSelectedCollege2(college);
+        setShowDropdown2(false);
+    };
+
+    const handleCompare = () => {
+        const c1 = selectedCollege1 || colleges.find(c => c.name === college1);
+        const c2 = selectedCollege2 || colleges.find(c => c.name === college2);
+        if (c1 || c2) {
+            onNavigate("compareCollegesResult", {
+                college1: c1 || { name: college1 },
+                college2: c2 || { name: college2 }
+            });
+        }
+    };
 
     return (
         <div className="bg-[#f8f9fc] min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
-            <style>{`
-        .hero-section {
-            background-color: #536DFE;
-            width: 1381px;
-            max-width: 95vw;
-            height: 655px;
-            position: relative;
-            overflow: visible;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            border-radius: 20px;
-            flex-shrink: 0;
-        }
-
-        .hero-bg-container {
-            position: absolute;
-            inset: 0;
-            border-radius: 20px;
-            overflow: hidden;
-            pointer-events: none;
-        }
-
-        .content-section {
-            width: 1381px;
-            max-width: 95vw;
-            margin-top: 60px;
-        }
-        
-        .input-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
-        
-        .input-focus-ring:focus-within {
-            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
-        }
-
-        input {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover {
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        .card-hover:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
-        }
-
-        .rating-green { background-color: #73c836; }
-        .rating-yellow { background-color: #f5a623; }
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f8f9fc;
-            border-radius: 8px;
-            margin: 4px 0;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 8px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-      `}</style>
-
-            <div className="hero-section">
-                <div className="hero-bg-container">
+            <div className="bg-[#536DFE] w-full max-w-7xl mx-auto relative overflow-visible flex flex-col shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] rounded-2xl mx-4 md:mx-auto" style={{ minHeight: 655 }}>
+                <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
                     <div className="absolute inset-x-0 bottom-0 z-0 h-[300px] pointer-events-none opacity-90">
                         <svg width="100%" height="100%" viewBox="0 0 1440 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M0,400 L0,250 L80,250 L80,180 L180,180 L180,220 L280,220 L280,150 L380,150 L380,260 L480,260 L480,120 L600,120 L600,200 L700,200 L700,160 L850,160 L850,240 L950,240 L950,140 L1100,140 L1100,210 L1200,210 L1200,170 L1350,170 L1350,250 L1440,250 L1440,400 Z" fill="#6079F9" opacity="0.7" />
@@ -164,19 +118,19 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                 <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4">
                     <div className="text-center mb-10 max-w-3xl">
-                        <h1 className="text-white text-4xl md:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight mb-4 drop-">
+                        <h1 className="text-white text-4xl md:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight mb-4">
                             Compare colleges to<br />find the best fit
                         </h1>
                         <p className="text-white text-lg md:text-xl font-medium opacity-95">
-                            Because you deserve better 😜
+                            Because you deserve better
                         </p>
                     </div>
 
                     <div className="w-full max-w-4xl flex flex-col md:flex-row items-center justify-center gap-4 md:gap-6">
-                        <div className="relative w-full md:w-[420px] input-focus-ring rounded-full" ref={wrapperRef1}>
+                        <div className="relative w-full md:w-[420px] rounded-full" ref={wrapperRef1}>
                             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                 <svg className="h-[22px] w-[22px] text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
                             <input
@@ -185,28 +139,31 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                 onFocus={() => setShowDropdown1(true)}
                                 onChange={(e) => {
                                     setCollege1(e.target.value);
+                                    setSelectedCollege1(null);
                                     setShowDropdown1(true);
                                 }}
-                                className="w-full bg-white rounded-full py-4 pl-14 pr-6 text-[16px] text-gray-800 placeholder-gray-400 focus:outline-none input-shadow"
+                                className="w-full bg-white rounded-full py-4 pl-14 pr-6 text-[16px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]"
                                 placeholder="Add first college"
                                 autoComplete="off"
                             />
 
                             {showDropdown1 && (
-                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto custom-scrollbar z-50 text-left py-2">
-                                    {filtered1.length === 0 ? (
+                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto z-50 text-left py-2">
+                                    {isLoading ? (
+                                        <li className="px-5 py-3 text-gray-500 text-sm">Loading colleges...</li>
+                                    ) : filtered1.length === 0 ? (
                                         <li className="px-5 py-3 text-gray-500 text-sm italic">No colleges found</li>
                                     ) : (
-                                        filtered1.map((c, i) => (
+                                        filtered1.map((c) => (
                                             <li
-                                                key={i}
+                                                key={c.id}
                                                 className="px-5 py-3.5 text-gray-700 hover:bg-[#F3F4F6] hover:text-[#3182CE] font-medium cursor-pointer text-[15px] transition-colors border-b border-gray-50 last:border-0"
-                                                onClick={() => {
-                                                    setCollege1(c);
-                                                    setShowDropdown1(false);
-                                                }}
+                                                onClick={() => handleSelect1(c)}
                                             >
-                                                {c}
+                                                {c.name}
+                                                {c.location && (
+                                                    <span className="text-gray-400 text-sm ml-2">- {c.location}</span>
+                                                )}
                                             </li>
                                         ))
                                     )}
@@ -215,13 +172,13 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                         </div>
 
                         <div className="flex-shrink-0 flex items-center justify-center py-2 md:py-0">
-                            <span className="text-white font-bold text-xl lowercase tracking-wide drop-">vs</span>
+                            <span className="text-white font-bold text-xl lowercase tracking-wide">vs</span>
                         </div>
 
-                        <div className="relative w-full md:w-[420px] input-focus-ring rounded-full" ref={wrapperRef2}>
+                        <div className="relative w-full md:w-[420px] rounded-full" ref={wrapperRef2}>
                             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                                 <svg className="h-[22px] w-[22px] text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
                             <input
@@ -230,28 +187,31 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                 onFocus={() => setShowDropdown2(true)}
                                 onChange={(e) => {
                                     setCollege2(e.target.value);
+                                    setSelectedCollege2(null);
                                     setShowDropdown2(true);
                                 }}
-                                className="w-full bg-white rounded-full py-4 pl-14 pr-6 text-[16px] text-gray-800 placeholder-gray-400 focus:outline-none input-shadow"
+                                className="w-full bg-white rounded-full py-4 pl-14 pr-6 text-[16px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]"
                                 placeholder="Add second college"
                                 autoComplete="off"
                             />
 
                             {showDropdown2 && (
-                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto custom-scrollbar z-50 text-left py-2">
-                                    {filtered2.length === 0 ? (
+                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-md shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto z-50 text-left py-2">
+                                    {isLoading ? (
+                                        <li className="px-5 py-3 text-gray-500 text-sm">Loading colleges...</li>
+                                    ) : filtered2.length === 0 ? (
                                         <li className="px-5 py-3 text-gray-500 text-sm italic">No colleges found</li>
                                     ) : (
-                                        filtered2.map((c, i) => (
+                                        filtered2.map((c) => (
                                             <li
-                                                key={i}
+                                                key={c.id}
                                                 className="px-5 py-3.5 text-gray-700 hover:bg-[#F3F4F6] hover:text-[#3182CE] font-medium cursor-pointer text-[15px] transition-colors border-b border-gray-50 last:border-0"
-                                                onClick={() => {
-                                                    setCollege2(c);
-                                                    setShowDropdown2(false);
-                                                }}
+                                                onClick={() => handleSelect2(c)}
                                             >
-                                                {c}
+                                                {c.name}
+                                                {c.location && (
+                                                    <span className="text-gray-400 text-sm ml-2">- {c.location}</span>
+                                                )}
                                             </li>
                                         ))
                                     )}
@@ -262,15 +222,9 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                     <div className="mt-8">
                         <button
-                            onClick={() => {
-                                if (college1 || college2) {
-                                    onNavigate("compareCollegesResult", {
-                                        college1: c1Obj || { name: college1 },
-                                        college2: c2Obj || { name: college2 }
-                                    });
-                                }
-                            }}
-                            className="bg-[#1a2b4c] text-white font-bold text-[16px] px-10 py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(26,43,76,0.39)] hover:shadow-[0_6px_20px_rgba(26,43,76,0.23)] hover:bg-[#111c33] transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-900/50"
+                            onClick={handleCompare}
+                            disabled={!college1 && !college2}
+                            className="bg-[#1a2b4c] text-white font-bold text-[16px] px-10 py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(26,43,76,0.39)] hover:shadow-[0_6px_20px_rgba(26,43,76,0.23)] hover:bg-[#111c33] transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Compare Now
                         </button>
@@ -278,209 +232,77 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                 </main>
             </div>
 
-            <section className="content-section">
+            <section className="w-full max-w-7xl mx-auto mt-16 px-4">
                 <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div
-                        onClick={() => onNavigate("compareCollegesResult", { college1: { name: "Pulchowk Campus" }, college2: { name: "Kathmandu University" } })}
-                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
-                    >
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                        <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
+                    {[
+                        { c1: "Pulchowk Campus", c2: "Kathmandu University", short1: "Pulchowk", short2: "KU" },
+                        { c1: "KUSOM", c2: "Apex College", short1: "KUSOM", short2: "Apex" },
+                        { c1: "St. Xavier's College", c2: "Trinity International College", short1: "SXC", short2: "Trinity" },
+                        { c1: "NCIT", c2: "Kantipur Engineering College", short1: "NCIT", short2: "KEC" },
+                        { c1: "British College", c2: "Islington College", short1: "British", short2: "Islington" },
+                        { c1: "NATHM", c2: "Silver Mountain", short1: "NATHM", short2: "SM" },
+                    ].map((pair) => {
+                        const found1 = colleges.find(c => c.name.toLowerCase() === pair.c1.toLowerCase());
+                        const found2 = colleges.find(c => c.name.toLowerCase() === pair.c2.toLowerCase());
+                        return (
+                            <div
+                                key={pair.c1}
+                                onClick={() => onNavigate("compareCollegesResult", {
+                                    college1: found1 || { name: pair.c1 },
+                                    college2: found2 || { name: pair.c2 }
+                                })}
+                                className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer hover:translate-y-[-4px] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-200"
+                            >
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
+                                <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
 
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="20" cy="20" r="20" fill="#EBF4FF" />
-                                    <path d="M20 10L10 28H30L20 10Z" fill="#3182CE" />
-                                </svg>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.9
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Pulchowk</span>
-                        </div>
+                                <div className="flex flex-col items-center w-1/2 px-2 z-10">
+                                    <div className="h-14 flex items-center justify-center mb-3">
+                                        {found1?.image_url || found1?.logo_url ? (
+                                            <img src={found1.image_url || found1.logo_url} alt={pair.short1} className="w-10 h-10 object-contain" />
+                                        ) : (
+                                            <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <circle cx="20" cy="20" r="20" fill="#EBF4FF" />
+                                                <path d="M20 10L10 28H30L20 10Z" fill="#3182CE" />
+                                            </svg>
+                                        )}
+                                    </div>
+                                    <div className="bg-[#73c836] text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2">
+                                        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                                        {found1?.rating?.toFixed(1) || "N/A"}
+                                    </div>
+                                    <span className="text-[15px] font-bold text-[#1a2b4c] text-center">{pair.short1}</span>
+                                </div>
 
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <span className="text-xl font-bold text-[#2B6CB0] tracking-wider">KU</span>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                4.0
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Kathmandu Univ.</span>
-                        </div>
-                    </div>
-
-                    <div
-                        onClick={() => onNavigate("compareCollegesResult", { college1: { name: "KUSOM" }, college2: { name: "Apex College" } })}
-                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
-                    >
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                        <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <span className="text-xl font-bold text-[#DD6B20]">KUSOM</span>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                4.2
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">KUSOM</span>
-                        </div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <rect width="40" height="40" rx="8" fill="#E6FFFA" />
-                                    <path d="M20 12L12 26H28L20 12Z" fill="#38B2AC" />
-                                </svg>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.9
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Apex College</span>
-                        </div>
-                    </div>
-
-                    <div
-                        onClick={() => onNavigate("compareCollegesResult", { college1: { name: "St. Xavier's College" }, college2: { name: "Trinity International College" } })}
-                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
-                    >
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                        <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <div className="w-10 h-10 bg-[#2A4365] rounded flex items-center justify-center">
-                                    <span className="text-white font-bold text-sm">SXC</span>
+                                <div className="flex flex-col items-center w-1/2 px-2 z-10">
+                                    <div className="h-14 flex items-center justify-center mb-3">
+                                        {found2?.image_url || found2?.logo_url ? (
+                                            <img src={found2.image_url || found2.logo_url} alt={pair.short2} className="w-10 h-10 object-contain" />
+                                        ) : (
+                                            <span className="text-xl font-bold text-[#2B6CB0] tracking-wider">{pair.short2}</span>
+                                        )}
+                                    </div>
+                                    <div className="bg-[#73c836] text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2">
+                                        <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
+                                        {found2?.rating?.toFixed(1) || "N/A"}
+                                    </div>
+                                    <span className="text-[15px] font-bold text-[#1a2b4c] text-center">{pair.short2}</span>
                                 </div>
                             </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                4.1
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">St. Xavier's</span>
-                        </div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <span className="text-xl font-bold text-[#C53030]">Trinity</span>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.8
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Trinity Int'l</span>
-                        </div>
-                    </div>
-
-                    <div
-                        onClick={() => onNavigate("compareCollegesResult", { college1: { name: "NCIT" }, college2: { name: "Kantipur Engineering College" } })}
-                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
-                    >
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                        <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <span className="text-xl font-bold text-[#2C5282] tracking-tight">NCIT</span>
-                            </div>
-                            <div className="rating-yellow text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.5
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">NCIT</span>
-                        </div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <div className="w-10 h-10 border-2 border-[#1A365D] rounded-full flex items-center justify-center">
-                                    <span className="text-[#1A365D] font-bold text-xs">KEC</span>
-                                </div>
-                            </div>
-                            <div className="rating-yellow text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.6
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Kantipur Eng.</span>
-                        </div>
-                    </div>
-
-                    <div
-                        onClick={() => onNavigate("compareCollegesResult", { college1: { name: "British College" }, college2: { name: "Islington College" } })}
-                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
-                    >
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                        <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M5 20L20 5L35 20L20 35L5 20Z" fill="#2B6CB0" />
-                                </svg>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.8
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">British College</span>
-                        </div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <span className="text-[18px] font-bold text-[#4A5568]">Islington</span>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.9
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Islington</span>
-                        </div>
-                    </div>
-
-                    <div
-                        onClick={() => onNavigate("compareCollegesResult", { college1: { name: "NATHM" }, college2: { name: "Silver Mountain" } })}
-                        className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer card-hover"
-                    >
-                        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                        <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <span className="text-xl font-bold text-[#1a2b4c]">NATHM</span>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                4.0
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">NATHM</span>
-                        </div>
-                        <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                            <div className="h-14 flex items-center justify-center mb-3">
-                                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-300">
-                                    <span className="text-gray-600 font-bold text-sm">SM</span>
-                                </div>
-                            </div>
-                            <div className="rating-green text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2 ">
-                                <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                3.9
-                            </div>
-                            <span className="text-[15px] font-bold text-[#1a2b4c] text-center">Silver Mountain</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="flex justify-center mt-12 mb-4">
-                    <button className="px-6 py-2.5 rounded-full text-[#3182CE] text-[14px] font-semibold bg-[#EBF4FF] hover:bg-[#bee3f8] transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-blue-100">
-                        View all comparisons
-                    </button>
+                        );
+                    })}
                 </div>
             </section>
 
-            <section className="content-section !mt-8 mb-16 flex flex-col md:flex-row justify-between gap-[19px]">
-                <div className="bg-white rounded-md  w-full md:w-[681px] h-[151px] relative overflow-hidden group hover: transition-shadow flex-shrink-0">
+            <section className="w-full max-w-7xl mx-auto mt-8 px-4 mb-16 flex flex-col md:flex-row justify-between gap-4">
+                <div className="bg-white rounded-md w-full md:w-[681px] h-[151px] relative overflow-hidden group flex-shrink-0">
                     <span className="absolute top-2 right-2 text-[9px] text-white/90 font-bold uppercase tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded z-10">Advertisement</span>
                     <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=681&h=151&q=80" alt="Ad 1" className="w-full h-full object-cover" />
                 </div>
 
-                <div className="bg-white rounded-md  w-full md:w-[681px] h-[151px] relative overflow-hidden group hover: transition-shadow flex-shrink-0">
+                <div className="bg-white rounded-md w-full md:w-[681px] h-[151px] relative overflow-hidden group flex-shrink-0">
                     <span className="absolute top-2 right-2 text-[9px] text-white/90 font-bold uppercase tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded z-10">Advertisement</span>
                     <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=681&h=151&q=80" alt="Ad 2" className="w-full h-full object-cover" />
                 </div>
