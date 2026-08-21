@@ -590,11 +590,11 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm"
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-none"
+        className="relative w-full max-w-lg rounded-xl bg-white p-4 sm:p-6 shadow-none max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -611,10 +611,10 @@ const CreatePostModal: React.FC<{
             <img
               src={imageUrl(user.image_url)}
               alt={user?.first_name}
-              className="h-12 w-12 rounded-full object-cover"
+              className="h-10 w-10 sm:h-12 sm:w-12 rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200 text-slate-600 font-semibold">
+            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-slate-200 text-slate-600 font-semibold text-sm">
               {avatarLetter}
             </div>
           )}
@@ -628,19 +628,19 @@ const CreatePostModal: React.FC<{
 
         <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
           {error && (
-            <div className="mb-4 rounded-lg bg-red-50 p-3 text-xs font-medium text-red-600">
+            <div className="mb-3 sm:mb-4 rounded-lg bg-red-50 p-2.5 sm:p-3 text-xs font-medium text-red-600">
               {error}
             </div>
           )}
 
-          <div className="mb-4">
+          <div className="mb-3 sm:mb-4">
             <select
               value={selectedCommunityId || ""}
               onChange={(e) => {
                 onCommunityChange(Number(e.target.value));
                 if (error) setError(null);
               }}
-              className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-600 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
+              className="w-full cursor-pointer rounded-lg border border-slate-200 bg-white px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-slate-600 outline-none transition-all focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20"
             >
               <option value="" disabled>
                 Select a community
@@ -651,7 +651,7 @@ const CreatePostModal: React.FC<{
             </select>
           </div>
 
-          <div className="mb-6 space-y-2">
+          <div className="mb-4 sm:mb-6 space-y-2">
             <input
               type="text"
               placeholder="Post title"
@@ -660,22 +660,22 @@ const CreatePostModal: React.FC<{
                 setTitle(e.target.value);
                 if (error) setError(null);
               }}
-              className="w-full bg-transparent text-lg font-semibold text-slate-800 placeholder-slate-400 outline-none"
+              className="w-full bg-transparent text-base sm:text-lg font-semibold text-slate-800 placeholder-slate-400 outline-none"
             />
             <textarea
               placeholder="Tell others about yourself..."
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="h-28 w-full resize-none bg-transparent text-slate-700 placeholder-slate-400 outline-none"
+              className="h-20 sm:h-28 w-full resize-none bg-transparent text-slate-700 placeholder-slate-400 outline-none"
             />
           </div>
 
-          <div className="mb-4 space-y-3">
+          <div className="mb-3 sm:mb-4 space-y-3">
             {imagePreviews.length > 0 && (
-              <div className="grid gap-2 grid-cols-2">
+              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2">
                 {imagePreviews.map((url, i) => (
                   <div key={i} className="relative rounded-xl overflow-hidden border border-gray-100 shadow-none bg-gray-50 group">
-                    <img src={imageUrl(url)} alt={`Preview ${i + 1}`} className="w-full h-32 object-cover" />
+                    <img src={imageUrl(url)} alt={`Preview ${i + 1}`} className="w-full h-24 sm:h-32 object-cover" />
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
@@ -690,7 +690,7 @@ const CreatePostModal: React.FC<{
 
             {videoPreview && (
               <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-none bg-black">
-                <video src={videoPreview} controls className="w-full max-h-[200px] object-contain" />
+                <video src={videoPreview} controls className="w-full max-h-[160px] sm:max-h-[200px] object-contain" />
                 <button
                   type="button"
                   onClick={removeVideo}
@@ -702,7 +702,7 @@ const CreatePostModal: React.FC<{
             )}
 
             {showPoll && (
-              <div className="space-y-3 bg-slate-50 rounded-xl p-4 border border-slate-200">
+              <div className="space-y-3 bg-slate-50 rounded-xl p-3 sm:p-4 border border-slate-200">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Create a poll</span>
                   <button
@@ -771,46 +771,46 @@ const CreatePostModal: React.FC<{
             )}
           </div>
 
-          <hr className="mb-4 border-slate-200" />
+          <hr className="mb-3 sm:mb-4 border-slate-200" />
 
-          <div className="flex items-center justify-between">
-            <div className="flex space-x-2 text-sm font-medium text-slate-700">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex space-x-1 sm:space-x-2 text-xs sm:text-sm font-medium text-slate-700">
               <button
                 type="button"
                 onClick={() => imageInputRef.current?.click()}
-                className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 transition-colors ${
+                className={`flex items-center space-x-1 sm:space-x-1.5 rounded-lg px-2 sm:px-3 py-1.5 transition-colors ${
                   images.length > 0
                     ? "bg-blue-50 text-blue-600"
                     : "hover:bg-slate-100 hover:text-blue-600"
                 }`}
               >
-                <Image className="h-4 w-4" />
+                <Image className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Image</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowPoll((p) => !p)}
-                className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 transition-colors ${
+                className={`flex items-center space-x-1 sm:space-x-1.5 rounded-lg px-2 sm:px-3 py-1.5 transition-colors ${
                   showPoll
                     ? "bg-blue-50 text-blue-600"
                     : "hover:bg-slate-100 hover:text-blue-600"
                 }`}
               >
-                <BarChart2 className="h-4 w-4" />
+                <BarChart2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Poll</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => videoInputRef.current?.click()}
-                className={`flex items-center space-x-1.5 rounded-lg px-3 py-1.5 transition-colors ${
+                className={`flex items-center space-x-1 sm:space-x-1.5 rounded-lg px-2 sm:px-3 py-1.5 transition-colors ${
                   video
                     ? "bg-blue-50 text-blue-600"
                     : "hover:bg-slate-100 hover:text-blue-600"
                 }`}
               >
-                <Video className="h-4 w-4" />
+                <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 <span>Video</span>
               </button>
             </div>
@@ -818,7 +818,7 @@ const CreatePostModal: React.FC<{
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-full bg-blue-600 px-6 py-2 font-semibold text-white shadow-none transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 active:scale-95 disabled:opacity-50"
+              className="rounded-full bg-blue-600 px-5 sm:px-6 py-2 font-semibold text-sm sm:text-base text-white shadow-none transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 active:scale-95 disabled:opacity-50 w-full sm:w-auto"
             >
               {isSubmitting ? "Publishing..." : "Publish"}
             </button>
@@ -879,11 +879,11 @@ const ToastContainer: React.FC<{
 }> = ({ toasts }) => {
   if (toasts.length === 0) return null;
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[70] flex flex-col gap-2 items-center pointer-events-none">
+    <div className="fixed top-16 sm:top-20 right-4 z-[130] flex flex-col gap-2 items-end pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-none flex items-center gap-2 animate-in fade-in slide-in-from-bottom duration-300"
+          className="bg-white text-black px-4 py-2.5 rounded-md text-sm font-medium shadow-lg border border-gray-200 flex items-center gap-2 animate-in fade-in slide-in-from-top duration-300"
         >
           <span>{t.message}</span>
         </div>
@@ -1213,7 +1213,7 @@ const CampusForumPage: React.FC = () => {
           </aside>
 
           {/* ── MIDDLE ── */}
-          <section className="lg:col-span-6 space-y-5 order-2">
+          <section className="lg:col-span-6 space-y-5 order-3 lg:order-2">
             {/* Create Post Widget */}
             <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all w-full">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
@@ -1291,7 +1291,7 @@ const CampusForumPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="lg:space-y-4 space-y-0 divide-y divide-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-0 lg:space-y-0 lg:block lg:divide-y lg:divide-slate-100">
                 {posts.map((post) => (
                   <PostCard
                     key={post.id}
@@ -1313,7 +1313,7 @@ const CampusForumPage: React.FC = () => {
           </section>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5 order-3">
+          <aside className="lg:col-span-3 space-y-5 order-2 lg:order-3">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
