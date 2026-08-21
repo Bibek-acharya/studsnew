@@ -115,7 +115,7 @@ const PostCard: React.FC<{
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-gray-200/80 p-4 shadow-sm font-sans text-gray-900">
+    <div className="w-full bg-white rounded-2xl border border-gray-200/80 p-4 shadow-none font-sans text-gray-900">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
@@ -594,7 +594,7 @@ const CreatePostModal: React.FC<{
       onClick={handleClose}
     >
       <div
-        className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-xl"
+        className="relative w-full max-w-lg rounded-xl bg-white p-6 shadow-none"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -674,12 +674,12 @@ const CreatePostModal: React.FC<{
             {imagePreviews.length > 0 && (
               <div className="grid gap-2 grid-cols-2">
                 {imagePreviews.map((url, i) => (
-                  <div key={i} className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-gray-50 group">
+                  <div key={i} className="relative rounded-xl overflow-hidden border border-gray-100 shadow-none bg-gray-50 group">
                     <img src={imageUrl(url)} alt={`Preview ${i + 1}`} className="w-full h-32 object-cover" />
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
-                      className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm"
+                      className="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-none backdrop-blur-sm"
                     >
                       <X className="h-3.5 w-3.5" />
                     </button>
@@ -689,12 +689,12 @@ const CreatePostModal: React.FC<{
             )}
 
             {videoPreview && (
-              <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-sm bg-black">
+              <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-none bg-black">
                 <video src={videoPreview} controls className="w-full max-h-[200px] object-contain" />
                 <button
                   type="button"
                   onClick={removeVideo}
-                  className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-md backdrop-blur-sm z-10"
+                  className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-none backdrop-blur-sm z-10"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -818,7 +818,7 @@ const CreatePostModal: React.FC<{
             <button
               type="submit"
               disabled={isSubmitting}
-              className="rounded-full bg-blue-600 px-6 py-2 font-semibold text-white shadow-sm transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 active:scale-95 disabled:opacity-50"
+              className="rounded-full bg-blue-600 px-6 py-2 font-semibold text-white shadow-none transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 active:scale-95 disabled:opacity-50"
             >
               {isSubmitting ? "Publishing..." : "Publish"}
             </button>
@@ -883,7 +883,7 @@ const ToastContainer: React.FC<{
       {toasts.map((t) => (
         <div
           key={t.id}
-          className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom duration-300"
+          className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-medium shadow-none flex items-center gap-2 animate-in fade-in slide-in-from-bottom duration-300"
         >
           <span>{t.message}</span>
         </div>
@@ -1143,7 +1143,7 @@ const CampusForumPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-0 lg:px-8">
           {/* ── LEFT SIDEBAR ── */}
           <aside className="lg:col-span-3 space-y-5 order-1">
-            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
+            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
                   Discover Communities
@@ -1264,8 +1264,8 @@ const CampusForumPage: React.FC = () => {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0000ff] border-t-transparent" />
               </div>
             ) : posts.length === 0 ? (
-              <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center shadow-xs flex flex-col items-center justify-center min-h-[320px]">
-                <div className="w-14 h-14 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mb-4 text-2xl shadow-xs">
+              <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center shadow-none flex flex-col items-center justify-center min-h-[320px]">
+                <div className="w-14 h-14 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mb-4 text-2xl shadow-none">
                   <svg
                     className="h-6 w-6"
                     fill="none"
@@ -1314,7 +1314,7 @@ const CampusForumPage: React.FC = () => {
 
           {/* ── RIGHT SIDEBAR ── */}
           <aside className="lg:col-span-3 space-y-5 order-3">
-            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-xs">
+            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
                   className="h-4 w-4 text-amber-500"
