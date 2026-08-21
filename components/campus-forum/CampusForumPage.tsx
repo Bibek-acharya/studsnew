@@ -1311,7 +1311,7 @@ const CampusForumPage: React.FC = () => {
           </section>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5 order-2 lg:order-3">
+          <aside className="hidden sm:block lg:col-span-3 space-y-5 order-2 lg:order-3">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
