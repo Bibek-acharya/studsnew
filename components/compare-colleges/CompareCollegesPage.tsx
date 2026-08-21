@@ -1,7 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { apiService } from "@/services/api";
 import type { College } from "@/services/api";
+
+interface InstitutionResult {
+    id: number;
+    institution_name: string;
+    district?: string;
+    location?: string;
+    type?: string;
+    institution_type?: string;
+    logo_url?: string;
+    card_image_url?: string;
+    rating?: number;
+    reviews?: number;
+    college_id?: number;
+}
 
 interface PopularComparison {
   college1_id: number;
@@ -22,23 +35,64 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     const [selectedCollege2, setSelectedCollege2] = useState<College | null>(null);
     const [showDropdown1, setShowDropdown1] = useState(false);
     const [showDropdown2, setShowDropdown2] = useState(false);
+    const [colleges1, setColleges1] = useState<College[]>([]);
+    const [colleges2, setColleges2] = useState<College[]>([]);
+    const [loading1, setLoading1] = useState(false);
+    const [loading2, setLoading2] = useState(false);
+    const [popularComparisons, setPopularComparisons] = useState<PopularComparison[]>([]);
 
     const wrapperRef1 = useRef<HTMLDivElement>(null);
     const wrapperRef2 = useRef<HTMLDivElement>(null);
+    const debounceRef1 = useRef<NodeJS.Timeout | null>(null);
+    const debounceRef2 = useRef<NodeJS.Timeout | null>(null);
 
-    const { data: collegesData, isLoading } = useQuery({
-        queryKey: ["all-colleges-compare"],
-        queryFn: () => apiService.getColleges({ pageSize: 200 })
-    });
+    useEffect(() => {
+        apiService.getPopularComparisons(6)
+            .then((res) => setPopularComparisons(res?.data || []))
+            .catch(() => {});
+    }, []);
 
-    const { data: popularData } = useQuery({
-        queryKey: ["popular-comparisons"],
-        queryFn: () => apiService.getPopularComparisons(6),
-    });
+    const fetchColleges = useCallback(async (query: string, setList: (c: College[]) => void, setLoading: (l: boolean) => void) => {
+        if (!query.trim()) {
+            setList([]);
+            return;
+        }
+        setLoading(true);
+        try {
+            const [collegeRes, instRes] = await Promise.all([
+                apiService.getColleges({ search: query, pageSize: 10, page: 1 }),
+                apiService.getPublicInstitutions({ search: query, limit: 10 }),
+            ]);
 
-    const colleges = collegesData?.data?.colleges || [];
-    const collegesList = [...colleges].sort((a, b) => a.name.localeCompare(b.name));
-    const popularComparisons: PopularComparison[] = popularData?.data || [];
+            const tableColleges = (collegeRes as { data?: { colleges?: College[] } })?.data?.colleges || [];
+
+            const institutions = (instRes as { data?: { institutions?: InstitutionResult[] } })?.data?.institutions || [];
+
+            const instColleges = institutions
+                .map((inst) => ({
+                    id: inst.id,
+                    name: inst.institution_name,
+                    location: inst.district || inst.location || "",
+                    type: inst.type || inst.institution_type || "College",
+                    image_url: inst.logo_url || inst.card_image_url || "",
+                    rating: inst.rating || 0,
+                    reviews: inst.reviews || 0,
+                }));
+
+            const claimedCollegeIds = new Set(
+                institutions
+                    .filter((inst) => (inst.college_id || 0) > 0)
+                    .map((inst) => inst.college_id),
+            );
+
+            const unclaimed = tableColleges.filter((c) => !claimedCollegeIds.has(c.id));
+
+            setList([...instColleges, ...unclaimed] as College[]);
+        } catch {
+            setList([]);
+        }
+        setLoading(false);
+    }, []);
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
@@ -50,13 +104,24 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const filtered1 = collegesList.filter(c => c.name.toLowerCase().includes(college1.toLowerCase()));
-    const filtered2 = collegesList.filter(c => c.name.toLowerCase().includes(college2.toLowerCase()));
+    const handleInputChange1 = (value: string) => {
+        setCollege1(value);
+        setSelectedCollege1(null);
+        setShowDropdown1(true);
+        if (debounceRef1.current) clearTimeout(debounceRef1.current);
+        debounceRef1.current = setTimeout(() => fetchColleges(value, setColleges1, setLoading1), 250);
+    };
+
+    const handleInputChange2 = (value: string) => {
+        setCollege2(value);
+        setSelectedCollege2(null);
+        setShowDropdown2(true);
+        if (debounceRef2.current) clearTimeout(debounceRef2.current);
+        debounceRef2.current = setTimeout(() => fetchColleges(value, setColleges2, setLoading2), 250);
+    };
 
     const handleSelect1 = (college: College) => {
         setCollege1(college.name);
@@ -71,8 +136,8 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     };
 
     const handleCompare = () => {
-        const c1 = selectedCollege1 || colleges.find(c => c.name === college1);
-        const c2 = selectedCollege2 || colleges.find(c => c.name === college2);
+        const c1 = selectedCollege1;
+        const c2 = selectedCollege2;
         if (c1 || c2) {
             const college1Final = c1 || { name: college1 };
             const college2Final = c2 || { name: college2 };
@@ -94,16 +159,55 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     };
 
     const handlePopularCompare = (pair: PopularComparison) => {
-        const c1 = colleges.find(c => c.id === pair.college1_id);
-        const c2 = colleges.find(c => c.id === pair.college2_id);
         onNavigate("compareCollegesResult", {
-            college1: c1 || { name: pair.college1_name },
-            college2: c2 || { name: pair.college2_name },
+            college1: { name: pair.college1_name, id: pair.college1_id } as Partial<College>,
+            college2: { name: pair.college2_name, id: pair.college2_id } as Partial<College>,
         });
     };
 
     const initials = (name: string) =>
         name.split(" ").filter(Boolean).slice(0, 2).map(p => p[0]?.toUpperCase()).join("");
+
+    const renderDropdown = (
+        items: College[],
+        loading: boolean,
+        onSelect: (c: College) => void,
+    ) => (
+        <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[280px] overflow-y-auto z-50 text-left py-2">
+            {loading ? (
+                <li className="px-5 py-4 flex items-center gap-2 text-gray-500 text-sm">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+                    Searching colleges...
+                </li>
+            ) : items.length === 0 ? (
+                <li className="px-5 py-4 text-gray-400 text-sm italic">No colleges found</li>
+            ) : (
+                items.map((c) => (
+                    <li
+                        key={c.id}
+                        className="px-5 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium cursor-pointer text-[15px] transition-colors border-b border-gray-50 last:border-0"
+                        onClick={() => onSelect(c)}
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                {c.image_url ? (
+                                    <img src={c.image_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <span className="text-blue-600 font-bold text-xs">{initials(c.name)}</span>
+                                )}
+                            </div>
+                            <div className="min-w-0">
+                                <div className="font-semibold truncate">{c.name}</div>
+                                {c.location && (
+                                    <div className="text-gray-400 text-xs font-normal truncate">{c.location}</div>
+                                )}
+                            </div>
+                        </div>
+                    </li>
+                ))
+            )}
+        </ul>
+    );
 
     return (
         <div className="bg-[#f8f9fc] min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
@@ -174,41 +278,13 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <input
                                 type="text"
                                 value={college1}
-                                onFocus={() => setShowDropdown1(true)}
-                                onChange={(e) => {
-                                    setCollege1(e.target.value);
-                                    setSelectedCollege1(null);
-                                    setShowDropdown1(true);
-                                }}
+                                onFocus={() => { setShowDropdown1(true); if (college1) handleInputChange1(college1); }}
+                                onChange={(e) => handleInputChange1(e.target.value)}
                                 className="w-full bg-white rounded-full py-4 pl-14 pr-6 text-[16px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]"
                                 placeholder="Search college name..."
                                 autoComplete="off"
                             />
-
-                            {showDropdown1 && (
-                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto z-50 text-left py-2">
-                                    {isLoading ? (
-                                        <li className="px-5 py-3 text-gray-500 text-sm">Loading colleges...</li>
-                                    ) : filtered1.length === 0 ? (
-                                        <li className="px-5 py-3 text-gray-500 text-sm italic">No colleges found</li>
-                                    ) : (
-                                        filtered1.slice(0, 50).map((c) => (
-                                            <li
-                                                key={c.id}
-                                                className="px-5 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium cursor-pointer text-[15px] transition-colors border-b border-gray-50 last:border-0"
-                                                onClick={() => handleSelect1(c)}
-                                            >
-                                                <span className="flex items-center justify-between">
-                                                    <span>{c.name}</span>
-                                                    {c.location && (
-                                                        <span className="text-gray-400 text-sm font-normal">{c.location}</span>
-                                                    )}
-                                                </span>
-                                            </li>
-                                        ))
-                                    )}
-                                </ul>
-                            )}
+                            {showDropdown1 && renderDropdown(colleges1, loading1, handleSelect1)}
                         </div>
 
                         <div className="flex-shrink-0 flex items-center justify-center py-2 md:py-0">
@@ -224,41 +300,13 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <input
                                 type="text"
                                 value={college2}
-                                onFocus={() => setShowDropdown2(true)}
-                                onChange={(e) => {
-                                    setCollege2(e.target.value);
-                                    setSelectedCollege2(null);
-                                    setShowDropdown2(true);
-                                }}
+                                onFocus={() => { setShowDropdown2(true); if (college2) handleInputChange2(college2); }}
+                                onChange={(e) => handleInputChange2(e.target.value)}
                                 className="w-full bg-white rounded-full py-4 pl-14 pr-6 text-[16px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-4 focus:ring-white/20 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]"
                                 placeholder="Search college name..."
                                 autoComplete="off"
                             />
-
-                            {showDropdown2 && (
-                                <ul className="absolute top-full left-0 w-full bg-white mt-2 rounded-lg shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-gray-100 max-h-[260px] overflow-y-auto z-50 text-left py-2">
-                                    {isLoading ? (
-                                        <li className="px-5 py-3 text-gray-500 text-sm">Loading colleges...</li>
-                                    ) : filtered2.length === 0 ? (
-                                        <li className="px-5 py-3 text-gray-500 text-sm italic">No colleges found</li>
-                                    ) : (
-                                        filtered2.slice(0, 50).map((c) => (
-                                            <li
-                                                key={c.id}
-                                                className="px-5 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium cursor-pointer text-[15px] transition-colors border-b border-gray-50 last:border-0"
-                                                onClick={() => handleSelect2(c)}
-                                            >
-                                                <span className="flex items-center justify-between">
-                                                    <span>{c.name}</span>
-                                                    {c.location && (
-                                                        <span className="text-gray-400 text-sm font-normal">{c.location}</span>
-                                                    )}
-                                                </span>
-                                            </li>
-                                        ))
-                                    )}
-                                </ul>
-                            )}
+                            {showDropdown2 && renderDropdown(colleges2, loading2, handleSelect2)}
                         </div>
                     </div>
 
@@ -279,54 +327,34 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                     <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {popularComparisons.map((pair) => {
-                            const c1 = colleges.find(c => c.id === pair.college1_id);
-                            const c2 = colleges.find(c => c.id === pair.college2_id);
-                            return (
-                                <div
-                                    key={`${pair.college1_id}-${pair.college2_id}`}
-                                    onClick={() => handlePopularCompare(pair)}
-                                    className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer hover:translate-y-[-4px] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-200"
-                                >
-                                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
-                                    <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
+                        {popularComparisons.map((pair) => (
+                            <div
+                                key={`${pair.college1_id}-${pair.college2_id}`}
+                                onClick={() => handlePopularCompare(pair)}
+                                className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer hover:translate-y-[-4px] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-200"
+                            >
+                                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
+                                <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
 
-                                    <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                                        <div className="h-14 flex items-center justify-center mb-3">
-                                            {c1?.image_url || c1?.logo_url ? (
-                                                <img src={c1.image_url || c1.logo_url} alt={pair.college1_name} className="w-10 h-10 object-contain" />
-                                            ) : (
-                                                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                                                    <span className="text-blue-600 font-bold text-xs">{initials(pair.college1_name)}</span>
-                                                </div>
-                                            )}
+                                <div className="flex flex-col items-center w-1/2 px-2 z-10">
+                                    <div className="h-14 flex items-center justify-center mb-3">
+                                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                                            <span className="text-blue-600 font-bold text-xs">{initials(pair.college1_name)}</span>
                                         </div>
-                                        <div className="bg-[#73c836] text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2">
-                                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                            {c1?.rating?.toFixed(1) || "N/A"}
-                                        </div>
-                                        <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college1_name}</span>
                                     </div>
-
-                                    <div className="flex flex-col items-center w-1/2 px-2 z-10">
-                                        <div className="h-14 flex items-center justify-center mb-3">
-                                            {c2?.image_url || c2?.logo_url ? (
-                                                <img src={c2.image_url || c2.logo_url} alt={pair.college2_name} className="w-10 h-10 object-contain" />
-                                            ) : (
-                                                <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                                                    <span className="text-blue-600 font-bold text-xs">{initials(pair.college2_name)}</span>
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="bg-[#73c836] text-white text-[12px] font-bold px-2 py-0.5 rounded flex items-center gap-1 mb-2">
-                                            <svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" /></svg>
-                                            {c2?.rating?.toFixed(1) || "N/A"}
-                                        </div>
-                                        <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college2_name}</span>
-                                    </div>
+                                    <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college1_name}</span>
                                 </div>
-                            );
-                        })}
+
+                                <div className="flex flex-col items-center w-1/2 px-2 z-10">
+                                    <div className="h-14 flex items-center justify-center mb-3">
+                                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
+                                            <span className="text-blue-600 font-bold text-xs">{initials(pair.college2_name)}</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college2_name}</span>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </section>
             )}
