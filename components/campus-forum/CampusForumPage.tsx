@@ -1140,7 +1140,7 @@ const CampusForumPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased py-6">
       <main className="max-w-[1400px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 px-0 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* ── LEFT SIDEBAR ── */}
           <aside className="lg:col-span-3 space-y-5 order-1">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
@@ -1148,25 +1148,23 @@ const CampusForumPage: React.FC = () => {
                 <h3 className="text-xs font-extrabold text-black tracking-wider uppercase">
                   Discover Communities
                 </h3>
-                {selectedCommunityId && (
-                  <button
-                    onClick={() => setSelectedCommunityId(null)}
-                    className="text-[10px] font-black text-blue-600 hover:underline"
-                  >
-                    Show all
-                  </button>
-                )}
+                <button
+                  onClick={() => setSelectedCommunityId(null)}
+                  className="text-[10px] font-black text-blue-600 hover:underline"
+                >
+                  {selectedCommunityId ? "Show all" : "View all"}
+                </button>
               </div>
 
-              <div className="space-y-3.5">
+              <div className="grid grid-cols-3 sm:grid-cols-1 gap-2 sm:gap-0 sm:space-y-3.5">
                 {communities.filter((c) => !c.is_general).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between py-1 group">
+                  <div key={item.id} className="flex flex-col items-center sm:flex-row sm:items-center sm:justify-between py-1 group gap-1.5 sm:gap-0">
                     <div
-                      className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                      className="flex flex-col items-center sm:flex-row sm:items-center sm:gap-3 min-w-0 flex-1 cursor-pointer"
                       onClick={() => handleCommunityClick(item.id)}
                     >
                       <div
-                        className={`w-9 h-9 rounded-md flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
+                        className={`w-10 h-10 sm:w-9 sm:h-9 rounded-lg sm:rounded-md flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
                           item.bg_color || "bg-blue-100/70"
                         }`}
                       >
@@ -1176,9 +1174,9 @@ const CampusForumPage: React.FC = () => {
                           <span className="text-lg">🎓</span>
                         )}
                       </div>
-                      <div className="truncate">
+                      <div className="truncate text-center sm:text-left">
                         <p
-                          className={`text-xs font-bold truncate leading-snug transition-colors ${
+                          className={`text-[11px] sm:text-xs font-bold truncate leading-snug transition-colors ${
                             selectedCommunityId === item.id
                               ? "text-blue-600"
                               : "text-slate-800 group-hover:text-blue-600"
@@ -1187,7 +1185,7 @@ const CampusForumPage: React.FC = () => {
                         >
                           {item.name}
                         </p>
-                        <p className="text-[11px] font-medium text-slate-400">
+                        <p className="text-[10px] sm:text-[11px] font-medium text-slate-400">
                           {item.member_count ?? 0} members
                         </p>
                       </div>
@@ -1198,7 +1196,7 @@ const CampusForumPage: React.FC = () => {
                         handleJoinToggle(item.id);
                       }}
                       disabled={joinLoading[item.id]}
-                      className={`ml-2 px-4 py-1.5 text-xs font-bold rounded-full transition-all flex-shrink-0 ${
+                      className={`px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold rounded-full transition-all flex-shrink-0 w-full sm:w-auto text-center ${
                         item.is_member
                           ? "bg-green-600 hover:bg-green-700 text-white"
                           : "bg-[#0000ff] hover:opacity-90 text-white active:scale-95"
