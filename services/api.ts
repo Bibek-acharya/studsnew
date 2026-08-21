@@ -349,6 +349,8 @@ export const apiService = {
   approveProvider: collegeApi.approveProvider.bind(collegeApi),
   rejectProvider: collegeApi.rejectProvider.bind(collegeApi),
   geocodeLocation: collegeApi.geocodeLocation.bind(collegeApi),
+  logComparison: collegeApi.logComparison.bind(collegeApi),
+  getPopularComparisons: collegeApi.getPopularComparisons.bind(collegeApi),
 
   // University
   getUniversities: universityApi.getUniversities.bind(universityApi),

@@ -268,4 +268,26 @@ export const collegeApi = {
   async geocodeLocation(query: string): Promise<any> {
     return apiRequest<any>(`/api/v1/geocode?q=${encodeURIComponent(query)}`);
   },
+  async logComparison(data: {
+    college1_id: number;
+    college2_id: number;
+    college1_name: string;
+    college2_name: string;
+  }): Promise<void> {
+    await apiRequest("/api/v1/colleges/log-comparison", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  async getPopularComparisons(limit = 6): Promise<{
+    data: Array<{
+      college1_id: number;
+      college1_name: string;
+      college2_id: number;
+      college2_name: string;
+      count: number;
+    }>;
+  }> {
+    return apiRequest(`/api/v1/colleges/popular-comparisons?limit=${limit}`);
+  },
 };
