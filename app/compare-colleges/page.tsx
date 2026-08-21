@@ -9,6 +9,13 @@ import CollegeComparisonResultPage from "@/components/compare-colleges/CollegeCo
 
 type CollegeInput = Partial<College> | string;
 
+function extractId(input: CollegeInput): number | null {
+  if (typeof input === "object" && input !== null && "id" in input && input.id) {
+    return input.id as number;
+  }
+  return null;
+}
+
 export default function CompareCollegesRoute() {
   const [view, setView] = useState<"search" | "result">("search");
   const [compareData, setCompareData] = useState<{
@@ -16,48 +23,24 @@ export default function CompareCollegesRoute() {
     college2: CollegeInput;
   } | null>(null);
 
-  const needsResolve = view === "result" && compareData && (
-    (typeof compareData.college1 === "object" && !("id" in compareData.college1 && compareData.college1.id)) ||
-    (typeof compareData.college2 === "object" && !("id" in compareData.college2 && compareData.college2.id)) ||
-    typeof compareData.college1 === "string" ||
-    typeof compareData.college2 === "string"
-  );
+  const college1Id = useMemo(() => compareData ? extractId(compareData.college1) : null, [compareData]);
+  const college2Id = useMemo(() => compareData ? extractId(compareData.college2) : null, [compareData]);
 
-  const { data: collegesData } = useQuery({
-    queryKey: ["all-colleges-compare-resolve"],
-    queryFn: () => apiService.getColleges({ pageSize: 100 }),
-    enabled: !!needsResolve,
+  const { data: c1Data, isLoading: c1Loading } = useQuery({
+    queryKey: ["college-detail", college1Id],
+    queryFn: () => apiService.getCollegeById(college1Id!),
+    enabled: view === "result" && college1Id !== null,
   });
 
-  const resolvedColleges = useMemo(() => {
-    if (!compareData) return { college1: null, college2: null };
+  const { data: c2Data, isLoading: c2Loading } = useQuery({
+    queryKey: ["college-detail", college2Id],
+    queryFn: () => apiService.getCollegeById(college2Id!),
+    enabled: view === "result" && college2Id !== null,
+  });
 
-    const colleges = collegesData?.data?.colleges || [];
-    const c1 = compareData.college1;
-    const c2 = compareData.college2;
-
-    const resolve = (input: CollegeInput): College | null => {
-      if (typeof input === "object" && "id" in input && input.id) {
-        return input as College;
-      }
-      if (typeof input === "object" && "name" in input) {
-        return colleges.find(
-          (c) => c.name.toLowerCase() === input.name?.toLowerCase()
-        ) || null;
-      }
-      if (typeof input === "string") {
-        return colleges.find(
-          (c) => c.name.toLowerCase() === input.toLowerCase()
-        ) || null;
-      }
-      return null;
-    };
-
-    return {
-      college1: resolve(c1),
-      college2: resolve(c2),
-    };
-  }, [compareData, collegesData]);
+  const c1Full = c1Data?.data || null;
+  const c2Full = c2Data?.data || null;
+  const loading = (college1Id !== null && c1Loading) || (college2Id !== null && c2Loading);
 
   const handleNavigate = (newView: string, data?: { college1: CollegeInput; college2: CollegeInput }) => {
     if (newView === "compareCollegesResult" && data) {
@@ -71,6 +54,18 @@ export default function CompareCollegesRoute() {
     }
   };
 
+  const getCollege1 = (): Partial<College> | undefined => {
+    if (c1Full) return c1Full;
+    if (compareData?.college1 && typeof compareData.college1 === "object") return compareData.college1;
+    return undefined;
+  };
+
+  const getCollege2 = (): Partial<College> | undefined => {
+    if (c2Full) return c2Full;
+    if (compareData?.college2 && typeof compareData.college2 === "object") return compareData.college2;
+    return undefined;
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {view === "search" ? (
@@ -78,9 +73,9 @@ export default function CompareCollegesRoute() {
       ) : (
         <CollegeComparisonResultPage
           onNavigate={handleNavigate}
-          college1={resolvedColleges.college1 || compareData?.college1}
-          college2={resolvedColleges.college2 || compareData?.college2}
-          loading={!!needsResolve && !collegesData}
+          college1={getCollege1()}
+          college2={getCollege2()}
+          loading={loading}
         />
       )}
     </div>

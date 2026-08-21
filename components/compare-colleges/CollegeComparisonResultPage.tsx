@@ -389,11 +389,11 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
 
-              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white overflow-hidden">
-                {c1?.image_url || c1?.logo_url ? (
-                  <img src={c1.image_url || c1.logo_url} alt={c1Name} className="w-full h-full object-contain" />
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-[#2c51c6] overflow-hidden">
+                {c1?.image_url ? (
+                  <img src={c1.image_url} alt={c1Name} className="w-full h-full object-contain" />
                 ) : (
-                  <span className="text-sm font-bold text-indigo-700">{initials(c1Name)}</span>
+                  <span className="text-sm font-bold text-white">{initials(c1Name)}</span>
                 )}
               </div>
 
@@ -426,11 +426,11 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
 
-              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-white overflow-hidden">
-                {c2?.image_url || c2?.logo_url ? (
-                  <img src={c2.image_url || c2.logo_url} alt={c2Name} className="w-full h-full object-contain" />
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-md flex items-center justify-center p-1 flex-shrink-0 bg-[#2c51c6] overflow-hidden">
+                {c2?.image_url ? (
+                  <img src={c2.image_url} alt={c2Name} className="w-full h-full object-contain" />
                 ) : (
-                  <span className="text-sm font-bold text-indigo-700">{initials(c2Name)}</span>
+                  <span className="text-sm font-bold text-white">{initials(c2Name)}</span>
                 )}
               </div>
 

@@ -189,11 +189,11 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                         onClick={() => onSelect(c)}
                     >
                         <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                            <div className="w-9 h-9 rounded-full bg-[#2c51c6] flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 {c.image_url ? (
                                     <img src={c.image_url} alt="" className="w-full h-full object-cover" />
                                 ) : (
-                                    <span className="text-blue-600 font-bold text-xs">{initials(c.name)}</span>
+                                    <span className="text-white font-bold text-xs">{initials(c.name)}</span>
                                 )}
                             </div>
                             <div className="min-w-0">
@@ -338,8 +338,8 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                                 <div className="flex flex-col items-center w-1/2 px-2 z-10">
                                     <div className="h-14 flex items-center justify-center mb-3">
-                                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                                            <span className="text-blue-600 font-bold text-xs">{initials(pair.college1_name)}</span>
+                                        <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center">
+                                            <span className="text-white font-bold text-xs">{initials(pair.college1_name)}</span>
                                         </div>
                                     </div>
                                     <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college1_name}</span>
@@ -347,8 +347,8 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                                 <div className="flex flex-col items-center w-1/2 px-2 z-10">
                                     <div className="h-14 flex items-center justify-center mb-3">
-                                        <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
-                                            <span className="text-blue-600 font-bold text-xs">{initials(pair.college2_name)}</span>
+                                        <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center">
+                                            <span className="text-white font-bold text-xs">{initials(pair.college2_name)}</span>
                                         </div>
                                     </div>
                                     <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college2_name}</span>
