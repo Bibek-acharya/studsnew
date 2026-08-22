@@ -14,6 +14,10 @@ interface InstitutionResult {
     rating?: number;
     reviews?: number;
     college_id?: number;
+    affiliation?: string;
+    verified?: boolean;
+    claimed?: boolean;
+    university_id?: number;
 }
 
 interface PopularComparison {
@@ -84,13 +88,18 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
             const instColleges = institutions
                 .map((inst) => ({
-                    id: inst.id,
+                    id: inst.college_id || inst.id,
                     name: inst.institution_name,
                     location: inst.district || inst.location || "",
                     type: inst.type || inst.institution_type || "College",
                     image_url: inst.logo_url || inst.card_image_url || "",
                     rating: inst.rating || 0,
                     reviews: inst.reviews || 0,
+                    affiliation: inst.affiliation || "",
+                    verified: inst.verified || false,
+                    claimed: inst.claimed || false,
+                    // Institution ID for reference
+                    university_id: inst.university_id,
                 }));
 
             const claimedCollegeIds = new Set(
@@ -142,16 +151,42 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
         debounceRef2.current = setTimeout(() => fetchColleges(value, setColleges2, setLoading2, "search2"), 250);
     };
 
-    const handleSelect1 = (college: College) => {
+    const handleSelect1 = async (college: College) => {
         setCollege1(college.name);
-        setSelectedCollege1(college);
         setShowDropdown1(false);
+        
+        // If institution has a college_id, fetch full college data
+        if (college.id && !college.established && !college.featured_programs) {
+            try {
+                const res = await apiService.getCollegeById(college.id);
+                if (res?.data) {
+                    setSelectedCollege1(res.data);
+                    return;
+                }
+            } catch {
+                // Fall back to basic data
+            }
+        }
+        setSelectedCollege1(college);
     };
 
-    const handleSelect2 = (college: College) => {
+    const handleSelect2 = async (college: College) => {
         setCollege2(college.name);
-        setSelectedCollege2(college);
         setShowDropdown2(false);
+        
+        // If institution has a college_id, fetch full college data
+        if (college.id && !college.established && !college.featured_programs) {
+            try {
+                const res = await apiService.getCollegeById(college.id);
+                if (res?.data) {
+                    setSelectedCollege2(res.data);
+                    return;
+                }
+            } catch {
+                // Fall back to basic data
+            }
+        }
+        setSelectedCollege2(college);
     };
 
     const handleCompare = () => {
