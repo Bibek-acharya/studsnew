@@ -69,7 +69,7 @@ export default function CommunitiesPage() {
       </div>
 
       {/* Community List */}
-      <div className="px-4 py-4">
+      <div className="px-4 sm:px-8 lg:px-16 py-4 sm:py-8">
         {isLoading ? (
           <div className="flex justify-center py-12">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0000ff] border-t-transparent" />
@@ -79,37 +79,36 @@ export default function CommunitiesPage() {
             <p className="text-slate-500 text-sm">No communities found.</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {communities.filter((c) => !c.is_general).map((item) => (
               <div
                 key={item.id}
-                className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4"
+                onClick={() => router.push(`/campus-forum/${item.id}`)}
+                className="bg-white rounded-xl border border-slate-200 p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow cursor-pointer"
               >
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center text-sm font-semibold flex-shrink-0 ${
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-base font-semibold flex-shrink-0 mb-3 ${
                     item.bg_color || "bg-blue-100/70"
                   }`}
                 >
                   {item.icon ? (
-                    <DynamicIcon name={item.icon} size={22} />
+                    <DynamicIcon name={item.icon} size={28} />
                   ) : (
-                    <span className="text-lg">🎓</span>
+                    <span className="text-2xl">🎓</span>
                   )}
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm text-slate-900 truncate">
-                    {item.name}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    {item.member_count ?? 0} members
-                  </p>
-                </div>
+                <h3 className="font-bold text-base text-slate-900 mb-1">
+                  {item.name}
+                </h3>
+                <p className="text-sm text-slate-500 mb-4">
+                  {item.member_count ?? 0} members
+                </p>
 
                 <button
                   onClick={() => handleJoinToggle(item.id)}
                   disabled={joinLoading[item.id]}
-                  className={`px-5 py-2 text-xs font-bold rounded-full transition-all flex-shrink-0 ${
+                  className={`w-full max-w-[160px] px-5 py-2.5 text-sm font-bold rounded-full transition-all ${
                     item.is_member
                       ? "bg-green-600 hover:bg-green-700 text-white"
                       : "bg-[#0000ff] hover:opacity-90 text-white active:scale-95"

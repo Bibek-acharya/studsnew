@@ -972,7 +972,7 @@ const CampusForumPage: React.FC = () => {
   }, [fetchPosts]);
 
   const handleCommunityClick = (id: number) => {
-    setSelectedCommunityId((prev) => (prev === id ? null : id));
+    router.push(`/campus-forum/${id}`);
   };
 
   const handleJoinToggle = async (communityId: number) => {
@@ -1163,7 +1163,8 @@ const CampusForumPage: React.FC = () => {
                 {communities.filter((c) => !c.is_general).map((item) => (
                   <div
                     key={item.id}
-                    className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white"
+                    onClick={() => handleCommunityClick(item.id)}
+                    className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white cursor-pointer"
                   >
                     <div
                       className={`w-14 h-14 mb-2 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
