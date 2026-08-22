@@ -251,21 +251,23 @@ const PostCard: React.FC<{
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-xs font-medium text-[#52525e]">
-        <div className="flex items-center bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3 py-2 text-gray-700 transition-colors">
+      <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#52525e]">
+        <div className="flex items-center bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2 py-1 sm:px-3 sm:py-2 text-gray-700 transition-colors">
           <button
             onClick={() => onLike(post.id)}
-            className={`flex items-center gap-1.5 hover:text-black ${post.is_liked ? "text-blue-600" : ""}`}
+            className={`flex items-center gap-1 sm:gap-1.5 hover:text-black ${post.is_liked ? "text-blue-600" : ""}`}
           >
-            <ArrowUp size={16} className={post.is_liked ? "text-indigo-500" : "text-gray-500"} />
+            <ArrowUp size={14} className={`sm:hidden ${post.is_liked ? "text-indigo-500" : "text-gray-500"}`} />
+            <ArrowUp size={16} className={`hidden sm:block ${post.is_liked ? "text-indigo-500" : "text-gray-500"}`} />
             <span className="font-semibold text-gray-800">{post.upvotes || 0}</span>
           </button>
-          <span className="mx-2 text-gray-300">|</span>
+          <span className="mx-1.5 sm:mx-2 text-gray-300">|</span>
           <button
             onClick={() => onDislike(post.id)}
-            className={`flex items-center gap-1.5 hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
+            className={`flex items-center gap-1 sm:gap-1.5 hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
           >
-            <ArrowDown size={16} className={post.is_disliked ? "text-red-500" : "text-gray-500"} />
+            <ArrowDown size={14} className={`sm:hidden ${post.is_disliked ? "text-red-500" : "text-gray-500"}`} />
+            <ArrowDown size={16} className={`hidden sm:block ${post.is_disliked ? "text-red-500" : "text-gray-500"}`} />
             <span className="font-semibold text-gray-800">{post.downvotes || 0}</span>
           </button>
         </div>
@@ -281,9 +283,10 @@ const PostCard: React.FC<{
 
         <button
           onClick={() => onShare(post)}
-          className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold"
+          className="flex items-center gap-1 sm:gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2.5 py-1 sm:px-3.5 sm:py-2 text-gray-700 transition-colors font-semibold text-xs sm:text-sm"
         >
-          <Share2 size={16} className="text-gray-500" />
+          <Share2 size={14} className="text-gray-500 sm:hidden" />
+          <Share2 size={16} className="text-gray-500 hidden sm:block" />
           Share
         </button>
       </div>
@@ -404,7 +407,7 @@ const CommentItem: React.FC<{
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     placeholder="Write a reply..."
-                    className="flex-1 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
+                    className="flex-1 border border-slate-200 rounded-full px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
                     onKeyDown={(e) => e.key === "Enter" && handleReply()}
                   />
                   <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
@@ -1126,6 +1129,7 @@ const CampusForumPage: React.FC = () => {
 
       setPosts((p) => [newPost, ...p]);
       showToast("Post published successfully!");
+      setIsCreateModalOpen(false);
     } catch (e: any) {
       showToast(e?.message || "Failed to create post");
     } finally {

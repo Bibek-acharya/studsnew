@@ -731,7 +731,7 @@ const CampusFeedPage: React.FC = () => {
   const pollPosts = posts.filter((p) => p.is_poll);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] antialiased">
+    <div className="min-h-screen bg-white antialiased">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex gap-6 justify-center w-full">
         {/* ================= LEFT SIDEBAR ================= */}
         <div className="hidden lg:block w-[280px] shrink-0 space-y-6 sticky top-6 h-fit">
