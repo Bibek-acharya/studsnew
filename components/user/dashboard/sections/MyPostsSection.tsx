@@ -6,6 +6,9 @@ import {
   ArrowUp,
   PenSquare,
   Trash2,
+  Pencil,
+  X,
+  Save,
 } from "lucide-react";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
@@ -33,12 +36,30 @@ function isArray<T>(data: unknown): data is T[] {
   return Array.isArray(data);
 }
 
+function relativeTime(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = Math.floor((now - then) / 1000);
+  if (diff < 60) return "Just now";
+  const mins = Math.floor(diff / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return `${Math.floor(days / 30)}mo ago`;
+}
+
 export default function MyPostsSection() {
-  const { user, isAuthenticated } = useAuth();
+  const { user } = useAuth();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [editingPostId, setEditingPostId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editSaving, setEditSaving] = useState(false);
 
   const token = apiService.getToken();
 
@@ -80,6 +101,37 @@ export default function MyPostsSection() {
       console.error(e);
     } finally {
       setDeleteLoading(null);
+    }
+  };
+
+  const startEditing = (post: ForumPost) => {
+    setEditingPostId(post.id);
+    setEditTitle(post.title || "");
+    setEditContent(post.content || "");
+  };
+
+  const cancelEditing = () => {
+    setEditingPostId(null);
+    setEditTitle("");
+    setEditContent("");
+  };
+
+  const saveEditing = async (postId: number) => {
+    if (!token) return;
+    setEditSaving(true);
+    try {
+      const updated = await apiService.updateForumPost(token, postId, {
+        title: editTitle.trim() || "Untitled",
+        content: editContent.trim(),
+      });
+      setPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, ...updated } : p))
+      );
+      cancelEditing();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEditSaving(false);
     }
   };
 
@@ -130,67 +182,86 @@ export default function MyPostsSection() {
               <p className="text-gray-500 text-xs sm:text-sm">You haven&apos;t posted anything yet.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               {posts.map((post) => {
                 const images = parseImageUrls(post);
                 const community = post.community;
+                const isEditing = editingPostId === post.id;
 
                 return (
                   <div
                     key={post.id}
-                    className="bg-white border border-gray-200 rounded-lg sm:rounded-xl p-2.5 sm:p-3 shadow-sm flex flex-col"
+                    className="bg-white border border-gray-200 rounded-xl p-4 sm:p-5 shadow-sm flex flex-col"
                   >
                     {/* Community Tag */}
                     {community && (
-                      <div className="flex items-center gap-1 mb-1.5 sm:mb-2">
+                      <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
                         <div
-                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 rounded flex items-center justify-center ${
+                          className={`w-5 h-5 sm:w-6 sm:h-6 rounded flex items-center justify-center ${
                             community.bg_color || "bg-blue-100"
                           }`}
                         >
                           {community.icon ? (
-                            <DynamicIcon name={community.icon} size={8} />
+                            <DynamicIcon name={community.icon} size={12} />
                           ) : (
-                            <span className="text-[6px]">&#127891;</span>
+                            <span className="text-[8px]">&#127891;</span>
                           )}
                         </div>
-                        <span className="text-[9px] sm:text-[10px] text-blue-600 font-medium truncate">
+                        <span className="text-[10px] sm:text-xs text-blue-600 font-medium truncate">
                           {community.name}
+                        </span>
+                        <span className="text-[10px] sm:text-xs text-gray-400 ml-auto">
+                          {relativeTime(post.created_at || post.CreatedAt || new Date().toISOString())}
                         </span>
                       </div>
                     )}
 
                     {/* Post Title */}
-                    {post.title && (
-                      <h4 className="text-xs sm:text-sm font-bold text-gray-900 leading-tight line-clamp-2 mb-1">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="text-sm sm:text-base font-bold text-gray-900 border border-gray-300 rounded-lg px-3 py-2 mb-2 focus:outline-none focus:border-blue-500"
+                        placeholder="Post title"
+                      />
+                    ) : post.title ? (
+                      <h4 className="text-sm sm:text-base font-bold text-gray-900 leading-tight line-clamp-2 mb-2">
                         {post.title}
                       </h4>
-                    )}
+                    ) : null}
 
                     {/* Post Content */}
-                    {post.content && (
-                      <p className="text-[10px] sm:text-xs text-gray-600 leading-relaxed line-clamp-3 mb-1.5">
+                    {isEditing ? (
+                      <textarea
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="text-xs sm:text-sm text-gray-600 leading-relaxed border border-gray-300 rounded-lg px-3 py-2 mb-2 resize-none h-24 focus:outline-none focus:border-blue-500"
+                        placeholder="Post content"
+                      />
+                    ) : post.content ? (
+                      <p className="text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-4 mb-2">
                         {post.content}
                       </p>
-                    )}
+                    ) : null}
 
                     {/* Post Image */}
                     {images.length > 0 && (
-                      <div className="rounded-md overflow-hidden mb-1.5">
+                      <div className="rounded-lg overflow-hidden mb-3">
                         <img
                           src={imageUrl(images[0])}
                           alt=""
-                          className="w-full h-20 sm:h-28 object-cover"
+                          className="w-full h-32 sm:h-44 object-cover"
                         />
                       </div>
                     )}
 
                     {/* Post Video */}
                     {post.video_url && (
-                      <div className="rounded-md overflow-hidden mb-1.5">
+                      <div className="rounded-lg overflow-hidden mb-3">
                         <video
                           src={imageUrl(post.video_url)}
-                          className="w-full h-20 sm:h-28 object-cover bg-black"
+                          className="w-full h-32 sm:h-44 object-cover bg-black"
                         />
                       </div>
                     )}
@@ -198,28 +269,60 @@ export default function MyPostsSection() {
                     <div className="flex-1" />
 
                     {/* Footer */}
-                    <div className="flex items-center justify-between pt-1.5 sm:pt-2 mt-auto border-t border-gray-100">
-                      <div className="flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] text-gray-500">
-                        <span className="flex items-center gap-0.5">
-                          <ArrowUp size={10} />
+                    <div className="flex items-center justify-between pt-3 mt-auto border-t border-gray-100">
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <ArrowUp size={14} />
                           {post.upvotes || 0}
                         </span>
-                        <span className="flex items-center gap-0.5">
-                          <MessageSquare size={10} />
+                        <span className="flex items-center gap-1">
+                          <MessageSquare size={14} />
                           {post.comment_count || 0}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleDelete(post.id)}
-                        disabled={deleteLoading === post.id}
-                        className="p-0.5 sm:p-1 text-gray-400 hover:text-red-500 rounded-full transition-colors"
-                      >
-                        {deleteLoading === post.id ? (
-                          <div className="w-3 h-3 animate-spin rounded-full border-1.5 border-red-500 border-t-transparent" />
+                      <div className="flex items-center gap-1">
+                        {isEditing ? (
+                          <>
+                            <button
+                              onClick={() => saveEditing(post.id)}
+                              disabled={editSaving}
+                              className="p-1.5 text-green-600 hover:bg-green-50 rounded-full transition-colors"
+                            >
+                              {editSaving ? (
+                                <div className="w-4 h-4 animate-spin rounded-full border-2 border-green-600 border-t-transparent" />
+                              ) : (
+                                <Save className="w-4 h-4" />
+                              )}
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-full transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </>
                         ) : (
-                          <Trash2 className="w-3 h-3" />
+                          <>
+                            <button
+                              onClick={() => startEditing(post)}
+                              className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(post.id)}
+                              disabled={deleteLoading === post.id}
+                              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors"
+                            >
+                              {deleteLoading === post.id ? (
+                                <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </button>
+                          </>
                         )}
-                      </button>
+                      </div>
                     </div>
                   </div>
                 );
