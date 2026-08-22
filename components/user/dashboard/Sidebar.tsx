@@ -20,6 +20,7 @@ import {
   BadgeQuestionMark,
   LogOut,
   X,
+  PenSquare,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -108,6 +109,12 @@ export default function Sidebar({
       label: "My Reviews",
       icon: Star,
       href: "/user/dashboard/reviews",
+    },
+    {
+      id: "my-posts",
+      label: "My Posts",
+      icon: PenSquare,
+      href: "/user/dashboard/my-posts",
     },
     {
       id: "notifications",
