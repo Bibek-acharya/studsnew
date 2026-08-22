@@ -417,8 +417,9 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
           </button>
           <div className="h-4 w-px bg-gray-300" />
           <button onClick={() => onDislike(post.id)}
-            className={`rounded-r-full px-3.5 py-1.5 transition ${post.is_disliked ? "text-red-600 bg-red-50" : "text-[#5C607A] hover:bg-gray-200"}`}>
+            className={`flex items-center gap-1.5 rounded-r-full px-3.5 py-1.5 transition ${post.is_disliked ? "text-red-600 bg-red-50" : "text-[#5C607A] hover:bg-gray-200"}`}>
             <ArrowDown className={`h-4 w-4 ${post.is_disliked ? "fill-current" : ""}`} />
+            {post.downvotes}
           </button>
         </div>
 

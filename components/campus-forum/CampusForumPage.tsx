@@ -242,9 +242,10 @@ const PostCard: React.FC<{
           <span className="mx-2 text-gray-300">|</span>
           <button
             onClick={() => onDislike(post.id)}
-            className={`hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
+            className={`flex items-center gap-1.5 hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
           >
             <ArrowDown size={16} className={post.is_disliked ? "text-red-500" : "text-gray-500"} />
+            <span className="font-semibold text-gray-800">{post.downvotes || 0}</span>
           </button>
         </div>
 
@@ -285,6 +286,37 @@ const CommentItem: React.FC<{
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [likes, setLikes] = useState(0);
+  const [dislikes, setDislikes] = useState(0);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
+
+  const handleLike = () => {
+    if (isLiked) {
+      setLikes(likes - 1);
+      setIsLiked(false);
+    } else {
+      setLikes(likes + 1);
+      setIsLiked(true);
+      if (isDisliked) {
+        setDislikes(dislikes - 1);
+        setIsDisliked(false);
+      }
+    }
+  };
+
+  const handleDislike = () => {
+    if (isDisliked) {
+      setDislikes(dislikes - 1);
+      setIsDisliked(false);
+    } else {
+      setDislikes(dislikes + 1);
+      setIsDisliked(true);
+      if (isLiked) {
+        setLikes(likes - 1);
+        setIsLiked(false);
+      }
+    }
+  };
 
   const handleReply = async () => {
     if (!replyContent.trim()) return;
@@ -322,9 +354,21 @@ const CommentItem: React.FC<{
           {!collapsed && (
             <>
               <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
-              <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff] mt-1">
-                Reply
-              </button>
+              <div className="flex items-center gap-3 mt-1">
+                <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
+                  Reply
+                </button>
+                <div className="flex items-center gap-1">
+                  <button onClick={handleLike} className={`p-0.5 rounded transition ${isLiked ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}>
+                    <ArrowUp size={12} />
+                  </button>
+                  <span className="text-[10px] font-bold text-slate-500">{likes}</span>
+                  <button onClick={handleDislike} className={`p-0.5 rounded transition ${isDisliked ? "text-red-500" : "text-slate-400 hover:text-red-500"}`}>
+                    <ArrowDown size={12} />
+                  </button>
+                  {dislikes > 0 && <span className="text-[10px] font-bold text-slate-500">{dislikes}</span>}
+                </div>
+              </div>
               {showReply && (
                 <div className="mt-2 flex gap-2 items-center">
                   <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
@@ -1143,8 +1187,8 @@ const CampusForumPage: React.FC = () => {
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased py-6">
       <main className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
-          {/* ── LEFT SIDEBAR ── */}
-          <aside className="lg:col-span-3 space-y-5 order-1">
+          {/* ── LEFT SIDEBAR (desktop only) ── */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-5 order-1">
             <div className="bg-white rounded-lg p-5 sm:p-6 sm:border sm:border-slate-200/80">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-sm sm:text-xs font-extrabold text-gray-900 tracking-wider uppercase">
@@ -1346,8 +1390,92 @@ const CampusForumPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-0 lg:space-y-0 lg:block lg:divide-y lg:divide-slate-100">
-                {posts.map((post) => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-5">
+                {posts.slice(0, 5).map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
+                    onLike={handleLike}
+                    onDislike={handleDislike}
+                    onCommentClick={handleCommentClick}
+                    onShare={handleShare}
+                    onLightbox={handleLightbox}
+                    comments={commentsData[post.id]}
+                    commentsOpen={openComments[post.id]}
+                    onJoinCommunity={handleJoinToggle}
+                    onCommentAdded={handleCommentAdded}
+                  />
+                ))}
+
+                {posts.length > 5 && (
+                  <div className="lg:hidden bg-white rounded-lg p-4 border border-slate-200/80">
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
+                      <button onClick={() => router.push("/campus-forum/communities")} className="text-blue-600 font-semibold text-xs hover:underline">View all</button>
+                    </div>
+                    <div className="flex overflow-x-auto gap-3 no-scrollbar scroll-smooth pb-1">
+                      {communities.filter((c) => !c.is_general).slice(0, 4).map((item) => (
+                        <div key={item.id} onClick={() => handleCommunityClick(item.id)} className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white cursor-pointer">
+                          <div className={`w-14 h-14 mb-2 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 ${item.bg_color || "bg-blue-100/70"}`}>
+                            {item.icon ? <DynamicIcon name={item.icon} size={24} /> : <span className="text-xl">🎓</span>}
+                          </div>
+                          <div className="mb-3 w-full">
+                            <p className="font-semibold text-sm leading-tight truncate max-w-[120px] mx-auto text-gray-900" title={item.name}>{item.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">{item.member_count ?? 0} members</p>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); handleJoinToggle(item.id); }} disabled={joinLoading[item.id]} className={`w-full font-medium py-2 text-sm rounded-full transition-all active:scale-95 ${item.is_member ? "bg-green-600 hover:bg-green-700 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white"}`}>
+                            {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {posts.slice(5, 10).map((post) => (
+                  <PostCard
+                    key={post.id}
+                    post={post}
+                    currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
+                    onLike={handleLike}
+                    onDislike={handleDislike}
+                    onCommentClick={handleCommentClick}
+                    onShare={handleShare}
+                    onLightbox={handleLightbox}
+                    comments={commentsData[post.id]}
+                    commentsOpen={openComments[post.id]}
+                    onJoinCommunity={handleJoinToggle}
+                    onCommentAdded={handleCommentAdded}
+                  />
+                ))}
+
+                {posts.length > 10 && (
+                  <div className="lg:hidden bg-white rounded-lg p-4 border border-slate-200/80">
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
+                      <button onClick={() => router.push("/campus-forum/communities")} className="text-blue-600 font-semibold text-xs hover:underline">View all</button>
+                    </div>
+                    <div className="flex overflow-x-auto gap-3 no-scrollbar scroll-smooth pb-1">
+                      {communities.filter((c) => !c.is_general).slice(4, 8).map((item) => (
+                        <div key={item.id} onClick={() => handleCommunityClick(item.id)} className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white cursor-pointer">
+                          <div className={`w-14 h-14 mb-2 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 ${item.bg_color || "bg-blue-100/70"}`}>
+                            {item.icon ? <DynamicIcon name={item.icon} size={24} /> : <span className="text-xl">🎓</span>}
+                          </div>
+                          <div className="mb-3 w-full">
+                            <p className="font-semibold text-sm leading-tight truncate max-w-[120px] mx-auto text-gray-900" title={item.name}>{item.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">{item.member_count ?? 0} members</p>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); handleJoinToggle(item.id); }} disabled={joinLoading[item.id]} className={`w-full font-medium py-2 text-sm rounded-full transition-all active:scale-95 ${item.is_member ? "bg-green-600 hover:bg-green-700 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white"}`}>
+                            {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {posts.slice(10).map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}

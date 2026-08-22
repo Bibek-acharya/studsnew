@@ -63,10 +63,12 @@ export default function CommunityDetailPage() {
   const communityId = Number(params.id);
 
   const [community, setCommunity] = useState<ForumCommunity | null>(null);
+  const [allCommunities, setAllCommunities] = useState<ForumCommunity[]>([]);
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [joinLoading, setJoinLoading] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
+  const [relatedJoinLoading, setRelatedJoinLoading] = useState<Record<number, boolean>>({});
 
   const token = apiService.getToken();
 
@@ -75,6 +77,7 @@ export default function CommunityDetailPage() {
       try {
         const communitiesData = await apiService.getForumCommunities(token || undefined);
         const list = isArray(communitiesData) ? communitiesData : [];
+        setAllCommunities(list);
         const found = list.find((c) => c.id === communityId);
         setCommunity(found || null);
         setIsJoined(found?.is_member || false);
@@ -106,6 +109,23 @@ export default function CommunityDetailPage() {
       console.error(e);
     } finally {
       setJoinLoading(false);
+    }
+  };
+
+  const handleRelatedJoinToggle = async (id: number) => {
+    if (!isAuthenticated || !token) return;
+    setRelatedJoinLoading((p) => ({ ...p, [id]: true }));
+    try {
+      const updated = await apiService.joinForumCommunity(token, id);
+      setAllCommunities((prev) =>
+        prev.map((c) =>
+          c.id === id ? { ...c, is_member: updated.is_member, member_count: updated.member_count } : c
+        )
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setRelatedJoinLoading((p) => ({ ...p, [id]: false }));
     }
   };
 
@@ -316,27 +336,55 @@ export default function CommunityDetailPage() {
           {/* Right Sidebar Column */}
           <div className="hidden lg:block">
             <div className="bg-white border border-gray-200 rounded-xl p-5 sm:p-6 space-y-4 sticky top-6">
-              <h3 className="font-bold text-sm text-gray-900">About Community</h3>
-              {community.description && (
-                <p className="text-sm text-gray-600">{community.description}</p>
-              )}
-              <div className="space-y-2 text-sm text-gray-500">
-                <div className="flex items-center gap-2">
-                  <Users size={16} />
-                  <span>{community.member_count ?? 0} members</span>
-                </div>
+              <h3 className="font-bold text-sm text-gray-900">Related Communities</h3>
+              <div className="space-y-3">
+                {allCommunities.filter((c) => c.id !== communityId).length === 0 ? (
+                  <p className="text-xs text-gray-400">No other communities yet.</p>
+                ) : (
+                  allCommunities.filter((c) => c.id !== communityId).map((item) => (
+                    <div key={item.id} className="flex items-center justify-between py-1 group">
+                      <div
+                        className="flex items-center gap-3 min-w-0 flex-1 cursor-pointer"
+                        onClick={() => router.push(`/campus-forum/${item.id}`)}
+                      >
+                        <div
+                          className={`w-9 h-9 rounded-md flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
+                            item.bg_color || "bg-blue-100/70"
+                          }`}
+                        >
+                          {item.icon ? (
+                            <DynamicIcon name={item.icon} size={20} />
+                          ) : (
+                            <span className="text-lg">🎓</span>
+                          )}
+                        </div>
+                        <div className="truncate">
+                          <p className="text-xs font-bold truncate leading-snug text-slate-800 group-hover:text-blue-600 transition-colors" title={item.name}>
+                            {item.name}
+                          </p>
+                          <p className="text-[11px] font-medium text-slate-400">
+                            {item.member_count ?? 0} members
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRelatedJoinToggle(item.id);
+                        }}
+                        disabled={relatedJoinLoading[item.id]}
+                        className={`ml-2 px-4 py-1.5 text-xs font-bold rounded-full transition-all flex-shrink-0 ${
+                          item.is_member
+                            ? "bg-green-600 hover:bg-green-700 text-white"
+                            : "bg-[#0000ff] hover:opacity-90 text-white active:scale-95"
+                        }`}
+                      >
+                        {relatedJoinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
-              <button
-                onClick={handleJoinToggle}
-                disabled={joinLoading}
-                className={`w-full font-semibold px-5 py-2.5 rounded-full transition-colors text-sm ${
-                  isJoined
-                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    : "bg-[#0000ff] hover:bg-blue-700 text-white"
-                }`}
-              >
-                {isJoined ? "Joined" : "Join Community"}
-              </button>
             </div>
           </div>
         </div>
