@@ -14,6 +14,10 @@ interface InstitutionResult {
     rating?: number;
     reviews?: number;
     college_id?: number;
+    affiliation?: string;
+    verified?: boolean;
+    claimed?: boolean;
+    university_id?: number;
 }
 
 interface PopularComparison {
@@ -30,6 +34,11 @@ interface CompareCollegesPageProps {
     onNavigate: (view: string, data?: { college1: Partial<College> | string; college2: Partial<College> | string }) => void;
 }
 
+type SearchError = {
+    type: "search1" | "search2" | "popular";
+    message: string;
+} | null;
+
 const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate }) => {
     const [college1, setCollege1] = useState("");
     const [college2, setCollege2] = useState("");
@@ -42,6 +51,8 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const [popularComparisons, setPopularComparisons] = useState<PopularComparison[]>([]);
+    const [error, setError] = useState<SearchError>(null);
+    const [loadingPopular, setLoadingPopular] = useState(true);
 
     const wrapperRef1 = useRef<HTMLDivElement>(null);
     const wrapperRef2 = useRef<HTMLDivElement>(null);
@@ -51,15 +62,20 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     useEffect(() => {
         apiService.getPopularComparisons(6)
             .then((res) => setPopularComparisons(res?.data || []))
-            .catch(() => {});
+            .catch((err) => {
+                console.error("Failed to fetch popular comparisons:", err);
+                setError({ type: "popular", message: "Failed to load popular comparisons" });
+            })
+            .finally(() => setLoadingPopular(false));
     }, []);
 
-    const fetchColleges = useCallback(async (query: string, setList: (c: College[]) => void, setLoading: (l: boolean) => void) => {
+    const fetchColleges = useCallback(async (query: string, setList: (c: College[]) => void, setLoading: (l: boolean) => void, errorType: "search1" | "search2") => {
         if (!query.trim()) {
             setList([]);
             return;
         }
         setLoading(true);
+        setError(null);
         try {
             const [collegeRes, instRes] = await Promise.all([
                 apiService.getColleges({ search: query, pageSize: 10, page: 1 }),
@@ -72,13 +88,18 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
             const instColleges = institutions
                 .map((inst) => ({
-                    id: inst.id,
+                    id: inst.college_id || inst.id,
                     name: inst.institution_name,
                     location: inst.district || inst.location || "",
                     type: inst.type || inst.institution_type || "College",
                     image_url: inst.logo_url || inst.card_image_url || "",
                     rating: inst.rating || 0,
                     reviews: inst.reviews || 0,
+                    affiliation: inst.affiliation || "",
+                    verified: inst.verified || false,
+                    claimed: inst.claimed || false,
+                    // Institution ID for reference
+                    university_id: inst.university_id,
                 }));
 
             const claimedCollegeIds = new Set(
@@ -90,10 +111,13 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             const unclaimed = tableColleges.filter((c) => !claimedCollegeIds.has(c.id));
 
             setList([...instColleges, ...unclaimed] as College[]);
-        } catch {
+        } catch (err) {
+            console.error(`Failed to fetch colleges for ${errorType}:`, err);
+            setError({ type: errorType, message: "Failed to search colleges. Please try again." });
             setList([]);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }, []);
 
     useEffect(() => {
@@ -113,51 +137,76 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
         setCollege1(value);
         setSelectedCollege1(null);
         setShowDropdown1(true);
+        setError(null);
         if (debounceRef1.current) clearTimeout(debounceRef1.current);
-        debounceRef1.current = setTimeout(() => fetchColleges(value, setColleges1, setLoading1), 250);
+        debounceRef1.current = setTimeout(() => fetchColleges(value, setColleges1, setLoading1, "search1"), 250);
     };
 
     const handleInputChange2 = (value: string) => {
         setCollege2(value);
         setSelectedCollege2(null);
         setShowDropdown2(true);
+        setError(null);
         if (debounceRef2.current) clearTimeout(debounceRef2.current);
-        debounceRef2.current = setTimeout(() => fetchColleges(value, setColleges2, setLoading2), 250);
+        debounceRef2.current = setTimeout(() => fetchColleges(value, setColleges2, setLoading2, "search2"), 250);
     };
 
-    const handleSelect1 = (college: College) => {
+    const handleSelect1 = async (college: College) => {
         setCollege1(college.name);
-        setSelectedCollege1(college);
         setShowDropdown1(false);
+        
+        // If institution has a college_id, fetch full college data
+        if (college.id && !college.established && !college.featured_programs) {
+            try {
+                const res = await apiService.getCollegeById(college.id);
+                if (res?.data) {
+                    setSelectedCollege1(res.data);
+                    return;
+                }
+            } catch {
+                // Fall back to basic data
+            }
+        }
+        setSelectedCollege1(college);
     };
 
-    const handleSelect2 = (college: College) => {
+    const handleSelect2 = async (college: College) => {
         setCollege2(college.name);
-        setSelectedCollege2(college);
         setShowDropdown2(false);
+        
+        // If institution has a college_id, fetch full college data
+        if (college.id && !college.established && !college.featured_programs) {
+            try {
+                const res = await apiService.getCollegeById(college.id);
+                if (res?.data) {
+                    setSelectedCollege2(res.data);
+                    return;
+                }
+            } catch {
+                // Fall back to basic data
+            }
+        }
+        setSelectedCollege2(college);
     };
 
     const handleCompare = () => {
-        const c1 = selectedCollege1;
-        const c2 = selectedCollege2;
-        if (c1 || c2) {
-            const college1Final = c1 || { name: college1 };
-            const college2Final = c2 || { name: college2 };
+        if (!selectedCollege1 || !selectedCollege2) return;
 
-            if (c1?.id && c2?.id) {
-                apiService.logComparison({
-                    college1_id: c1.id,
-                    college2_id: c2.id,
-                    college1_name: c1.name,
-                    college2_name: c2.name,
-                }).catch(() => {});
-            }
-
-            onNavigate("compareCollegesResult", {
-                college1: college1Final,
-                college2: college2Final,
+        if (selectedCollege1.id && selectedCollege2.id) {
+            apiService.logComparison({
+                college1_id: selectedCollege1.id,
+                college2_id: selectedCollege2.id,
+                college1_name: selectedCollege1.name,
+                college2_name: selectedCollege2.name,
+            }).catch((err) => {
+                console.error("Failed to log comparison:", err);
             });
         }
+
+        onNavigate("compareCollegesResult", {
+            college1: selectedCollege1,
+            college2: selectedCollege2,
+        });
     };
 
     const handlePopularCompare = (pair: PopularComparison) => {
@@ -270,16 +319,50 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                     <div className="mt-8">
                         <button
                             onClick={handleCompare}
-                            disabled={!college1 && !college2}
+                            disabled={!selectedCollege1 || !selectedCollege2}
                             className="bg-[#1a2b4c] text-white font-bold text-[16px] px-10 py-3.5 rounded-full shadow-[0_4px_14px_0_rgba(26,43,76,0.39)] hover:shadow-[0_6px_20px_rgba(26,43,76,0.23)] hover:bg-[#111c33] transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Compare Now
                         </button>
                     </div>
+
+                    {error && error.type !== "popular" && (
+                        <div className="mt-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                            {error.message}
+                        </div>
+                    )}
                 </main>
             </div>
 
-            {popularComparisons.length > 0 && (
+            {error?.type === "popular" && (
+                <div className="w-full max-w-7xl mx-auto mt-8 px-4">
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                        {error.message}
+                    </div>
+                </div>
+            )}
+
+            {loadingPopular ? (
+                <section className="w-full max-w-7xl mx-auto mt-16 px-4">
+                    <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="bg-white rounded-md border border-gray-100 p-6 pt-8 pb-8 animate-pulse">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex flex-col items-center w-1/2 px-2">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-full mb-3"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                    </div>
+                                    <div className="flex flex-col items-center w-1/2 px-2">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-full mb-3"></div>
+                                        <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            ) : popularComparisons.length > 0 && (
                 <section className="w-full max-w-7xl mx-auto mt-16 px-4">
                     <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
 
