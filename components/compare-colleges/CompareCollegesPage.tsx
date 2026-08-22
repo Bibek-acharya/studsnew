@@ -19,8 +19,10 @@ interface InstitutionResult {
 interface PopularComparison {
   college1_id: number;
   college1_name: string;
+  college1_logo_url: string;
   college2_id: number;
   college2_name: string;
+  college2_logo_url: string;
   count: number;
 }
 
@@ -211,54 +213,9 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
     return (
         <div className="bg-[#f8f9fc] min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
-            <div className="bg-[#536DFE] w-full max-w-7xl mx-4 md:mx-auto relative flex flex-col shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] rounded-2xl" style={{ minHeight: 655 }}>
-                <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-                    <div className="absolute inset-x-0 bottom-0 z-0 h-[300px] pointer-events-none opacity-90">
-                        <svg width="100%" height="100%" viewBox="0 0 1440 400" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M0,400 L0,250 L80,250 L80,180 L180,180 L180,220 L280,220 L280,150 L380,150 L380,260 L480,260 L480,120 L600,120 L600,200 L700,200 L700,160 L850,160 L850,240 L950,240 L950,140 L1100,140 L1100,210 L1200,210 L1200,170 L1350,170 L1350,250 L1440,250 L1440,400 Z" fill="#6079F9" opacity="0.7" />
-                            <path d="M50,400 L50,280 L200,280 L200,200 L320,200 L320,290 L480,290 L480,180 L620,180 L620,270 L780,270 L780,150 L920,150 L920,280 L1080,280 L1080,190 L1220,190 L1220,290 L1440,290 L1440,400 Z" fill="#4B66EE" />
-                            <path d="M0,400 L0,340 Q300,320 600,350 T1440,330 L1440,400 Z" fill="#425EDD" />
-                            <path d="M0,400 L0,370 Q400,350 800,380 T1440,360 L1440,400 Z" fill="#3A53C5" />
-                            <g transform="translate(0, 80)">
-                                <rect x="0" y="0" width="130" height="320" fill="#6A85F5" />
-                                <rect x="0" y="0" width="130" height="10" fill="#4B66EE" />
-                                <rect x="0" y="100" width="130" height="2" fill="#88A1FB" />
-                                <rect x="0" y="210" width="130" height="2" fill="#88A1FB" />
-                                <rect x="20" y="30" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="80" y="30" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="20" y="130" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="80" y="130" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="20" y="240" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="80" y="240" width="30" height="35" fill="#536DFE" rx="2" />
-                            </g>
-                            <g transform="translate(1310, 80)">
-                                <rect x="0" y="0" width="130" height="320" fill="#6A85F5" />
-                                <rect x="0" y="0" width="130" height="10" fill="#4B66EE" />
-                                <rect x="0" y="120" width="130" height="2" fill="#88A1FB" />
-                                <rect x="0" y="230" width="130" height="2" fill="#88A1FB" />
-                                <rect x="20" y="40" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="80" y="40" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="20" y="150" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="80" y="150" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="20" y="260" width="30" height="35" fill="#536DFE" rx="2" />
-                                <rect x="80" y="260" width="30" height="35" fill="#536DFE" rx="2" />
-                            </g>
-                            <path d="M180,360 Q185,310 195,360 Z" fill="#6A85F5" />
-                            <circle cx="190" cy="320" r="18" fill="#6A85F5" />
-                            <path d="M400,380 Q420,340 440,380 Z" fill="#425EDD" />
-                            <path d="M900,370 Q920,330 940,370 Z" fill="#425EDD" />
-                            <path d="M1250,350 Q1255,300 1265,350 Z" fill="#6A85F5" />
-                            <circle cx="1255" cy="300" r="15" fill="#6A85F5" />
-                            <g fill="#6A85F5" opacity="0.8">
-                                <path d="M350,120 Q355,115 360,120 Q365,115 370,120 Q365,122 360,118 Q355,122 350,120 Z" />
-                                <path d="M380,135 Q383,132 386,135 Q389,132 392,135 Q389,137 386,134 Q383,137 380,135 Z" />
-                                <path d="M1050,90 Q1055,85 1060,90 Q1065,85 1070,90 Q1065,92 1060,88 Q1055,92 1050,90 Z" />
-                            </g>
-                        </svg>
-                    </div>
-                </div>
+            <div className="bg-brand-blue w-full max-w-350 md:mx-auto relative flex flex-col rounded-2xl">
 
-                <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 py-12">
+                <main className="relative z-10 flex-1 flex flex-col items-center justify-center py-12">
                     <div className="text-center mb-10 max-w-3xl">
                         <h1 className="text-white text-4xl md:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight mb-4">
                             Compare colleges to<br />find the best fit
@@ -338,8 +295,12 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                                 <div className="flex flex-col items-center w-1/2 px-2 z-10">
                                     <div className="h-14 flex items-center justify-center mb-3">
-                                        <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center">
-                                            <span className="text-white font-bold text-xs">{initials(pair.college1_name)}</span>
+                                        <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center overflow-hidden">
+                                            {pair.college1_logo_url ? (
+                                                <img src={pair.college1_logo_url} alt={pair.college1_name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-white font-bold text-xs">{initials(pair.college1_name)}</span>
+                                            )}
                                         </div>
                                     </div>
                                     <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college1_name}</span>
@@ -347,8 +308,12 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
                                 <div className="flex flex-col items-center w-1/2 px-2 z-10">
                                     <div className="h-14 flex items-center justify-center mb-3">
-                                        <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center">
-                                            <span className="text-white font-bold text-xs">{initials(pair.college2_name)}</span>
+                                        <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center overflow-hidden">
+                                            {pair.college2_logo_url ? (
+                                                <img src={pair.college2_logo_url} alt={pair.college2_name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-white font-bold text-xs">{initials(pair.college2_name)}</span>
+                                            )}
                                         </div>
                                     </div>
                                     <span className="text-[15px] font-bold text-[#1a2b4c] text-center truncate max-w-full">{pair.college2_name}</span>
@@ -359,17 +324,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                 </section>
             )}
 
-            <section className="w-full max-w-7xl mx-auto mt-8 px-4 mb-16 flex flex-col md:flex-row justify-between gap-4">
-                <div className="bg-white rounded-md w-full md:w-[681px] h-[151px] relative overflow-hidden group flex-shrink-0">
-                    <span className="absolute top-2 right-2 text-[9px] text-white/90 font-bold uppercase tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded z-10">Advertisement</span>
-                    <img src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=681&h=151&q=80" alt="Ad 1" className="w-full h-full object-cover" />
-                </div>
 
-                <div className="bg-white rounded-md w-full md:w-[681px] h-[151px] relative overflow-hidden group flex-shrink-0">
-                    <span className="absolute top-2 right-2 text-[9px] text-white/90 font-bold uppercase tracking-widest bg-black/40 backdrop-blur-sm px-2 py-1 rounded z-10">Advertisement</span>
-                    <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=681&h=151&q=80" alt="Ad 2" className="w-full h-full object-cover" />
-                </div>
-            </section>
         </div>
     );
 };
