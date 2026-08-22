@@ -7,6 +7,7 @@ import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
 import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, MessageSquare, Share2, MoreVertical } from "lucide-react";
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
+import ActionMenu from "./ActionMenu";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -90,7 +91,9 @@ const PostCard: React.FC<{
   commentsOpen?: boolean;
   onJoinCommunity?: (communityId: number) => void;
   onCommentAdded?: (postId: number) => void;
-}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
+  onNotInterested?: (postId: number) => void;
+  onReport?: (postId: number) => void;
+}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded, onNotInterested, onReport }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -101,6 +104,7 @@ const PostCard: React.FC<{
   const userRole = (user as any)?.role || "Student";
   const [isJoined, setIsJoined] = useState(post.community?.is_member || false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const contentLength = post.content?.length || 0;
   const shouldTruncate = contentLength > 150;
@@ -154,9 +158,26 @@ const PostCard: React.FC<{
               {isJoined ? "Joined" : "Join"}
             </button>
           )}
-          <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full">
-            <MoreVertical size={18} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+            >
+              <MoreVertical size={18} />
+            </button>
+            {isMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
+                <div className="absolute right-0 z-50 mt-1">
+                  <ActionMenu
+                    onShare={() => { setIsMenuOpen(false); onShare(post); }}
+                    onNotInterested={() => { setIsMenuOpen(false); onNotInterested?.(post.id); }}
+                    onReport={() => { setIsMenuOpen(false); onReport?.(post.id); }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -251,9 +272,10 @@ const PostCard: React.FC<{
 
         <button
           onClick={() => onCommentClick(post.id)}
-          className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold"
+          className="flex items-center gap-1 sm:gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2.5 py-1 sm:px-3.5 sm:py-2 text-gray-700 transition-colors font-semibold text-xs sm:text-sm"
         >
-          <MessageSquare size={16} className="text-gray-500" />
+          <MessageSquare size={14} className="text-gray-500 sm:hidden" />
+          <MessageSquare size={16} className="text-gray-500 hidden sm:block" />
           {post.comment_count || 0} Comment
         </button>
 
@@ -1181,6 +1203,15 @@ const CampusForumPage: React.FC = () => {
     setLightboxType(type);
   };
 
+  const handleNotInterested = (postId: number) => {
+    setPosts((p) => p.filter((post) => post.id !== postId));
+    showToast("Post hidden from your feed");
+  };
+
+  const handleReport = (postId: number) => {
+    showToast("Report submitted. Thank you for your feedback.");
+  };
+
   const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
 
   return (
@@ -1405,6 +1436,8 @@ const CampusForumPage: React.FC = () => {
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
                     onCommentAdded={handleCommentAdded}
+                    onNotInterested={handleNotInterested}
+                    onReport={handleReport}
                   />
                 ))}
 
@@ -1447,6 +1480,8 @@ const CampusForumPage: React.FC = () => {
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
                     onCommentAdded={handleCommentAdded}
+                    onNotInterested={handleNotInterested}
+                    onReport={handleReport}
                   />
                 ))}
 
@@ -1489,6 +1524,8 @@ const CampusForumPage: React.FC = () => {
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
                     onCommentAdded={handleCommentAdded}
+                    onNotInterested={handleNotInterested}
+                    onReport={handleReport}
                   />
                 ))}
               </div>
