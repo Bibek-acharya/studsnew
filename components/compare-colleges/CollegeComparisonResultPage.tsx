@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useCallback } from "react";
 import type { College } from "@/services/api";
 
 interface CollegeComparisonResultPageProps {
@@ -319,6 +319,23 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   const c1Reviews = useMemo(() => getReviews(c1), [c1]);
   const c2Reviews = useMemo(() => getReviews(c2), [c2]);
 
+  const [showAllReviews1, setShowAllReviews1] = useState(false);
+  const [showAllReviews2, setShowAllReviews2] = useState(false);
+
+  const handleShare = useCallback(() => {
+    if (navigator.share) {
+      navigator.share({
+        title: `Compare ${c1Name} vs ${c2Name}`,
+        text: `Compare ${c1Name} vs ${c2Name} on StudSphere`,
+        url: window.location.href,
+      }).catch((err) => console.error("Failed to share:", err));
+    } else {
+      navigator.clipboard.writeText(window.location.href).catch((err) => {
+        console.error("Failed to copy URL:", err);
+      });
+    }
+  }, [c1Name, c2Name]);
+
   const getGallery = (c: Partial<College> | null): GalleryImage[] => {
     if (!c) return [];
     return safeJsonParse<GalleryImage[]>(c.gallery, []);
@@ -369,7 +386,10 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
             Compare {c1Name} vs {c2Name}
           </h1>
-          <button className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium text-sm">
+          <button 
+            onClick={handleShare}
+            className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium text-sm"
+          >
             <i className="fa-solid fa-share-nodes text-[13px]"></i>
             Share
           </button>
@@ -398,9 +418,18 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
               </div>
 
               <div className="flex-1 min-w-0">
-                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left truncate">
-                  {c1Name}
-                </button>
+                {c1?.id ? (
+                  <a 
+                    href={`/find-college/${c1.id}`}
+                    className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left truncate"
+                  >
+                    {c1Name}
+                  </a>
+                ) : (
+                  <span className="text-xl font-semibold text-gray-900 block mb-1 text-left truncate">
+                    {c1Name}
+                  </span>
+                )}
                 <div className="flex items-center gap-2 mb-1">
                   <span className="bg-[#10b981] text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-sm font-bold">
                     <i className="fa-solid fa-star text-[11px]"></i>
@@ -435,9 +464,18 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
               </div>
 
               <div className="flex-1 min-w-0">
-                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left truncate">
-                  {c2Name}
-                </button>
+                {c2?.id ? (
+                  <a 
+                    href={`/find-college/${c2.id}`}
+                    className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left truncate"
+                  >
+                    {c2Name}
+                  </a>
+                ) : (
+                  <span className="text-xl font-semibold text-gray-900 block mb-1 text-left truncate">
+                    {c2Name}
+                  </span>
+                )}
                 <div className="flex items-center gap-2 mb-1">
                   <span className="bg-[#f59e0b] text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-sm font-bold">
                     <i className="fa-solid fa-star text-[11px]"></i>
@@ -540,43 +578,53 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <div className="flex-1 flex flex-col md:border-r border-gray-200">
                   <div className="p-5 flex-1">
                     {c1Reviews.length > 0 ? (
-                      c1Reviews.slice(0, 1).map((review, idx) => (
-                        <div key={idx}>
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="flex items-center">
-                              <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
-                              <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
-                                <i className="fa-solid fa-star text-[11px]"></i> {review.rating || "N/A"}
-                              </span>
+                      <>
+                        {(showAllReviews1 ? c1Reviews : c1Reviews.slice(0, 2)).map((review, idx) => (
+                          <div key={idx} className={idx > 0 ? "mt-6 pt-6 border-t border-gray-100" : ""}>
+                            <div className="flex justify-between items-start gap-3">
+                              <div className="flex items-center">
+                                <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
+                                <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
+                                  <i className="fa-solid fa-star text-[11px]"></i> {review.rating || "N/A"}
+                                </span>
+                              </div>
+                              {review.created_at && (
+                                <span className="text-[13px] text-gray-500 mt-1">
+                                  {new Date(review.created_at).toLocaleDateString()}
+                                </span>
+                              )}
                             </div>
-                            {review.created_at && (
-                              <span className="text-[13px] text-gray-500 mt-1">
-                                {new Date(review.created_at).toLocaleDateString()}
-                              </span>
+                            <div className="mt-3 text-[13px]">
+                              {review.program && (
+                                <>
+                                  <span className="text-gray-500">rated by a {review.program} Student</span>
+                                  <div className="text-gray-900 font-semibold mt-0.5">{c1Name}</div>
+                                </>
+                              )}
+                            </div>
+                            {review.likes && (
+                              <div className="mt-5">
+                                <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
+                                <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.likes}</p>
+                              </div>
+                            )}
+                            {review.dislikes && (
+                              <div className="mt-4 mb-2">
+                                <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
+                                <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.dislikes}</p>
+                              </div>
                             )}
                           </div>
-                          <div className="mt-3 text-[13px]">
-                            {review.program && (
-                              <>
-                                <span className="text-gray-500">rated by a {review.program} Student</span>
-                                <div className="text-gray-900 font-semibold mt-0.5">{c1Name}</div>
-                              </>
-                            )}
-                          </div>
-                          {review.likes && (
-                            <div className="mt-5">
-                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
-                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.likes}</p>
-                            </div>
-                          )}
-                          {review.dislikes && (
-                            <div className="mt-4 mb-2">
-                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
-                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.dislikes}</p>
-                            </div>
-                          )}
-                        </div>
-                      ))
+                        ))}
+                        {c1Reviews.length > 2 && (
+                          <button
+                            onClick={() => setShowAllReviews1(!showAllReviews1)}
+                            className="mt-4 text-[#2c51c6] font-semibold text-sm hover:underline"
+                          >
+                            {showAllReviews1 ? "Show less" : `Show all ${c1Reviews.length} reviews`}
+                          </button>
+                        )}
+                      </>
                     ) : (
                       <p className="text-gray-400 text-sm italic">No reviews yet</p>
                     )}
@@ -586,43 +634,53 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 <div className="flex-1 flex flex-col">
                   <div className="p-5 flex-1">
                     {c2Reviews.length > 0 ? (
-                      c2Reviews.slice(0, 1).map((review, idx) => (
-                        <div key={idx}>
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="flex items-center">
-                              <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
-                              <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
-                                <i className="fa-solid fa-star text-[11px]"></i> {review.rating || "N/A"}
-                              </span>
+                      <>
+                        {(showAllReviews2 ? c2Reviews : c2Reviews.slice(0, 2)).map((review, idx) => (
+                          <div key={idx} className={idx > 0 ? "mt-6 pt-6 border-t border-gray-100" : ""}>
+                            <div className="flex justify-between items-start gap-3">
+                              <div className="flex items-center">
+                                <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
+                                <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
+                                  <i className="fa-solid fa-star text-[11px]"></i> {review.rating || "N/A"}
+                                </span>
+                              </div>
+                              {review.created_at && (
+                                <span className="text-[13px] text-gray-500 mt-1">
+                                  {new Date(review.created_at).toLocaleDateString()}
+                                </span>
+                              )}
                             </div>
-                            {review.created_at && (
-                              <span className="text-[13px] text-gray-500 mt-1">
-                                {new Date(review.created_at).toLocaleDateString()}
-                              </span>
+                            <div className="mt-3 text-[13px]">
+                              {review.program && (
+                                <>
+                                  <span className="text-gray-500">rated by a {review.program} Student</span>
+                                  <div className="text-gray-900 font-semibold mt-0.5">{c2Name}</div>
+                                </>
+                              )}
+                            </div>
+                            {review.likes && (
+                              <div className="mt-5">
+                                <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
+                                <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.likes}</p>
+                              </div>
+                            )}
+                            {review.dislikes && (
+                              <div className="mt-4 mb-2">
+                                <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
+                                <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.dislikes}</p>
+                              </div>
                             )}
                           </div>
-                          <div className="mt-3 text-[13px]">
-                            {review.program && (
-                              <>
-                                <span className="text-gray-500">rated by a {review.program} Student</span>
-                                <div className="text-gray-900 font-semibold mt-0.5">{c2Name}</div>
-                              </>
-                            )}
-                          </div>
-                          {review.likes && (
-                            <div className="mt-5">
-                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
-                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.likes}</p>
-                            </div>
-                          )}
-                          {review.dislikes && (
-                            <div className="mt-4 mb-2">
-                              <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
-                              <p className="text-[14.5px] text-gray-700 leading-relaxed">{review.dislikes}</p>
-                            </div>
-                          )}
-                        </div>
-                      ))
+                        ))}
+                        {c2Reviews.length > 2 && (
+                          <button
+                            onClick={() => setShowAllReviews2(!showAllReviews2)}
+                            className="mt-4 text-[#2c51c6] font-semibold text-sm hover:underline"
+                          >
+                            {showAllReviews2 ? "Show less" : `Show all ${c2Reviews.length} reviews`}
+                          </button>
+                        )}
+                      </>
                     ) : (
                       <p className="text-gray-400 text-sm italic">No reviews yet</p>
                     )}
