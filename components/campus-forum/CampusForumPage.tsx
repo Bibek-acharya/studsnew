@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
@@ -896,6 +897,7 @@ const ToastContainer: React.FC<{
 
 const CampusForumPage: React.FC = () => {
   const { user, isAuthenticated } = useAuth();
+  const router = useRouter();
   const [posts, setPosts] = useState<ForumPost[]>([]);
   const [communities, setCommunities] = useState<ForumCommunity[]>([]);
   const [trending, setTrending] = useState<any[]>([]);
@@ -1149,10 +1151,10 @@ const CampusForumPage: React.FC = () => {
                   Discover Communities
                 </h3>
                 <button
-                  onClick={() => setSelectedCommunityId(null)}
+                  onClick={() => router.push("/campus-forum/communities")}
                   className="text-blue-600 font-semibold text-sm sm:text-xs hover:underline"
                 >
-                  {selectedCommunityId ? "Show all" : "View all"}
+                  View all
                 </button>
               </div>
 
