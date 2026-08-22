@@ -1145,7 +1145,7 @@ const CampusForumPage: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* ── LEFT SIDEBAR ── */}
           <aside className="lg:col-span-3 space-y-5 order-1">
-            <div className="bg-white rounded-lg p-5 sm:p-6 border border-slate-200/80 shadow-none">
+            <div className="bg-white rounded-lg p-5 sm:p-6 sm:border sm:border-slate-200/80">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-sm sm:text-xs font-extrabold text-gray-900 tracking-wider uppercase">
                   Discover Communities
@@ -1163,7 +1163,7 @@ const CampusForumPage: React.FC = () => {
                 {communities.filter((c) => !c.is_general).map((item) => (
                   <div
                     key={item.id}
-                    className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white shadow-sm"
+                    className="flex-shrink-0 w-[145px] rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white"
                   >
                     <div
                       className={`w-14 h-14 mb-2 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 transition-transform group-hover:scale-105 ${
