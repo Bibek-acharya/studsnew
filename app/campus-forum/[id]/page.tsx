@@ -166,19 +166,19 @@ export default function CommunityDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
       {/* Top Banner */}
-      <div className="h-40 sm:h-48 md:h-56 w-full bg-[#0000ff]" />
+      <div className="relative h-40 sm:h-48 md:h-56 w-full bg-[#0000ff]">
+        {/* Back Button */}
+        <button
+          onClick={() => router.back()}
+          className="absolute top-4 left-4 p-2 rounded-full hover:bg-white/20 transition-colors z-10"
+        >
+          <ArrowLeft size={22} className="text-white" />
+        </button>
+      </div>
 
       {/* Main Header Container */}
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative pb-4 sm:pb-6 border-b border-gray-200">
-          {/* Back Button */}
-          <button
-            onClick={() => router.back()}
-            className="absolute -top-4 left-0 p-2 rounded-full bg-white shadow-md hover:bg-gray-50 transition-colors z-10"
-          >
-            <ArrowLeft size={20} className="text-gray-700" />
-          </button>
-
           {/* Avatar and Group Info */}
           <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-14 sm:-mt-12 mb-4 gap-3 sm:gap-4">
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border-4 border-white flex items-center justify-center shadow-sm shrink-0 bg-[#0000ff]">
