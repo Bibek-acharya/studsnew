@@ -63,7 +63,10 @@ export async function fetchGlobalCourses(page = 1, limit = 20): Promise<{ course
 }
 
 export async function searchGlobalCourses(query: string): Promise<GlobalCourse[]> {
-  return apiCall(`/api/v1/education/courses/search?q=${encodeURIComponent(query)}`);
+  const result = await apiCall<GlobalCourse[] | { courses?: GlobalCourse[] }>(
+    `/api/v1/education/courses/search?q=${encodeURIComponent(query)}`,
+  );
+  return Array.isArray(result) ? result : result.courses || [];
 }
 
 export async function fetchCoursesByLevel(level: string, page = 1, limit = 20): Promise<{ courses: GlobalCourse[]; meta: { total: number } }> {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { apiService } from "@/services/api";
+import { apiService, getImageUrl } from "@/services/api";
 import type { College } from "@/services/api";
 
 interface InstitutionResult {
@@ -60,8 +60,35 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     const debounceRef2 = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
+        const resolveCollege = async (id: number, name: string) => {
+            try {
+                const response = await apiService.getCollegeById(id);
+                if (response?.data) return response.data;
+            } catch {
+                const response = await apiService.getColleges({ search: name, pageSize: 10, page: 1 });
+                const colleges = (response as { data?: { colleges?: College[] } })?.data?.colleges || [];
+                return colleges.find((college) => college.name?.toLowerCase() === name.toLowerCase()) || colleges[0];
+            }
+            return undefined;
+        };
+
         apiService.getPopularComparisons(6)
-            .then((res) => setPopularComparisons(res?.data || []))
+            .then(async (res) => {
+                const pairs = await Promise.all((res?.data || []).map(async (pair) => {
+                    const [college1, college2] = await Promise.all([
+                        resolveCollege(pair.college1_id, pair.college1_name),
+                        resolveCollege(pair.college2_id, pair.college2_name),
+                    ]);
+                    return {
+                        ...pair,
+                        college1_id: college1?.id || pair.college1_id,
+                        college2_id: college2?.id || pair.college2_id,
+                        college1_logo_url: college1?.image_url || pair.college1_logo_url ? getImageUrl(college1?.image_url || pair.college1_logo_url) : "",
+                        college2_logo_url: college2?.image_url || pair.college2_logo_url ? getImageUrl(college2?.image_url || pair.college2_logo_url) : "",
+                    };
+                }));
+                setPopularComparisons(pairs);
+            })
             .catch((err) => {
                 console.error("Failed to fetch popular comparisons:", err);
                 setError({ type: "popular", message: "Failed to load popular comparisons" });
@@ -244,6 +271,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             if (res2?.data) college2 = res2.data;
         } catch (err) {
             console.error("Failed to fetch college details:", err);
+            return;
         }
 
         onNavigate("compareCollegesResult", { college1, college2 });
@@ -275,7 +303,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-[#2c51c6] flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 {c.image_url ? (
-                                    <img src={c.image_url} alt="" className="w-full h-full object-cover" />
+                                    <img src={getImageUrl(c.image_url)} alt="" className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="text-white font-bold text-xs">{initials(c.name)}</span>
                                 )}
@@ -376,7 +404,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             )}
 
             {loadingPopular ? (
-                <section className="w-full max-w-7xl mx-auto mt-16 px-4 md:px-0">
+                <section className="w-full max-w-350 mx-auto mt-16">
                     <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
@@ -396,7 +424,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                     </div>
                 </section>
             ) : popularComparisons.length > 0 && (
-                <section className="w-full max-w-7xl mx-auto mt-16 px-4 md:px-0">
+                <section className="w-full max-w-350 mx-auto mt-16">
                     <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -404,7 +432,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                             <div
                                 key={`${pair.college1_id}-${pair.college2_id}`}
                                 onClick={() => handlePopularCompare(pair)}
-                                className="bg-white rounded-md border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.04)] p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer hover:translate-y-[-4px] hover:shadow-[0_12px_24px_-8px_rgba(0,0,0,0.1)] transition-all duration-200"
+                                className="bg-white rounded-md border border-gray-100 p-6 pt-8 pb-8 relative flex justify-between items-center cursor-pointer"
                             >
                                 <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#f1f3f6] text-gray-500 text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-4 border-white z-10">VS</div>
                                 <div className="absolute left-1/2 top-1/4 bottom-1/4 w-px bg-gray-100 -translate-x-1/2 z-0"></div>
@@ -413,7 +441,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <div className="h-14 flex items-center justify-center mb-3">
                                         <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center overflow-hidden">
                                             {pair.college1_logo_url ? (
-                                                <img src={pair.college1_logo_url} alt={pair.college1_name} className="w-full h-full object-cover" />
+                                                <img src={getImageUrl(pair.college1_logo_url)} alt={pair.college1_name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <span className="text-white font-bold text-xs">{initials(pair.college1_name)}</span>
                                             )}
@@ -426,7 +454,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                                     <div className="h-14 flex items-center justify-center mb-3">
                                         <div className="w-10 h-10 bg-[#2c51c6] rounded-full flex items-center justify-center overflow-hidden">
                                             {pair.college2_logo_url ? (
-                                                <img src={pair.college2_logo_url} alt={pair.college2_name} className="w-full h-full object-cover" />
+                                                <img src={getImageUrl(pair.college2_logo_url)} alt={pair.college2_name} className="w-full h-full object-cover" />
                                             ) : (
                                                 <span className="text-white font-bold text-xs">{initials(pair.college2_name)}</span>
                                             )}
