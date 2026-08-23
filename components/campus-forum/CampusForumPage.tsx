@@ -569,6 +569,13 @@ const CreatePostModal: React.FC<{
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const modalScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (showPoll && modalScrollRef.current) {
+      modalScrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [showPoll]);
 
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
 
@@ -662,10 +669,11 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-end sm:items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm sm:pt-24"
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm pt-20 sm:pt-24"
       onClick={handleClose}
     >
       <div
+        ref={modalScrollRef}
         className="relative w-full max-w-lg rounded-xl bg-white p-4 sm:p-6 shadow-none max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
