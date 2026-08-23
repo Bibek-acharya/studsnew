@@ -354,7 +354,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
 
   if (loading) {
     return (
-      <div className="bg-gray-50/50 min-h-screen p-4 md:p-8 flex items-center justify-center">
+      <div className="bg-white min-h-screen py-4 md:py-8 px-4 md:px-0 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2c51c6] mx-auto mb-4"></div>
           <p className="text-gray-500 font-medium">Loading college data...</p>
@@ -365,7 +365,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
 
   if (!c1 && !c2) {
     return (
-      <div className="bg-gray-50/50 min-h-screen p-4 md:p-8 flex items-center justify-center">
+      <div className="bg-white min-h-screen py-4 md:py-8 px-4 md:px-0 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-500 font-medium mb-4">No colleges selected for comparison.</p>
           <button
@@ -380,7 +380,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   }
 
   return (
-    <div className="bg-gray-50/50 text-gray-800 min-h-screen p-4 md:p-8">
+    <div className="bg-white text-gray-800 min-h-screen py-4 md:py-8 px-4 md:px-0">
       <div className="max-w-[1000px] mx-auto">
         <div className="flex justify-between items-center mb-6 gap-4">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
