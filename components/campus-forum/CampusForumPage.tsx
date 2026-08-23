@@ -1131,7 +1131,7 @@ const CampusForumPage: React.FC = () => {
         category: "General",
         title: data.title || "Untitled",
         content: data.content,
-        poll_options: pollItems.length > 1 ? JSON.stringify(pollItems) : undefined,
+        poll_options: pollItems.length > 1 ? pollItems : undefined,
         is_poll: pollItems.length > 1,
         image_url: imageUrlValue,
         video_url: videoUrlValue,
