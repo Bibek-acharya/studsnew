@@ -274,7 +274,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   if (loading) {
     return (
       <div className="bg-white min-h-screen py-4 md:py-8 px-4 md:px-0">
-        <div className="max-w-[1000px] mx-auto animate-pulse">
+        <div className="max-w-350 mx-auto animate-pulse">
           <div className="flex justify-between items-center mb-6 gap-4">
             <div className="h-8 bg-gray-200 rounded w-3/4 max-w-[620px]" />
             <div className="h-5 bg-gray-200 rounded w-16" />
@@ -326,7 +326,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
 
   return (
     <div className="bg-white text-gray-800 min-h-screen py-4 md:py-8 px-4 md:px-0">
-      <div className="max-w-[1000px] mx-auto">
+      <div className="max-w-350 mx-auto">
         <div className="flex justify-between items-center mb-6 gap-4">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
             Compare {c1Name} vs {c2Name}
