@@ -284,23 +284,12 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     };
 
     const handlePopularCompare = async (pair: PopularComparison) => {
-        // Fetch full college data for both colleges
-        let college1: Partial<College> = { name: pair.college1_name, id: pair.college1_id };
-        let college2: Partial<College> = { name: pair.college2_name, id: pair.college2_id };
-
-        try {
-            const [res1, res2] = await Promise.all([
-                apiService.getCollegeById(pair.college1_id),
-                apiService.getCollegeById(pair.college2_id),
-            ]);
-            if (res1?.data) college1 = res1.data;
-            if (res2?.data) college2 = res2.data;
-        } catch (err) {
-            console.error("Failed to fetch college details:", err);
-            return;
-        }
-
-        onNavigate("compareCollegesResult", { college1, college2 });
+        // Popular history can contain institution IDs. The comparison endpoint
+        // resolves those legacy IDs; avoid a direct college lookup here.
+        onNavigate("compareCollegesResult", {
+            college1: { name: pair.college1_name, id: pair.college1_id, image_url: pair.college1_logo_url },
+            college2: { name: pair.college2_name, id: pair.college2_id, image_url: pair.college2_logo_url },
+        });
     };
 
     const initials = (name: string) =>
