@@ -7,6 +7,7 @@ import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
 import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, MessageSquare, Share2, MoreVertical } from "lucide-react";
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
+import ActionMenu from "./ActionMenu";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -90,7 +91,9 @@ const PostCard: React.FC<{
   commentsOpen?: boolean;
   onJoinCommunity?: (communityId: number) => void;
   onCommentAdded?: (postId: number) => void;
-}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded }) => {
+  onNotInterested?: (postId: number) => void;
+  onReport?: (postId: number) => void;
+}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded, onNotInterested, onReport }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -101,6 +104,7 @@ const PostCard: React.FC<{
   const userRole = (user as any)?.role || "Student";
   const [isJoined, setIsJoined] = useState(post.community?.is_member || false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const contentLength = post.content?.length || 0;
   const shouldTruncate = contentLength > 150;
@@ -154,9 +158,26 @@ const PostCard: React.FC<{
               {isJoined ? "Joined" : "Join"}
             </button>
           )}
-          <button className="text-gray-400 hover:text-gray-600 p-1 rounded-full">
-            <MoreVertical size={18} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="text-gray-400 hover:text-gray-600 p-1 rounded-full"
+            >
+              <MoreVertical size={18} />
+            </button>
+            {isMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsMenuOpen(false)} />
+                <div className="absolute right-0 z-50 mt-1">
+                  <ActionMenu
+                    onShare={() => { setIsMenuOpen(false); onShare(post); }}
+                    onNotInterested={() => { setIsMenuOpen(false); onNotInterested?.(post.id); }}
+                    onReport={() => { setIsMenuOpen(false); onReport?.(post.id); }}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -230,38 +251,42 @@ const PostCard: React.FC<{
         </div>
       )}
 
-      <div className="flex items-center gap-2 text-xs font-medium text-[#52525e]">
-        <div className="flex items-center bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3 py-2 text-gray-700 transition-colors">
+      <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#52525e]">
+        <div className="flex items-center bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2 py-1 sm:px-3 sm:py-2 text-gray-700 transition-colors">
           <button
             onClick={() => onLike(post.id)}
-            className={`flex items-center gap-1.5 hover:text-black ${post.is_liked ? "text-blue-600" : ""}`}
+            className={`flex items-center gap-1 sm:gap-1.5 hover:text-black ${post.is_liked ? "text-blue-600" : ""}`}
           >
-            <ArrowUp size={16} className={post.is_liked ? "text-indigo-500" : "text-gray-500"} />
+            <ArrowUp size={14} className={`sm:hidden ${post.is_liked ? "text-indigo-500" : "text-gray-500"}`} />
+            <ArrowUp size={16} className={`hidden sm:block ${post.is_liked ? "text-indigo-500" : "text-gray-500"}`} />
             <span className="font-semibold text-gray-800">{post.upvotes || 0}</span>
           </button>
-          <span className="mx-2 text-gray-300">|</span>
+          <span className="mx-1.5 sm:mx-2 text-gray-300">|</span>
           <button
             onClick={() => onDislike(post.id)}
-            className={`flex items-center gap-1.5 hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
+            className={`flex items-center gap-1 sm:gap-1.5 hover:text-black ${post.is_disliked ? "text-red-600" : ""}`}
           >
-            <ArrowDown size={16} className={post.is_disliked ? "text-red-500" : "text-gray-500"} />
+            <ArrowDown size={14} className={`sm:hidden ${post.is_disliked ? "text-red-500" : "text-gray-500"}`} />
+            <ArrowDown size={16} className={`hidden sm:block ${post.is_disliked ? "text-red-500" : "text-gray-500"}`} />
             <span className="font-semibold text-gray-800">{post.downvotes || 0}</span>
           </button>
         </div>
 
         <button
           onClick={() => onCommentClick(post.id)}
-          className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold"
+          className="flex items-center gap-1 sm:gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2.5 py-1 sm:px-3.5 sm:py-2 text-gray-700 transition-colors font-semibold text-xs sm:text-sm"
         >
-          <MessageSquare size={16} className="text-gray-500" />
+          <MessageSquare size={14} className="text-gray-500 sm:hidden" />
+          <MessageSquare size={16} className="text-gray-500 hidden sm:block" />
           {post.comment_count || 0} Comment
         </button>
 
         <button
           onClick={() => onShare(post)}
-          className="flex items-center gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-3.5 py-2 text-gray-700 transition-colors font-semibold"
+          className="flex items-center gap-1 sm:gap-1.5 bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2.5 py-1 sm:px-3.5 sm:py-2 text-gray-700 transition-colors font-semibold text-xs sm:text-sm"
         >
-          <Share2 size={16} className="text-gray-500" />
+          <Share2 size={14} className="text-gray-500 sm:hidden" />
+          <Share2 size={16} className="text-gray-500 hidden sm:block" />
           Share
         </button>
       </div>
@@ -382,7 +407,7 @@ const CommentItem: React.FC<{
                     value={replyContent}
                     onChange={(e) => setReplyContent(e.target.value)}
                     placeholder="Write a reply..."
-                    className="flex-1 border border-slate-200 rounded-md px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
+                    className="flex-1 border border-slate-200 rounded-full px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
                     onKeyDown={(e) => e.key === "Enter" && handleReply()}
                   />
                   <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
@@ -610,8 +635,10 @@ const CreatePostModal: React.FC<{
       return;
     }
 
-    if (!title.trim() && !content.trim() && images.length === 0 && !video) {
-      setError("Please enter a title or post content.");
+    const hasPoll = showPoll && pollOptions.filter((o) => o.trim()).length >= 2;
+
+    if (!title.trim() && !content.trim() && images.length === 0 && !video && !hasPoll) {
+      setError("Please enter a title, post content, or add a poll.");
       return;
     }
 
@@ -635,7 +662,7 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[130] flex items-end sm:items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm sm:pt-24"
       onClick={handleClose}
     >
       <div
@@ -1096,7 +1123,7 @@ const CampusForumPage: React.FC = () => {
         category: "General",
         title: data.title || "Untitled",
         content: data.content,
-        poll_options: pollItems.length > 1 ? pollItems : undefined,
+        poll_options: pollItems.length > 1 ? JSON.stringify(pollItems) : undefined,
         is_poll: pollItems.length > 1,
         image_url: imageUrlValue,
         video_url: videoUrlValue,
@@ -1104,6 +1131,7 @@ const CampusForumPage: React.FC = () => {
 
       setPosts((p) => [newPost, ...p]);
       showToast("Post published successfully!");
+      setIsCreateModalOpen(false);
     } catch (e: any) {
       showToast(e?.message || "Failed to create post");
     } finally {
@@ -1179,6 +1207,15 @@ const CampusForumPage: React.FC = () => {
   const handleLightbox = (url: string, type: "image" | "video") => {
     setLightboxUrl(url);
     setLightboxType(type);
+  };
+
+  const handleNotInterested = (postId: number) => {
+    setPosts((p) => p.filter((post) => post.id !== postId));
+    showToast("Post hidden from your feed");
+  };
+
+  const handleReport = (postId: number) => {
+    showToast("Report submitted. Thank you for your feedback.");
   };
 
   const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
@@ -1405,6 +1442,8 @@ const CampusForumPage: React.FC = () => {
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
                     onCommentAdded={handleCommentAdded}
+                    onNotInterested={handleNotInterested}
+                    onReport={handleReport}
                   />
                 ))}
 
@@ -1447,6 +1486,8 @@ const CampusForumPage: React.FC = () => {
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
                     onCommentAdded={handleCommentAdded}
+                    onNotInterested={handleNotInterested}
+                    onReport={handleReport}
                   />
                 ))}
 
@@ -1489,6 +1530,8 @@ const CampusForumPage: React.FC = () => {
                     commentsOpen={openComments[post.id]}
                     onJoinCommunity={handleJoinToggle}
                     onCommentAdded={handleCommentAdded}
+                    onNotInterested={handleNotInterested}
+                    onReport={handleReport}
                   />
                 ))}
               </div>
