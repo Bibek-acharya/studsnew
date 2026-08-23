@@ -320,6 +320,7 @@ export const apiService = {
   getColleges: collegeApi.getColleges.bind(collegeApi),
   getFeaturedColleges: collegeApi.getFeaturedColleges.bind(collegeApi),
   getCollegeById: collegeApi.getCollegeById.bind(collegeApi),
+  compareColleges: collegeApi.compareColleges.bind(collegeApi),
   getCollegeFilterCounts: collegeApi.getCollegeFilterCounts.bind(collegeApi),
   getPublicInstitutionFilterCounts: collegeApi.getPublicInstitutionFilterCounts.bind(collegeApi),
   getAdminColleges: collegeApi.getAdminColleges.bind(collegeApi),

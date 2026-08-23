@@ -42,6 +42,39 @@ export const collegeApi = {
   async getCollegeById(id: number): Promise<{ data: College }> {
     return apiRequest<{ data: College }>(`/api/v1/colleges/${id}`);
   },
+  async compareColleges(college1Id: number, college2Id: number): Promise<{
+    data: { college1: College; college2: College };
+  }> {
+    const response = await apiRequest<{ data: { college1: any; college2: any } }>(
+      `/api/v1/colleges/compare?college1_id=${college1Id}&college2_id=${college2Id}`,
+    );
+    const normalizeGallery = (gallery: any): any[] => {
+      if (!Array.isArray(gallery)) return [];
+      return gallery.flatMap((item) => Array.isArray(item?.images) ? item.images : item);
+    };
+    const normalize = (entry: any): College => ({
+      ...entry.college,
+      institution_id: entry.institution_id,
+      image_url: entry.logo_url || entry.college?.image_url,
+      amenities: entry.facilities || [],
+      scholarships: entry.scholarships || [],
+      gallery: normalizeGallery(entry.gallery),
+      rating: entry.rating || 0,
+      reviews: entry.review_count || 0,
+      college_reviews: (entry.reviews || []).map((review: any) => ({
+        ...review,
+        likes: review.pros,
+        dislikes: review.cons,
+        program: review.course,
+      })),
+    });
+    return {
+      data: {
+        college1: normalize(response.data.college1),
+        college2: normalize(response.data.college2),
+      },
+    };
+  },
   async getCollegeFilterCounts(): Promise<CollegeFilterCountsResponse> {
     return apiRequest<CollegeFilterCountsResponse>(
       "/api/v1/colleges/filter-counts",

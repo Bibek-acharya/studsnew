@@ -89,6 +89,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             const instColleges = institutions
                 .map((inst) => ({
                     id: inst.college_id || inst.id,
+                    institution_id: inst.id,
                     name: inst.institution_name,
                     location: inst.district || inst.location || "",
                     type: inst.type || inst.institution_type || "College",

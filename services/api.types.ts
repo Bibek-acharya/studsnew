@@ -413,6 +413,7 @@ export interface EducationCourse {
 
 export interface College {
   id: number;
+  institution_id?: number;
   university_id?: number;
   name: string;
   full_name?: string;

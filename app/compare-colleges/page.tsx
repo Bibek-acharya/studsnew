@@ -38,9 +38,15 @@ export default function CompareCollegesRoute() {
     enabled: view === "result" && college2Id !== null,
   });
 
-  const c1Full = c1Data?.data || null;
-  const c2Full = c2Data?.data || null;
-  const loading = (college1Id !== null && c1Loading) || (college2Id !== null && c2Loading);
+  const { data: comparisonData, isLoading: comparisonLoading } = useQuery({
+    queryKey: ["college-comparison", college1Id, college2Id],
+    queryFn: () => apiService.compareColleges(college1Id!, college2Id!),
+    enabled: view === "result" && college1Id !== null && college2Id !== null,
+  });
+
+  const c1Full = comparisonData?.data?.college1 || c1Data?.data || null;
+  const c2Full = comparisonData?.data?.college2 || c2Data?.data || null;
+  const loading = comparisonLoading || (college1Id !== null && c1Loading) || (college2Id !== null && c2Loading);
 
   const handleNavigate = (newView: string, data?: { college1: CollegeInput; college2: CollegeInput }) => {
     if (newView === "compareCollegesResult" && data) {

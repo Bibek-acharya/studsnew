@@ -41,22 +41,6 @@ interface GalleryImage {
   src?: string;
 }
 
-interface CollegeAbout {
-  campus_size?: string;
-  class_mode?: string;
-  wifi?: string;
-  library?: string;
-  lab?: string;
-  [key: string]: string | undefined;
-}
-
-interface CollegeAdmission {
-  fee_range?: string;
-  admission_fee?: string;
-  payment_options?: string;
-  [key: string]: string | undefined;
-}
-
 const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "overview", label: "Overview" },
   { key: "academics", label: "Academics" },
@@ -165,35 +149,10 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
       return safeStr(c.description, "N/A");
     };
 
-    const getOfferedPrograms = (c: Partial<College> | null): string => {
-      if (!c) return "N/A";
-      const offered = safeJsonParse<Array<{ name?: string; title?: string } | string>>(c.offered_programs, []);
-      if (Array.isArray(offered) && offered.length > 0) {
-        return offered.map((p) => (typeof p === "string" ? p : p.name || p.title || "")).filter(Boolean).join(", ");
-      }
-      return "N/A";
-    };
-
-    const getDepartments = (c: Partial<College> | null): string => {
-      if (!c) return "N/A";
-      const depts = safeJsonParse<Array<{ name?: string } | string>>(c.departments, []);
-      if (Array.isArray(depts) && depts.length > 0) {
-        return depts.map((d) => (typeof d === "string" ? d : d.name || "")).filter(Boolean).join(", ");
-      }
-      return "N/A";
-    };
-
     return [
       {
         title: "Programs Offered",
-        rows: [
-          { label: "Featured Programs", left: getPrograms(c1), right: getPrograms(c2) },
-          { label: "All Offered Programs", left: getOfferedPrograms(c1), right: getOfferedPrograms(c2) },
-        ],
-      },
-      {
-        title: "Departments",
-        rows: [{ label: "Departments", left: getDepartments(c1), right: getDepartments(c2) }],
+        rows: [{ label: "Featured Programs", left: getPrograms(c1), right: getPrograms(c2) }],
       },
       {
         title: "Fit Scores",
@@ -217,35 +176,16 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
       return "N/A";
     };
 
-    const getAbout = (c: Partial<College> | null, key: string): string => {
-      if (!c) return "N/A";
-      const about = safeJsonParse<CollegeAbout>(c.about, {});
-      return safeStr(about[key], "N/A");
-    };
-
     return [
       {
-        title: "Amenities & Facilities",
-        rows: [
-          { label: "Amenities", left: getAmenities(c1), right: getAmenities(c2) },
-          { label: "Campus Size", left: getAbout(c1, "campus_size"), right: getAbout(c2, "campus_size") },
-          { label: "Class Mode", left: getAbout(c1, "class_mode"), right: getAbout(c2, "class_mode") },
-          { label: "WiFi", left: getAbout(c1, "wifi"), right: getAbout(c2, "wifi") },
-          { label: "Library", left: getAbout(c1, "library"), right: getAbout(c2, "library") },
-          { label: "Lab", left: getAbout(c1, "lab"), right: getAbout(c2, "lab") },
-        ],
+        title: "Facilities Provided",
+        rows: [{ label: "Facilities", left: getAmenities(c1), right: getAmenities(c2) }],
       },
     ];
   }, [c1, c2]);
 
   const financialSections: CompareSection[] = useMemo(() => {
     if (!c1 && !c2) return [];
-
-    const getAdmissions = (c: Partial<College> | null, key: string): string => {
-      if (!c) return "N/A";
-      const admissions = safeJsonParse<CollegeAdmission>(c.admissions, {});
-      return safeStr(admissions[key], "N/A");
-    };
 
     const getScholarships = (c: Partial<College> | null): string => {
       if (!c) return "N/A";
@@ -258,14 +198,6 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
 
     return [
       {
-        title: "Fee Structure",
-        rows: [
-          { label: "Fee Range", left: getAdmissions(c1, "fee_range"), right: getAdmissions(c2, "fee_range") },
-          { label: "Admission Fee", left: getAdmissions(c1, "admission_fee"), right: getAdmissions(c2, "admission_fee") },
-          { label: "Payment Options", left: getAdmissions(c1, "payment_options"), right: getAdmissions(c2, "payment_options") },
-        ],
-      },
-      {
         title: "Scholarships",
         rows: [{ label: "Available Scholarships", left: getScholarships(c1), right: getScholarships(c2) }],
       },
@@ -275,20 +207,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   const careerSections: CompareSection[] = useMemo(() => {
     if (!c1 && !c2) return [];
 
-    const getAlumni = (c: Partial<College> | null): string => {
-      if (!c) return "N/A";
-      const alumni = safeJsonParse<Array<{ name?: string } | string>>(c.alumni, []);
-      if (Array.isArray(alumni) && alumni.length > 0) {
-        return alumni.map((a) => (typeof a === "string" ? a : a.name || "")).filter(Boolean).join(", ");
-      }
-      return "N/A";
-    };
-
     return [
-      {
-        title: "Alumni Network",
-        rows: [{ label: "Alumni", left: getAlumni(c1), right: getAlumni(c2) }],
-      },
       {
         title: "Career Scores",
         rows: [
