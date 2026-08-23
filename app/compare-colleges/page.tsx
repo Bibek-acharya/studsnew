@@ -26,27 +26,15 @@ export default function CompareCollegesRoute() {
   const college1Id = useMemo(() => compareData ? extractId(compareData.college1) : null, [compareData]);
   const college2Id = useMemo(() => compareData ? extractId(compareData.college2) : null, [compareData]);
 
-  const { data: c1Data, isLoading: c1Loading } = useQuery({
-    queryKey: ["college-detail", college1Id],
-    queryFn: () => apiService.getCollegeById(college1Id!),
-    enabled: view === "result" && college1Id !== null,
-  });
-
-  const { data: c2Data, isLoading: c2Loading } = useQuery({
-    queryKey: ["college-detail", college2Id],
-    queryFn: () => apiService.getCollegeById(college2Id!),
-    enabled: view === "result" && college2Id !== null,
-  });
-
   const { data: comparisonData, isLoading: comparisonLoading } = useQuery({
     queryKey: ["college-comparison", college1Id, college2Id],
     queryFn: () => apiService.compareColleges(college1Id!, college2Id!),
     enabled: view === "result" && college1Id !== null && college2Id !== null,
   });
 
-  const c1Full = comparisonData?.data?.college1 || c1Data?.data || null;
-  const c2Full = comparisonData?.data?.college2 || c2Data?.data || null;
-  const loading = comparisonLoading || (college1Id !== null && c1Loading) || (college2Id !== null && c2Loading);
+  const c1Full = comparisonData?.data?.college1 || null;
+  const c2Full = comparisonData?.data?.college2 || null;
+  const loading = comparisonLoading;
 
   const handleNavigate = (newView: string, data?: { college1: CollegeInput; college2: CollegeInput }) => {
     if (newView === "compareCollegesResult" && data) {

@@ -61,15 +61,39 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
 
     useEffect(() => {
         const resolveCollege = async (id: number, name: string) => {
+            let college: College | undefined;
             try {
                 const response = await apiService.getCollegeById(id);
-                if (response?.data) return response.data;
+                college = response?.data;
             } catch {
+                // Historical comparison records can contain an institution ID.
+            }
+
+            try {
                 const response = await apiService.getColleges({ search: name, pageSize: 10, page: 1 });
                 const colleges = (response as { data?: { colleges?: College[] } })?.data?.colleges || [];
-                return colleges.find((college) => college.name?.toLowerCase() === name.toLowerCase()) || colleges[0];
+                const match = colleges.find((item) => item.name?.toLowerCase() === name.toLowerCase()) || colleges[0];
+                if (match) college = { ...match, image_url: match.image_url || college?.image_url || "" };
+            } catch {
+                // Continue with institution lookup for the logo only.
             }
-            return undefined;
+
+            try {
+                const response = await apiService.getPublicInstitutions({ search: name, limit: 10 });
+                const institutions = (response as { data?: { institutions?: InstitutionResult[] } })?.data?.institutions || [];
+                const institution = institutions.find((item) => item.college_id === college?.id) || institutions[0];
+                if (institution) {
+                    college = {
+                        ...college,
+                        id: college?.id || institution.college_id || 0,
+                        name: college?.name || institution.institution_name || name,
+                        image_url: institution.logo_url || institution.card_image_url || college?.image_url || "",
+                    } as College;
+                }
+            } catch {
+                // Keep the college search result when institution lookup is unavailable.
+            }
+            return college;
         };
 
         apiService.getPopularComparisons(6)
@@ -87,7 +111,9 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                         college2_logo_url: college2?.image_url || pair.college2_logo_url ? getImageUrl(college2?.image_url || pair.college2_logo_url) : "",
                     };
                 }));
-                setPopularComparisons(pairs);
+                setPopularComparisons(pairs.filter((pair) =>
+                    pair.college1_id > 0 && pair.college2_id > 0 && pair.college1_id !== pair.college2_id,
+                ));
             })
             .catch((err) => {
                 console.error("Failed to fetch popular comparisons:", err);
@@ -258,23 +284,12 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     };
 
     const handlePopularCompare = async (pair: PopularComparison) => {
-        // Fetch full college data for both colleges
-        let college1: Partial<College> = { name: pair.college1_name, id: pair.college1_id };
-        let college2: Partial<College> = { name: pair.college2_name, id: pair.college2_id };
-
-        try {
-            const [res1, res2] = await Promise.all([
-                apiService.getCollegeById(pair.college1_id),
-                apiService.getCollegeById(pair.college2_id),
-            ]);
-            if (res1?.data) college1 = res1.data;
-            if (res2?.data) college2 = res2.data;
-        } catch (err) {
-            console.error("Failed to fetch college details:", err);
-            return;
-        }
-
-        onNavigate("compareCollegesResult", { college1, college2 });
+        // Popular history can contain institution IDs. The comparison endpoint
+        // resolves those legacy IDs; avoid a direct college lookup here.
+        onNavigate("compareCollegesResult", {
+            college1: { name: pair.college1_name, id: pair.college1_id, image_url: pair.college1_logo_url },
+            college2: { name: pair.college2_name, id: pair.college2_id, image_url: pair.college2_logo_url },
+        });
     };
 
     const initials = (name: string) =>
