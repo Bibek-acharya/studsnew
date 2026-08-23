@@ -173,6 +173,7 @@ export const forumApi = {
     return data.data || data;
   },
   async createForumPost(_token: string, data: any): Promise<ForumPost> {
+    console.log("[createForumPost] Request body:", JSON.stringify(data, null, 2));
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts`, {
       method: "POST",
       headers: {
@@ -184,6 +185,7 @@ export const forumApi = {
     });
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
+      console.error("[createForumPost] Error response:", response.status, body);
       throw new Error(body.error || body.message || "Failed to create post");
     }
     const result = await response.json();
