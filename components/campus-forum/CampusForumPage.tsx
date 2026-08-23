@@ -635,8 +635,10 @@ const CreatePostModal: React.FC<{
       return;
     }
 
-    if (!title.trim() && !content.trim() && images.length === 0 && !video) {
-      setError("Please enter a title or post content.");
+    const hasPoll = showPoll && pollOptions.filter((o) => o.trim()).length >= 2;
+
+    if (!title.trim() && !content.trim() && images.length === 0 && !video && !hasPoll) {
+      setError("Please enter a title, post content, or add a poll.");
       return;
     }
 
@@ -660,7 +662,7 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm pt-20 sm:pt-24"
       onClick={handleClose}
     >
       <div
@@ -1121,7 +1123,7 @@ const CampusForumPage: React.FC = () => {
         category: "General",
         title: data.title || "Untitled",
         content: data.content,
-        poll_options: pollItems.length > 1 ? pollItems : undefined,
+        poll_options: pollItems.length > 1 ? JSON.stringify(pollItems) : undefined,
         is_poll: pollItems.length > 1,
         image_url: imageUrlValue,
         video_url: videoUrlValue,
