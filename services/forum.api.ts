@@ -282,4 +282,27 @@ export const forumApi = {
     const data = await response.json();
     return data.data || data;
   },
+  async reportForumPost(token: string, postId: number, reasons: string[], otherText: string): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/report`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+      body: JSON.stringify({ reasons, other_text: otherText }),
+    });
+    if (!response.ok) throw new Error("Failed to report post");
+  },
+  async notInterestedForumPost(token: string, postId: number): Promise<void> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/${postId}/not-interested`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to hide post");
+  },
 };

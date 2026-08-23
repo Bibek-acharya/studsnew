@@ -8,6 +8,7 @@ import DynamicIcon from "@/components/shared/DynamicIcon";
 import { Heart, MessageCircle, Image, BarChart2, Video, X, Plus, Send, ChevronDown, ChevronUp, Maximize2, ChevronRight, ChevronLeft, ArrowUp, ArrowDown, MessageSquare, Share2, MoreVertical } from "lucide-react";
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import ActionMenu from "./ActionMenu";
+import ReportPostModal from "./ReportPostModal";
 
 /* ── helpers ─────────────────────────────────────────────────────────── */
 
@@ -59,7 +60,12 @@ interface PollOption {
 function parsePollOptions(post: ForumPost): PollOption[] {
   if (!post.poll_options) return [];
   try {
-    return JSON.parse(post.poll_options);
+    const parsed = JSON.parse(post.poll_options);
+    if (!Array.isArray(parsed) || parsed.length === 0) return [];
+    if (typeof parsed[0] === "string") {
+      return parsed.map((text: string) => ({ text, votes: 0 }));
+    }
+    return parsed;
   } catch {
     return [];
   }
@@ -125,12 +131,12 @@ const PostCard: React.FC<{
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-xs tracking-wider shrink-0"
-            style={{ backgroundColor: post.community?.bg_color || "#0f8b8d" }}
+            style={{ backgroundColor: "#0000ff" }}
           >
             {post.community?.icon ? (
               <DynamicIcon name={post.community.icon} size={14} />
             ) : (
-              communityName.substring(0, 3).toUpperCase() || "U"
+              communityName.substring(0, 1).toUpperCase() || "G"
             )}
           </div>
           <div>
@@ -992,6 +998,7 @@ const CampusForumPage: React.FC = () => {
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
   const [lightboxType, setLightboxType] = useState<"image" | "video">("image");
   const [sharePost, setSharePost] = useState<ForumPost | null>(null);
+  const [reportPostId, setReportPostId] = useState<number | null>(null);
 
   const token = apiService.getToken();
 
@@ -1217,13 +1224,28 @@ const CampusForumPage: React.FC = () => {
     setLightboxType(type);
   };
 
-  const handleNotInterested = (postId: number) => {
+  const handleNotInterested = async (postId: number) => {
     setPosts((p) => p.filter((post) => post.id !== postId));
     showToast("Post hidden from your feed");
+    if (token) {
+      try {
+        await apiService.notInterestedForumPost(token, postId);
+      } catch {}
+    }
   };
 
   const handleReport = (postId: number) => {
-    showToast("Report submitted. Thank you for your feedback.");
+    setReportPostId(postId);
+  };
+
+  const handleReportSubmit = async (data: { reasons: string[]; otherText: string }) => {
+    if (!token || !reportPostId) return;
+    try {
+      await apiService.reportForumPost(token, reportPostId, data.reasons, data.otherText);
+      showToast("Report submitted. Thank you for your feedback.");
+    } catch {
+      showToast("Failed to submit report");
+    }
   };
 
   const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
@@ -1455,6 +1477,31 @@ const CampusForumPage: React.FC = () => {
                   />
                 ))}
 
+                {posts.length < 5 && communities.filter((c) => !c.is_general).length > 0 && (
+                  <div className="bg-white rounded-lg p-4 border border-slate-200/80 col-span-full">
+                    <div className="flex items-center justify-between mb-3 px-1">
+                      <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
+                      <button onClick={() => router.push("/campus-forum/communities")} className="text-blue-600 font-semibold text-xs hover:underline">View all</button>
+                    </div>
+                    <div className="flex overflow-x-auto gap-3 no-scrollbar scroll-smooth pb-1">
+                      {communities.filter((c) => !c.is_general).slice(0, 4).map((item) => (
+                        <div key={item.id} onClick={() => handleCommunityClick(item.id)} className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white cursor-pointer">
+                          <div className={`w-14 h-14 mb-2 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 ${item.bg_color || "bg-blue-100/70"}`}>
+                            {item.icon ? <DynamicIcon name={item.icon} size={24} /> : <span className="text-xl">🎓</span>}
+                          </div>
+                          <div className="mb-3 w-full">
+                            <p className="font-semibold text-sm leading-tight truncate max-w-[120px] mx-auto text-gray-900" title={item.name}>{item.name}</p>
+                            <p className="text-xs text-gray-500 mt-1">{item.member_count ?? 0} members</p>
+                          </div>
+                          <button onClick={(e) => { e.stopPropagation(); handleJoinToggle(item.id); }} disabled={joinLoading[item.id]} className={`w-full font-medium py-2 text-sm rounded-full transition-all active:scale-95 ${item.is_member ? "bg-green-600 hover:bg-green-700 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white"}`}>
+                            {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {posts.length > 5 && (
                   <div className="lg:hidden bg-white rounded-lg p-4 border border-slate-200/80">
                     <div className="flex items-center justify-between mb-3 px-1">
@@ -1499,7 +1546,7 @@ const CampusForumPage: React.FC = () => {
                   />
                 ))}
 
-                {posts.length > 10 && (
+                {(posts.length > 10 || (posts.length > 5 && posts.length <= 10)) && (
                   <div className="lg:hidden bg-white rounded-lg p-4 border border-slate-200/80">
                     <div className="flex items-center justify-between mb-3 px-1">
                       <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
@@ -1616,6 +1663,12 @@ const CampusForumPage: React.FC = () => {
         shareTitle={sharePost?.title || "Campus Forum Post"}
         shareText={sharePost?.content?.slice(0, 200) || "Check out this post on Campus Forum"}
         collegeName={sharePost?.title || "Post"}
+      />
+
+      <ReportPostModal
+        isOpen={reportPostId !== null}
+        onClose={() => setReportPostId(null)}
+        onSubmit={handleReportSubmit}
       />
 
       <ToastContainer toasts={toasts} />

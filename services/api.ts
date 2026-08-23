@@ -385,6 +385,8 @@ export const apiService = {
   deleteForumPost: forumApi.deleteForumPost.bind(forumApi),
   adminDeleteForumPost: forumApi.adminDeleteForumPost.bind(forumApi),
   uploadForumMedia: forumApi.uploadForumMedia.bind(forumApi),
+  reportForumPost: forumApi.reportForumPost.bind(forumApi),
+  notInterestedForumPost: forumApi.notInterestedForumPost.bind(forumApi),
 
   // Counselling
   createCounsellingBooking: counsellingApi.createCounsellingBooking.bind(counsellingApi),

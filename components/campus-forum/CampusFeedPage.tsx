@@ -31,6 +31,7 @@ import {
   ForumComment,
 } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
+import ReportPostModal from "./ReportPostModal";
 
 interface CommentProps {
   avatar: string;
@@ -159,6 +160,8 @@ const PostCardComponent: React.FC<{
   commentInput: string;
   setCommentInput: (postId: number, val: string) => void;
   onJoinCommunity?: (communityId: number) => void;
+  onNotInterested?: (postId: number) => void;
+  onReport?: (postId: number) => void;
 }> = ({
   post,
   onLike,
@@ -170,6 +173,8 @@ const PostCardComponent: React.FC<{
   commentInput,
   setCommentInput,
   onJoinCommunity,
+  onNotInterested,
+  onReport,
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -217,12 +222,12 @@ const PostCardComponent: React.FC<{
         <div className="flex items-center space-x-3">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm tracking-wide"
-            style={{ backgroundColor: community?.bg_color || "#0d9488" }}
+            style={{ backgroundColor: "#0000ff" }}
           >
             {community?.icon ? (
               <DynamicIcon name={community.icon} size={14} />
             ) : (
-              communityName.substring(0, 3).toUpperCase()
+              communityName.substring(0, 1).toUpperCase()
             )}
           </div>
           <div>
@@ -263,13 +268,13 @@ const PostCardComponent: React.FC<{
             </button>
             {isDropdownOpen && (
               <div className="absolute right-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-100 z-50 py-2">
-                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                <button onClick={() => { setIsDropdownOpen(false); }} className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                   <Share className="w-5 h-5 text-gray-400" /> Share via...
                 </button>
-                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                <button onClick={() => { setIsDropdownOpen(false); onNotInterested?.(post.id); }} className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                   <EyeOff className="w-5 h-5 text-gray-400" /> Not interested
                 </button>
-                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
+                <button onClick={() => { setIsDropdownOpen(false); onReport?.(post.id); }} className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
                   <Flag className="w-5 h-5 text-red-500" /> Report
                 </button>
               </div>
@@ -392,7 +397,9 @@ const PostCardComponent: React.FC<{
 const PollPostComponent: React.FC<{
   post: ForumPost;
   onVote: (postId: number, optionIdx: number) => void;
-}> = ({ post, onVote }) => {
+  onNotInterested?: (postId: number) => void;
+  onReport?: (postId: number) => void;
+}> = ({ post, onVote, onNotInterested, onReport }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isJoined, setIsJoined] = useState(post.community?.is_member || false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -440,12 +447,12 @@ const PollPostComponent: React.FC<{
         <div className="flex items-center space-x-3">
           <div
             className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm tracking-wide"
-            style={{ backgroundColor: community?.bg_color || "#0d9488" }}
+            style={{ backgroundColor: "#0000ff" }}
           >
             {community?.icon ? (
               <DynamicIcon name={community.icon} size={14} />
             ) : (
-              communityName.substring(0, 3).toUpperCase()
+              communityName.substring(0, 1).toUpperCase()
             )}
           </div>
           <div>
@@ -474,13 +481,13 @@ const PollPostComponent: React.FC<{
             </button>
             {isDropdownOpen && (
               <div className="absolute right-0 mt-1 w-56 bg-white rounded-md shadow-lg border border-gray-100 z-50 py-2">
-                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                <button onClick={() => { setIsDropdownOpen(false); }} className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                   <Share className="w-5 h-5 text-gray-400" /> Share via...
                 </button>
-                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
+                <button onClick={() => { setIsDropdownOpen(false); onNotInterested?.(post.id); }} className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition">
                   <EyeOff className="w-5 h-5 text-gray-400" /> Not interested
                 </button>
-                <button className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
+                <button onClick={() => { setIsDropdownOpen(false); onReport?.(post.id); }} className="w-full text-left px-4 py-2.5 text-[15px] font-medium text-red-600 hover:bg-red-50 flex items-center gap-3 transition">
                   <Flag className="w-5 h-5 text-red-500" /> Report
                 </button>
               </div>
@@ -727,8 +734,36 @@ const CampusFeedPage: React.FC = () => {
     }
   };
 
+  const [reportPostId, setReportPostId] = useState<number | null>(null);
+
+  const handleNotInterested = async (postId: number) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+    addToast("Post hidden from your feed", "info");
+    if (token) {
+      try {
+        await apiService.notInterestedForumPost(token, postId);
+      } catch {}
+    }
+  };
+
+  const handleReport = (postId: number) => {
+    setReportPostId(postId);
+  };
+
+  const handleReportSubmit = async (data: { reasons: string[]; otherText: string }) => {
+    if (!token || !reportPostId) return;
+    try {
+      await apiService.reportForumPost(token, reportPostId, data.reasons, data.otherText);
+      addToast("Report submitted. Thank you for your feedback.", "success");
+    } catch {
+      addToast("Failed to submit report", "error");
+    }
+  };
+
   const regularPosts = posts.filter((p) => !p.is_poll);
   const pollPosts = posts.filter((p) => p.is_poll);
+  const displayRegularPosts = isAuthenticated ? regularPosts : regularPosts.slice(0, 3);
+  const displayPollPosts = isAuthenticated ? pollPosts : pollPosts.slice(0, 3);
 
   return (
     <div className="min-h-screen bg-white antialiased">
@@ -844,7 +879,7 @@ const CampusFeedPage: React.FC = () => {
           )}
 
           {/* Regular Posts */}
-          {regularPosts.map((post) => (
+          {displayRegularPosts.map((post) => (
             <PostCardComponent
               key={post.id}
               post={post}
@@ -858,15 +893,19 @@ const CampusFeedPage: React.FC = () => {
               setCommentInput={(postId, val) =>
                 setCommentInputs((prev) => ({ ...prev, [postId]: val }))
               }
+              onNotInterested={handleNotInterested}
+              onReport={handleReport}
             />
           ))}
 
           {/* Poll Posts */}
-          {pollPosts.map((post) => (
+          {displayPollPosts.map((post) => (
             <PollPostComponent
               key={post.id}
               post={post}
               onVote={handlePollVote}
+              onNotInterested={handleNotInterested}
+              onReport={handleReport}
             />
           ))}
         </div>
@@ -882,7 +921,7 @@ const CampusFeedPage: React.FC = () => {
               </h3>
             </div>
             <div className="space-y-4">
-              {posts.slice(0, 3).map((post) => (
+              {posts.slice(0, 5).map((post) => (
                 <div key={post.id}>
                   <h4 className="font-bold text-gray-800 text-sm leading-snug cursor-pointer hover:text-blue-600 transition">
                     {post.title}
@@ -975,6 +1014,12 @@ const CampusFeedPage: React.FC = () => {
           ))}
         </div>
       )}
+
+      <ReportPostModal
+        isOpen={reportPostId !== null}
+        onClose={() => setReportPostId(null)}
+        onSubmit={handleReportSubmit}
+      />
     </div>
   );
 };
