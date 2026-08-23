@@ -152,8 +152,15 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     };
 
     const handleSelect1 = async (college: College) => {
+        // Check if same college is already selected in the other slot
+        if (selectedCollege2?.id && college.id === selectedCollege2.id) {
+            setError({ type: "search1", message: "Cannot compare a college with itself" });
+            return;
+        }
+        
         setCollege1(college.name);
         setShowDropdown1(false);
+        setError(null);
         
         // If institution has a college_id, fetch full college data
         if (college.id && !college.established && !college.featured_programs) {
@@ -171,8 +178,15 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     };
 
     const handleSelect2 = async (college: College) => {
+        // Check if same college is already selected in the other slot
+        if (selectedCollege1?.id && college.id === selectedCollege1.id) {
+            setError({ type: "search2", message: "Cannot compare a college with itself" });
+            return;
+        }
+        
         setCollege2(college.name);
         setShowDropdown2(false);
+        setError(null);
         
         // If institution has a college_id, fetch full college data
         if (college.id && !college.established && !college.featured_programs) {
@@ -192,6 +206,12 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     const handleCompare = () => {
         if (!selectedCollege1 || !selectedCollege2) return;
 
+        // Prevent comparing same college
+        if (selectedCollege1.id && selectedCollege2.id && selectedCollege1.id === selectedCollege2.id) {
+            setError({ type: "search1", message: "Cannot compare a college with itself" });
+            return;
+        }
+
         if (selectedCollege1.id && selectedCollege2.id) {
             apiService.logComparison({
                 college1_id: selectedCollege1.id,
@@ -209,11 +229,23 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
         });
     };
 
-    const handlePopularCompare = (pair: PopularComparison) => {
-        onNavigate("compareCollegesResult", {
-            college1: { name: pair.college1_name, id: pair.college1_id } as Partial<College>,
-            college2: { name: pair.college2_name, id: pair.college2_id } as Partial<College>,
-        });
+    const handlePopularCompare = async (pair: PopularComparison) => {
+        // Fetch full college data for both colleges
+        let college1: Partial<College> = { name: pair.college1_name, id: pair.college1_id };
+        let college2: Partial<College> = { name: pair.college2_name, id: pair.college2_id };
+
+        try {
+            const [res1, res2] = await Promise.all([
+                apiService.getCollegeById(pair.college1_id),
+                apiService.getCollegeById(pair.college2_id),
+            ]);
+            if (res1?.data) college1 = res1.data;
+            if (res2?.data) college2 = res2.data;
+        } catch (err) {
+            console.error("Failed to fetch college details:", err);
+        }
+
+        onNavigate("compareCollegesResult", { college1, college2 });
     };
 
     const initials = (name: string) =>
@@ -261,7 +293,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     );
 
     return (
-        <div className="bg-[#f8f9fc] min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
+        <div className="bg-white min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
             <div className="bg-brand-blue w-full max-w-350 md:mx-auto relative flex flex-col rounded-2xl">
 
                 <main className="relative z-10 flex-1 flex flex-col items-center justify-center py-12">
@@ -343,7 +375,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
             )}
 
             {loadingPopular ? (
-                <section className="w-full max-w-7xl mx-auto mt-16 px-4">
+                <section className="w-full max-w-7xl mx-auto mt-16 px-4 md:px-0">
                     <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {[1, 2, 3].map((i) => (
@@ -363,7 +395,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                     </div>
                 </section>
             ) : popularComparisons.length > 0 && (
-                <section className="w-full max-w-7xl mx-auto mt-16 px-4">
+                <section className="w-full max-w-7xl mx-auto mt-16 px-4 md:px-0">
                     <h2 className="text-[#1a2b4c] text-3xl font-bold mb-8 tracking-tight">Popular comparisons</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
