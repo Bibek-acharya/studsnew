@@ -669,7 +669,7 @@ const CreatePostModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[130] flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm pt-20 sm:pt-24"
+      className="fixed inset-0 z-[160] flex items-center justify-center bg-black/40 p-2 sm:p-4 backdrop-blur-sm pt-20 sm:pt-24"
       onClick={handleClose}
     >
       <div
