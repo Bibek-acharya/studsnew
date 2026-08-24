@@ -335,15 +335,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   if (!c1 && !c2) {
     return (
       <div className="bg-white min-h-screen py-4 md:py-8 px-4 md:px-0 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500 font-medium mb-4">No colleges selected for comparison.</p>
-          <button
-            onClick={() => onNavigate("search")}
-            className="text-[#2c51c6] font-semibold hover:underline"
-          >
-            Go back to search
-          </button>
-        </div>
+        <p className="text-gray-500 font-medium">No colleges selected for comparison.</p>
       </div>
     );
   }

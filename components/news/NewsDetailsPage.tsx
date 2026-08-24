@@ -313,7 +313,7 @@ const NewsDetailsPage: React.FC<{
 
   return (
     <div className="bg-white text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900">
-      <div className="max-w-350 mx-auto py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
+      <div className="max-w-350 mx-auto px-4 py-8 flex flex-col lg:flex-row gap-10 lg:gap-16">
         <main className="w-full lg:w-[68%]">
           <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-sm font-medium text-gray-500 mb-6 border-b border-gray-100 pb-4">
             <span
@@ -392,10 +392,11 @@ const NewsDetailsPage: React.FC<{
             </div>
           )}
 
-          <RichText
-            html={article.content || article.excerpt || ""}
-            className="mb-12"
-          />
+          <div className="mb-12 overflow-x-auto">
+            <RichText
+              html={article.content || article.excerpt || ""}
+            />
+          </div>
 
           <hr className="border-gray-100 mb-8" />
 
