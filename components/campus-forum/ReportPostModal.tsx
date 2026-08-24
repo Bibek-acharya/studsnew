@@ -6,7 +6,7 @@ import { X, Flag } from "lucide-react";
 interface ReportPostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: { reasons: string[]; otherText: string }) => void;
+  onSubmit: (data: { reasons: string[]; otherText: string }) => Promise<void>;
 }
 
 const REASONS = [
@@ -18,6 +18,7 @@ const REASONS = [
 export default function ReportPostModal({ isOpen, onClose, onSubmit }: ReportPostModalProps) {
   const [selectedReasons, setSelectedReasons] = useState<string[]>([]);
   const [otherReason, setOtherReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleReason = (reason: string) => {
     setSelectedReasons((prev) =>
@@ -25,11 +26,16 @@ export default function ReportPostModal({ isOpen, onClose, onSubmit }: ReportPos
     );
   };
 
-  const handleSubmit = () => {
-    onSubmit({ reasons: selectedReasons, otherText: otherReason });
-    setSelectedReasons([]);
-    setOtherReason("");
-    onClose();
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    try {
+      await onSubmit({ reasons: selectedReasons, otherText: otherReason });
+    } finally {
+      setIsSubmitting(false);
+      setSelectedReasons([]);
+      setOtherReason("");
+      onClose();
+    }
   };
 
   if (!isOpen) return null;
@@ -85,16 +91,17 @@ export default function ReportPostModal({ isOpen, onClose, onSubmit }: ReportPos
         <div className="mt-5 flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            disabled={isSubmitting}
+            className="flex-1 rounded-xl border border-gray-200 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            disabled={selectedReasons.length === 0 && !otherReason.trim()}
+            disabled={(selectedReasons.length === 0 && !otherReason.trim()) || isSubmitting}
             className="flex-1 rounded-xl bg-[#0000ff] py-2.5 text-sm font-semibold text-white hover:bg-[#0000cc] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
-            Report
+            {isSubmitting ? "Submitting..." : "Report"}
           </button>
         </div>
       </div>
