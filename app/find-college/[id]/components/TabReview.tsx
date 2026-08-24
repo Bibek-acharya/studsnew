@@ -10,9 +10,21 @@ interface TabReviewProps {
   reviewsLoading: boolean;
 }
 
+interface ReviewLike {
+  rating?: number;
+  ratings?: Record<string, number>;
+}
+
 const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) => {
   const router = useRouter();
   const hasReviews = reviewsData?.reviews?.length > 0;
+
+  // API returns snake_case fields plus a precomputed per-review rating.
+  const reviewRating = (r: ReviewLike): number => {
+    if (typeof r?.rating === "number" && r.rating > 0) return r.rating;
+    const vals = Object.values(r?.ratings || {}) as number[];
+    return vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : 0;
+  };
 
   if (reviewsLoading) {
     return (
@@ -39,21 +51,18 @@ const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) =>
     <div>
       <div className="mb-8 flex flex-col items-center gap-8 rounded-md border border-gray-200 bg-white p-8 md:flex-row">
         <div className="text-center md:border-r md:pr-8 md:text-left">
-          <h2 className="mb-2 text-5xl font-extrabold text-gray-900">{reviewsData?.overallRating?.toFixed(1) || "0.0"}</h2>
+          <h2 className="mb-2 text-5xl font-extrabold text-gray-900">{reviewsData?.overall_rating?.toFixed(1) || "0.0"}</h2>
           <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
             {Array.from({ length: 5 }).map((_, idx) => (
-              <i key={idx} className={`fa-solid fa-star text-[14px] ${idx < Math.round(reviewsData?.overallRating || 0) ? "text-yellow-400" : "text-gray-300"}`}></i>
+              <i key={idx} className={`fa-solid fa-star text-[14px] ${idx < Math.round(reviewsData?.overall_rating || 0) ? "text-yellow-400" : "text-gray-300"}`}></i>
             ))}
           </div>
-          <p className="text-[13px] font-medium text-gray-500">Based on {reviewsData?.reviewCount || 0} reviews</p>
+          <p className="text-[13px] font-medium text-gray-500">Based on {reviewsData?.review_count || 0} reviews</p>
         </div>
         <div className="w-full flex-1 space-y-2.5">
           {[5, 4, 3, 2, 1].map((star) => {
-            const count = reviewsData?.reviews?.filter((r: any) => {
-              const avg = Object.values(r.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
-              return Math.round(avg) === star;
-            }).length || 0;
-            const pct = reviewsData?.reviewCount ? Math.round((count / reviewsData.reviewCount) * 100) : 0;
+            const count = reviewsData?.reviews?.filter((r: any) => Math.round(reviewRating(r)) === star).length || 0;
+            const pct = reviewsData?.review_count ? Math.round((count / reviewsData.review_count) * 100) : 0;
             return <RatingBar key={star} label={String(star)} width={`${pct}%`} color={star >= 4 ? "bg-green-500" : star >= 3 ? "bg-yellow-400" : "bg-orange-400"} pct={`${pct}%`} />;
           })}
         </div>
@@ -69,8 +78,7 @@ const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) =>
       {hasReviews ? (
         <div className="space-y-5">
           {reviewsData.reviews.map((review: any, idx: number) => {
-            const avgRating = Object.values(review.ratings || {}).reduce((s: number, v: any) => s + v, 0) / 10;
-            return <ReviewCard key={review.id} initials={review.userInitials || "U"} name={review.userName || "Anonymous"} subtitle={`${review.course ? `${review.course} · ` : ""}Batch ${review.batchYear}`} rating={Math.round(avgRating)} pros={review.pros} cons={review.cons} tone={idx % 2 === 0 ? "blue" : "purple"} yearlyFee={review.yearlyFee} scholarship={review.scholarship} internshipOutcome={review.internshipOutcome} ratings={review.ratings} />;
+            return <ReviewCard key={review.id} initials={review.user_initials || "U"} name={review.user_name || "Anonymous"} subtitle={`${review.course ? `${review.course} · ` : ""}Batch ${review.batch_year}`} rating={Math.round(reviewRating(review))} pros={review.pros} cons={review.cons} tone={idx % 2 === 0 ? "blue" : "purple"} yearlyFee={review.yearly_fee} scholarship={review.scholarship} internshipOutcome={review.internship_outcome} ratings={review.ratings} />;
           })}
         </div>
       ) : (
