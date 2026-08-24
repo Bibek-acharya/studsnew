@@ -169,7 +169,7 @@ const BlogPage: React.FC = () => {
 
   return (
     <div className="bg-white text-gray-800 antialiased pb-16 min-h-screen">
-      <div className="max-w-350 mx-auto py-8 px-4 sm:px-6">
+      <div className="max-w-350 mx-auto py-8">
         <section className="mb-10">
           <h2 className="text-3xl font-bold text-gray-900 mb-5">
             Browse by category

@@ -236,12 +236,12 @@ const NewsPage: React.FC = () => {
   );
 
   return (
-    <main className="max-w-350 mx-auto py-10 space-y-14 min-h-screen text-slate-800 px-4 sm:px-6">
+    <main className="max-w-350 mx-auto py-10 space-y-14 min-h-screen text-slate-800">
       <section>
         <h1 className="text-3xl font-bold text-slate-900 mb-5">
           Browse by category
         </h1>
-        <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {categoryPills.map((pill) => {
             const isActive = activeCategory === pill;
             return (
