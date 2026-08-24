@@ -158,13 +158,20 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   const academicsSections: CompareSection[] = useMemo(() => {
     if (!c1 && !c2) return [];
 
-    const getPrograms = (c: Partial<College> | null): string => {
+    const getPrograms = (c: Partial<College> | null): React.ReactNode => {
       if (!c) return "N/A";
       const names = collectProgramNames(
         c.featured_programs,
         (c as Record<string, unknown>).courses,
       );
-      return names.length > 0 ? names.join(", ") : "N/A";
+      if (names.length === 0) return "N/A";
+      return (
+        <ul className="list-disc pl-5 space-y-1 font-normal">
+          {names.map((name) => (
+            <li key={name}>{name}</li>
+          ))}
+        </ul>
+      );
     };
 
     return [
