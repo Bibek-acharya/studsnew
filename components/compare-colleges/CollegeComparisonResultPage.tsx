@@ -19,8 +19,8 @@ type TabKey =
 
 interface CompareRow {
   label: string;
-  left: string;
-  right: string;
+  left: React.ReactNode;
+  right: React.ReactNode;
 }
 
 interface CompareSection {
@@ -66,6 +66,22 @@ const safeJsonParse = <T,>(val: unknown, fallback: T): T => {
     }
   }
   return val as T;
+};
+
+const getItemName = (item: unknown): string => {
+  if (typeof item === "string") return item.trim();
+  if (item && typeof item === "object") {
+    const o = item as Record<string, unknown>;
+    return String(o.courseName || o.title || o.name || "").trim();
+  }
+  return "";
+};
+
+export const collectProgramNames = (...sources: unknown[]): string[] => {
+  const names = sources.flatMap((source) =>
+    safeJsonParse<unknown[]>(source, []).map(getItemName),
+  );
+  return Array.from(new Set(names.filter(Boolean)));
 };
 
 const renderComparisonRows = (rows: CompareRow[]) => (
@@ -144,9 +160,11 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
 
     const getPrograms = (c: Partial<College> | null): string => {
       if (!c) return "N/A";
-      const featured = safeJsonParse<string[]>(c.featured_programs, []);
-      if (featured.length > 0) return featured.join(", ");
-      return safeStr(c.description, "N/A");
+      const names = collectProgramNames(
+        c.featured_programs,
+        (c as Record<string, unknown>).courses,
+      );
+      return names.length > 0 ? names.join(", ") : "N/A";
     };
 
     return [
@@ -169,11 +187,17 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   const facilitiesSections: CompareSection[] = useMemo(() => {
     if (!c1 && !c2) return [];
 
-    const getAmenities = (c: Partial<College> | null): string => {
+    const getAmenities = (c: Partial<College> | null): React.ReactNode => {
       if (!c) return "N/A";
-      const items = safeJsonParse<string[]>(c.amenities, []);
-      if (Array.isArray(items) && items.length > 0) return items.join(", ");
-      return "N/A";
+      const items = safeJsonParse<unknown[]>(c.amenities, []);
+      if (!Array.isArray(items) || items.length === 0) return "N/A";
+      return (
+        <ul className="list-disc pl-5 space-y-1">
+          {items.map((item, i) => (
+            <li key={i}>{typeof item === "string" ? item : getItemName(item)}</li>
+          ))}
+        </ul>
+      );
     };
 
     return [
@@ -505,7 +529,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
           )}
 
           {activeTab === "reviews" && (
-            <div className="max-w-4xl mx-auto">
+            <div>
               <div className="flex items-center gap-2 mb-4">
                 <i className="fa-solid fa-star text-[#1b254b]"></i>
                 <h2 className="text-xl font-bold text-[#1b254b]">Reviews & Reputation</h2>
