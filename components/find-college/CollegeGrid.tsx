@@ -331,8 +331,8 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
         affiliation: inst.affiliation || "",
         non_university_affiliation: inst.non_university_affiliation || "",
         featured: inst.featured || false,
-        rating: 0,
-        reviews: 0,
+        rating: inst.rating || 0,
+        reviews: inst.review_count || 0,
         type: inst.type || inst.institution_type || "College",
       }));
 
