@@ -148,7 +148,6 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
       { label: "Year Established", left: safeStr(c1?.established), right: safeStr(c2?.established) },
       { label: "Type", left: safeStr(c1?.type), right: safeStr(c2?.type) },
       { label: "Affiliated University", left: safeStr(c1?.affiliation), right: safeStr(c2?.affiliation) },
-      { label: "Total Students", left: safeStr(c1?.students), right: safeStr(c2?.students) },
       { label: "Location", left: safeStr(c1?.location), right: safeStr(c2?.location) },
       { label: "Total Programs", left: safeStr(c1?.programs), right: safeStr(c2?.programs) },
       { label: "Verified", left: c1?.verified ? "Yes" : "No", right: c2?.verified ? "Yes" : "No" },
