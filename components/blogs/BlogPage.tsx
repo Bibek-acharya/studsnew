@@ -71,7 +71,9 @@ const BlogPage: React.FC = () => {
               (b: any): BlogEntry => ({
                 id: b.id,
                 title: b.title,
-                slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
+                slug: b.slug
+                  ? `provider-${b.slug}`
+                  : `provider-${(b.title || "").toLowerCase().replace(/\s+/g, "-")}`,
                 excerpt: stripHtml(b.content || "").slice(0, 200) || "",
                 content: b.content || "",
                 image: b.image_url || "",
@@ -98,7 +100,9 @@ const BlogPage: React.FC = () => {
             const instBlogs = instData.blogs.map((b: any): BlogEntry => ({
               id: b.id,
               title: b.title,
-              slug: b.title?.toLowerCase().replace(/\s+/g, "-") || "",
+              slug:
+                b.slug ||
+                `inst-${(b.title || "").toLowerCase().replace(/\s+/g, "-")}`,
               excerpt:
                 stripHtml(b.excerpt || b.content || "").slice(0, 200) || "",
               content: b.content || "",

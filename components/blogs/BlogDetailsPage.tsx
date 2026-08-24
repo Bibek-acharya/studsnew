@@ -14,6 +14,7 @@ import {
   getPublicBlogByID,
   getPublicBlogBySlug,
 } from "@/services/scholarshipProviderApi";
+import { getPublicInstitutionBlogBySlug } from "@/services/institutionBlogsApi";
 import { useAuth } from "@/services/AuthContext";
 import { getImageUrl, stripHtml } from "@/services/api";
 import RichText from "@/components/RichText";
@@ -75,7 +76,31 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             const json = await res.json();
             blogResult = json?.data || json;
             commentsData = await fetchBlogComments(safeId).catch(() => []);
-          } else {
+        } else if (safeId.startsWith("inst-")) {
+          const instBlog = await getPublicInstitutionBlogBySlug(safeId);
+          if (instBlog) {
+            setBlog({
+              id: instBlog.id,
+              title: instBlog.title,
+              slug: safeId,
+              excerpt: instBlog.excerpt || "",
+              content: instBlog.content || "",
+              image: instBlog.image || "",
+              author: "Institution",
+              category:
+                (instBlog as { blog_category?: string }).blog_category ||
+                instBlog.category ||
+                "Others",
+              tags: [],
+              read_time: instBlog.read_time || "3 min",
+              featured: false,
+              published: instBlog.status === "published",
+              views: 0,
+              created_at: instBlog.published_at || instBlog.created_at,
+            });
+            setRelated([]);
+          }
+        } else {
             [blogResult, commentsData] = await Promise.all([
               fetchPublicBlogBySlug(safeId),
               fetchBlogComments(safeId),

@@ -64,6 +64,7 @@ async function uploadFile(file: File, folder: string): Promise<string> {
 
 export interface InstitutionBlog {
   id: number;
+  slug?: string;
   institution_id: number;
   title: string;
   content: string;
@@ -143,6 +144,20 @@ export const institutionBlogsApi = {
     return uploadFile(file, folder);
   },
 };
+
+export async function getPublicInstitutionBlogBySlug(
+  slug: string,
+): Promise<InstitutionBlog | null> {
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const res = await fetch(
+    `${API_BASE_URL}/api/v1/institutions/public/blogs/by-slug/${slug}`,
+    { headers: { "Content-Type": "application/json" }, credentials: "include" },
+  );
+  if (!res.ok) return null;
+  const data = await res.json();
+  return data?.data || null;
+}
 
 export async function getPublicInstitutionBlogs(
   page = 1,

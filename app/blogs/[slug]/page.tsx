@@ -28,6 +28,20 @@ async function fetchMeta(slug: string) {
         description: stripHtml(d.short_desc || ""),
       };
     }
+    if (slug.startsWith("inst-")) {
+      const res = await fetch(
+        `${API_BASE}/api/v1/institutions/public/blogs/by-slug/${slug}`,
+        { cache: "no-store" },
+      );
+      if (!res.ok) return null;
+      const json = await res.json();
+      const d = json.data || json;
+      return {
+        title: d.title,
+        image: d.image || "",
+        description: stripHtml(d.excerpt || ""),
+      };
+    }
     const rawSlug = slug;
     const isNumeric = /^\d+$/.test(rawSlug);
     const url = isNumeric
