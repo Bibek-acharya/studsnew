@@ -373,7 +373,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
             <div className="p-5 md:p-6 relative flex gap-4 rounded-tl-xl md:rounded-bl-none">
               <button
                 onClick={() => onNavigate("search")}
-                className="absolute top-4 right-4 p-1.5 border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+                className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
               >
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
@@ -419,7 +419,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
             <div className="p-5 md:p-6 relative flex gap-4">
               <button
                 onClick={() => onNavigate("search")}
-                className="absolute top-4 right-4 p-1.5 border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+                className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
               >
                 <i className="fa-solid fa-pen text-[11px]"></i>
               </button>
