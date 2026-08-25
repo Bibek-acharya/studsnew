@@ -6,7 +6,6 @@ import {
   Building2,
   GraduationCap,
   CreditCard,
-  Users,
   Bookmark,
   BookOpen,
 } from "lucide-react";
@@ -243,20 +242,6 @@ const CourseGrid: React.FC<CourseGridProps> = ({
                         className="font-bold text-[#0014FF] truncate"
                       >
                         {course.estFee || "-"}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex items-center whitespace-nowrap overflow-hidden">
-                    <div className="w-6 flex justify-center shrink-0">
-                      <Users className="w-4 h-4 text-gray-400" />
-                    </div>
-                    <div className="text-[0.8rem] min-w-0 overflow-hidden">
-                      <span className="font-semibold text-gray-800 shrink-0">Seats:</span>{" "}
-                      <span
-                        title={String(course.fullTimeCourses?.[0]?.seats || "-")}
-                        className="text-gray-500 truncate"
-                      >
-                        {course.fullTimeCourses?.[0]?.seats || "-"}
                       </span>
                     </div>
                   </div>
