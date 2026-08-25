@@ -285,17 +285,14 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   return (
     <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen px-4 sm:px-0">
       <div className="mb-6">
-        <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-            {badgeLabel}
-          </span>
-          {event.featured && (
+        {event.featured && (
+          <div className="flex flex-wrap items-center gap-3 mb-4">
             <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
               Featured
             </span>
-          )}
-        </div>
-        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
+          </div>
+        )}
+        <h1 className="text-xl sm:text-2xl lg:text-4xl font-extrabold text-gray-900 leading-tight mb-4">
           {event.title}
         </h1>
       </div>
