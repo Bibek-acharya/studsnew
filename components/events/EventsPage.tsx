@@ -272,7 +272,7 @@ const EventsPage: React.FC = () => {
         {featured && (
           <section className="mb-14">
             <h2 className="text-3xl font-bold mb-4">
-              Featured Story of the Week
+              Featured Event of the Week
             </h2>
             <Link
               href={`/events/${(featured as any).slug || featured.id}`}
@@ -296,7 +296,7 @@ const EventsPage: React.FC = () => {
                       90 days ago
                     </span>
                   </div>
-                  <h3 className="text-3xl font-bold mb-2">{featured.title}</h3>
+                  <h3 className="text-3xl font-bold mb-2 line-clamp-2">{featured.title}</h3>
                   <p className="text-gray-200 text-base font-medium line-clamp-2">
                     {stripHtml(featured.excerpt || "")}
                   </p>
