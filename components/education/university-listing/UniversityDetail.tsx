@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
-import { apiService, University, UniversityCollege } from "@/services/api";
+import { apiService, University } from "@/services/api";
 import { useFollow } from "@/app/find-college/[id]/hooks/useFollow";
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import UniversityBanner from "./UniversityBanner";
@@ -51,7 +51,6 @@ const UniversityDetail: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<TabKey>(getInitialTab);
   const [university, setUniversity] = useState<University | null>(null);
-  const [colleges, setColleges] = useState<UniversityCollege[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sponsoredInsts, setSponsoredInsts] = useState<any[]>([]);
@@ -96,7 +95,6 @@ const UniversityDetail: React.FC = () => {
       .getUniversityById(id)
       .then((res) => {
         setUniversity(decodeFields(res.data.university));
-        setColleges(res.data.colleges || []);
       })
       .catch(() => setError("Failed to load university details"))
       .finally(() => setLoading(false));
