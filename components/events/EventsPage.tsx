@@ -344,46 +344,79 @@ const EventsPage: React.FC = () => {
               return (
                 <article
                   key={event.id}
-                  className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md p-5 flex flex-col transition-all duration-300 group cursor-pointer"
+                  className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
-                  <div className="mb-4">
-                    <span
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${badgeClass(mapped)}`}
-                    >
-                      {mapped}
-                    </span>
-                  </div>
-
-                  <div className="rounded-md overflow-hidden aspect-16/10 mb-5 bg-gray-100 h-30">
+                  <div className="h-35 w-full overflow-hidden p-4">
                     <img
                       src={event.image}
                       alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                      className="w-full h-full object-cover rounded-md"
                     />
                   </div>
+                  <div className="p-5 flex flex-col grow">
+                    <div className="flex justify-between items-center mb-3">
+                      <span
+                        className={`${badgeClass(mapped)} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}
+                      >
+                        {mapped}
+                      </span>
+                      <span className="flex items-center text-xs text-gray-500 font-semibold">
+                        <i className="fa-regular fa-calendar mr-1.5"></i> Oct 25
+                        , 2024
+                      </span>
+                    </div>
 
-                  <Link
-                    href={`/events/${(event as any).slug || event.id}`}
-                    className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors line-clamp-1"
-                    title={event.title}
-                  >
-                    {event.title}
-                  </Link>
-                  <p className="text-slate-500 text-sm mb-5 grow line-clamp-2 leading-relaxed overflow-hidden break-words" title={stripHtml(event.excerpt || "")}>
-                    {stripHtml(event.excerpt || "")}
-                  </p>
-
-                  <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
-                    <span className="text-slate-400 flex items-center font-medium">
-                      <i className="fa-regular fa-clock mr-1.5"></i>{" "}
-                      {event.date || "TBA"}
-                    </span>
                     <Link
                       href={`/events/${(event as any).slug || event.id}`}
-                      className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200"
+                      className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff] line-clamp-1`}
+                      title={event.title}
                     >
-                      View Details
+                      {event.title}
                     </Link>
+
+                    <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
+                      <i className="fa-regular fa-building mr-2 text-gray-500"></i>{" "}
+                      {event.organizer}
+                    </div>
+                    <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
+                      <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
+                      {event.location}
+                    </div>
+
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-1 leading-relaxed font-medium" title={stripHtml(event.excerpt || "")}>
+                      {stripHtml(event.excerpt || "")}
+                    </p>
+
+                    <div className="mt-auto flex gap-2">
+                      <Link
+                        href={`/events/${(event as any).slug || event.id}`}
+                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
+                      >
+                        Details
+                      </Link>
+                      <button
+                        className={`flex-1 text-white text-sm font-bold py-2 rounded-md transition bg-brand-blue cursor-pointer hover:bg-blue-600`}
+                      >
+                        Register Now
+                      </button>
+                      <button
+                        className={`w-10 flex items-center justify-center border rounded-md transition-colors shrink-0 ${
+                          isBookmarked
+                            ? "border-blue-200 bg-blue-50"
+                            : "border-gray-200 hover:bg-gray-50"
+                        }`}
+                        title={isBookmarked ? "Remove Bookmark" : "Bookmark"}
+                        onClick={(e) => toggleBookmark(e, event.id)}
+                      >
+                        <Bookmark
+                          className={`w-4 h-4 transition-all ${
+                            isBookmarked
+                              ? "text-[#0000ff] fill-[#0000ff]"
+                              : "text-gray-400"
+                          }`}
+                        />
+                      </button>
+                    </div>
                   </div>
                 </article>
               );
