@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import HoverTooltip from "./HoverTooltip";
+import { stripHtml } from "@/services/api";
 
 interface CampusEventsSectionProps {
   onNavigate: (view: string, data?: { [key: string]: unknown }) => void;
@@ -131,8 +132,8 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate, e
                       {event.location}
                     </div>
 
-                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">
-                      {event.excerpt || ""}
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-2 leading-relaxed font-medium">
+                      {stripHtml(event.excerpt || "")}
                     </p>
 
                     <div className="mt-auto">
