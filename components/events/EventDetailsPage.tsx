@@ -74,6 +74,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 max_participants: providerData.max_participants || 0,
                 online_link: providerData.online_link || "",
                 contact_person: providerData.contact_person || "",
+                application_link: providerData.application_link || "",
               };
             } else {
               eventData = null;
@@ -119,6 +120,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 max_participants: instData.max_participants || 0,
                 online_link: instData.online_link || "",
                 contact_person: instData.contact_person || "",
+                application_link: instData.application_link || "",
               };
             } else {
               const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -161,6 +163,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                     max_participants: instData2.max_participants || 0,
                     online_link: instData2.online_link || "",
                     contact_person: instData2.contact_person || "",
+                    application_link: instData2.application_link || "",
                   };
                 } else {
                   eventData = null;
@@ -208,6 +211,10 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               published: raw.published ?? raw.status === "published",
               slug: raw.slug,
               created_at: raw.created_at || raw.publish_date || new Date().toISOString(),
+              registration_deadline: raw.registration_deadline || "",
+              application_link: raw.application_link || "",
+              end_date: raw.end_date || "",
+              online_link: raw.online_link || "",
             };
           } else {
             eventData = await fetchPublicEventBySlug(slug);
@@ -288,7 +295,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             </span>
           )}
         </div>
-        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-4 max-w-4xl">
+        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-4">
           {event.title}
         </h1>
       </div>
@@ -389,6 +396,25 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                       <p className="text-xs text-gray-500 leading-relaxed">
                         {event.organizer}
                       </p>
+                    </div>
+                  </div>
+                )}
+
+                {event.application_link && (
+                  <div className="flex gap-4">
+                    <i className="fa-solid fa-link text-blue-600 shrink-0 mt-0.5"></i>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm mb-1">
+                        Application Link
+                      </h4>
+                      <a
+                        href={event.application_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-600 hover:underline break-all"
+                      >
+                        {event.application_link}
+                      </a>
                     </div>
                   </div>
                 )}
