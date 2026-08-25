@@ -52,10 +52,25 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 time: providerData.start_date
                   ? new Date(providerData.start_date).toLocaleTimeString()
                   : "",
-                registrationFee: "",
-                interestedCount: 0,
+                registrationFee: providerData.registration_fee || "",
+                interestedCount: providerData.interested || 0,
                 published: true,
                 created_at: providerData.created_at,
+                registration_deadline: providerData.registration_deadline || "",
+                organizer_email: providerData.organizer_email || providerData.contact_email || "",
+                organizer_phone: providerData.organizer_phone || providerData.contact_phone || "",
+                organizer_website: providerData.organizer_website || "",
+                featured: providerData.featured || false,
+                end_date: providerData.end_date
+                  ? new Date(providerData.end_date).toLocaleDateString()
+                  : "",
+                end_time: providerData.end_date
+                  ? new Date(providerData.end_date).toLocaleTimeString()
+                  : "",
+                attendees: providerData.interested || 0,
+                max_participants: providerData.max_participants || 0,
+                online_link: providerData.online_link || "",
+                contact_person: providerData.contact_person || "",
               };
             } else {
               eventData = null;
