@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import ContactInfoRow from "@/app/find-college/[id]/components/ContactInfoRow";
 
 function getMapEmbedUrl(mapUrl?: string, address?: string): string {
@@ -35,14 +36,12 @@ interface UniversitySidebarProps {
   contactData: Record<string, any>;
   aboutData: Record<string, any>;
   sponsoredInsts: any[];
-  id: number;
 }
 
 export default function UniversitySidebar({
   contactData,
   aboutData,
   sponsoredInsts,
-  id,
 }: UniversitySidebarProps) {
   const fullAddress = [contactData?.state, contactData?.district, contactData?.municipality].filter(Boolean).join(" / ");
   const displayAddress = fullAddress || contactData?.address || "";
@@ -175,11 +174,10 @@ export default function UniversitySidebar({
                   src={getMapEmbedUrl(contactData?.mapUrl as string, contactData?.address as string)}
                   width="100%"
                   height="100%"
-                  style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  className="rounded-md"
+                  className="border-0 rounded-md"
                 ></iframe>
               </div>
             )}
@@ -197,7 +195,7 @@ export default function UniversitySidebar({
               <div key={inst.id} className="bg-white border border-gray-200 rounded-[14px] p-5 flex items-center gap-4 transition-colors">
                 <div className="w-[60px] h-[60px] rounded-lg bg-white border border-gray-100 flex items-center justify-center shrink-0 p-1">
                   {inst.logo_url ? (
-                    <img src={inst.logo_url} alt={inst.institution_name} className="w-full h-full object-contain rounded" />
+                    <Image src={inst.logo_url} alt={inst.institution_name} width={60} height={60} className="w-full h-full object-contain rounded" />
                   ) : (
                     <div className="w-full h-full bg-blue-50 text-blue-600 text-[10px] font-bold flex items-center justify-center rounded uppercase text-center leading-tight">{inst.institution_name?.charAt(0) || "C"}</div>
                   )}
