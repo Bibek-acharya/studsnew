@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
+import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import {
   Users,
   Plus,
@@ -69,6 +70,7 @@ export default function CommunityDetailPage() {
   const [joinLoading, setJoinLoading] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
   const [relatedJoinLoading, setRelatedJoinLoading] = useState<Record<number, boolean>>({});
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const token = apiService.getToken();
 
@@ -197,11 +199,10 @@ export default function CommunityDetailPage() {
       </div>
 
       {/* Main Header Container */}
-      <div className="max-w-[350px] mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative pb-4 sm:pb-6 border-b border-gray-200">
-          {/* Avatar and Group Info */}
-          <div className="flex flex-row items-start gap-3 sm:items-end -mt-14 sm:-mt-12 mb-4 sm:gap-4">
-            <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-2xl border-4 border-white flex items-center justify-center shadow-sm shrink-0 bg-[#0000ff]">
+      <div className="max-w-350 mx-auto">
+        <div className="relative bg-white">
+          <div className="relative flex flex-row items-start gap-3 px-6 pb-8 md:block md:px-12 lg:px-24 xl:px-32">
+            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
               {community.icon ? (
                 <DynamicIcon name={community.icon} size={40} className="text-white" />
               ) : (
@@ -209,52 +210,79 @@ export default function CommunityDetailPage() {
               )}
             </div>
 
-            <div className="min-w-0 flex-1 pt-1">
-              <div className="flex items-center gap-2 pt-0 sm:pt-4">
-                <h1 className="min-w-0 text-[18px] font-bold tracking-tight text-gray-900 truncate sm:text-[24px] sm:overflow-visible sm:whitespace-normal md:text-3xl">
-                  {community.name}
-                </h1>
-              </div>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] font-medium sm:text-[14px]">
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600">
-                    {community.member_count ?? 0} members
-                  </span>
+            <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 lg:pl-42.5">
+              <div className="w-full space-y-1.5 md:space-y-3 text-left lg:w-auto">
+                <div className="flex items-center gap-2 pt-0 md:pt-4">
+                  <h1 className="min-w-0 text-[18px] font-bold tracking-tight text-gray-900 truncate md:text-[24px] md:overflow-visible md:whitespace-normal lg:text-3xl">
+                    {community.name}
+                  </h1>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <MessageSquare className="w-4 h-4 text-gray-500" />
-                  <span className="text-gray-600">
-                    {community.post_count ?? 0} posts
-                  </span>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] font-medium md:text-[14px]">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <Users className="w-4 h-4 text-gray-500 shrink-0" />
+                    <span className="text-gray-600 truncate max-w-[120px] md:max-w-none">
+                      {community.member_count ?? 0} members
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <MessageSquare className="w-4 h-4 text-gray-500" />
+                    <span className="text-gray-600 whitespace-nowrap">
+                      {community.post_count ?? 0} posts
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={joinLoading}
+                    onClick={handleJoinToggle}
+                    className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1 text-[12px] font-semibold transition-colors md:px-4 md:py-1.5 md:text-[13px] disabled:opacity-50 ${
+                      isJoined
+                        ? "bg-green-300 text-gray-800 hover:bg-green-400"
+                        : "bg-brand-blue text-white hover:bg-brand-hover"
+                    }`}
+                  >
+                    {joinLoading ? (
+                      <i className="fa-solid fa-spinner fa-spin"></i>
+                    ) : (
+                      <i className={`fa-solid ${isJoined ? "fa-check" : "fa-plus"}`}></i>
+                    )}
+                    {isJoined ? "Following" : "Join"}
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Header Action Buttons */}
-            <div className="flex items-center gap-2 mt-2 sm:mt-0 sm:gap-3 sm:w-auto justify-end">
-              <button
-                onClick={handleJoinToggle}
-                disabled={joinLoading}
-                className={`font-semibold px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full flex items-center gap-1 sm:gap-2 transition-colors text-[12px] sm:text-sm ${
-                  isJoined
-                    ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    : "bg-[#0000ff] hover:bg-blue-700 text-white"
-                }`}
-              >
-                {isJoined ? (
-                  "Joined"
-                ) : (
-                  <>
-                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                    Join
-                  </>
-                )}
-              </button>
-              <button className="p-2 sm:p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
-                <Share2 className="w-4 h-4" />
-              </button>
+              <div className="hidden mt-8 w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 md:flex lg:mt-0 lg:w-auto lg:gap-3 lg:overflow-visible lg:pb-0">
+                <button
+                  className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]"
+                >
+                  <Users className="h-4 w-4" />
+                  Invite Friends
+                </button>
+                <button
+                  onClick={() => setIsShareModalOpen(true)}
+                  className="shrink-0 flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50 lg:p-3"
+                >
+                  <Share2 className="h-5 w-5" />
+                </button>
+              </div>
             </div>
+          </div>
+
+          {/* Mobile action buttons */}
+          <div className="grid grid-cols-2 gap-2 px-6 pb-6 md:hidden">
+            <button
+              className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              <Users className="h-4 w-4" />
+              Invite
+            </button>
+            <button
+              onClick={() => setIsShareModalOpen(true)}
+              className="flex items-center justify-center rounded-md border border-gray-200 bg-white p-2.5 text-gray-700 transition-colors hover:bg-gray-50"
+            >
+              <Share2 className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
@@ -395,6 +423,14 @@ export default function CommunityDetailPage() {
           </div>
         </div>
       </div>
+      <ShareCollegeModal
+        collegeName={community.name}
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        shareUrl={`${typeof window !== "undefined" ? window.location.origin : ""}/campus-forum/${communityId}`}
+        shareTitle={community.name}
+        shareText={`Join ${community.name} on StudsSphere`}
+      />
     </div>
   );
 }
