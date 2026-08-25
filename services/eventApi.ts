@@ -29,6 +29,7 @@ export interface EventEntry {
   max_participants?: number;
   online_link?: string;
   contact_person?: string;
+  application_link?: string;
 }
 
 export interface EventMeta {
