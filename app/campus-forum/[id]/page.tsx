@@ -197,35 +197,46 @@ export default function CommunityDetailPage() {
       </div>
 
       {/* Main Header Container */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[350px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="relative pb-4 sm:pb-6 border-b border-gray-200">
           {/* Avatar and Group Info */}
-          <div className="flex flex-col sm:flex-row items-center sm:items-end -mt-14 sm:-mt-12 mb-4 gap-3 sm:gap-4">
-            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl border-4 border-white flex items-center justify-center shadow-sm shrink-0 bg-[#0000ff]">
+          <div className="flex flex-row items-start gap-3 sm:items-end -mt-14 sm:-mt-12 mb-4 sm:gap-4">
+            <div className="w-20 h-20 sm:w-32 sm:h-32 rounded-2xl border-4 border-white flex items-center justify-center shadow-sm shrink-0 bg-[#0000ff]">
               {community.icon ? (
-                <DynamicIcon name={community.icon} size={48} />
+                <DynamicIcon name={community.icon} size={40} className="text-white" />
               ) : (
-                <Users className="w-12 h-12 sm:w-14 sm:h-14 text-white" />
+                <Users className="w-10 h-10 sm:w-14 sm:h-14 text-white" />
               )}
             </div>
 
-            <div className="flex-1 pt-2 text-center sm:text-left">
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-gray-900">
-                {community.name}
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                {community.member_count ?? 0} members
-                <span className="mx-1">•</span>
-                {community.post_count ?? 0} posts
-              </p>
+            <div className="min-w-0 flex-1 pt-1">
+              <div className="flex items-center gap-2 pt-0 sm:pt-4">
+                <h1 className="min-w-0 text-[18px] font-bold tracking-tight text-gray-900 truncate sm:text-[24px] sm:overflow-visible sm:whitespace-normal md:text-3xl">
+                  {community.name}
+                </h1>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[12px] font-medium sm:text-[14px]">
+                <div className="flex items-center gap-1.5">
+                  <Users className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">
+                    {community.member_count ?? 0} members
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <MessageSquare className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">
+                    {community.post_count ?? 0} posts
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Header Action Buttons */}
-            <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-0 w-full sm:w-auto justify-center sm:justify-end">
+            <div className="flex items-center gap-2 mt-2 sm:mt-0 sm:gap-3 sm:w-auto justify-end">
               <button
                 onClick={handleJoinToggle}
                 disabled={joinLoading}
-                className={`font-semibold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full flex items-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm ${
+                className={`font-semibold px-3 sm:px-5 py-1.5 sm:py-2.5 rounded-full flex items-center gap-1 sm:gap-2 transition-colors text-[12px] sm:text-sm ${
                   isJoined
                     ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
                     : "bg-[#0000ff] hover:bg-blue-700 text-white"
@@ -235,15 +246,10 @@ export default function CommunityDetailPage() {
                   "Joined"
                 ) : (
                   <>
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     Join
                   </>
                 )}
-              </button>
-              <button className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-3 sm:px-4 py-2 sm:py-2.5 rounded-full flex items-center gap-1.5 sm:gap-2 transition-colors text-xs sm:text-sm">
-                <Users className="w-4 h-4" />
-                <span className="hidden sm:inline">Invite Friends</span>
-                <span className="sm:hidden">Invite</span>
               </button>
               <button className="p-2 sm:p-2.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">
                 <Share2 className="w-4 h-4" />
