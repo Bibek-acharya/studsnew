@@ -10,7 +10,6 @@ import {
   Users,
   Plus,
   Share2,
-  ArrowLeft,
   MessageSquare,
   ArrowUp,
   ArrowDown,
@@ -186,23 +185,15 @@ export default function CommunityDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans">
+    <div className="min-h-screen bg-white text-gray-900 font-sans">
       {/* Top Banner */}
-      <div className="relative h-40 sm:h-48 md:h-56 w-full bg-[#0000ff]">
-        {/* Back Button */}
-        <button
-          onClick={() => router.back()}
-          className="absolute top-4 left-4 p-2 rounded-full hover:bg-white/20 transition-colors z-10"
-        >
-          <ArrowLeft size={22} className="text-white" />
-        </button>
-      </div>
+      <div className="relative h-40 sm:h-48 md:h-56 w-full bg-[#0000ff]" />
 
       {/* Main Header Container */}
       <div className="max-w-350 mx-auto">
         <div className="relative bg-white">
-          <div className="relative flex flex-row items-start gap-3 px-6 pb-8 md:block md:px-12 lg:px-24 xl:px-32">
-            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-white p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
+          <div className="relative flex flex-row items-start gap-3 px-6 pb-8 md:block md:px-0">
+            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-[#0000ff] p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
               {community.icon ? (
                 <DynamicIcon name={community.icon} size={40} className="text-white" />
               ) : (

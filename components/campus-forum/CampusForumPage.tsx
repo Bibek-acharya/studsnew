@@ -1251,7 +1251,7 @@ const CampusForumPage: React.FC = () => {
   const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased py-6">
+    <div className="min-h-screen bg-white text-slate-800 antialiased py-6">
       <main className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* ── LEFT SIDEBAR (desktop only) ── */}
