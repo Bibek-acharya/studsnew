@@ -291,26 +291,6 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-4 max-w-4xl">
           {event.title}
         </h1>
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-          {event.organizer && (
-            <div className="flex items-center gap-2">
-              <i className="fa-regular fa-building text-gray-800"></i>
-              <span>Organized by: <strong className="text-gray-900 font-semibold">{event.organizer}</strong></span>
-            </div>
-          )}
-          {event.date && (
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-calendar text-gray-800"></i>
-              <span>{event.date}</span>
-            </div>
-          )}
-          {event.location && (
-            <div className="flex items-center gap-2">
-              <i className="fa-solid fa-location-dot text-gray-800"></i>
-              <span>{event.location}</span>
-            </div>
-          )}
-        </div>
       </div>
 
       {event.image && (
