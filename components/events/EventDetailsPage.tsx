@@ -259,9 +259,11 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ">
               {badgeLabel}
             </span>
-            <span className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/20">
-              <i className="fa-solid fa-star text-[11px]"></i> Featured
-            </span>
+            {event.featured && (
+              <span className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/20">
+                <i className="fa-solid fa-star text-[11px]"></i> Featured
+              </span>
+            )}
           </div>
           <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4 max-w-4xl">
             {event.title}
