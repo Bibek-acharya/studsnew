@@ -271,39 +271,45 @@ const EventsPage: React.FC = () => {
 
         {featured && (
           <section className="mb-14">
-            <h2 className="text-3xl font-bold mb-4">
+            <h2 className="text-3xl font-bold text-slate-900 mb-5">
               Featured Event of the Week
             </h2>
             <Link
               href={`/events/${(featured as any).slug || featured.id}`}
-              className="relative rounded-md overflow-hidden  h-87.5 sm:h-100 group  cursor-pointer block"
+              className="relative w-full h-112.5 sm:h-100 rounded-md overflow-hidden shadow-lg group cursor-pointer block"
             >
               <img
                 src={featured.image}
                 alt={featured.title}
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
               />
-              <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-transparent"></div>
+              <div className="absolute inset-0 bg-linear-to-t from-slate-900/90 via-slate-900/50 to-transparent"></div>
 
-              <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div className="text-white max-w-3xl">
-                  <div className="flex items-center gap-4 mb-4">
-                    <span className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
-                      Featured
-                    </span>
-                    <span className="flex items-center text-sm text-gray-200 font-medium">
-                      <i className="fa-regular fa-clock mr-1.5 opacity-80"></i>{" "}
-                      90 days ago
-                    </span>
+              <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 w-full">
+                  <div className="max-w-2xl">
+                    <div className="flex items-center gap-4 mb-4">
+                      <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                        Featured
+                      </span>
+                      <div className="flex items-center text-gray-300 text-sm font-medium">
+                        <i className="fa-regular fa-clock mr-1.5 opacity-80"></i>
+                        {featured.date || "Date TBA"}
+                      </div>
+                    </div>
+
+                    <h3 className="text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight tracking-tight line-clamp-2">
+                      {featured.title}
+                    </h3>
+                    <p className="text-gray-200 text-base sm:text-lg font-medium line-clamp-2 overflow-hidden break-words">
+                      {stripHtml(featured.excerpt || "")}
+                    </p>
                   </div>
-                  <h3 className="text-3xl font-bold mb-2 line-clamp-2">{featured.title}</h3>
-                  <p className="text-gray-200 text-base font-medium line-clamp-2">
-                    {stripHtml(featured.excerpt || "")}
-                  </p>
+
+                  <button className="w-full sm:w-auto bg-white text-slate-900 font-semibold px-6 py-3 rounded-md hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 whitespace-nowrap">
+                    View Details
+                  </button>
                 </div>
-                <button className="bg-white text-black px-6 py-3 rounded-md font-bold hover:bg-gray-100 transition whitespace-nowrap ">
-                  Read Full Story
-                </button>
               </div>
             </Link>
           </section>
@@ -362,7 +368,8 @@ const EventsPage: React.FC = () => {
 
                     <Link
                       href={`/events/${(event as any).slug || event.id}`}
-                      className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff]`}
+                      className={`font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff] line-clamp-1`}
+                      title={event.title}
                     >
                       {event.title}
                     </Link>
@@ -376,7 +383,7 @@ const EventsPage: React.FC = () => {
                       {event.location}
                     </div>
 
-                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-1 leading-relaxed font-medium" title={stripHtml(event.excerpt || "")}>
                       {stripHtml(event.excerpt || "")}
                     </p>
 
