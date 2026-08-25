@@ -361,8 +361,7 @@ const EventsPage: React.FC = () => {
                         {mapped}
                       </span>
                       <span className="flex items-center text-xs text-gray-500 font-semibold">
-                        <i className="fa-regular fa-calendar mr-1.5"></i> Oct 25
-                        , 2024
+                        <i className="fa-regular fa-calendar mr-1.5"></i> {event.date || "TBA"}
                       </span>
                     </div>
 

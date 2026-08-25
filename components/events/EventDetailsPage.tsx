@@ -408,20 +408,11 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 <div className="grid grid-cols-2 gap-3">
                   <a
                     href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${(() => {
-                      const dateStr = event.date || "";
-                      const timeStr = event.time || "";
-                      let startDate: Date;
-                      if (dateStr && timeStr) {
-                        startDate = new Date(`${dateStr} ${timeStr}`);
-                      } else if (dateStr) {
-                        startDate = new Date(`${dateStr}T09:00:00`);
-                      } else {
-                        startDate = new Date();
-                      }
-                      if (isNaN(startDate.getTime())) startDate = new Date(`${dateStr}T09:00:00`);
-                      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+                      const now = new Date();
+                      now.setHours(9, 0, 0, 0);
+                      const endDate = new Date(now.getTime() + 60 * 60 * 1000);
                       const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
-                      return `${fmt(startDate)}/${fmt(endDate)}`;
+                      return `${fmt(now)}/${fmt(endDate)}`;
                     })()}&location=${encodeURIComponent(event.location)}&details=${encodeURIComponent(event.description || "")}`}
                     target="_blank"
                     rel="noopener noreferrer"
