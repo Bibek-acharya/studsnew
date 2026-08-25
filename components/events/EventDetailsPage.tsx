@@ -419,27 +419,33 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         </div>
       </div>
 
-      <div className="mt-16 lg:mt-24 border-t border-gray-100 pt-10">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-gray-900">Similar Events</h2>
-          <Link
-            href="/events"
-            className="text-blue-600 text-sm font-medium hover:underline"
-          >
-            View All
-          </Link>
-        </div>
+      {related.length > 0 && (
+        <div className="mt-16 lg:mt-24 border-t border-gray-100 pt-10">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">Similar Events</h2>
+            <Link
+              href="/events"
+              className="text-blue-600 text-sm font-medium hover:underline"
+            >
+              View All
+            </Link>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {(related.length > 0 ? related : [event])
-            .slice(0, 3)
-            .map((rel, idx) => {
-              const relBadge =
-                idx % 3 === 0
-                  ? { label: "Seminars & Workshops", className: "bg-[#0f9d86]" }
-                  : idx % 3 === 1
-                    ? { label: "Career Fairs", className: "bg-amber-400" }
-                    : { label: "Competitions", className: "bg-blue-500" };
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {related.slice(0, 3).map((rel, idx) => {
+              const categoryColors: Record<string, string> = {
+                Seminar: "bg-[#0f9d86]",
+                Workshop: "bg-[#0f9d86]",
+                "Job Fair": "bg-amber-400",
+                "Career Fair": "bg-amber-400",
+                Hackathon: "bg-blue-500",
+                Competition: "bg-blue-500",
+                Conference: "bg-purple-500",
+                Webinar: "bg-cyan-500",
+              };
+              const relCategory = rel.category || "Event";
+              const relBadgeClass =
+                categoryColors[relCategory] || "bg-gray-500";
 
               return (
                 <article
@@ -457,18 +463,17 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                   <div className="p-5">
                     <div className="flex justify-between items-center mb-3">
                       <span
-                        className={`${relBadge.className} text-white text-[11px] px-2.5 py-1 rounded-full font-medium tracking-wide`}
+                        className={`${relBadgeClass} text-white text-[11px] px-2.5 py-1 rounded-full font-medium tracking-wide`}
                       >
-                        {relBadge.label}
+                        {relCategory}
                       </span>
                       <div className="flex items-center text-gray-500 text-[12px] font-medium gap-1.5">
-                        <i className="fa-regular fa-calendar"></i> Oct 25 , 2024
+                        <i className="fa-regular fa-calendar"></i>{" "}
+                        {rel.date || "Date TBA"}
                       </div>
                     </div>
 
-                    <h3
-                      className={`text-[17px] font-bold mb-3 leading-snug ${idx === 0 ? "text-blue-600" : "text-gray-900"}`}
-                    >
+                    <h3 className="text-[17px] font-bold mb-3 leading-snug text-gray-900">
                       {rel.title}
                     </h3>
 
@@ -494,18 +499,12 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
 
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`/events/${(rel as any).slug || rel.id}`}
+                        href={`/events/${rel.slug || rel.id}`}
                         className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-md hover:bg-gray-50 transition-colors text-center"
                       >
                         Details
                       </Link>
-                      <button
-                        className={`flex-[1.5] text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors ${
-                          idx === 1
-                            ? "bg-[#1a233a] hover:bg-gray-900"
-                            : "bg-blue-500 hover:bg-blue-600"
-                        }`}
-                      >
+                      <button className="flex-[1.5] bg-blue-500 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors hover:bg-blue-600">
                         Register Now
                       </button>
                       <button className="border border-gray-200 p-2.5 rounded-md hover:bg-gray-50 text-gray-600 transition-colors group">
@@ -516,8 +515,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 </article>
               );
             })}
+          </div>
         </div>
-      </div>
+      )}
       <style>{`
          .news-content { overflow-wrap: break-word; word-break: normal; hyphens: none; line-break: strict; }
         .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
