@@ -205,6 +205,9 @@ const EventsPage: React.FC = () => {
   const featured = allEvents[0];
 
   const visibleEvents = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const filtered =
       activeFilter === "All News"
         ? events
@@ -212,7 +215,14 @@ const EventsPage: React.FC = () => {
             (event) => mapCategory(event.category) === activeFilter,
           );
 
-    return [...filtered].sort((a, b) => {
+    const withDeadline = filtered.filter((event) => {
+      if (!event.registration_deadline) return true;
+      const deadline = new Date(event.registration_deadline);
+      deadline.setHours(0, 0, 0, 0);
+      return deadline >= today;
+    });
+
+    return [...withDeadline].sort((a, b) => {
       if (sortBy === "Newest First") return Number(b.id) - Number(a.id);
       if (sortBy === "Oldest First") return Number(a.id) - Number(b.id);
       return b.interested - a.interested;
