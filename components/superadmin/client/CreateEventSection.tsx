@@ -82,8 +82,8 @@ export default function CreateEventSection({
           setEventDate(event.date || "");
           setEventTime(event.time || "");
           setRegistrationFee(event.registrationFee || "");
-          setApplicationLink(event.applicationLink || "");
-          setRegistrationDeadline(event.registrationDeadline || "");
+          setApplicationLink(event.application_link || "");
+          setRegistrationDeadline(event.registration_deadline || "");
           setExcerpt(event.excerpt || "");
           setDescription(event.description || "");
           setImageUrl(event.image || "");
@@ -136,8 +136,8 @@ export default function CreateEventSection({
         date: eventDate,
         time: eventTime,
         registrationFee,
-        applicationLink,
-        registrationDeadline,
+        application_link: applicationLink,
+        registration_deadline: registrationDeadline,
         excerpt,
         description,
         image: imageUrl,

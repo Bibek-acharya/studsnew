@@ -187,8 +187,8 @@ export interface AdminEvent {
   date: string;
   time: string;
   registrationFee: string;
-  applicationLink?: string;
-  registrationDeadline?: string;
+  application_link?: string;
+  registration_deadline?: string;
   image: string;
   interested: number;
   trending: boolean;
@@ -258,6 +258,8 @@ export const adminEventApi = {
     date?: string;
     time?: string;
     registrationFee?: string;
+    application_link?: string;
+    registration_deadline?: string;
     image?: string;
   }): Promise<AdminEvent> {
     return extractData(
@@ -281,6 +283,8 @@ export const adminEventApi = {
       date?: string;
       time?: string;
       registrationFee?: string;
+      application_link?: string;
+      registration_deadline?: string;
       image?: string;
     },
   ): Promise<AdminEvent> {
