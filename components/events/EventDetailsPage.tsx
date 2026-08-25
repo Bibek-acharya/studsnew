@@ -419,8 +419,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         </div>
       </div>
 
-      {related.length > 0 && (
-        <div className="mt-16 lg:mt-24 border-t border-gray-100 pt-10">
+      <div className="mt-16 lg:mt-24 border-t border-gray-100 pt-10">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-bold text-gray-900">Similar Events</h2>
             <Link
@@ -432,7 +431,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {related.slice(0, 3).map((rel, idx) => {
+            {(related.length > 0 ? related : [event]).slice(0, 3).map((rel, idx) => {
               const categoryColors: Record<string, string> = {
                 Seminar: "bg-[#0f9d86]",
                 Workshop: "bg-[#0f9d86]",
@@ -515,9 +514,8 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 </article>
               );
             })}
-          </div>
-        </div>
-      )}
+           </div>
+      </div>
       <style>{`
          .news-content { overflow-wrap: break-word; word-break: normal; hyphens: none; line-break: strict; }
         .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
