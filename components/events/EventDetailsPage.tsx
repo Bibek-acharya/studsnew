@@ -329,10 +329,12 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                   <i className="fa-regular fa-calendar-xmark text-blue-600 shrink-0 mt-0.5"></i>
                   <div>
                     <h4 className="font-bold text-gray-900 text-sm mb-1">
-                      Venue
+                      Registration Deadline
                     </h4>
                     <p className="text-xs text-red-500">
-                      Closes on oct 24,2025
+                      {event.registration_deadline
+                        ? `Closes on ${event.registration_deadline}`
+                        : "No deadline specified"}
                     </p>
                   </div>
                 </div>
