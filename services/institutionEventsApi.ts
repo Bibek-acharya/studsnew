@@ -83,6 +83,9 @@ export interface InstitutionEvent {
   enable_registration: boolean;
   status: string;
   attendees: number;
+  registration_fee?: string;
+  registration_deadline?: string;
+  featured?: boolean;
   slug?: string;
   created_at: string;
   updated_at: string;

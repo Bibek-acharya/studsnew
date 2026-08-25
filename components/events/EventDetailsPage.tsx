@@ -97,10 +97,25 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                 time: instData.start_date
                   ? new Date(instData.start_date).toLocaleTimeString()
                   : "",
-                registrationFee: "",
-                interestedCount: 0,
+                registrationFee: instData.registration_fee || "",
+                interestedCount: instData.attendees || 0,
                 published: true,
                 created_at: instData.created_at,
+                registration_deadline: instData.registration_deadline || "",
+                organizer_email: instData.contact_email || "",
+                organizer_phone: instData.contact_person || "",
+                organizer_website: "",
+                featured: instData.featured || false,
+                end_date: instData.end_date
+                  ? new Date(instData.end_date).toLocaleDateString()
+                  : "",
+                end_time: instData.end_date
+                  ? new Date(instData.end_date).toLocaleTimeString()
+                  : "",
+                attendees: instData.attendees || 0,
+                max_participants: instData.max_participants || 0,
+                online_link: instData.online_link || "",
+                contact_person: instData.contact_person || "",
               };
             } else {
               const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -124,10 +139,25 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                     time: instData2.start_date
                       ? new Date(instData2.start_date).toLocaleTimeString()
                       : "",
-                    registrationFee: "",
-                    interestedCount: 0,
+                    registrationFee: instData2.registration_fee || "",
+                    interestedCount: instData2.attendees || 0,
                     published: true,
                     created_at: instData2.created_at,
+                    registration_deadline: instData2.registration_deadline || "",
+                    organizer_email: instData2.contact_email || "",
+                    organizer_phone: instData2.contact_person || "",
+                    organizer_website: "",
+                    featured: instData2.featured || false,
+                    end_date: instData2.end_date
+                      ? new Date(instData2.end_date).toLocaleDateString()
+                      : "",
+                    end_time: instData2.end_date
+                      ? new Date(instData2.end_date).toLocaleTimeString()
+                      : "",
+                    attendees: instData2.attendees || 0,
+                    max_participants: instData2.max_participants || 0,
+                    online_link: instData2.online_link || "",
+                    contact_person: instData2.contact_person || "",
                   };
                 } else {
                   eventData = null;
