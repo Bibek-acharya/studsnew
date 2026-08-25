@@ -108,29 +108,29 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     onNavigate("findCollege", { search: query });
   };
 
-  if (heroSlides.length === 0) return null;
-
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
-      <main className="relative w-full max-w-350 h-60 sm:h-70 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl">
+      <main className="relative w-full max-w-350 h-60 sm:h-70 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
         {/* Background Slider Container */}
-        <div
-          id="slider-container"
-          className="absolute inset-0 z-0 overflow-hidden"
-        >
+        {heroSlides.length > 0 && (
           <div
-            className="flex h-full w-full transition-transform duration-700 ease-out"
-            style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            id="slider-container"
+            className="absolute inset-0 z-0 overflow-hidden"
           >
-            {heroSlides.map((slide, index) => (
-              <div
-                key={index}
-                className="h-full w-full shrink-0 bg-cover bg-center"
-                style={{ backgroundImage: `url('${slide.image}')` }}
-              ></div>
-            ))}
+            <div
+              className="flex h-full w-full transition-transform duration-700 ease-out"
+              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+            >
+              {heroSlides.map((slide, index) => (
+                <div
+                  key={index}
+                  className="h-full w-full shrink-0 bg-cover bg-center"
+                  style={{ backgroundImage: `url('${slide.image}')` }}
+                ></div>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Dark Overlays */}
         <div className="absolute inset-0 bg-black/40 z-10"></div>
@@ -207,44 +207,48 @@ const HeroSection: React.FC<HeroSectionProps> = ({
         </div>
 
         {/* BOTTOM CONTROLS */}
-        <div className="absolute bottom-4 md:bottom-8 left-0 w-full flex flex-col items-center z-30">
+        {heroSlides.length > 0 && (
+          <div className="absolute bottom-4 md:bottom-8 left-0 w-full flex flex-col items-center z-30">
+            <a
+              href={heroSlides[safeIndex].url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`md:hidden fade-text text-white text-[13px] font-semibold underline decoration-white/80 underline-offset-4 drop-shadow-lg hover:text-gray-200 transition-opacity duration-300 mb-3 ${fade ? "opacity-100" : "opacity-0"}`}
+            >
+              {heroSlides[safeIndex].text}
+            </a>
+
+            {heroSlides.length > 1 && (
+              <div className="flex items-center space-x-2 md:space-x-3">
+                {heroSlides.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`nav-dot transition-all duration-300 focus:outline-none ${
+                      currentSlide === index
+                        ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue"
+                        : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
+                    }`}
+                    aria-label={`Go to slide ${index + 1}`}
+                  ></button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Floating Link (Desktop) */}
+        {heroSlides.length > 0 && (
           <a
             href={heroSlides[safeIndex].url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`md:hidden fade-text text-white text-[13px] font-semibold underline decoration-white/80 underline-offset-4 drop-shadow-lg hover:text-gray-200 transition-opacity duration-300 mb-3 ${fade ? "opacity-100" : "opacity-0"}`}
+            className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-brand-blue items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
           >
-            {heroSlides[safeIndex].text}
+            <LinkIcon className="w-5 h-5 text-brand-blue group-hover:rotate-12 transition-transform" />
+            <span className="text-base">{heroSlides[safeIndex].text}</span>
           </a>
-
-          {heroSlides.length > 1 && (
-            <div className="flex items-center space-x-2 md:space-x-3">
-              {heroSlides.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentSlide(index)}
-                  className={`nav-dot transition-all duration-300 focus:outline-none ${
-                    currentSlide === index
-                      ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue"
-                      : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
-                  }`}
-                  aria-label={`Go to slide ${index + 1}`}
-                ></button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Floating Link (Desktop) */}
-        <a
-          href={heroSlides[safeIndex].url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="hidden md:flex absolute bottom-8 right-8 z-30 bg-white text-brand-blue items-center gap-2 px-5 py-2.5 rounded-full font-semibold shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-        >
-          <LinkIcon className="w-5 h-5 text-brand-blue group-hover:rotate-12 transition-transform" />
-          <span className="text-base">{heroSlides[safeIndex].text}</span>
-        </a>
+        )}
 
         <FeedbackWidget />
       </main>
