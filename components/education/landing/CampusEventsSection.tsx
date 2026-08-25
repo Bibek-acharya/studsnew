@@ -125,11 +125,11 @@ const CampusEventsSection: React.FC<CampusEventsSectionProps> = ({ onNavigate, e
 
                     <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold min-w-0">
                       <i className="fa-regular fa-building mr-2 text-gray-500 shrink-0"></i>{" "}
-                      <span className="truncate">{event.organizer}</span>
+                      <span className="truncate" title={event.organizer}>{event.organizer}</span>
                     </div>
-                    <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
-                      <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
-                      {event.location}
+                    <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold min-w-0">
+                      <i className="fa-solid fa-location-dot mr-2 text-gray-500 shrink-0"></i>{" "}
+                      <span className="truncate" title={event.location}>{event.location}</span>
                     </div>
 
                     <p className="text-xs text-gray-500 mb-5 line-clamp-2 leading-relaxed font-medium">
