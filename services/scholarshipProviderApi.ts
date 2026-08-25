@@ -594,6 +594,8 @@ export interface ProviderEvent {
   location: string;
   tags: string[];
   enable_registration: boolean;
+  application_link?: string;
+  registration_deadline?: string;
   status: string;
   attendees: number;
   slug?: string;

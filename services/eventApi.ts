@@ -186,6 +186,8 @@ export interface AdminEvent {
   date: string;
   time: string;
   registrationFee: string;
+  applicationLink?: string;
+  registrationDeadline?: string;
   image: string;
   interested: number;
   trending: boolean;

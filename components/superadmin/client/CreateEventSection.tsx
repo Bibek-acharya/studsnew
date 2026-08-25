@@ -60,6 +60,8 @@ export default function CreateEventSection({
   const [eventDate, setEventDate] = useState("");
   const [eventTime, setEventTime] = useState("");
   const [registrationFee, setRegistrationFee] = useState("");
+  const [applicationLink, setApplicationLink] = useState("");
+  const [registrationDeadline, setRegistrationDeadline] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -80,6 +82,8 @@ export default function CreateEventSection({
           setEventDate(event.date || "");
           setEventTime(event.time || "");
           setRegistrationFee(event.registrationFee || "");
+          setApplicationLink(event.applicationLink || "");
+          setRegistrationDeadline(event.registrationDeadline || "");
           setExcerpt(event.excerpt || "");
           setDescription(event.description || "");
           setImageUrl(event.image || "");
@@ -132,6 +136,8 @@ export default function CreateEventSection({
         date: eventDate,
         time: eventTime,
         registrationFee,
+        applicationLink,
+        registrationDeadline,
         excerpt,
         description,
         image: imageUrl,
@@ -157,6 +163,8 @@ export default function CreateEventSection({
     eventDate,
     eventTime,
     registrationFee,
+    applicationLink,
+    registrationDeadline,
     excerpt,
     description,
     imageUrl,
@@ -303,6 +311,32 @@ export default function CreateEventSection({
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Application Link
+              </label>
+              <input
+                type="url"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                placeholder="https://..."
+                value={applicationLink}
+                onChange={(e) => setApplicationLink(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Registration Deadline
+              </label>
+              <input
+                type="date"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                value={registrationDeadline}
+                onChange={(e) => setRegistrationDeadline(e.target.value)}
+              />
+            </div>
           </div>
 
           <div>

@@ -81,6 +81,7 @@ export interface InstitutionEvent {
   location: string;
   tags: string[];
   enable_registration: boolean;
+  application_link?: string;
   status: string;
   attendees: number;
   registration_fee?: string;

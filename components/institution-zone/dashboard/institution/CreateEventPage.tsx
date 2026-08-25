@@ -77,6 +77,8 @@ function CreateEventForm() {
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState("");
   const [enableRegistration, setEnableRegistration] = useState(false);
+  const [applicationLink, setApplicationLink] = useState("");
+  const [registrationDeadline, setRegistrationDeadline] = useState("");
   const [featuredImageUrl, setFeaturedImageUrl] = useState("");
   const [featuredImagePreview, setFeaturedImagePreview] = useState("");
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -116,6 +118,8 @@ function CreateEventForm() {
           setDescription(event.description || "");
           setTags(event.tags?.join(", ") || "");
           setEnableRegistration(event.enable_registration || false);
+          setApplicationLink(event.application_link || "");
+          setRegistrationDeadline(event.registration_deadline || "");
           setFeaturedImageUrl(event.image_url || "");
           setFeaturedImagePreview(event.image_url || "");
         })
@@ -216,6 +220,8 @@ function CreateEventForm() {
           location: venue,
           tags: tags ? tags.split(",").map((t) => t.trim()) : [],
           enable_registration: enableRegistration,
+          application_link: applicationLink,
+          registration_deadline: registrationDeadline,
           status: draft ? "draft" : "upcoming",
         };
 
@@ -254,6 +260,8 @@ function CreateEventForm() {
       description,
       tags,
       enableRegistration,
+      applicationLink,
+      registrationDeadline,
       venue,
       featuredImageUrl,
       isEditing,
@@ -481,6 +489,32 @@ function CreateEventForm() {
                 value={onlineLink}
                 onChange={(e) => setOnlineLink(e.target.value)}
                 placeholder="https://zoom.us/j/..."
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Application Link
+              </label>
+              <input
+                type="url"
+                value={applicationLink}
+                onChange={(e) => setApplicationLink(e.target.value)}
+                placeholder="https://..."
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Registration Deadline
+              </label>
+              <input
+                type="date"
+                value={registrationDeadline}
+                onChange={(e) => setRegistrationDeadline(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
               />
             </div>

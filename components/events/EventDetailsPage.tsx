@@ -12,6 +12,7 @@ import { getPublicEventBySlug } from "@/services/scholarshipProviderApi";
 import { fetchInstitutionEventBySlug } from "@/services/institutionEventsApi";
 import { getImageUrl, stripHtml } from "@/services/api";
 import RichText from "@/components/RichText";
+import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 
 const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   params,
@@ -20,6 +21,8 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   const [event, setEvent] = useState<EventEntry | null>(null);
   const [related, setRelated] = useState<EventEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState("");
 
   useEffect(() => {
     params.then(async (p) => {
@@ -211,6 +214,9 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
           }
         }
         setEvent(eventData);
+        if (typeof window !== "undefined") {
+          setShareUrl(window.location.href);
+        }
 
         if (eventData) {
           const eventsResult = await fetchPublicEvents({ limit: 50 });
@@ -385,14 +391,44 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               </div>
 
               <div className="mt-6 space-y-3">
-                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm ">
-                  Register Now
-                </button>
+                {event.online_link && (
+                  <a
+                    href={event.online_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-md transition-colors text-sm text-center"
+                  >
+                    Register Now
+                  </a>
+                )}
                 <div className="grid grid-cols-2 gap-3">
-                  <button className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-xs ">
+                  <a
+                    href={`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${(() => {
+                      const dateStr = event.date || "";
+                      const timeStr = event.time || "";
+                      let startDate: Date;
+                      if (dateStr && timeStr) {
+                        startDate = new Date(`${dateStr} ${timeStr}`);
+                      } else if (dateStr) {
+                        startDate = new Date(`${dateStr}T09:00:00`);
+                      } else {
+                        startDate = new Date();
+                      }
+                      if (isNaN(startDate.getTime())) startDate = new Date(`${dateStr}T09:00:00`);
+                      const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
+                      const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+                      return `${fmt(startDate)}/${fmt(endDate)}`;
+                    })()}&location=${encodeURIComponent(event.location)}&details=${encodeURIComponent(event.description || "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-xs"
+                  >
                     <i className="fa-regular fa-calendar"></i> Calendar
-                  </button>
-                  <button className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-xs ">
+                  </a>
+                  <button
+                    onClick={() => setIsShareModalOpen(true)}
+                    className="flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-xs"
+                  >
                     <i className="fa-solid fa-share-nodes"></i> Share
                   </button>
                 </div>
@@ -486,9 +522,16 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                       >
                         Details
                       </Link>
-                      <button className="flex-[1.5] bg-blue-500 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors hover:bg-blue-600">
-                        Register Now
-                      </button>
+                      {rel.online_link && (
+                        <a
+                          href={rel.online_link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-[1.5] bg-blue-500 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors hover:bg-blue-600 text-center"
+                        >
+                          Register Now
+                        </a>
+                      )}
                       <button className="border border-gray-200 p-2.5 rounded-md hover:bg-gray-50 text-gray-600 transition-colors group">
                         <i className="fa-regular fa-heart w-4 h-4 group-hover:text-red-500 transition-colors"></i>
                       </button>
@@ -499,6 +542,14 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             })}
            </div>
       </div>
+      <ShareCollegeModal
+        collegeName="Event"
+        isOpen={isShareModalOpen}
+        onClose={() => setIsShareModalOpen(false)}
+        shareUrl={shareUrl}
+        shareTitle={event?.title || ""}
+        shareText={event?.title || ""}
+      />
       <style>{`
          .news-content { overflow-wrap: break-word; word-break: normal; hyphens: none; line-break: strict; }
         .news-content a { color: #2563eb !important; text-decoration: underline !important; font-weight: 500 !important; }
