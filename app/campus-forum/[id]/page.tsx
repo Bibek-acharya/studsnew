@@ -192,7 +192,7 @@ export default function CommunityDetailPage() {
       {/* Main Header Container */}
       <div className="max-w-350 mx-auto">
         <div className="relative bg-white">
-          <div className="relative flex flex-row items-start gap-3 px-6 pb-8 md:block md:px-0">
+          <div className="relative flex flex-row items-start gap-3 px-4 sm:px-6 pb-8 md:block md:px-0">
             <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-[#0000ff] p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
               {community.icon ? (
                 <DynamicIcon name={community.icon} size={40} className="text-white" />
