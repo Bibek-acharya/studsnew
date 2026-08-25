@@ -372,41 +372,47 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                    <i className="fa-regular fa-envelope"></i>
+                {event.organizer_email && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                      <i className="fa-regular fa-envelope"></i>
+                    </div>
+                    <a
+                      href={`mailto:${event.organizer_email}`}
+                      className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                    >
+                      {event.organizer_email}
+                    </a>
                   </div>
-                  <a
-                    href="mailto:info@gmail.com"
-                    className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
-                  >
-                    info@gmail.com
-                  </a>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                    <i className="fa-solid fa-phone"></i>
+                )}
+                {event.organizer_phone && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                      <i className="fa-solid fa-phone"></i>
+                    </div>
+                    <a
+                      href={`tel:${event.organizer_phone}`}
+                      className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                    >
+                      {event.organizer_phone}
+                    </a>
                   </div>
-                  <a
-                    href="tel:+977987654321"
-                    className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
-                  >
-                    +977-987654321
-                  </a>
-                </div>
-                <div className="flex items-center gap-3 text-sm">
-                  <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                    <i className="fa-solid fa-globe"></i>
+                )}
+                {event.organizer_website && (
+                  <div className="flex items-center gap-3 text-sm">
+                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+                      <i className="fa-solid fa-globe"></i>
+                    </div>
+                    <a
+                      href={event.organizer_website.startsWith("http") ? event.organizer_website : `https://${event.organizer_website}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
+                    >
+                      {event.organizer_website.replace(/^https?:\/\//, "")}
+                    </a>
                   </div>
-                  <a
-                    href="http://www.studsphere.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
-                  >
-                    www.studsphere.com
-                  </a>
-                </div>
+                )}
               </div>
             </div>
           </div>
