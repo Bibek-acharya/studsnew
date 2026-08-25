@@ -126,7 +126,7 @@ export default function UniversityBanner({
                   className="shrink-0 flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 lg:px-5 lg:py-3 lg:text-[15px]"
                 >
                   <Download className="h-4 w-4" />
-                  <span>{aboutData?.prospectus_title as string || "Prospectus"}</span>
+                  <span>Download Brochure</span>
                 </a>
               ) : null}
               <button
