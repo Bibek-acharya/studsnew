@@ -177,7 +177,35 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               `${API_BASE}/api/v1/education/events/${slug}`,
             );
             const json = await res.json();
-            eventData = json?.data || json;
+            const raw = json?.data || json;
+            eventData = {
+              id: String(raw.id ?? raw.event_id),
+              title: raw.title || raw.name || "",
+              excerpt: raw.excerpt || raw.short_desc || raw.description?.slice(0, 200) || "",
+              description: raw.description || "",
+              category: raw.category || raw.event_type || "Event",
+              image: raw.image || raw.image_url || raw.banner_image || "",
+              organizer: raw.organizer || raw.organized_by || "",
+              location: raw.location || "",
+              date: raw.date || raw.start_date
+                ? new Date(raw.date || raw.start_date).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "",
+              time: raw.time || raw.start_date
+                ? new Date(raw.start_date).toLocaleTimeString("en-US", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : "",
+              registrationFee: raw.registrationFee ?? raw.registration_fee ?? "",
+              interestedCount: raw.interestedCount ?? raw.interested_count ?? 0,
+              published: raw.published ?? raw.status === "published",
+              slug: raw.slug,
+              created_at: raw.created_at || raw.publish_date || new Date().toISOString(),
+            };
           } else {
             eventData = await fetchPublicEventBySlug(slug);
           }
@@ -340,6 +368,20 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                     </p>
                   </div>
                 </div>
+
+                {event.organizer && (
+                  <div className="flex gap-4">
+                    <i className="fa-regular fa-building text-blue-600 shrink-0 mt-0.5"></i>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm mb-1">
+                        Organized By
+                      </h4>
+                      <p className="text-xs text-gray-500 leading-relaxed">
+                        {event.organizer}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 space-y-3">
@@ -354,65 +396,6 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                     <i className="fa-solid fa-share-nodes"></i> Share
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 mb-6">
-                Organized By
-              </h2>
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-gray-900 flex items-center justify-center overflow-hidden shrink-0">
-                  <div className="w-6 h-6 border-2 border-orange-500 rotate-45"></div>
-                </div>
-                <h3 className="font-bold text-gray-900 text-sm">
-                  {event.organizer}
-                </h3>
-              </div>
-
-              <div className="space-y-4">
-                {event.organizer_email && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <i className="fa-regular fa-envelope"></i>
-                    </div>
-                    <a
-                      href={`mailto:${event.organizer_email}`}
-                      className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
-                    >
-                      {event.organizer_email}
-                    </a>
-                  </div>
-                )}
-                {event.organizer_phone && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <i className="fa-solid fa-phone"></i>
-                    </div>
-                    <a
-                      href={`tel:${event.organizer_phone}`}
-                      className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
-                    >
-                      {event.organizer_phone}
-                    </a>
-                  </div>
-                )}
-                {event.organizer_website && (
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                      <i className="fa-solid fa-globe"></i>
-                    </div>
-                    <a
-                      href={event.organizer_website.startsWith("http") ? event.organizer_website : `https://${event.organizer_website}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-gray-900 font-medium hover:text-blue-600 transition-colors"
-                    >
-                      {event.organizer_website.replace(/^https?:\/\//, "")}
-                    </a>
-                  </div>
-                )}
               </div>
             </div>
           </div>
