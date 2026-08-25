@@ -18,6 +18,17 @@ export interface EventEntry {
   published: boolean;
   slug?: string;
   created_at: string;
+  registration_deadline?: string;
+  organizer_email?: string;
+  organizer_phone?: string;
+  organizer_website?: string;
+  featured?: boolean;
+  end_date?: string;
+  end_time?: string;
+  attendees?: number;
+  max_participants?: number;
+  online_link?: string;
+  contact_person?: string;
 }
 
 export interface EventMeta {
