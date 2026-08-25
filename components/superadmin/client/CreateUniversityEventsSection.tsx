@@ -37,6 +37,8 @@ export default function CreateUniversityEventsSection({ setActiveSection, editId
   const [eventDate, setEventDate] = useState("");
   const [eventTime, setEventTime] = useState("");
   const [registrationFee, setRegistrationFee] = useState("");
+  const [applicationLink, setApplicationLink] = useState("");
+  const [registrationDeadline, setRegistrationDeadline] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
@@ -68,6 +70,8 @@ export default function CreateUniversityEventsSection({ setActiveSection, editId
           setEventDate(event.date || "");
           setEventTime(event.time || "");
           setRegistrationFee(event.registrationFee || "");
+          setApplicationLink(event.application_link || "");
+          setRegistrationDeadline(event.registration_deadline || "");
           setExcerpt(event.excerpt || "");
           setDescription(event.description || "");
           setImageUrl(event.image || "");
@@ -99,13 +103,13 @@ export default function CreateUniversityEventsSection({ setActiveSection, editId
     setSubmitting(true);
     setError("");
     try {
-      const payload = { title: title.trim(), category, organizer, location, date: eventDate, time: eventTime, registrationFee, excerpt, description, image: imageUrl, university_id: universityId };
+      const payload = { title: title.trim(), category, organizer, location, date: eventDate, time: eventTime, registrationFee, application_link: applicationLink, registration_deadline: registrationDeadline, excerpt, description, image: imageUrl, university_id: universityId };
       if (isEditing && editId) { await adminEventApi.update(editId, payload); toast.success("Event updated."); }
       else { await adminEventApi.create(payload); toast.success("Event created."); }
       setActiveSection("university-events");
     } catch (err: any) { setError(err.message || "Failed to save"); }
     finally { setSubmitting(false); }
-  }, [title, category, organizer, location, eventDate, eventTime, registrationFee, excerpt, description, imageUrl, universityId, isEditing, editId, setActiveSection]);
+  }, [title, category, organizer, location, eventDate, eventTime, registrationFee, applicationLink, registrationDeadline, excerpt, description, imageUrl, universityId, isEditing, editId, setActiveSection]);
 
   return (
     <div className="space-y-6">
@@ -160,6 +164,16 @@ export default function CreateUniversityEventsSection({ setActiveSection, editId
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
             <input className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500" value={location} onChange={(e) => setLocation(e.target.value)} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Application Link</label>
+              <input type="url" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500" value={applicationLink} onChange={(e) => setApplicationLink(e.target.value)} placeholder="https://..." />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Registration Deadline</label>
+              <input type="date" className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500" value={registrationDeadline} onChange={(e) => setRegistrationDeadline(e.target.value)} />
+            </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Featured Image *</label>
