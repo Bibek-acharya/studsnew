@@ -277,36 +277,60 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
 
   return (
     <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen px-4 sm:px-0">
-      <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16 bg-gray-100">
-        <img
-          src={getImageUrl(event.image)}
-          alt={event.title}
-          className="absolute inset-0 w-full h-full object-cover"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = getImageUrl("");
-          }}
-        />
-        <div className="absolute inset-0 bg-linear-to-t from-gray-900 via-gray-900/60 to-transparent"></div>
-
-        <div className="absolute bottom-0 left-0 w-full p-6 sm:p-10 lg:p-12">
-          <div className="flex flex-wrap items-center gap-3 mb-3 sm:mb-4">
-            <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider ">
-              {badgeLabel}
+      <div className="mb-6">
+        <div className="flex flex-wrap items-center gap-3 mb-4">
+          <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+            {badgeLabel}
+          </span>
+          {event.featured && (
+            <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+              Featured
             </span>
-            {event.featured && (
-              <span className="bg-white/20 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1.5 border border-white/20">
-                <i className="fa-solid fa-star text-[11px]"></i> Featured
-              </span>
-            )}
-          </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-white leading-tight mb-3 sm:mb-4 max-w-4xl">
-            {event.title}
-          </h1>
-          <div className="hidden sm:block max-w-2xl news-content prose prose-invert prose-sm max-w-none prose-p:text-gray-200 prose-a:text-blue-300">
-            <RichText html={event.excerpt} variant="sm" />
-          </div>
+          )}
+        </div>
+        <h1 className="text-2xl sm:text-3xl lg:text-5xl font-extrabold text-gray-900 leading-tight mb-4 max-w-4xl">
+          {event.title}
+        </h1>
+        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
+          {event.organizer && (
+            <div className="flex items-center gap-2">
+              <i className="fa-regular fa-building text-gray-800"></i>
+              <span>Organized by: <strong className="text-gray-900 font-semibold">{event.organizer}</strong></span>
+            </div>
+          )}
+          {event.date && (
+            <div className="flex items-center gap-2">
+              <i className="fa-solid fa-calendar text-gray-800"></i>
+              <span>{event.date}</span>
+            </div>
+          )}
+          {event.location && (
+            <div className="flex items-center gap-2">
+              <i className="fa-solid fa-location-dot text-gray-800"></i>
+              <span>{event.location}</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {event.image && (
+        <div className="mb-8 rounded-xl overflow-hidden border border-gray-100">
+          <img
+            src={getImageUrl(event.image)}
+            alt={event.title}
+            className="w-full h-auto max-h-[450px] object-cover hover:scale-[1.02] transition-transform duration-500"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = getImageUrl("");
+            }}
+          />
+        </div>
+      )}
+
+      {event.excerpt && (
+        <div className="max-w-none bg-blue-50 border-l-[3px] border-blue-500 p-5 md:p-6 rounded-r-xl mb-10">
+          <RichText html={event.excerpt} />
+        </div>
+      )}
 
       <div className="lg:flex lg:gap-12 xl:gap-16">
         <div className="lg:w-2/3 space-y-12">
