@@ -383,9 +383,9 @@ const EventsPage: React.FC = () => {
                       {event.title}
                     </Link>
 
-                    <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
-                      <i className="fa-regular fa-building mr-2 text-gray-500"></i>{" "}
-                      {event.organizer}
+                    <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold min-w-0">
+                      <i className="fa-regular fa-building mr-2 text-gray-500 shrink-0"></i>{" "}
+                      <span className="truncate">{event.organizer}</span>
                     </div>
                     <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
                       <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i>{" "}
