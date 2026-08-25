@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
+import { Calendar } from "lucide-react";
 import { apiService } from "@/services/api";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
 
@@ -80,10 +82,10 @@ export default function EventsTab({ universityId }: EventsTabProps) {
               <div key={event.id} className="flex items-center gap-4 rounded-md border border-gray-200 bg-white p-4 transition hover:border-blue-500/20">
                 <div className="flex h-16 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100">
                   {event.image ? (
-                    <img src={event.image} alt={event.title} className="h-full w-full object-cover" />
+                    <Image src={event.image} alt={event.title} width={96} height={64} className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-gray-400">
-                      <i className="fa-regular fa-calendar text-2xl"></i>
+                      <Calendar className="text-2xl"></Calendar>
                     </div>
                   )}
                 </div>
@@ -99,7 +101,7 @@ export default function EventsTab({ universityId }: EventsTabProps) {
                       {mapped}
                     </span>
                     <span className="flex items-center text-xs text-gray-500">
-                      <i className="fa-regular fa-calendar mr-1.5"></i> {formattedDate}
+                      <Calendar className="mr-1.5 h-3.5 w-3.5"></Calendar> {formattedDate}
                     </span>
                   </div>
                 </div>

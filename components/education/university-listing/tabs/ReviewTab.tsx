@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { Star } from "lucide-react";
 import ReviewCard from "@/app/find-college/[id]/components/ReviewCard";
 import RatingBar from "@/app/find-college/[id]/components/RatingBar";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
@@ -140,10 +141,10 @@ export default function ReviewTab({
               </h2>
               <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
                 {Array.from({ length: 5 }).map((_, idx) => (
-                  <i
+                  <Star
                     key={idx}
-                    className={`fa-solid fa-star text-[14px] ${idx < Math.round(reviewsData?.overall_rating || overallRating || 0) ? "text-yellow-400" : "text-gray-300"}`}
-                  ></i>
+                    className={`text-[14px] ${idx < Math.round(reviewsData?.overall_rating || overallRating || 0) ? "fill-yellow-400 text-yellow-400" : "fill-gray-300 text-gray-300"}`}
+                  />
                 ))}
               </div>
               <p className="text-[13px] font-medium text-gray-500">
@@ -196,7 +197,7 @@ export default function ReviewTab({
                       onClick={() => setReviewRating(star)}
                       className="text-2xl transition-colors hover:scale-110"
                     >
-                      <i className={`${star <= (reviewRating || myReview?.rating) ? "fa-solid text-yellow-400" : "fa-regular text-gray-300"} fa-star`}></i>
+                      <Star className={`${star <= (reviewRating || myReview?.rating) ? "fill-yellow-400 text-yellow-400" : "fill-gray-300 text-gray-300"} h-5 w-5`}></Star>
                     </button>
                   ))}
                 </div>

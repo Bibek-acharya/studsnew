@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
 
 interface GalleryTabProps {
@@ -137,10 +139,12 @@ export default function GalleryTab({ galleryList }: GalleryTabProps) {
                 className="aspect-[16/10] overflow-hidden rounded-md cursor-pointer bg-brand-blue"
                 onClick={() => setGalIdx(idx)}
               >
-                <img
+                <Image
                   src={url}
                   className="h-full w-full object-cover transition duration-300 hover:scale-105"
                   alt="Gallery"
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                 />
               </div>
             ))}
@@ -169,11 +173,13 @@ export default function GalleryTab({ galleryList }: GalleryTabProps) {
               setGalIdx((p) => (p === null ? null : p === 0 ? currentImages.length - 1 : p - 1));
             }}
           >
-            <i className="fa-solid fa-chevron-left text-xl"></i>
+            <ChevronLeft className="text-xl"></ChevronLeft>
           </button>
-          <img
+          <Image
             src={currentImages[galIdx]}
             alt="Gallery preview"
+            width={1200}
+            height={800}
             className="max-h-[90vh] max-w-[90vw] object-contain"
             onClick={(e) => e.stopPropagation()}
           />
@@ -184,13 +190,13 @@ export default function GalleryTab({ galleryList }: GalleryTabProps) {
               setGalIdx((p) => (p === null ? null : p === currentImages.length - 1 ? 0 : p + 1));
             }}
           >
-            <i className="fa-solid fa-chevron-right text-xl"></i>
+            <ChevronRight className="text-xl"></ChevronRight>
           </button>
           <button
             className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 transition"
             onClick={() => setGalIdx(null)}
           >
-            <i className="fa-solid fa-xmark text-xl"></i>
+            <X className="text-xl"></X>
           </button>
         </div>
       )}

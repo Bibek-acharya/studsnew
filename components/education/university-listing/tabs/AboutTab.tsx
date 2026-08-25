@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import RichText from "@/components/RichText";
 import {
   BadgeCheck,
@@ -50,10 +51,12 @@ export default function AboutTab({
           <div className="px-6 py-4 border-b border-gray-100">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0">
-                <img
+                <Image
                   src="/icon.png"
                   alt="StudSphere Team"
-                  className="h-12 w-12 rounded-full object-cover border-2 border-blue-500"
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover border-2 border-blue-500"
                 />
               </div>
               <div className="flex-1 min-w-0">

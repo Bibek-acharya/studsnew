@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { FileText, Download } from "lucide-react";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
 
 interface DownloadTabProps {
@@ -20,7 +21,7 @@ export default function DownloadTab({ downloadsList }: DownloadTabProps) {
             <div key={dl.title || dl.name || i} className="flex items-center justify-between rounded-md border border-gray-200 bg-white p-5 transition">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-md bg-brand-blue/5 text-brand-blue">
-                  <i className="fa-regular fa-file-lines text-xl"></i>
+                  <FileText className="text-xl"></FileText>
                 </div>
                 <div>
                   <h4 className="font-bold text-gray-900">{dl.title || dl.name}</h4>
@@ -34,11 +35,11 @@ export default function DownloadTab({ downloadsList }: DownloadTabProps) {
                   rel="noreferrer"
                   className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white"
                 >
-                  <i className="fa-solid fa-download"></i>Download
+                  <Download className="h-4 w-4"></Download>Download
                 </a>
               ) : (
                 <button className="flex items-center gap-2 rounded-md bg-brand-blue hover:bg-brand-hover px-5 py-2.5 text-sm font-bold text-white">
-                  <i className="fa-solid fa-download"></i>Download
+                  <Download className="h-4 w-4"></Download>Download
                 </button>
               )}
             </div>

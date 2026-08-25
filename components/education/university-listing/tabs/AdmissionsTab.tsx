@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { Check, CloudUpload, File, X, Loader2 } from "lucide-react";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
 
 interface AdmissionsTabProps {
@@ -186,7 +187,7 @@ export default function AdmissionsTab({
             {dateReportSuccess ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
-                  <i className="fa-solid fa-check text-2xl text-green-500"></i>
+                  <Check className="text-2xl text-green-500"></Check>
                 </div>
                 <p className="text-gray-700 font-medium">Thank you for your feedback!</p>
                 <p className="text-sm text-gray-500 mt-1">We will review the dates shortly.</p>
@@ -289,7 +290,7 @@ export default function AdmissionsTab({
                     Attach File (optional)
                   </label>
                   <label className="flex items-center gap-3 cursor-pointer bg-gray-50 border border-dashed border-gray-300 rounded-md px-4 py-3 hover:border-blue-400 transition-colors">
-                    <i className="fa-solid fa-cloud-arrow-up text-gray-400"></i>
+                    <CloudUpload className="text-gray-400"></CloudUpload>
                     <span className="text-sm text-gray-600">
                       {dateReportFile ? dateReportFile.name : "Upload image or document"}
                     </span>
@@ -305,14 +306,14 @@ export default function AdmissionsTab({
                   </label>
                   {dateReportFile && (
                     <div className="mt-2 flex items-center gap-2 text-xs text-gray-500">
-                      <i className="fa-solid fa-file text-blue-500"></i>
+                      <File className="text-blue-500"></File>
                       <span className="truncate">{dateReportFile.name}</span>
                       <button
                         type="button"
                         onClick={() => setDateReportFile(null)}
                         className="text-red-400 hover:text-red-600 ml-auto"
                       >
-                        <i className="fa-solid fa-times"></i>
+                        <X className="h-4 w-4"></X>
                       </button>
                     </div>
                   )}
@@ -343,7 +344,7 @@ export default function AdmissionsTab({
                   >
                     {dateReportSubmitting ? (
                       <>
-                        <i className="fa-solid fa-spinner fa-spin"></i>
+                        <Loader2 className="h-4 w-4 animate-spin"></Loader2>
                         Submitting...
                       </>
                     ) : (
