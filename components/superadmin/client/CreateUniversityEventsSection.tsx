@@ -71,7 +71,7 @@ export default function CreateUniversityEventsSection({ setActiveSection, editId
           setEventTime(event.time || "");
           setRegistrationFee(event.registrationFee || "");
           setApplicationLink(event.application_link || "");
-          setRegistrationDeadline(event.registration_deadline || "");
+          setRegistrationDeadline(event.registration_deadline ? event.registration_deadline.slice(0, 10) : "");
           setExcerpt(event.excerpt || "");
           setDescription(event.description || "");
           setImageUrl(event.image || "");

@@ -119,7 +119,7 @@ function CreateEventForm() {
           setTags(event.tags?.join(", ") || "");
           setEnableRegistration(event.enable_registration || false);
           setApplicationLink(event.application_link || "");
-          setRegistrationDeadline(event.registration_deadline || "");
+          setRegistrationDeadline(event.registration_deadline ? event.registration_deadline.slice(0, 10) : "");
           setFeaturedImageUrl(event.image_url || "");
           setFeaturedImagePreview(event.image_url || "");
         })

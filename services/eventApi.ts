@@ -363,7 +363,7 @@ export async function fetchPublicEventBySlug(
           : "",
       time:
         raw.time || raw.start_date
-          ? new Date(raw.start_date).toLocaleTimeString("en-US", {
+          ? raw.time || new Date(raw.start_date).toLocaleTimeString("en-US", {
               hour: "2-digit",
               minute: "2-digit",
             })
@@ -374,6 +374,10 @@ export async function fetchPublicEventBySlug(
       slug: raw.slug,
       created_at:
         raw.created_at || raw.publish_date || new Date().toISOString(),
+      registration_deadline: raw.registration_deadline || "",
+      application_link: raw.application_link || "",
+      end_date: raw.end_date || "",
+      online_link: raw.online_link || "",
     };
   } catch {
     return null;
