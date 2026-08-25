@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Check, CloudUpload, File, X, Loader2 } from "lucide-react";
 import EmptyTabState from "@/app/find-college/[id]/components/EmptyTabState";
@@ -127,11 +128,13 @@ export default function AdmissionsTab({
                 className="bg-white border border-gray-100 hover:border-blue-500/20 rounded-md overflow-hidden cursor-pointer transition-all duration-300 group"
                 onClick={() => setOfficialNoticePreview(notice.url)}
               >
-                <div className="aspect-[4/3] w-full overflow-hidden bg-gray-100">
-                  <img
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100">
+                  <Image
                     src={notice.url}
                     alt={`Official Notice ${i + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    fill
+                    unoptimized
+                    className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                   />
                 </div>
               </div>
@@ -152,12 +155,15 @@ export default function AdmissionsTab({
           >
             &times;
           </button>
-          <img
-            src={officialNoticePreview}
-            alt="Official Notice"
-            className="max-h-[85vh] max-w-[90%] rounded-md object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="relative h-[85vh] w-[90vw]" onClick={(e) => e.stopPropagation()}>
+            <Image
+              src={officialNoticePreview}
+              alt="Official Notice"
+              fill
+              unoptimized
+              className="rounded-md object-contain"
+            />
+          </div>
         </div>
       )}
 
