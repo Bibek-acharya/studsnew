@@ -231,7 +231,7 @@ const EventsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8 px-4 sm:px-6">
+      <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8 px-4 sm:px-0">
         <div className="mx-auto py-8 flex items-center justify-center py-20">
           <Loader2 className="w-8 h-8 text-[#0000ff] animate-spin" />
         </div>
@@ -240,7 +240,7 @@ const EventsPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8 px-4 sm:px-6">
+    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8 px-4 sm:px-0">
       <div className="mx-auto py-8">
         <section className="mb-10">
           <h2 className="text-3xl font-bold mb-4">Browse by category</h2>

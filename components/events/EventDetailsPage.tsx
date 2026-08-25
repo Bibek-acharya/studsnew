@@ -242,7 +242,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   }
 
   return (
-    <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen">
+    <main className="max-w-350 mx-auto pt-6 pb-10 lg:pb-14 bg-white min-h-screen px-4 sm:px-0">
       <div className="relative w-full h-62.5 sm:h-75 lg:h-90 rounded-md lg:rounded-md overflow-hidden shadow-xl mb-10 lg:mb-16 bg-gray-100">
         <img
           src={getImageUrl(event.image)}
