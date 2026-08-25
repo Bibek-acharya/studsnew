@@ -377,7 +377,7 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
                     </h4>
                     <p className="text-xs text-red-500">
                       {event.registration_deadline
-                        ? `Closes on ${event.registration_deadline}`
+                        ? `Closes on ${new Date(event.registration_deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
                         : "No deadline specified"}
                     </p>
                   </div>
