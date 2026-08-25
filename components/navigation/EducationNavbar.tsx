@@ -53,7 +53,7 @@ import {
 } from "./types";
 import Image from "next/image";
 import { trendingSearches } from "@/utils/searchDatabase";
-import { apiService, DashboardStats, getImageUrl } from "@/services/api";
+import { apiService, DashboardStats, getImageUrl, stripHtml } from "@/services/api";
 import TopBar from "./TopBar";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
@@ -595,7 +595,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                       {notif.title}
                                     </p>
                                     <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
-                                      {notif.message}
+                                      {stripHtml(notif.message)}
                                     </p>
                                   </div>
                                 </div>
@@ -761,8 +761,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                       </span>
                                     )}
                                   </div>
-                                  <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
-                                    {notif.message}
+                                   <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
+                                    {stripHtml(notif.message)}
                                   </p>
                                   <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
                                     <Clock size={12} /> {notif.time}
