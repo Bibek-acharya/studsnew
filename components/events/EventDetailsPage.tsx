@@ -463,73 +463,75 @@ const EventDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
               return (
                 <article
                   key={`${rel.id}-${idx}`}
-                  className="bg-white border border-gray-200 rounded-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                  className="bg-white rounded-md border border-gray-200 hover:border-blue-500/20 overflow-hidden flex flex-col duration-300 cursor-pointer"
                 >
-                  <img
-                    src={getImageUrl(rel.image)}
-                    alt={rel.title}
-                    className="w-full h-44 object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = getImageUrl("");
-                    }}
-                  />
-                  <div className="p-5">
+                  <div className="h-35 w-full overflow-hidden p-4">
+                    <img
+                      src={getImageUrl(rel.image)}
+                      alt={rel.title}
+                      className="w-full h-full object-cover rounded-md"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = getImageUrl("");
+                      }}
+                    />
+                  </div>
+                  <div className="p-5 flex flex-col grow">
                     <div className="flex justify-between items-center mb-3">
                       <span
-                        className={`${relBadgeClass} text-white text-[11px] px-2.5 py-1 rounded-full font-medium tracking-wide`}
+                        className={`${relBadgeClass} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}
                       >
                         {relCategory}
                       </span>
-                      <div className="flex items-center text-gray-500 text-[12px] font-medium gap-1.5">
-                        <i className="fa-regular fa-calendar"></i>{" "}
-                        {rel.date || "Date TBA"}
-                      </div>
+                      <span className="flex items-center text-xs text-gray-500 font-semibold">
+                        <i className="fa-regular fa-calendar mr-1.5"></i> {rel.date || "TBA"}
+                      </span>
                     </div>
 
-                    <h3 className="text-[17px] font-bold mb-3 leading-snug text-gray-900">
+                    <Link
+                      href={`/events/${rel.slug || rel.id}`}
+                      className="font-bold text-lg mb-3 leading-tight text-left text-black hover:text-[#0000ff] line-clamp-1"
+                      title={rel.title}
+                    >
                       {rel.title}
-                    </h3>
+                    </Link>
 
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-center text-gray-700 text-[13px] font-medium gap-2">
-                        <i className="fa-regular fa-building text-gray-400"></i>{" "}
-                        {rel.organizer}
-                      </div>
-                      <div className="flex items-center text-gray-700 text-[13px] font-medium gap-2">
-                        <i className="fa-solid fa-location-dot text-gray-400"></i>{" "}
-                        {rel.location}
-                      </div>
+                    <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold min-w-0">
+                      <i className="fa-regular fa-building mr-2 text-gray-500 shrink-0"></i>{" "}
+                      <span className="truncate" title={rel.organizer}>{rel.organizer}</span>
+                    </div>
+                    <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold min-w-0">
+                      <i className="fa-solid fa-location-dot mr-2 text-gray-500 shrink-0"></i>{" "}
+                      <span className="truncate" title={rel.location}>{rel.location}</span>
                     </div>
 
-                    <RichText
-                      html={rel.excerpt}
-                      variant="sm"
-                      as="p"
-                      className="text-gray-500 text-[13px] leading-relaxed mb-5 line-clamp-3 news-content"
-                    />
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-1 leading-relaxed font-medium" title={stripHtml(rel.excerpt || "")}>
+                      {stripHtml(rel.excerpt || "")}
+                    </p>
 
-                    <div className="border-t border-dashed border-gray-200 mb-4"></div>
-
-                    <div className="flex items-center gap-3">
+                    <div className="mt-auto flex gap-2">
                       <Link
                         href={`/events/${rel.slug || rel.id}`}
-                        className="flex-1 border border-gray-200 text-gray-700 text-[13px] font-semibold py-2.5 rounded-md hover:bg-gray-50 transition-colors text-center"
+                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-md hover:bg-gray-50 transition text-center"
                       >
                         Details
                       </Link>
-                      {rel.online_link && (
+                      {rel.online_link ? (
                         <a
                           href={rel.online_link}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-[1.5] bg-blue-500 text-white text-[13px] font-semibold py-2.5 rounded-md transition-colors hover:bg-blue-600 text-center"
+                          className="flex-1 bg-brand-blue text-white text-sm font-bold py-2 rounded-md transition-colors hover:bg-blue-600 text-center"
                         >
                           Register Now
                         </a>
+                      ) : (
+                        <Link
+                          href={`/events/${rel.slug || rel.id}`}
+                          className="flex-1 bg-brand-blue text-white text-sm font-bold py-2 rounded-md transition-colors hover:bg-blue-600 text-center"
+                        >
+                          View Details
+                        </Link>
                       )}
-                      <button className="border border-gray-200 p-2.5 rounded-md hover:bg-gray-50 text-gray-600 transition-colors group">
-                        <i className="fa-regular fa-heart w-4 h-4 group-hover:text-red-500 transition-colors"></i>
-                      </button>
                     </div>
                   </div>
                 </article>
