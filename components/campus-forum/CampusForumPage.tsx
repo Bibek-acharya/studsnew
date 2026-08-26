@@ -155,16 +155,12 @@ const PostCard: React.FC<{
         </div>
 
         <div className="flex items-center gap-2">
-          {onJoinCommunity && post.community && (
+          {onJoinCommunity && post.community && !isGeneral && !isJoined && (
             <button
               onClick={handleJoinToggle}
-              className={`px-4 py-1 rounded-full text-xs font-semibold transition-colors ${
-                isJoined
-                  ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  : "border border-[#2563eb] text-[#2563eb] hover:bg-blue-50"
-              }`}
+              className="px-4 py-1 rounded-full text-xs font-semibold transition-colors border border-[#2563eb] text-[#2563eb] hover:bg-blue-50"
             >
-              {isJoined ? "Joined" : "Join"}
+              Join
             </button>
           )}
           <div className="relative">
@@ -423,12 +419,12 @@ const CommentItem: React.FC<{
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-slate-800 text-[11px]">{comment.user_name}</span>
+          <div className="flex items-center gap-1.5 min-w-0">
+            <span className="font-bold text-slate-800 text-[11px] shrink-0">{comment.user_name}</span>
             {comment.parent_user_name && (
-              <span className="text-[10px] text-slate-400">replying to <span className="font-semibold text-slate-600">@{comment.parent_user_name}</span></span>
+              <span className="text-[10px] text-slate-400 truncate">replying to <span className="font-semibold text-slate-600">@{comment.parent_user_name}</span></span>
             )}
-            <span className="text-[10px] text-slate-400">{relativeTime(comment.created_at)}</span>
+            <span className="text-[10px] text-slate-400 shrink-0">{relativeTime(comment.created_at)}</span>
           </div>
           <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
           <div className="flex items-center gap-3 mt-1.5">
@@ -1181,6 +1177,10 @@ const CampusForumPage: React.FC = () => {
   const handleJoinToggle = async (communityId: number) => {
     if (!isAuthenticated || !token) {
       showToast("Please login to join communities");
+      return;
+    }
+    const community = communities.find((c) => c.id === communityId);
+    if (community?.is_member && !window.confirm(`Leave "${community.name}"? You won't see its posts in your feed anymore.`)) {
       return;
     }
     setJoinLoading((p) => ({ ...p, [communityId]: true }));

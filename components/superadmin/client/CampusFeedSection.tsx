@@ -137,8 +137,9 @@ export default function CampusFeedSection() {
     setSelectedCommunity(community);
     setPostsLoading(true);
     try {
-      const data = await apiService.getForumPosts(50, undefined, community.id);
-      setCommunityPosts(Array.isArray(data) ? data : []);
+      const data = await apiService.getForumPosts(50, undefined, community.id) as any;
+      const posts = data?.posts || (Array.isArray(data) ? data : []);
+      setCommunityPosts(posts);
     } catch {
       setCommunityPosts([]);
     } finally {
