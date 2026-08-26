@@ -326,8 +326,9 @@ const CommentItem: React.FC<{
   onReply: (postId: number, parentId: number, content: string) => void;
   onVote?: (commentId: number, delta: number) => void;
   isAuthor?: boolean;
+  autoExpand?: boolean;
   currentUser?: { first_name: string; last_name: string; image_url?: string } | null;
-}> = ({ comment, postId, onReply, onVote, currentUser }) => {
+}> = ({ comment, postId, onReply, onVote, currentUser, autoExpand }) => {
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -335,7 +336,7 @@ const CommentItem: React.FC<{
   const [dislikes, setDislikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  const [showReplies, setShowReplies] = useState(false);
+  const [showReplies, setShowReplies] = useState(autoExpand && (comment.reply_count || 0) > 0);
   const [replies, setReplies] = useState<CommentData[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [localReplyCount, setLocalReplyCount] = useState(comment.reply_count || 0);
@@ -389,6 +390,18 @@ const CommentItem: React.FC<{
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (autoExpand && (comment.reply_count || 0) > 0 && replies.length === 0) {
+      setLoadingReplies(true);
+      apiService.getForumPostComments(postId, 50, 0, undefined, comment.id)
+        .then((result) => {
+          setReplies(Array.isArray(result) ? result : result.comments || []);
+        })
+        .catch(() => {})
+        .finally(() => setLoadingReplies(false));
+    }
+  }, [autoExpand, comment.id, comment.reply_count, postId]);
 
   const toggleReplies = async () => {
     if (showReplies) {
@@ -482,7 +495,7 @@ const CommentItem: React.FC<{
       {showReplies && replies.length > 0 && (
         <div className="ml-6 sm:ml-9 mt-2 space-y-3 overflow-hidden">
           {replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} />
+            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} autoExpand />
           ))}
           <button
             onClick={() => setShowReplies(false)}
