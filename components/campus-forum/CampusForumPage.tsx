@@ -1387,8 +1387,8 @@ const CampusForumPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white text-slate-800 antialiased py-6">
-      <main className="max-w-350">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-350 mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6">
           {/* ── LEFT SIDEBAR (desktop only) ── */}
           <aside className="hidden lg:block lg:col-span-3 space-y-5 order-1 sticky top-6 h-fit self-start">
             <div className="bg-white rounded-md p-5 sm:p-6 sm:border sm:border-slate-200/80">
