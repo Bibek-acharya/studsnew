@@ -99,7 +99,8 @@ const PostCard: React.FC<{
   onCommentAdded?: (postId: number) => void;
   onNotInterested?: (postId: number) => void;
   onReport?: (postId: number) => void;
-}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded, onNotInterested, onReport }) => {
+  onPollVote?: (postId: number, optionIdx: number) => void;
+}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded, onNotInterested, onReport, onPollVote }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -238,24 +239,39 @@ const PostCard: React.FC<{
         </div>
       )}
 
-      {post.is_poll && pollOptions.length > 0 && (
-        <div className="mb-3 space-y-2">
-          {pollOptions.map((opt: any, idx: number) => {
-            const total = post.total_votes || 1;
-            const pct = Math.round(((opt.votes || 0) / total) * 100);
+      {post.is_poll && pollOptions.length > 0 && (() => {
+            const hasVoted = post.voted_option != null;
             return (
-              <div key={idx} className="relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50">
-                <div className="absolute inset-0 bg-blue-100 rounded-lg transition-all" style={{ width: `${pct}%` }} />
-                <div className="relative flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700">
-                  <span>{opt.text}</span>
-                  <span className="text-gray-500">{pct}%</span>
-                </div>
+              <div className="mb-3 space-y-2">
+                {pollOptions.map((opt: any, idx: number) => {
+                  const total = post.total_votes || 1;
+                  const pct = hasVoted ? Math.round(((opt.votes || 0) / total) * 100) : 0;
+                  const isSelected = post.voted_option === idx;
+                  return (
+                    <div
+                      key={idx}
+                      onClick={() => !hasVoted && onPollVote?.(post.id, idx)}
+                      className={`relative overflow-hidden rounded-lg border p-3 transition-all duration-300 ${hasVoted ? (isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white") : "border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"}`}
+                    >
+                      {hasVoted && (
+                        <div
+                          className={`absolute left-0 top-0 bottom-0 transition-all duration-700 ease-out ${isSelected ? "bg-blue-100" : "bg-gray-100"}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      )}
+                      <div className="relative flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700">
+                        <span>{opt.text}</span>
+                        {hasVoted && <span>{pct}%</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+                {post.total_votes != null && (
+                  <p className="text-xs text-gray-500 font-medium">{post.total_votes} votes</p>
+                )}
               </div>
             );
-          })}
-          <p className="text-xs text-gray-500 font-medium">{post.total_votes || 0} votes</p>
-        </div>
-      )}
+          })()}
 
       <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium text-[#52525e]">
         <div className="flex items-center bg-[#f3f4f6] hover:bg-gray-200 rounded-full px-2 py-1 sm:px-3 sm:py-2 text-gray-700 transition-colors">
@@ -1234,6 +1250,21 @@ const CampusForumPage: React.FC = () => {
     }
   };
 
+  const handlePollVote = async (postId: number, optionIdx: number) => {
+    if (!isAuthenticated) {
+      showToast("Please login to vote");
+      return;
+    }
+    try {
+      const updated = await apiService.voteForumPoll(token!, postId, optionIdx);
+      setPosts((prev) =>
+        prev.map((p) => (p.id === postId ? { ...p, ...updated } : p)),
+      );
+    } catch {
+      showToast("Failed to vote");
+    }
+  };
+
   const handleReport = (postId: number) => {
     setReportPostId(postId);
   };
@@ -1474,6 +1505,7 @@ const CampusForumPage: React.FC = () => {
                     onCommentAdded={handleCommentAdded}
                     onNotInterested={handleNotInterested}
                     onReport={handleReport}
+                    onPollVote={handlePollVote}
                   />
                 ))}
 
@@ -1543,6 +1575,7 @@ const CampusForumPage: React.FC = () => {
                     onCommentAdded={handleCommentAdded}
                     onNotInterested={handleNotInterested}
                     onReport={handleReport}
+                    onPollVote={handlePollVote}
                   />
                 ))}
 
@@ -1587,6 +1620,7 @@ const CampusForumPage: React.FC = () => {
                     onCommentAdded={handleCommentAdded}
                     onNotInterested={handleNotInterested}
                     onReport={handleReport}
+                    onPollVote={handlePollVote}
                   />
                 ))}
               </div>

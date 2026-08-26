@@ -192,8 +192,8 @@ export default function CommunityDetailPage() {
       {/* Main Header Container */}
       <div className="max-w-350 mx-auto">
         <div className="relative bg-white">
-          <div className="relative flex flex-row items-start gap-3 px-4 sm:px-6 pb-8 md:block md:px-0">
-            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-[#0000ff] p-1.5 md:absolute md:-top-4 md:left-12 md:mx-0 md:mt-0 md:h-37.5 md:w-37.5 lg:left-24 xl:left-32">
+          <div className="relative flex flex-row items-start gap-3 px-4 sm:px-6 pb-8 md:flex md:flex-col md:items-center md:px-0">
+            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-[#0000ff] p-1.5 md:mx-auto md:mt-0 md:-mt-6 md:h-37.5 md:w-37.5 md:p-0">
               {community.icon ? (
                 <DynamicIcon name={community.icon} size={40} className="text-white" />
               ) : (
@@ -201,8 +201,8 @@ export default function CommunityDetailPage() {
               )}
             </div>
 
-            <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 lg:pl-42.5">
-              <div className="w-full space-y-1.5 md:space-y-3 text-left lg:w-auto">
+            <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 md:text-center">
+              <div className="w-full space-y-1.5 md:space-y-3 text-left md:text-center lg:w-auto">
                 <div className="flex items-center gap-2 pt-0 md:pt-4">
                   <h1 className="min-w-0 text-[18px] font-bold tracking-tight text-gray-900 truncate md:text-[24px] md:overflow-visible md:whitespace-normal lg:text-3xl">
                     {community.name}
