@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { apiService, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import DynamicIcon from "@/components/shared/DynamicIcon";
-import { ArrowLeft } from "lucide-react";
 
 function isArray<T>(data: unknown): data is T[] {
   return Array.isArray(data);
@@ -57,17 +56,6 @@ export default function CommunitiesPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="sticky top-0 z-40 bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">
-        <button
-          onClick={() => router.back()}
-          className="p-1 rounded-full hover:bg-slate-100 transition-colors"
-        >
-          <ArrowLeft size={20} className="text-slate-700" />
-        </button>
-        <h1 className="text-base font-bold text-slate-900">All Communities</h1>
-      </div>
-
       {/* Community List */}
       <div className="px-4 sm:px-8 lg:px-16 py-4 sm:py-8">
         {isLoading ? (
@@ -79,7 +67,7 @@ export default function CommunitiesPage() {
             <p className="text-slate-500 text-sm">No communities found.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {communities.filter((c) => !c.is_general).map((item) => (
               <div
                 key={item.id}

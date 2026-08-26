@@ -40,11 +40,13 @@ export const forumApi = {
     _token?: string,
     communityId?: number,
     page?: number,
+    category?: string,
   ): Promise<{ posts: ForumPost[]; has_more: boolean }> {
     const params = new URLSearchParams();
     if (limit) params.set("limit", String(limit));
     if (communityId) params.set("community_id", String(communityId));
     if (page) params.set("page", String(page));
+    if (category) params.set("category", category);
     const response = await fetch(
       `${API_BASE_URL}/api/v1/forum/posts?${params.toString()}`,
       {

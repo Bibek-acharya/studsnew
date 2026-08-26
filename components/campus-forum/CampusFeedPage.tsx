@@ -619,6 +619,7 @@ const CampusFeedPage: React.FC = () => {
         token || undefined,
         selectedCommunityId || undefined,
         1,
+        (!selectedCommunityId && token) ? "Feed" : undefined,
       )
       .then((result) => {
         setPosts(result.posts || []);

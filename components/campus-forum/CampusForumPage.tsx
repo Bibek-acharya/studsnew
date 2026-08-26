@@ -106,8 +106,6 @@ const PostCard: React.FC<{
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
-  const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
-  const avatarUrl = user?.image_url ? imageUrl(user.image_url) : "";
   const communityName = post.community?.name || "";
   const isGeneral = post.community?.is_general || communityName === "General";
   const userRole = (user as any)?.role || "Student";
@@ -129,7 +127,7 @@ const PostCard: React.FC<{
   };
 
   return (
-    <div className="w-full bg-white rounded-2xl border border-gray-200/80 p-4 shadow-none font-sans text-gray-900">
+    <div className="w-full bg-white rounded-md border border-gray-200/80 p-4 shadow-none font-sans text-gray-900">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <div
@@ -229,11 +227,14 @@ const PostCard: React.FC<{
       )}
 
       {post.video_url && (
-        <div className="w-full h-72 rounded-xl overflow-hidden mb-3 bg-gray-100 relative cursor-pointer group" onClick={() => onLightbox(imageUrl(post.video_url), "video")}>
-          <video src={imageUrl(post.video_url)} className="w-full h-full object-contain" />
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-            <Maximize2 className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+        <div className="w-full rounded-xl overflow-hidden mb-3 bg-gray-100">
+          <video
+            src={imageUrl(post.video_url)}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full max-h-[500px] object-contain"
+          />
         </div>
       )}
 
@@ -326,7 +327,7 @@ const CommentItem: React.FC<{
   onVote?: (commentId: number, delta: number) => void;
   isAuthor?: boolean;
   currentUser?: { first_name: string; last_name: string; image_url?: string } | null;
-}> = ({ comment, postId, onReply, onVote, isAuthor = false, currentUser }) => {
+}> = ({ comment, postId, onReply, onVote, currentUser }) => {
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -337,6 +338,7 @@ const CommentItem: React.FC<{
   const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState<CommentData[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
+  const [localReplyCount, setLocalReplyCount] = useState(comment.reply_count || 0);
 
   const handleLike = () => {
     if (isLiked) {
@@ -379,6 +381,7 @@ const CommentItem: React.FC<{
       await onReply(postId, comment.id, replyContent.trim());
       setReplyContent("");
       setShowReply(false);
+      setLocalReplyCount((c) => c + 1);
       const result = await apiService.getForumPostComments(postId, 50, 0, undefined, comment.id);
       setReplies(Array.isArray(result) ? result : result.comments || []);
       setShowReplies(true);
@@ -406,7 +409,7 @@ const CommentItem: React.FC<{
   const avatarLetter = (comment.user?.first_name?.[0] || comment.user_name?.[0] || "U").toUpperCase();
   const avatarUrl = comment.user?.image_url ? imageUrl(comment.user.image_url) : "";
 
-  const replyCount = comment.reply_count || 0;
+  const replyCount = localReplyCount;
 
   return (
     <div className="text-xs overflow-hidden">
@@ -513,18 +516,7 @@ const CommentSection: React.FC<{
     setVoteCounts((prev) => ({ ...prev, [commentId]: (prev[commentId] || 0) + delta }));
   };
 
-  const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setCommentImage(file);
-    setCommentImagePreview(URL.createObjectURL(file));
-    if (commentImageRef.current) commentImageRef.current.value = "";
-  };
 
-  const removeCommentImage = () => {
-    setCommentImage(null);
-    setCommentImagePreview(null);
-  };
 
   const handleAddComment = async () => {
     if (!token || ((!newComment.trim()) && !commentImage) || isSubmitting) return;
@@ -768,7 +760,7 @@ const CreatePostModal: React.FC<{
     >
       <div
         ref={modalScrollRef}
-        className="relative w-full max-w-lg rounded-xl bg-white p-4 sm:p-6 shadow-none max-h-[90vh] overflow-y-auto"
+        className="relative w-full max-w-lg rounded-md bg-white p-4 sm:p-6 shadow-none max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -862,18 +854,25 @@ const CreatePostModal: React.FC<{
               </div>
             )}
 
-            {videoPreview && (
-              <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-none bg-black">
-                <video src={videoPreview} controls className="w-full max-h-[160px] sm:max-h-[200px] object-contain" />
-                <button
-                  type="button"
-                  onClick={removeVideo}
-                  className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-none backdrop-blur-sm z-10"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
+            {videoPreview && video && (() => {
+              const sizeMB = (video.size / (1024 * 1024)).toFixed(1);
+              const overSize = video.size > 50 * 1024 * 1024;
+              return (
+                <div className="relative rounded-xl overflow-hidden border border-gray-100 shadow-none bg-black">
+                  <video src={videoPreview} controls className="w-full max-h-[160px] sm:max-h-[200px] object-contain" />
+                  <button
+                    type="button"
+                    onClick={removeVideo}
+                    className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white w-7 h-7 rounded-full flex items-center justify-center transition-all shadow-none backdrop-blur-sm z-10"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                  <div className={`text-[10px] px-2 py-1 ${overSize ? "bg-red-500 text-white" : "bg-black/60 text-white/80"}`}>
+                    {sizeMB} MB {overSize && "— exceeds 50MB limit"}
+                  </div>
+                </div>
+              );
+            })()}
 
             {showPoll && (
               <div className="space-y-3 bg-slate-50 rounded-xl p-3 sm:p-4 border border-slate-200">
@@ -991,7 +990,7 @@ const CreatePostModal: React.FC<{
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || (!!video && video.size > 50 * 1024 * 1024)}
               className="rounded-full bg-blue-600 px-5 sm:px-6 py-2 font-semibold text-sm sm:text-base text-white shadow-none transition-all hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 active:scale-95 disabled:opacity-50 w-full sm:w-auto"
             >
               {isSubmitting ? "Publishing..." : "Publish"}
@@ -1087,6 +1086,7 @@ const CampusForumPage: React.FC = () => {
   const [lightboxType, setLightboxType] = useState<"image" | "video">("image");
   const [sharePost, setSharePost] = useState<ForumPost | null>(null);
   const [reportPostId, setReportPostId] = useState<number | null>(null);
+  const [alertDialog, setAlertDialog] = useState<{ title: string; message: string; onConfirm: () => void } | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -1113,21 +1113,12 @@ const CampusForumPage: React.FC = () => {
     if (append) setLoadingMore(true);
     else setIsLoading(true);
     try {
-      const data = await apiService.getForumPosts(20, token || undefined, selectedCommunityId || undefined, pageNum);
+      const category = (!selectedCommunityId && token) ? "Feed" : undefined;
+      const data = await apiService.getForumPosts(20, token || undefined, selectedCommunityId || undefined, pageNum, category);
       const result = data as any;
       const list: ForumPost[] = result?.posts || (isArray(result) ? result : []);
       const more = result?.has_more ?? false;
-      if (!selectedCommunityId) {
-        const joinedIds = communities.filter((c) => c.is_member).map((c) => c.id);
-        const generalId = communities.find((c) => c.is_general)?.id;
-        const userId = user?.id;
-        const filtered = list.filter((p) =>
-          joinedIds.includes(p.community_id) || p.community_id === generalId || (userId && p.user_id === userId)
-        );
-        setPosts((prev) => append ? [...prev, ...filtered] : filtered);
-      } else {
-        setPosts((prev) => append ? [...prev, ...list] : list);
-      }
+      setPosts((prev) => append ? [...prev, ...list] : list);
       setHasMore(more);
       setPage(pageNum);
     } catch (e) {
@@ -1136,7 +1127,7 @@ const CampusForumPage: React.FC = () => {
       setIsLoading(false);
       setLoadingMore(false);
     }
-  }, [token, selectedCommunityId, communities, user]);
+  }, [token, selectedCommunityId]);
 
   const fetchTrending = useCallback(async () => {
     try {
@@ -1158,15 +1149,16 @@ const CampusForumPage: React.FC = () => {
 
   useEffect(() => {
     if (!loadMoreRef.current || !hasMore || loadingMore || isLoading) return;
+    const el = loadMoreRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+        if (entries[0].isIntersecting) {
           fetchPosts(page + 1, true);
         }
       },
-      { threshold: 0.1 }
+      { rootMargin: "200px" }
     );
-    observer.observe(loadMoreRef.current);
+    observer.observe(el);
     return () => observer.disconnect();
   }, [hasMore, loadingMore, isLoading, page, fetchPosts]);
 
@@ -1174,18 +1166,10 @@ const CampusForumPage: React.FC = () => {
     router.push(`/campus-forum/${id}`);
   };
 
-  const handleJoinToggle = async (communityId: number) => {
-    if (!isAuthenticated || !token) {
-      showToast("Please login to join communities");
-      return;
-    }
-    const community = communities.find((c) => c.id === communityId);
-    if (community?.is_member && !window.confirm(`Leave "${community.name}"? You won't see its posts in your feed anymore.`)) {
-      return;
-    }
+  const doJoinToggle = async (communityId: number) => {
     setJoinLoading((p) => ({ ...p, [communityId]: true }));
     try {
-      const updated = await apiService.joinForumCommunity(token, communityId);
+      const updated = await apiService.joinForumCommunity(token!, communityId);
       setCommunities((prev) =>
         prev.map((c) =>
           c.id === communityId
@@ -1198,6 +1182,26 @@ const CampusForumPage: React.FC = () => {
     } finally {
       setJoinLoading((p) => ({ ...p, [communityId]: false }));
     }
+  };
+
+  const handleJoinToggle = (communityId: number) => {
+    if (!isAuthenticated || !token) {
+      showToast("Please login to join communities");
+      return;
+    }
+    const community = communities.find((c) => c.id === communityId);
+    if (community?.is_member) {
+      setAlertDialog({
+        title: "Leave Community",
+        message: `Leave "${community.name}"? You won't see its posts in your feed anymore.`,
+        onConfirm: () => {
+          setAlertDialog(null);
+          doJoinToggle(communityId);
+        },
+      });
+      return;
+    }
+    doJoinToggle(communityId);
   };
 
   const handleCreatePostClick = () => {
@@ -1380,15 +1384,14 @@ const CampusForumPage: React.FC = () => {
     }
   };
 
-  const selectedCommunity = communities.find((c) => c.id === selectedCommunityId);
 
   return (
     <div className="min-h-screen bg-white text-slate-800 antialiased py-6">
-      <main className="max-w-[1400px] mx-auto">
+      <main className="max-w-350">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* ── LEFT SIDEBAR (desktop only) ── */}
           <aside className="hidden lg:block lg:col-span-3 space-y-5 order-1 sticky top-6 h-fit self-start">
-            <div className="bg-white rounded-lg p-5 sm:p-6 sm:border sm:border-slate-200/80">
+            <div className="bg-white rounded-md p-5 sm:p-6 sm:border sm:border-slate-200/80">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-sm sm:text-xs font-extrabold text-gray-900 tracking-wider uppercase">
                   Discover Communities
@@ -1513,7 +1516,7 @@ const CampusForumPage: React.FC = () => {
           {/* ── MIDDLE ── */}
           <section className="lg:col-span-6 space-y-5 order-3 lg:order-2">
             {/* Create Post Widget */}
-            <div className="bg-white rounded-lg p-4 border border-slate-200/80 input-glow transition-all w-full">
+            <div className="bg-white rounded-md p-4 border border-slate-200/80 input-glow transition-all w-full">
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
                   {user?.image_url ? (
@@ -1562,7 +1565,7 @@ const CampusForumPage: React.FC = () => {
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#0000ff] border-t-transparent" />
               </div>
             ) : posts.length === 0 ? (
-              <div className="bg-white rounded-lg border border-slate-200/80 p-12 text-center shadow-none flex flex-col items-center justify-center min-h-[320px]">
+              <div className="bg-white rounded-md border border-slate-200/80 p-12 text-center shadow-none flex flex-col items-center justify-center min-h-[320px]">
                 <div className="w-14 h-14 rounded-full bg-blue-50 text-[#0000ff] flex items-center justify-center mb-4 text-2xl shadow-none">
                   <svg
                     className="h-6 w-6"
@@ -1611,7 +1614,7 @@ const CampusForumPage: React.FC = () => {
                 ))}
 
                 {posts.length < 5 && communities.filter((c) => !c.is_general).length > 0 && (
-                  <div className="bg-white rounded-lg p-4 border border-slate-200/80 col-span-full">
+                  <div className="bg-white rounded-md p-4 border border-slate-200/80 col-span-full">
                     <div className="flex items-center justify-between mb-3 px-1">
                       <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
                       <button onClick={() => router.push("/campus-forum/communities")} className="text-blue-600 font-semibold text-xs hover:underline">View all</button>
@@ -1636,7 +1639,7 @@ const CampusForumPage: React.FC = () => {
                 )}
 
                 {posts.length > 5 && (
-                  <div className="lg:hidden bg-white rounded-lg p-4 border border-slate-200/80">
+                  <div className="lg:hidden bg-white rounded-md p-4 border border-slate-200/80">
                     <div className="flex items-center justify-between mb-3 px-1">
                       <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
                       <button onClick={() => router.push("/campus-forum/communities")} className="text-blue-600 font-semibold text-xs hover:underline">View all</button>
@@ -1666,14 +1669,14 @@ const CampusForumPage: React.FC = () => {
                   </div>
                 )}
 
-                {hasMore && !loadingMore && <div ref={loadMoreRef} className="h-4" />}
+                <div ref={loadMoreRef} className={hasMore && !loadingMore ? "h-1" : "hidden"} />
               </div>
             )}
           </section>
 
           {/* ── RIGHT SIDEBAR ── */}
           <aside className="hidden sm:block lg:col-span-3 space-y-5 order-2 lg:order-3 sticky top-6 h-fit self-start">
-            <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
+            <div className="bg-white rounded-md p-5 border border-slate-200/80 shadow-none">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
                   className="h-4 w-4 text-amber-500"
@@ -1748,6 +1751,29 @@ const CampusForumPage: React.FC = () => {
         onClose={() => setReportPostId(null)}
         onSubmit={handleReportSubmit}
       />
+
+      {alertDialog && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4 p-5">
+            <h3 className="text-base font-semibold text-gray-900 mb-2">{alertDialog.title}</h3>
+            <p className="text-sm text-gray-600 mb-5">{alertDialog.message}</p>
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setAlertDialog(null)}
+                className="px-4 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={alertDialog.onConfirm}
+                className="px-4 py-1.5 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ToastContainer toasts={toasts} />
     </div>
