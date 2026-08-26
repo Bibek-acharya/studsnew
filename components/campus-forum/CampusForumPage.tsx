@@ -1091,6 +1091,10 @@ const CampusForumPage: React.FC = () => {
   const [lightboxType, setLightboxType] = useState<"image" | "video">("image");
   const [sharePost, setSharePost] = useState<ForumPost | null>(null);
   const [reportPostId, setReportPostId] = useState<number | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const token = apiService.getToken();
 
@@ -1109,27 +1113,34 @@ const CampusForumPage: React.FC = () => {
     }
   }, []);
 
-  const fetchPosts = useCallback(async () => {
-    setIsLoading(true);
+  const fetchPosts = useCallback(async (pageNum: number = 1, append: boolean = false) => {
+    if (append) setLoadingMore(true);
+    else setIsLoading(true);
     try {
-      const data = await apiService.getForumPosts(50, token || undefined, selectedCommunityId || undefined, 1);
-      const list: ForumPost[] = isArray(data) ? (data as ForumPost[]) : ((data as { posts?: ForumPost[] })?.posts || []);
-      if (!selectedCommunityId && communities.length > 0) {
+      const data = await apiService.getForumPosts(20, token || undefined, selectedCommunityId || undefined, pageNum);
+      const result = data as any;
+      const list: ForumPost[] = result?.posts || (isArray(result) ? result : []);
+      const more = result?.has_more ?? false;
+      if (!selectedCommunityId) {
         const joinedIds = communities.filter((c) => c.is_member).map((c) => c.id);
         const generalId = communities.find((c) => c.is_general)?.id;
         const userId = user?.id;
-        setPosts(list.filter((p) =>
+        const filtered = list.filter((p) =>
           joinedIds.includes(p.community_id) || p.community_id === generalId || (userId && p.user_id === userId)
-        ));
+        );
+        setPosts((prev) => append ? [...prev, ...filtered] : filtered);
       } else {
-        setPosts(list);
+        setPosts((prev) => append ? [...prev, ...list] : list);
       }
+      setHasMore(more);
+      setPage(pageNum);
     } catch (e) {
       console.error(e);
     } finally {
       setIsLoading(false);
+      setLoadingMore(false);
     }
-  }, [token, selectedCommunityId]);
+  }, [token, selectedCommunityId, communities, user]);
 
   const fetchTrending = useCallback(async () => {
     try {
@@ -1146,8 +1157,22 @@ const CampusForumPage: React.FC = () => {
   }, [fetchCommunities, fetchTrending]);
 
   useEffect(() => {
-    fetchPosts();
+    fetchPosts(1, false);
   }, [fetchPosts]);
+
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore || loadingMore || isLoading) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          fetchPosts(page + 1, true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [hasMore, loadingMore, isLoading, page, fetchPosts]);
 
   const handleCommunityClick = (id: number) => {
     router.push(`/campus-forum/${id}`);
@@ -1362,7 +1387,7 @@ const CampusForumPage: React.FC = () => {
       <main className="max-w-[1400px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 px-4 sm:px-6 lg:px-8">
           {/* ── LEFT SIDEBAR (desktop only) ── */}
-          <aside className="hidden lg:block lg:col-span-3 space-y-5 order-1">
+          <aside className="hidden lg:block lg:col-span-3 space-y-5 order-1 sticky top-6 h-fit self-start">
             <div className="bg-white rounded-lg p-5 sm:p-6 sm:border sm:border-slate-200/80">
               <div className="flex items-center justify-between mb-4 px-1">
                 <h3 className="text-sm sm:text-xs font-extrabold text-gray-900 tracking-wider uppercase">
@@ -1565,7 +1590,7 @@ const CampusForumPage: React.FC = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-5">
-                {posts.slice(0, 5).map((post) => (
+                {posts.map((post) => (
                   <PostCard
                     key={post.id}
                     post={post}
@@ -1635,76 +1660,19 @@ const CampusForumPage: React.FC = () => {
                   </div>
                 )}
 
-                {posts.slice(5, 10).map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
-                    onLike={handleLike}
-                    onDislike={handleDislike}
-                    onCommentClick={handleCommentClick}
-                    onShare={handleShare}
-                    onLightbox={handleLightbox}
-                    comments={commentsData[post.id]}
-                    commentsOpen={openComments[post.id]}
-                    onJoinCommunity={handleJoinToggle}
-                    onCommentAdded={handleCommentAdded}
-                    onNotInterested={handleNotInterested}
-                    onReport={handleReport}
-                    onPollVote={handlePollVote}
-                  />
-                ))}
-
-                {(posts.length > 10 || (posts.length > 5 && posts.length <= 10)) && (
-                  <div className="lg:hidden bg-white rounded-lg p-4 border border-slate-200/80">
-                    <div className="flex items-center justify-between mb-3 px-1">
-                      <h3 className="text-xs font-extrabold text-gray-900 tracking-wider uppercase">Discover Communities</h3>
-                      <button onClick={() => router.push("/campus-forum/communities")} className="text-blue-600 font-semibold text-xs hover:underline">View all</button>
-                    </div>
-                    <div className="flex overflow-x-auto gap-3 no-scrollbar scroll-smooth pb-1">
-                      {communities.filter((c) => !c.is_general).slice(4, 8).map((item) => (
-                        <div key={item.id} onClick={() => handleCommunityClick(item.id)} className="flex-shrink-0 w-[145px] border border-gray-200 rounded-xl p-3 flex flex-col items-center justify-between text-center bg-white cursor-pointer">
-                          <div className={`w-14 h-14 mb-2 rounded-lg flex items-center justify-center text-sm font-semibold flex-shrink-0 ${item.bg_color || "bg-blue-100/70"}`}>
-                            {item.icon ? <DynamicIcon name={item.icon} size={24} /> : <span className="text-xl">🎓</span>}
-                          </div>
-                          <div className="mb-3 w-full">
-                            <p className="font-semibold text-sm leading-tight truncate max-w-[120px] mx-auto text-gray-900" title={item.name}>{item.name}</p>
-                            <p className="text-xs text-gray-500 mt-1">{item.member_count ?? 0} members</p>
-                          </div>
-                          <button onClick={(e) => { e.stopPropagation(); handleJoinToggle(item.id); }} disabled={joinLoading[item.id]} className={`w-full font-medium py-2 text-sm rounded-full transition-all active:scale-95 ${item.is_member ? "bg-green-600 hover:bg-green-700 text-white" : "bg-indigo-600 hover:bg-indigo-700 text-white"}`}>
-                            {joinLoading[item.id] ? "..." : item.is_member ? "Joined" : "Join"}
-                          </button>
-                        </div>
-                      ))}
-                    </div>
+                {loadingMore && (
+                  <div className="flex justify-center py-4">
+                    <div className="h-6 w-6 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
                   </div>
                 )}
 
-                {posts.slice(10).map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    currentUser={user ? { first_name: user.first_name, last_name: user.last_name, image_url: user.image_url } : null}
-                    onLike={handleLike}
-                    onDislike={handleDislike}
-                    onCommentClick={handleCommentClick}
-                    onShare={handleShare}
-                    onLightbox={handleLightbox}
-                    comments={commentsData[post.id]}
-                    commentsOpen={openComments[post.id]}
-                    onJoinCommunity={handleJoinToggle}
-                    onCommentAdded={handleCommentAdded}
-                    onNotInterested={handleNotInterested}
-                    onReport={handleReport}
-                    onPollVote={handlePollVote}
-                  />
-                ))}
+                {hasMore && !loadingMore && <div ref={loadMoreRef} className="h-4" />}
               </div>
             )}
           </section>
 
           {/* ── RIGHT SIDEBAR ── */}
-          <aside className="hidden sm:block lg:col-span-3 space-y-5 order-2 lg:order-3">
+          <aside className="hidden sm:block lg:col-span-3 space-y-5 order-2 lg:order-3 sticky top-6 h-fit self-start">
             <div className="bg-white rounded-lg p-5 border border-slate-200/80 shadow-none">
               <div className="flex items-center gap-2 mb-4 px-1">
                 <svg
