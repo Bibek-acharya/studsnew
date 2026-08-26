@@ -242,24 +242,22 @@ const PostCard: React.FC<{
       {post.is_poll && pollOptions.length > 0 && (() => {
             const hasVoted = post.voted_option != null;
             return (
-              <div className="mb-3 space-y-2">
+              <div className="mb-3 space-y-1.5">
                 {pollOptions.map((opt: any, idx: number) => {
                   const total = post.total_votes || 1;
-                  const pct = hasVoted ? Math.round(((opt.votes || 0) / total) * 100) : 0;
+                  const pct = Math.round(((opt.votes || 0) / total) * 100);
                   const isSelected = post.voted_option === idx;
                   return (
                     <div
                       key={idx}
                       onClick={() => !hasVoted && onPollVote?.(post.id, idx)}
-                      className={`relative overflow-hidden rounded-lg border p-3 transition-all duration-300 ${hasVoted ? (isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white") : "border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"}`}
+                      className={`relative overflow-hidden rounded-md border p-2 transition-all duration-300 ${hasVoted ? (isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white") : "border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"}`}
                     >
-                      {hasVoted && (
-                        <div
-                          className={`absolute left-0 top-0 bottom-0 transition-all duration-700 ease-out ${isSelected ? "bg-blue-100" : "bg-gray-100"}`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      )}
-                      <div className="relative flex items-center justify-between px-3 py-2.5 text-sm font-medium text-gray-700">
+                      <div
+                        className="absolute left-0 top-0 bottom-0 bg-blue-100 transition-all duration-700 ease-out"
+                        style={{ width: hasVoted ? `${pct}%` : "0%" }}
+                      />
+                      <div className="relative flex items-center justify-between px-2 py-0.5 text-sm font-medium text-gray-700">
                         <span>{opt.text}</span>
                         {hasVoted && <span>{pct}%</span>}
                       </div>
