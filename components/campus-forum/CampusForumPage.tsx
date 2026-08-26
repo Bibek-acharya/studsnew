@@ -246,7 +246,8 @@ const PostCard: React.FC<{
               <div className="mb-3 space-y-1.5">
                 {pollOptions.map((opt: any, idx: number) => {
                   const total = post.total_votes || 1;
-                  const pct = Math.round(((opt.votes || 0) / total) * 100);
+                  const voteCount = post.poll_results?.[idx] || 0;
+                  const pct = Math.round((voteCount / total) * 100);
                   const isSelected = post.voted_option === idx;
                   return (
                     <div
@@ -314,7 +315,7 @@ const PostCard: React.FC<{
 
       {commentsOpen && (
         <div className="mt-4 border-t border-gray-100 pt-4">
-          <CommentSection postId={post.id} comments={comments} user={currentUser} onCommentAdded={onCommentAdded} />
+           <CommentSection postId={post.id} comments={comments} totalCount={post.comment_count || 0} user={currentUser} onCommentAdded={onCommentAdded} />
         </div>
       )}
     </div>
@@ -325,9 +326,10 @@ const CommentItem: React.FC<{
   comment: CommentData;
   postId: number;
   onReply: (postId: number, parentId: number, content: string) => void;
+  onVote?: (commentId: number, delta: number) => void;
   isAuthor?: boolean;
   currentUser?: { first_name: string; last_name: string; image_url?: string } | null;
-}> = ({ comment, postId, onReply, isAuthor = false, currentUser }) => {
+}> = ({ comment, postId, onReply, onVote, isAuthor = false, currentUser }) => {
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -343,12 +345,15 @@ const CommentItem: React.FC<{
     if (isLiked) {
       setLikes(likes - 1);
       setIsLiked(false);
+      onVote?.(comment.id, -1);
     } else {
       setLikes(likes + 1);
       setIsLiked(true);
+      onVote?.(comment.id, 1);
       if (isDisliked) {
         setDislikes(dislikes - 1);
         setIsDisliked(false);
+        onVote?.(comment.id, 1);
       }
     }
   };
@@ -357,12 +362,15 @@ const CommentItem: React.FC<{
     if (isDisliked) {
       setDislikes(dislikes - 1);
       setIsDisliked(false);
+      onVote?.(comment.id, 1);
     } else {
       setDislikes(dislikes + 1);
       setIsDisliked(true);
+      onVote?.(comment.id, -1);
       if (isLiked) {
         setLikes(likes - 1);
         setIsLiked(false);
+        onVote?.(comment.id, -1);
       }
     }
   };
@@ -386,11 +394,8 @@ const CommentItem: React.FC<{
     }
     setLoadingReplies(true);
     try {
-      const token = apiService.getToken();
-      const result = await apiService.getForumPostComments(postId, 50, 0);
-      const allComments = result.comments || [];
-      const parentComment = allComments.find((c: CommentData) => c.id === comment.id);
-      setReplies(parentComment?.replies || []);
+      const result = await apiService.getForumPostComments(postId, 50, 0, undefined, comment.id);
+      setReplies(Array.isArray(result) ? result : result.comments || []);
       setShowReplies(true);
     } catch {
     } finally {
@@ -503,9 +508,10 @@ const CommentItem: React.FC<{
 const CommentSection: React.FC<{
   postId: number;
   comments: CommentData[];
+  totalCount?: number;
   user?: { first_name: string; last_name: string; image_url?: string } | null;
   onCommentAdded?: (postId: number) => void;
-}> = ({ postId, comments, user, onCommentAdded }) => {
+}> = ({ postId, comments, totalCount, user, onCommentAdded }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<"popular" | "newest">("newest");
@@ -513,6 +519,11 @@ const CommentSection: React.FC<{
   const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
   const commentImageRef = useRef<HTMLInputElement>(null);
   const token = apiService.getToken();
+  const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
+
+  const handleVote = (commentId: number, delta: number) => {
+    setVoteCounts((prev) => ({ ...prev, [commentId]: (prev[commentId] || 0) + delta }));
+  };
 
   const handleImagePick = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -568,16 +579,18 @@ const CommentSection: React.FC<{
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
   const avatarUrl = user?.image_url ? imageUrl(user.image_url) : "";
 
-  const commentCount = (comments as CommentData[]).length;
+  const commentCount = totalCount ?? (comments as CommentData[]).length;
 
   const sortedComments = useMemo(() => {
     if (!Array.isArray(comments)) return [];
     const arr = [...comments];
     if (sortBy === "newest") {
       arr.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else {
+      arr.sort((a, b) => (voteCounts[b.id] || 0) - (voteCounts[a.id] || 0));
     }
     return arr;
-  }, [comments, sortBy]);
+  }, [comments, sortBy, voteCounts]);
 
   return (
     <div className="pt-3 space-y-3">
@@ -623,7 +636,7 @@ const CommentSection: React.FC<{
           <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
         ) : (
           sortedComments.map((c: CommentData) => (
-            <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} currentUser={user} />
+            <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} onVote={handleVote} currentUser={user} />
           ))
         )}
       </div>
