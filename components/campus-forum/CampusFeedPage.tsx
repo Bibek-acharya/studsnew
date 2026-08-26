@@ -507,7 +507,7 @@ const PollPostComponent: React.FC<{
           return (
             <div
               key={idx}
-              onClick={() => !hasVoted && onVote(post.id, idx)}
+              onClick={() => onVote(post.id, idx)}
               className={`relative border rounded-md p-3 overflow-hidden transition ${hasVoted ? (isSelected ? "border-indigo-300 bg-indigo-50" : "border-gray-200") : "bg-gray-50 border-gray-200 hover:bg-gray-100 cursor-pointer"}`}
             >
               <div

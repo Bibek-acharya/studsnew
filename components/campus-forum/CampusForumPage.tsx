@@ -242,7 +242,6 @@ const PostCard: React.FC<{
       )}
 
       {post.is_poll && pollOptions.length > 0 && (() => {
-            const hasVoted = post.voted_option != null;
             return (
               <div className="mb-3 space-y-1.5">
                 {pollOptions.map((opt: any, idx: number) => {
@@ -250,10 +249,11 @@ const PostCard: React.FC<{
                   const voteCount = post.poll_results?.[idx] || 0;
                   const pct = Math.round((voteCount / total) * 100);
                   const isSelected = post.voted_option === idx;
+                  const hasVoted = post.voted_option != null;
                   return (
                     <div
                       key={idx}
-                      onClick={() => !hasVoted && onPollVote?.(post.id, idx)}
+                      onClick={() => onPollVote?.(post.id, idx)}
                       className={`relative overflow-hidden rounded-md border p-2 transition-all duration-300 ${hasVoted ? (isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white") : "border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"}`}
                     >
                       <div
