@@ -409,8 +409,8 @@ const CommentItem: React.FC<{
   const replyCount = comment.reply_count || 0;
 
   return (
-    <div className="text-xs">
-      <div className="flex items-start gap-2.5">
+    <div className="text-xs overflow-hidden">
+      <div className="flex items-start gap-2.5 min-w-0">
         <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
@@ -477,7 +477,7 @@ const CommentItem: React.FC<{
         </div>
       </div>
       {showReplies && replies.length > 0 && (
-        <div className="ml-9 mt-2 space-y-3">
+        <div className="ml-6 sm:ml-9 mt-2 space-y-3 overflow-hidden">
           {replies.map((reply) => (
             <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} />
           ))}
