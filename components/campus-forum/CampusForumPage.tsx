@@ -250,7 +250,7 @@ const PostCard: React.FC<{
                     <div
                       key={idx}
                       onClick={() => onPollVote?.(post.id, idx)}
-                      className={`relative overflow-hidden rounded-md border p-2 transition-all duration-300 ${hasVoted ? (isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white") : "border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"}`}
+                      className={`relative overflow-hidden rounded-md border p-2 transition-all duration-300 focus:outline-none ${hasVoted ? (isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white") : "border-gray-200 bg-gray-50 hover:bg-gray-100 cursor-pointer"}`}
                     >
                       <div
                         className="absolute left-0 top-0 bottom-0 bg-blue-100 transition-all duration-700 ease-out"
@@ -642,7 +642,7 @@ const CreatePostModal: React.FC<{
     video: File | null;
     poll: { question: string; options: PollOption[]; duration: string } | null;
     communityId: number;
-  }) => void;
+  }) => Promise<void> | void;
   isSubmitting: boolean;
   user: { first_name: string; last_name: string; image_url?: string } | null;
   communities: ForumCommunity[];
@@ -730,7 +730,7 @@ const CreatePostModal: React.FC<{
     setPollOptions((p) => p.filter((_, i) => i !== idx));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedCommunityId) {
       setError("Please select a community before publishing.");
       return;
@@ -755,7 +755,7 @@ const CreatePostModal: React.FC<{
             duration: pollDuration,
           }
         : null;
-    onSubmit({ title, content, images, video, poll, communityId: selectedCommunityId });
+    await onSubmit({ title, content, images, video, poll, communityId: selectedCommunityId });
     reset();
   };
 

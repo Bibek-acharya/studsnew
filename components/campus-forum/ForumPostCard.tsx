@@ -373,7 +373,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({
                   <div
                     key={`${post.id}-p${index}`}
                     onClick={() => onPollVote(post.id, index)}
-                    className={`relative cursor-pointer overflow-hidden rounded-md border p-3 transition-all duration-300 ${hasVoted
+                    className={`relative cursor-pointer overflow-hidden rounded-md border p-3 transition-all duration-300 focus:outline-none ${hasVoted
                         ? isSelected ? "border-blue-500 bg-blue-50" : "border-gray-100 bg-white"
                         : "border-gray-200 bg-gray-50 hover:bg-gray-100"
                       }`}
