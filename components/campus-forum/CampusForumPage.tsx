@@ -476,22 +476,7 @@ const CommentItem: React.FC<{
       {showReplies && replies.length > 0 && (
         <div className="ml-9 mt-2 space-y-3">
           {replies.map((reply) => (
-            <div key={reply.id} className="flex items-start gap-2">
-              <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
-                {reply.user?.image_url ? (
-                  <img src={imageUrl(reply.user.image_url)} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  (reply.user_name?.[0] || "U").toUpperCase()
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-bold text-slate-800 text-[10px]">{reply.user_name}</span>
-                  <span className="text-[9px] text-slate-400">{relativeTime(reply.created_at)}</span>
-                </div>
-                <p className="text-slate-700 mt-0.5 leading-relaxed text-[11px]">{reply.content}</p>
-              </div>
-            </div>
+            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} />
           ))}
           <button
             onClick={() => setShowReplies(false)}
