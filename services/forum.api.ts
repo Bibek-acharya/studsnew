@@ -78,10 +78,11 @@ export const forumApi = {
     const data = await response.json();
     return data.data || data;
   },
-  async getForumPostComments(postId: number, limit?: number, offset?: number): Promise<any> {
+  async getForumPostComments(postId: number, limit?: number, offset?: number, sort?: string): Promise<any> {
     const params = new URLSearchParams();
     if (limit) params.set("limit", String(limit));
     if (offset) params.set("offset", String(offset));
+    if (sort) params.set("sort", sort);
     const response = await fetch(
       `${API_BASE_URL}/api/v1/forum/posts/${postId}/comments?${params.toString()}`,
       { credentials: "include" },

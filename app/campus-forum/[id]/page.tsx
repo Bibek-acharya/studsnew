@@ -190,10 +190,10 @@ export default function CommunityDetailPage() {
       <div className="relative h-40 sm:h-48 md:h-56 w-full bg-[#0000ff]" />
 
       {/* Main Header Container */}
-      <div className="max-w-350 mx-auto">
-        <div className="relative bg-white">
-          <div className="relative flex flex-row items-start gap-3 px-4 sm:px-6 pb-8 md:flex md:flex-col md:items-center md:px-0">
-            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-[#0000ff] p-1.5 md:mx-auto md:mt-0 md:-mt-6 md:h-37.5 md:w-37.5 md:p-0">
+      <div className="relative bg-white px-4 sm:px-0">
+        <div className="relative mx-auto max-w-[1400px] pb-8">
+          <div className="relative flex flex-row items-start gap-3 md:block">
+            <div className="relative z-10 -mt-2 flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-gray-200 bg-[#0000ff] p-1.5 md:absolute md:-top-4 md:left-0 md:h-[150px] md:w-[150px] md:p-0">
               {community.icon ? (
                 <DynamicIcon name={community.icon} size={40} className="text-white" />
               ) : (
@@ -201,8 +201,8 @@ export default function CommunityDetailPage() {
               )}
             </div>
 
-            <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 md:text-center">
-              <div className="w-full space-y-1.5 md:space-y-3 text-left md:text-center lg:w-auto">
+            <div className="min-w-0 flex-1 pt-1 flex flex-col items-start gap-3 md:items-center md:mt-4 md:pt-0 md:gap-6 lg:mt-0 lg:flex-row lg:items-end lg:justify-between lg:gap-0 lg:pl-[170px]">
+              <div className="w-full space-y-1.5 md:space-y-3 text-left lg:w-auto">
                 <div className="flex items-center gap-2 pt-0 md:pt-4">
                   <h1 className="min-w-0 text-[18px] font-bold tracking-tight text-gray-900 truncate md:text-[24px] md:overflow-visible md:whitespace-normal lg:text-3xl">
                     {community.name}
@@ -261,7 +261,7 @@ export default function CommunityDetailPage() {
           </div>
 
           {/* Mobile action buttons */}
-          <div className="grid grid-cols-2 gap-2 px-6 pb-6 md:hidden">
+          <div className="grid grid-cols-2 gap-2 mt-4 md:hidden">
             <button
               className="flex items-center justify-center gap-2 rounded-md border border-gray-200 bg-white px-4 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50"
             >
@@ -276,8 +276,10 @@ export default function CommunityDetailPage() {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Content Layout: Feed + Sidebar */}
+      {/* Content Layout: Feed + Sidebar */}
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-0">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 pt-4 sm:pt-6">
           {/* Main Feed Column */}
           <div className="lg:col-span-2 space-y-3 sm:space-y-4">

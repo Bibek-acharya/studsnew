@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { apiService, ForumPost, ForumCommunity } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
@@ -81,6 +81,7 @@ interface CommentData {
   user?: { id: number; first_name: string; last_name: string; image_url?: string };
   image_url?: string;
   parent_id?: number;
+  reply_count?: number;
   replies?: CommentData[];
   created_at: string;
 }
@@ -325,8 +326,8 @@ const CommentItem: React.FC<{
   postId: number;
   onReply: (postId: number, parentId: number, content: string) => void;
   isAuthor?: boolean;
-}> = ({ comment, postId, onReply, isAuthor = false }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  currentUser?: { first_name: string; last_name: string; image_url?: string } | null;
+}> = ({ comment, postId, onReply, isAuthor = false, currentUser }) => {
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -334,6 +335,9 @@ const CommentItem: React.FC<{
   const [dislikes, setDislikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [replies, setReplies] = useState<CommentData[]>([]);
+  const [loadingReplies, setLoadingReplies] = useState(false);
 
   const handleLike = () => {
     if (isLiked) {
@@ -375,16 +379,34 @@ const CommentItem: React.FC<{
     }
   };
 
+  const toggleReplies = async () => {
+    if (showReplies) {
+      setShowReplies(false);
+      return;
+    }
+    setLoadingReplies(true);
+    try {
+      const token = apiService.getToken();
+      const result = await apiService.getForumPostComments(postId, 50, 0);
+      const allComments = result.comments || [];
+      const parentComment = allComments.find((c: CommentData) => c.id === comment.id);
+      setReplies(parentComment?.replies || []);
+      setShowReplies(true);
+    } catch {
+    } finally {
+      setLoadingReplies(false);
+    }
+  };
+
   const avatarLetter = (comment.user?.first_name?.[0] || comment.user_name?.[0] || "U").toUpperCase();
   const avatarUrl = comment.user?.image_url ? imageUrl(comment.user.image_url) : "";
 
+  const replyCount = comment.reply_count || 0;
+
   return (
     <div className="text-xs">
-      <div className="flex items-start gap-2">
-        <button onClick={() => setCollapsed(!collapsed)} className="mt-0.5 text-slate-400 hover:text-slate-600">
-          {collapsed ? <ChevronRight className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-        </button>
-        <div className="w-6 h-6 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
+      <div className="flex items-start gap-2.5">
+        <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
           {avatarUrl ? (
             <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
           ) : (
@@ -396,54 +418,82 @@ const CommentItem: React.FC<{
             <span className="font-bold text-slate-800 text-[11px]">{comment.user_name}</span>
             <span className="text-[10px] text-slate-400">{relativeTime(comment.created_at)}</span>
           </div>
-          {!collapsed && (
-            <>
-              <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
-              <div className="flex items-center gap-3 mt-1">
-                <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
-                  Reply
-                </button>
-                <div className="flex items-center gap-1">
-                  <button onClick={handleLike} className={`p-0.5 rounded transition ${isLiked ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}>
-                    <ArrowUp size={12} />
-                  </button>
-                  <span className="text-[10px] font-bold text-slate-500">{likes}</span>
-                  <button onClick={handleDislike} className={`p-0.5 rounded transition ${isDisliked ? "text-red-500" : "text-slate-400 hover:text-red-500"}`}>
-                    <ArrowDown size={12} />
-                  </button>
-                  {dislikes > 0 && <span className="text-[10px] font-bold text-slate-500">{dislikes}</span>}
-                </div>
+          <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
+          <div className="flex items-center gap-3 mt-1.5">
+            <div className="flex items-center gap-1">
+              <button onClick={handleLike} className={`p-0.5 rounded transition ${isLiked ? "text-indigo-500" : "text-slate-400 hover:text-indigo-500"}`}>
+                <ArrowUp size={12} />
+              </button>
+              <span className="text-[10px] font-bold text-slate-500 min-w-[12px] text-center">{likes}</span>
+              <button onClick={handleDislike} className={`p-0.5 rounded transition ${isDisliked ? "text-red-500" : "text-slate-400 hover:text-red-500"}`}>
+                <ArrowDown size={12} />
+              </button>
+            </div>
+            <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
+              Reply
+            </button>
+            <button className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
+              Share
+            </button>
+          </div>
+          {showReply && (
+            <div className="mt-2 flex gap-2 items-center">
+              <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
+                {currentUser?.image_url ? (
+                  <img src={imageUrl(currentUser.image_url)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (currentUser?.first_name?.[0] || "U").toUpperCase()
+                )}
               </div>
-              {showReply && (
-                <div className="mt-2 flex gap-2 items-center">
-                  <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      avatarLetter
-                    )}
-                  </div>
-                  <input
-                    value={replyContent}
-                    onChange={(e) => setReplyContent(e.target.value)}
-                    placeholder="Write a reply..."
-                    className="flex-1 border border-slate-200 rounded-full px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
-                    onKeyDown={(e) => e.key === "Enter" && handleReply()}
-                  />
-                  <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
-                    {submitting ? "..." : "Reply"}
-                  </button>
-                </div>
-              )}
-            </>
+              <input
+                value={replyContent}
+                onChange={(e) => setReplyContent(e.target.value)}
+                placeholder="Write a reply..."
+                className="flex-1 border border-slate-200 rounded-full px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
+                onKeyDown={(e) => e.key === "Enter" && handleReply()}
+              />
+              <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
+                {submitting ? "..." : "Reply"}
+              </button>
+            </div>
+          )}
+          {replyCount > 0 && !showReplies && (
+            <button
+              onClick={toggleReplies}
+              disabled={loadingReplies}
+              className="mt-2 text-[11px] font-bold text-[#0000ff] hover:underline"
+            >
+              {loadingReplies ? "Loading..." : `Show ${replyCount} ${replyCount === 1 ? "reply" : "replies"}`}
+            </button>
           )}
         </div>
       </div>
-      {!collapsed && Array.isArray(comment.replies) && comment.replies.length > 0 && (
-        <div className="ml-4 mt-2 pl-3 border-l-2 border-slate-200 space-y-3">
-          {comment.replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} />
+      {showReplies && replies.length > 0 && (
+        <div className="ml-9 mt-2 space-y-3">
+          {replies.map((reply) => (
+            <div key={reply.id} className="flex items-start gap-2">
+              <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
+                {reply.user?.image_url ? (
+                  <img src={imageUrl(reply.user.image_url)} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  (reply.user_name?.[0] || "U").toUpperCase()
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-bold text-slate-800 text-[10px]">{reply.user_name}</span>
+                  <span className="text-[9px] text-slate-400">{relativeTime(reply.created_at)}</span>
+                </div>
+                <p className="text-slate-700 mt-0.5 leading-relaxed text-[11px]">{reply.content}</p>
+              </div>
+            </div>
           ))}
+          <button
+            onClick={() => setShowReplies(false)}
+            className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]"
+          >
+            Hide replies
+          </button>
         </div>
       )}
     </div>
@@ -458,7 +508,7 @@ const CommentSection: React.FC<{
 }> = ({ postId, comments, user, onCommentAdded }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sortBy, setSortBy] = useState<"popularity" | "newest">("popularity");
+  const [sortBy, setSortBy] = useState<"popular" | "newest">("newest");
   const [commentImage, setCommentImage] = useState<File | null>(null);
   const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
   const commentImageRef = useRef<HTMLInputElement>(null);
@@ -481,14 +531,14 @@ const CommentSection: React.FC<{
     if (!token || ((!newComment.trim()) && !commentImage) || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      let imageUrl = "";
+      let img = "";
       if (commentImage) {
         const urls = await apiService.uploadForumMedia(token, [commentImage]);
-        imageUrl = urls[0] || "";
+        img = urls[0] || "";
       }
       await apiService.createForumComment(token, postId, {
         content: newComment.trim(),
-        image_url: imageUrl || undefined,
+        image_url: img || undefined,
       });
       setNewComment("");
       setCommentImage(null);
@@ -518,6 +568,17 @@ const CommentSection: React.FC<{
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
   const avatarUrl = user?.image_url ? imageUrl(user.image_url) : "";
 
+  const commentCount = (comments as CommentData[]).length;
+
+  const sortedComments = useMemo(() => {
+    if (!Array.isArray(comments)) return [];
+    const arr = [...comments];
+    if (sortBy === "newest") {
+      arr.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    }
+    return arr;
+  }, [comments, sortBy]);
+
   return (
     <div className="pt-3 space-y-3">
       <div className="flex gap-2 items-center">
@@ -545,12 +606,24 @@ const CommentSection: React.FC<{
         </button>
       </div>
 
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-bold text-slate-600">{commentCount} {commentCount === 1 ? "Comment" : "Comments"}</span>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as "popular" | "newest")}
+          className="text-[11px] font-bold text-slate-500 bg-transparent border-none outline-none cursor-pointer"
+        >
+          <option value="popular">Popular</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+
       <div className="space-y-4">
-        {!Array.isArray(comments) || comments.length === 0 ? (
+        {sortedComments.length === 0 ? (
           <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
         ) : (
-          (comments as CommentData[]).map((c) => (
-            <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} />
+          sortedComments.map((c: CommentData) => (
+            <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} currentUser={user} />
           ))
         )}
       </div>
