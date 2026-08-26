@@ -614,6 +614,7 @@ export interface ForumComment {
   content: string;
   image_url?: string;
   parent_id?: number;
+  parent_user_name?: string;
   created_at: string;
   createdAt?: string;
   user: ForumUser;

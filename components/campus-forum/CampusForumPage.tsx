@@ -81,6 +81,7 @@ interface CommentData {
   user?: { id: number; first_name: string; last_name: string; image_url?: string };
   image_url?: string;
   parent_id?: number;
+  parent_user_name?: string;
   reply_count?: number;
   replies?: CommentData[];
   created_at: string;
@@ -382,6 +383,9 @@ const CommentItem: React.FC<{
       await onReply(postId, comment.id, replyContent.trim());
       setReplyContent("");
       setShowReply(false);
+      const result = await apiService.getForumPostComments(postId, 50, 0, undefined, comment.id);
+      setReplies(Array.isArray(result) ? result : result.comments || []);
+      setShowReplies(true);
     } finally {
       setSubmitting(false);
     }
@@ -421,6 +425,9 @@ const CommentItem: React.FC<{
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-slate-800 text-[11px]">{comment.user_name}</span>
+            {comment.parent_user_name && (
+              <span className="text-[10px] text-slate-400">replying to <span className="font-semibold text-slate-600">@{comment.parent_user_name}</span></span>
+            )}
             <span className="text-[10px] text-slate-400">{relativeTime(comment.created_at)}</span>
           </div>
           <p className="text-slate-700 mt-0.5 leading-relaxed">{comment.content}</p>
