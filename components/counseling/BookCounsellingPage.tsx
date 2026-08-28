@@ -312,12 +312,9 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-gray-800 overflow-x-hidden pt-6">
-      <div className="absolute -top-20 -left-20 h-72 w-72 rounded-full bg-indigo-100/80 blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 h-96 w-96 rounded-full bg-pink-100/80 blur-3xl" />
-      <div className="absolute top-[40%] right-[8%] h-64 w-64 rounded-full bg-sky-100/80 blur-3xl" />
+    <div className="relative min-h-screen bg-white text-gray-800 overflow-x-hidden pt-6">
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8 md:py-12">
+      <div className="relative z-10 mx-auto max-w-350 py-8 md:py-12">
         <div className="flex flex-col items-start gap-6 lg:flex-row">
           <div className="w-full overflow-hidden rounded-md border border-gray-100 bg-white lg:w-2/3">
             <div className="border-b border-gray-100 p-6">
@@ -775,19 +772,6 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   </div>
                 </div>
                 <div className="mt-4 border-t border-gray-100 pt-4">
-                  <div className="mb-6 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600">
-                      Session Fee
-                    </span>
-                    <div className="flex items-center gap-1">
-                      <span className="text-[14px] text-gray-400 line-through">
-                        NPR 500
-                      </span>
-                      <span className="text-xl font-bold text-[#1dc05c]">
-                        Free
-                      </span>
-                    </div>
-                  </div>
                   <button
                     type="button"
                     disabled={!isFormValid || isBooking || isConfirmed}
@@ -833,15 +817,15 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
                   We can help you
                 </h3>
                 <p className="mb-3 mt-1 text-xs leading-relaxed text-gray-500">
-                  Call us +977 1 456-7890 or chat with our student support team
+                  Call us +977-9712006863 or chat with our student support team
                   for guidance.
                 </p>
-                <button
-                  type="button"
-                  className="rounded border border-[#0000FF] px-3 py-1.5 text-xs font-medium text-[#0000FF] transition-colors hover:bg-blue-50"
+                <a
+                  href="/contact-us"
+                  className="inline-block rounded border border-[#0000FF] px-3 py-1.5 text-xs font-medium text-[#0000FF] transition-colors hover:bg-blue-50"
                 >
                   Chat with us
-                </button>
+                </a>
               </div>
             </div>
           </div>
