@@ -326,9 +326,8 @@ const CommentItem: React.FC<{
   onReply: (postId: number, parentId: number, content: string) => void;
   onVote?: (commentId: number, delta: number) => void;
   isAuthor?: boolean;
-  autoExpand?: boolean;
   currentUser?: { first_name: string; last_name: string; image_url?: string } | null;
-}> = ({ comment, postId, onReply, onVote, currentUser, autoExpand }) => {
+}> = ({ comment, postId, onReply, onVote, currentUser }) => {
   const [showReply, setShowReply] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -336,7 +335,7 @@ const CommentItem: React.FC<{
   const [dislikes, setDislikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
-  const [showReplies, setShowReplies] = useState(autoExpand && (comment.reply_count || 0) > 0);
+  const [showReplies, setShowReplies] = useState(false);
   const [replies, setReplies] = useState<CommentData[]>([]);
   const [loadingReplies, setLoadingReplies] = useState(false);
   const [localReplyCount, setLocalReplyCount] = useState(comment.reply_count || 0);
@@ -390,19 +389,6 @@ const CommentItem: React.FC<{
       setSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (autoExpand && (comment.reply_count || 0) > 0 && replies.length === 0) {
-      setLoadingReplies(true);
-      apiService.getForumPostComments(postId, 50, 0, undefined, comment.id)
-        .then((result) => {
-          setReplies(Array.isArray(result) ? result : result.comments || []);
-          setShowReplies(true);
-        })
-        .catch(() => {})
-        .finally(() => setLoadingReplies(false));
-    }
-  }, [autoExpand, comment.id, comment.reply_count, postId]);
 
   const toggleReplies = async () => {
     if (showReplies) {
@@ -496,7 +482,7 @@ const CommentItem: React.FC<{
       {showReplies && replies.length > 0 && (
         <div className="ml-6 sm:ml-9 mt-2 space-y-3 overflow-hidden">
           {replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} autoExpand />
+            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} />
           ))}
           <button
             onClick={() => setShowReplies(false)}
@@ -1023,7 +1009,7 @@ const CreatePostModal: React.FC<{
         <input
           ref={videoInputRef}
           type="file"
-          accept="video/*"
+          accept="video/mp4,video/webm,video/quicktime"
           className="hidden"
           onChange={handleVideoPick}
         />
@@ -1349,7 +1335,15 @@ const CampusForumPage: React.FC = () => {
     try {
       const raw = await apiService.getForumPostComments(postId, 50, 0);
       const cmts = Array.isArray(raw?.comments) ? raw.comments : Array.isArray(raw) ? raw : [];
-      setCommentsData((p) => ({ ...p, [postId]: cmts }));
+      setCommentsData((prev) => {
+        const existing = prev[postId];
+        if (!existing || existing.length === 0) return { ...prev, [postId]: cmts };
+        const merged = existing.map((c) => {
+          const updated = cmts.find((u: any) => u.id === c.id);
+          return updated ? { ...c, reply_count: updated.reply_count } : c;
+        });
+        return { ...prev, [postId]: merged };
+      });
       setPosts((p) => p.map((post) => post.id === postId ? { ...post, comment_count: (post.comment_count || 0) + 1 } : post));
     } catch {}
   };
