@@ -102,7 +102,8 @@ const PostCard: React.FC<{
   onNotInterested?: (postId: number) => void;
   onReport?: (postId: number) => void;
   onPollVote?: (postId: number, optionIdx: number) => void;
-}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded, onNotInterested, onReport, onPollVote }) => {
+  onRequireLogin?: () => void;
+}> = ({ post, currentUser, onLike, onDislike, onCommentClick, onShare, onLightbox, comments = [], commentsOpen, onJoinCommunity, onCommentAdded, onNotInterested, onReport, onPollVote, onRequireLogin }) => {
   const images = parseImageUrls(post);
   const pollOptions = parsePollOptions(post);
   const user = post.user;
@@ -313,7 +314,7 @@ const PostCard: React.FC<{
 
       {commentsOpen && (
         <div className="mt-4 border-t border-gray-100 pt-4">
-           <CommentSection postId={post.id} comments={comments} totalCount={post.comment_count || 0} user={currentUser} onCommentAdded={onCommentAdded} />
+            <CommentSection postId={post.id} comments={comments} totalCount={post.comment_count || 0} user={currentUser} onCommentAdded={onCommentAdded} onRequireLogin={onRequireLogin} />
         </div>
       )}
     </div>
@@ -502,7 +503,8 @@ const CommentSection: React.FC<{
   totalCount?: number;
   user?: { first_name: string; last_name: string; image_url?: string } | null;
   onCommentAdded?: (postId: number) => void;
-}> = ({ postId, comments, totalCount, user, onCommentAdded }) => {
+  onRequireLogin?: () => void;
+}> = ({ postId, comments, totalCount, user, onCommentAdded, onRequireLogin }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sortBy, setSortBy] = useState<"popular" | "newest">("newest");
@@ -519,7 +521,12 @@ const CommentSection: React.FC<{
 
 
   const handleAddComment = async () => {
-    if (!token || ((!newComment.trim()) && !commentImage) || isSubmitting) return;
+    if (!token) {
+      onRequireLogin?.();
+      return;
+    }
+    if ((!newComment.trim()) && !commentImage) return;
+    if (isSubmitting) return;
     setIsSubmitting(true);
     try {
       let img = "";
@@ -545,7 +552,10 @@ const CommentSection: React.FC<{
   };
 
   const handleReply = async (pId: number, parentId: number, content: string) => {
-    if (!token) return;
+    if (!token) {
+      onRequireLogin?.();
+      return;
+    }
     try {
       await apiService.createForumComment(token, pId, { content, parent_id: parentId });
       if (onCommentAdded) {
@@ -1618,6 +1628,7 @@ const CampusForumPage: React.FC = () => {
                     onNotInterested={handleNotInterested}
                     onReport={handleReport}
                     onPollVote={handlePollVote}
+                    onRequireLogin={() => showToast("Please login to comment")}
                   />
                 ))}
 
