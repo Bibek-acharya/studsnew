@@ -17,9 +17,9 @@ function getMapEmbedUrl(mapUrl?: string, address?: string): string {
   if (iframeMatch) {
     return iframeMatch[1];
   }
-  const placeMatch = mapUrl.match(/google\.com\/maps\/place\/([^/?]+)/);
-  if (placeMatch) {
-    return `https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d10000!2d0!3d0!2m2!1f0!2f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2s!4v1`;
+  const coordMatch = mapUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+  if (coordMatch) {
+    return `https://www.google.com/maps?q=${coordMatch[1]},${coordMatch[2]}&output=embed`;
   }
   const queryMatch = mapUrl.match(/[?&]q=([^&]+)/);
   if (queryMatch) {
@@ -55,7 +55,7 @@ export default function UniversitySidebar({
     contactData?.instagram ||
     contactData?.youtube ||
     contactData?.linkedin);
-  const hasMap = !!(contactData?.mapUrl || contactData?.address);
+  const hasMap = !!(contactData?.map_embed || contactData?.mapUrl || contactData?.address);
   const hasAny = hasAddress || hasPhone || hasEmail || hasWebsite || hasSocial || hasMap;
 
   if (!hasAny && sponsoredInsts.length === 0) return null;
@@ -171,7 +171,7 @@ export default function UniversitySidebar({
             {hasMap && (
               <div className="mt-8 h-40 w-full overflow-hidden rounded-md">
                 <iframe
-                  src={getMapEmbedUrl(contactData?.mapUrl as string, contactData?.address as string)}
+                  src={getMapEmbedUrl(contactData?.map_embed || contactData?.mapUrl as string, contactData?.address as string)}
                   width="100%"
                   height="100%"
                   allowFullScreen

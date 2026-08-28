@@ -75,7 +75,7 @@ const UniversityListing: React.FC<UniversityListingProps> = ({ type }) => {
         setLoading(true);
         const isNepaliParam = type === "nepali" ? "true" : "false";
         const [uniRes, countsRes] = await Promise.all([
-          apiService.getUniversities({ isNepali: isNepaliParam }),
+          apiService.getUniversities({ isNepali: isNepaliParam, academic: filters.academic }),
           apiService.getUniversityFilterCounts(isNepaliParam),
         ]);
         const universities = (uniRes?.data?.universities || []).map(
@@ -90,7 +90,7 @@ const UniversityListing: React.FC<UniversityListingProps> = ({ type }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [filters.academic]);
 
   useEffect(() => {
     if (!isAuthenticated) return;

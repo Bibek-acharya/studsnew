@@ -6,6 +6,7 @@ export const universityApi = {
     type?: string;
     popular?: boolean;
     isNepali?: string;
+    academic?: string[];
   }): Promise<{ data: { universities: University[] } }> {
     const query = new URLSearchParams();
     query.set("status", "published");
@@ -13,6 +14,9 @@ export const universityApi = {
     if (params?.type) query.set("type", params.type);
     if (params?.popular) query.set("popular", "true");
     if (params?.isNepali) query.set("isNepali", params.isNepali);
+    if (params?.academic && params.academic.length > 0) {
+      query.set("academic", params.academic.join(","));
+    }
     return apiRequest<{ data: { universities: University[] } }>(
       `/api/v1/universities${query.toString() ? `?${query.toString()}` : ""}`,
     );

@@ -397,6 +397,7 @@ const CommentItem: React.FC<{
       apiService.getForumPostComments(postId, 50, 0, undefined, comment.id)
         .then((result) => {
           setReplies(Array.isArray(result) ? result : result.comments || []);
+          setShowReplies(true);
         })
         .catch(() => {})
         .finally(() => setLoadingReplies(false));
