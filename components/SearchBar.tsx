@@ -35,6 +35,7 @@ export const SearchBar: React.FC<{
     { title: string; type: string }[]
   >([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const isLoadingRef = useRef(false);
   const [showBorder, setShowBorder] = useState(false);
   const [hoverAngle, setHoverAngle] = useState(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -49,10 +50,11 @@ export const SearchBar: React.FC<{
     if (debounceRef.current) clearTimeout(debounceRef.current);
     const query = searchQuery.trim();
     if (!query) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSuggestions([]);
-      setIsLoadingSuggestions(false);
       return;
     }
+    isLoadingRef.current = true;
     setIsLoadingSuggestions(true);
     debounceRef.current = setTimeout(async () => {
       try {
@@ -63,8 +65,8 @@ export const SearchBar: React.FC<{
         const json = await res.json();
         if (json.suggestions) {
           setSuggestions(
-            json.suggestions.map((item: any) => ({
-              title: item.label || item.title,
+            json.suggestions.map((item: { label?: string; title?: string; type: string }) => ({
+              title: item.label || item.title || "",
               type: item.type,
             })),
           );
@@ -72,6 +74,7 @@ export const SearchBar: React.FC<{
       } catch {
         // ignore
       } finally {
+        isLoadingRef.current = false;
         setIsLoadingSuggestions(false);
       }
     }, 200);
