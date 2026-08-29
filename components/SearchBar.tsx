@@ -2,19 +2,17 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, ChevronDown } from "lucide-react";
-import { suggestionCategoryMap, categoryMap } from "@/utils/searchDatabase";
+import { Search } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const defaultSuggestions = [
-  { text: "College" },
-  { text: "Entrance" },
-  { text: "Scholarship" },
-  { text: "Events" },
-  { text: "News" },
-  { text: "Blogs" },
-  { text: "Reviews" },
+  { text: "Colleges in Kathmandu" },
+  { text: "CSIT colleges" },
+  { text: "Scholarships 2026" },
+  { text: "Entrance exams" },
+  { text: "Upcoming events" },
+  { text: "Engineering courses" },
 ];
 
 export const SearchBar: React.FC<{
@@ -33,48 +31,18 @@ export const SearchBar: React.FC<{
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(defaultSearchOpen);
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchCategory, setSearchCategory] = useState("colleges");
-  const [categoryOpen, setCategoryOpen] = useState(false);
   const [suggestions, setSuggestions] = useState<
     { title: string; type: string }[]
   >([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [showBorder, setShowBorder] = useState(false);
   const [hoverAngle, setHoverAngle] = useState(0);
-  const categoryRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const categoryOptions = [
-    { value: "colleges", label: "Colleges" },
-    { value: "courses", label: "Courses" },
-    { value: "admission", label: "Admission" },
-    { value: "events", label: "Events" },
-    { value: "news", label: "News" },
-    { value: "blogs", label: "Blogs" },
-    { value: "entrance", label: "Entrance" },
-  ];
-
-  const selectedLabel =
-    categoryOptions.find((o) => o.value === searchCategory)?.label ||
-    "Colleges";
 
   useEffect(() => {
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
-  }, []);
-
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => {
-      if (
-        categoryRef.current &&
-        !categoryRef.current.contains(e.target as Node)
-      ) {
-        setCategoryOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
   useEffect(() => {
@@ -85,17 +53,11 @@ export const SearchBar: React.FC<{
       setIsLoadingSuggestions(false);
       return;
     }
-    const local = defaultSuggestions.filter((s) =>
-      s.text.toLowerCase().includes(query.toLowerCase()),
-    );
-    if (local.length > 0) {
-      setSuggestions(local.map((s) => ({ title: s.text, type: "suggestion" })));
-    }
     setIsLoadingSuggestions(true);
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/search/suggest?q=${encodeURIComponent(query)}&cat=${searchCategory}&limit=5`,
+          `${API_BASE_URL}/api/v1/search/suggest?q=${encodeURIComponent(query)}&limit=5`,
           { credentials: "include" },
         );
         const json = await res.json();
@@ -108,12 +70,12 @@ export const SearchBar: React.FC<{
           );
         }
       } catch {
-        // ignore, keep local results
+        // ignore
       } finally {
         setIsLoadingSuggestions(false);
       }
     }, 200);
-  }, [searchQuery, searchCategory]);
+  }, [searchQuery]);
 
   const router = useRouter();
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -147,7 +109,7 @@ export const SearchBar: React.FC<{
   const handleSearchExecute = (query: string) => {
     if (!query || query.trim() === "") return;
     setIsSearchOpen(false);
-    router.push(`/search?q=${encodeURIComponent(query)}&cat=${searchCategory}`);
+    router.push(`/search?q=${encodeURIComponent(query)}`);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -160,12 +122,7 @@ export const SearchBar: React.FC<{
   const handleDropdownItemClick = (text: string) => {
     setSearchQuery(text);
     setIsSearchOpen(false);
-
-    const category =
-      suggestionCategoryMap[text] || categoryMap[text.toLowerCase()] || null;
-    const cat = category ? `&cat=${category}` : "";
-    const query = `/search?q=${encodeURIComponent(text)}${cat}`;
-    router.push(query);
+    router.push(`/search?q=${encodeURIComponent(text)}`);
   };
 
   const renderDropdown = () => {
@@ -190,12 +147,12 @@ export const SearchBar: React.FC<{
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-gray-600"
+                className="text-gray-400"
               >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <span className="text-[15px] text-gray-700">{item.text}</span>
+              <span className="text-[15px] text-gray-600">{item.text}</span>
             </div>
           ))}
         </>
@@ -221,7 +178,7 @@ export const SearchBar: React.FC<{
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-gray-600"
+                className="text-gray-400"
               >
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -305,45 +262,13 @@ export const SearchBar: React.FC<{
           placeholder={
             isMobile
               ? "Search colleges, courses..."
-              : "Search for courses, exams, scholarships..."
+              : "Search for colleges, courses, events..."
           }
           className={`flex-1 bg-transparent border-none py-3.5 pr-2 text-[15px] text-gray-800 placeholder-[#6b7280] focus:outline-none focus:ring-0 ${isMobile ? "pl-2" : "pl-3"}`}
           autoComplete="off"
         />
 
         <div className="flex items-center shrink-0 pr-[6px]">
-          <div className="relative hidden sm:block pr-4" ref={categoryRef}>
-            <button
-              onClick={() => setCategoryOpen((prev) => !prev)}
-              className="flex items-center gap-1 pl-2 pr-1 py-1 text-[14px] font-medium text-gray-800 hover:text-gray-900 transition-colors"
-            >
-              {selectedLabel}
-              <ChevronDown
-                size={14}
-                className={`text-gray-500 transition-transform ${categoryOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-            {categoryOpen && (
-              <div className="absolute top-full left-0 mt-1 w-44 rounded-lg border border-gray-200 bg-white py-1 shadow-lg z-50">
-                {categoryOptions.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => {
-                      setSearchCategory(opt.value);
-                      setCategoryOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2 text-[14px] transition-colors ${
-                      searchCategory === opt.value
-                        ? "text-brand-blue font-bold bg-blue-50"
-                        : "text-gray-700 hover:bg-gray-50"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
           {!isMobile && (
             <button
               onClick={() => handleSearchExecute(searchQuery)}
