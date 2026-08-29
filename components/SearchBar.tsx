@@ -95,14 +95,14 @@ export const SearchBar: React.FC<{
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(query)}&cat=${searchCategory}&limit=5`,
+          `${API_BASE_URL}/api/v1/search/suggest?q=${encodeURIComponent(query)}&cat=${searchCategory}&limit=5`,
           { credentials: "include" },
         );
         const json = await res.json();
-        if (json.success && json.data?.items) {
+        if (json.suggestions) {
           setSuggestions(
-            json.data.items.map((item: any) => ({
-              title: item.title,
+            json.suggestions.map((item: any) => ({
+              title: item.label || item.title,
               type: item.type,
             })),
           );

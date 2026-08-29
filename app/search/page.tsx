@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -45,21 +45,34 @@ interface SearchResponse {
     category: SearchCategory | null;
     categoryKey: string;
     meta: PaginationMeta;
+    facets?: Record<string, Record<string, number>>;
   };
 }
+
+const SORT_OPTIONS: Record<string, string> = {
+  Popular: "relevance",
+  "Newest First": "created_at_desc",
+  "Highest Rated": "rating_desc",
+  "Title A-Z": "title_asc",
+};
 
 function SearchContent() {
   const params = useSearchParams();
   const router = useRouter();
   const q = params.get("q") || "";
   const catParam = params.get("cat") || "";
+  const pageParam = parseInt(params.get("page") || "1", 10);
+  const sortParam = params.get("sort") || "relevance";
 
   const [items, setItems] = useState<SearchItem[]>([]);
   const [category, setCategory] = useState<SearchCategory | null>(null);
   const [categoryKey, setCategoryKey] = useState("");
   const [loading, setLoading] = useState(true);
-  const [currentCategory, setCurrentCategory] = useState("all");
-  const [currentSort, setCurrentSort] = useState("Popular");
+  const [meta, setMeta] = useState<PaginationMeta>({ page: 1, limit: 20, total: 0, pages: 0 });
+  const [facets, setFacets] = useState<Record<string, Record<string, number>>>({});
+  const [currentSort, setCurrentSort] = useState(
+    Object.keys(SORT_OPTIONS).find((k) => SORT_OPTIONS[k] === sortParam) || "Popular"
+  );
   const [isPopularOpen, setIsPopularOpen] = useState(false);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState({
@@ -69,22 +82,44 @@ function SearchContent() {
     universities: [] as string[],
   });
 
+  const currentPage = Math.min(Math.max(pageParam, 1), 5);
+
+  const buildSearchUrl = useCallback(
+    (page: number, sort: string, cat: string) => {
+      let url = `${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(q)}&cat=${encodeURIComponent(cat)}&page=${page}&limit=20&sort=${sort}`;
+      if (activeFilters.locations.length > 0) {
+        url += `&location=${encodeURIComponent(activeFilters.locations[0])}`;
+      }
+      if (activeFilters.types.length > 0) {
+        url += `&type=${encodeURIComponent(activeFilters.types[0])}`;
+      }
+      if (activeFilters.rating !== "any") {
+        url += `&rating_min=${activeFilters.rating}`;
+      }
+      if (activeFilters.universities.length > 0) {
+        url += `&university=${encodeURIComponent(activeFilters.universities[0])}`;
+      }
+      return url;
+    },
+    [q, activeFilters]
+  );
+
   useEffect(() => {
     setLoading(true);
     const fetchSearch = async () => {
       try {
-        const url = `${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(q)}&cat=${encodeURIComponent(catParam)}&limit=50`;
+        const sortValue = SORT_OPTIONS[currentSort] || "relevance";
+        const url = buildSearchUrl(currentPage, sortValue, catParam);
         const res = await fetch(url, { credentials: "include" });
         const json: SearchResponse = await res.json();
         if (json.success) {
           const data = json.data;
           setItems(data.items || []);
+          setMeta(data.meta);
+          setFacets(data.facets || {});
           const cat = data.category;
           setCategory(cat);
           setCategoryKey(data.categoryKey);
-          if (cat && cat.tabs && cat.tabs.length > 0) {
-            setCurrentCategory(cat.tabs[0].toLowerCase());
-          }
         }
       } catch (e) {
         console.error("Search fetch failed:", e);
@@ -93,7 +128,51 @@ function SearchContent() {
       }
     };
     fetchSearch();
-  }, [q, catParam]);
+  }, [q, catParam, currentPage, currentSort, activeFilters, buildSearchUrl]);
+
+  const navigateToPage = (page: number) => {
+    const sortValue = SORT_OPTIONS[currentSort] || "relevance";
+    const searchParams = new URLSearchParams();
+    searchParams.set("q", q);
+    if (catParam) searchParams.set("cat", catParam);
+    searchParams.set("page", String(page));
+    searchParams.set("sort", sortValue);
+    if (activeFilters.locations.length > 0) searchParams.set("location", activeFilters.locations[0]);
+    if (activeFilters.types.length > 0) searchParams.set("type", activeFilters.types[0]);
+    if (activeFilters.rating !== "any") searchParams.set("rating_min", activeFilters.rating);
+    if (activeFilters.universities.length > 0) searchParams.set("university", activeFilters.universities[0]);
+    router.push(`/search?${searchParams.toString()}`);
+  };
+
+  const handleSortChange = (label: string) => {
+    setCurrentSort(label);
+    setIsPopularOpen(false);
+    const sortValue = SORT_OPTIONS[label] || "relevance";
+    const searchParams = new URLSearchParams();
+    searchParams.set("q", q);
+    if (catParam) searchParams.set("cat", catParam);
+    searchParams.set("page", "1");
+    searchParams.set("sort", sortValue);
+    if (activeFilters.locations.length > 0) searchParams.set("location", activeFilters.locations[0]);
+    if (activeFilters.types.length > 0) searchParams.set("type", activeFilters.types[0]);
+    if (activeFilters.rating !== "any") searchParams.set("rating_min", activeFilters.rating);
+    if (activeFilters.universities.length > 0) searchParams.set("university", activeFilters.universities[0]);
+    router.push(`/search?${searchParams.toString()}`);
+  };
+
+  const handleTabChange = (tab: string) => {
+    const searchParams = new URLSearchParams();
+    searchParams.set("q", q);
+    searchParams.set("cat", categoryKey);
+    searchParams.set("page", "1");
+    searchParams.set("sort", SORT_OPTIONS[currentSort] || "relevance");
+    searchParams.set("tab", tab.toLowerCase());
+    if (activeFilters.locations.length > 0) searchParams.set("location", activeFilters.locations[0]);
+    if (activeFilters.types.length > 0) searchParams.set("type", activeFilters.types[0]);
+    if (activeFilters.rating !== "any") searchParams.set("rating_min", activeFilters.rating);
+    if (activeFilters.universities.length > 0) searchParams.set("university", activeFilters.universities[0]);
+    router.push(`/search?${searchParams.toString()}`);
+  };
 
   const activeFiltersCount =
     activeFilters.locations.length +
@@ -104,11 +183,8 @@ function SearchContent() {
   const popoverItems = [
     { label: "Popular", icon: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" },
     { label: "Newest First", icon: "M3 6h18M3 12h18M3 18h18" },
-    { label: "Oldest First", icon: "M3 6h18M3 12h18M3 18h18" },
     { label: "Highest Rated", icon: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" },
-    { label: "Lowest Fees", icon: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
-    { label: "Highest Fees", icon: "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" },
-    { label: "Most Reviews", icon: "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" },
+    { label: "Title A-Z", icon: "M3 6h18M3 12h18M3 18h18" },
   ];
 
   const isNoResults = !loading && items.length === 0 && category === null;
@@ -343,8 +419,10 @@ function SearchContent() {
                         {popoverItems.map((item) => (
                           <div
                             key={item.label}
-                            className="px-4 py-2.5 text-[14px] text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-2"
-                            onClick={() => { setCurrentSort(item.label); setIsPopularOpen(false); }}
+                            className={`px-4 py-2.5 text-[14px] hover:bg-gray-50 cursor-pointer transition-colors flex items-center gap-2 ${
+                              currentSort === item.label ? "text-blue-600 font-semibold" : "text-gray-700"
+                            }`}
+                            onClick={() => handleSortChange(item.label)}
                           >
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
                               <path d={item.icon}></path>
@@ -359,25 +437,20 @@ function SearchContent() {
 
                 {category?.tabs && category.tabs.length > 0 && (
                   <div className="flex items-center gap-1 overflow-x-auto mx-4 no-scrollbar w-full justify-center">
-                    {category.tabs.map((cat: string, idx: number) => {
-                      const isActiveTab = currentCategory === cat.toLowerCase();
-                      const badgeNumber = cat === "Engineering" ? "1" : cat === "Medical" ? "2" : null;
+                    {category.tabs.map((cat: string) => {
+                      const tabParam = params.get("tab") || category.tabs[0]?.toLowerCase() || "";
+                      const isActiveTab = tabParam === cat.toLowerCase();
                       return (
                         <button
                           key={cat}
-                          onClick={() => setCurrentCategory(cat.toLowerCase())}
+                          onClick={() => handleTabChange(cat)}
                           className={`px-5 py-2.5 rounded-full text-[14px] font-medium whitespace-nowrap transition-colors ${
                             isActiveTab
                               ? "bg-gray-100 text-[#0d0c22]"
                               : "text-[#6e6d7a] hover:text-[#0d0c22] hover:bg-gray-50"
-                          } ${badgeNumber ? "relative" : ""}`}
+                          }`}
                         >
                           {cat}
-                          {badgeNumber && (
-                            <span className="absolute top-0 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#0000ff] text-[10px] font-bold text-white shadow-sm">
-                              {badgeNumber}
-                            </span>
-                          )}
                         </button>
                       );
                     })}
@@ -408,7 +481,7 @@ function SearchContent() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8 w-full pb-20">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8 w-full pb-10">
                 {items.length === 0 ? (
                   <div className="col-span-full text-center py-16 text-gray-500">
                     No items found in this category.
@@ -417,6 +490,44 @@ function SearchContent() {
                   items.map((item, idx) => renderCollegeCard(item, idx))
                 )}
               </div>
+
+              {meta.pages > 1 && (
+                <div className="flex items-center justify-center gap-2 py-8">
+                  <button
+                    onClick={() => navigateToPage(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                    className="px-4 py-2 rounded-lg text-[14px] font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Previous
+                  </button>
+                  {Array.from({ length: Math.min(meta.pages, 5) }, (_, i) => i + 1).map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => navigateToPage(p)}
+                      className={`w-10 h-10 rounded-lg text-[14px] font-medium transition-colors ${
+                        currentPage === p
+                          ? "bg-blue-600 text-white"
+                          : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => navigateToPage(currentPage + 1)}
+                    disabled={currentPage >= meta.pages || currentPage >= 5}
+                    className="px-4 py-2 rounded-lg text-[14px] font-medium border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+
+              {currentPage >= 5 && meta.total > 100 && (
+                <p className="text-[13px] text-gray-500 text-center pb-4">
+                  Showing top results. Refine your search to find what you need.
+                </p>
+              )}
             </>
           )}
         </div>
@@ -440,7 +551,7 @@ function SearchContent() {
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-900 mb-3">Location</h3>
                   <div className="space-y-2">
-                    {["Kathmandu", "Pokhara", "Chitwan", "Butwal", "Biratnagar"].map((loc) => (
+                    {Object.entries(facets.location || {}).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([loc, count]) => (
                       <label key={loc} className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           checked={activeFilters.locations.includes(loc.toLowerCase())}
@@ -448,6 +559,7 @@ function SearchContent() {
                             ...prev, locations: e.target.checked ? [...prev.locations, loc.toLowerCase()] : prev.locations.filter((l) => l !== loc.toLowerCase()),
                           }))} />
                         <span className="text-[14px] text-gray-700">{loc}</span>
+                        <span className="text-[12px] text-gray-400 ml-auto">{count}</span>
                       </label>
                     ))}
                   </div>
@@ -455,14 +567,15 @@ function SearchContent() {
                 <div>
                   <h3 className="text-[14px] font-bold text-gray-900 mb-3">Institution Type</h3>
                   <div className="space-y-2">
-                    {[{ value: "public", label: "Public/Government" }, { value: "private", label: "Private" }].map((type) => (
-                      <label key={type.value} className="flex items-center gap-2 cursor-pointer">
+                    {Object.entries(facets.college_type || {}).sort((a, b) => b[1] - a[1]).map(([type, count]) => (
+                      <label key={type} className="flex items-center gap-2 cursor-pointer">
                         <input type="checkbox" className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          checked={activeFilters.types.includes(type.value)}
+                          checked={activeFilters.types.includes(type.toLowerCase())}
                           onChange={(e) => setActiveFilters((prev) => ({
-                            ...prev, types: e.target.checked ? [...prev.types, type.value] : prev.types.filter((t) => t !== type.value),
+                            ...prev, types: e.target.checked ? [...prev.types, type.toLowerCase()] : prev.types.filter((t) => t !== type.toLowerCase()),
                           }))} />
-                        <span className="text-[14px] text-gray-700">{type.label}</span>
+                        <span className="text-[14px] text-gray-700">{type}</span>
+                        <span className="text-[12px] text-gray-400 ml-auto">{count}</span>
                       </label>
                     ))}
                   </div>
