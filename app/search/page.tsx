@@ -7,14 +7,8 @@ import {
   Star,
   Award,
   MapPin,
-  Bookmark,
-  GraduationCap,
-  Globe,
   Clock,
   Building2,
-  BadgeCheck,
-  MessageSquare,
-  Loader2,
 } from "lucide-react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -137,21 +131,21 @@ function getLevelColor(level?: string): string {
 
 function CollegeCard({ item }: { item: SearchItem }) {
   const slug = item.slug || item.id;
+  const displayUrl = item.website?.replace(/^https?:\/\//, "").replace(/\/+$/, "") || "";
   return (
     <div className="flex h-full cursor-pointer flex-col rounded-md border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 overflow-visible">
       <Link href={`/find-college/${slug}`} className="group relative h-35 shrink-0 overflow-hidden rounded-md">
         {item.featured && (
-          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
-            Featured
-          </div>
+          <div className="absolute top-3 left-3 z-10 rounded bg-blue-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">Featured</div>
         )}
         {item.image ? (
           <img src={item.image} alt={item.title} className="h-full w-full object-cover" />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-blue-600" />
+          <div className="flex h-full w-full items-center justify-center bg-blue-600">
+            <svg className="w-12 h-12 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+          </div>
         )}
       </Link>
-
       <div className="flex flex-1 flex-col px-0 pt-3 overflow-visible">
         <div className="flex items-center gap-1.5 mb-2">
           <Link href={`/find-college/${slug}`} className="group/title relative truncate text-left text-[20px] font-bold text-slate-800 tracking-tight transition-colors hover:text-blue-600 line-clamp-2">
@@ -161,89 +155,53 @@ function CollegeCard({ item }: { item: SearchItem }) {
               <span className="absolute top-full left-4 -mt-px border-[5px] border-transparent border-t-gray-900"></span>
             </span>
           </Link>
-          {item.verified && <BadgeCheck className="w-5 h-5 text-white fill-blue-500 shrink-0" />}
+          {item.verified && (
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0d6efd" className="w-5 h-5 shrink-0 mt-0.5">
+              <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+            </svg>
+          )}
         </div>
-
-        <div className="mb-2 flex min-w-0 items-center text-[14px] text-gray-500">
+        <div className="mb-2 flex min-w-0 items-center text-[12px] text-[#64748b]">
           {item.rating > 0 && (
             <>
-              <div className="flex items-center gap-1 font-bold text-slate-700">
-                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <span>{Number(item.rating).toFixed(1)}</span>
+              <div className="flex items-center gap-1">
+                <svg className="w-3.75 h-3.75 fill-[#f59e0b]" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                <span className="font-bold text-[#334155]">{Number(item.rating).toFixed(1)}</span>
               </div>
-              <span className="mx-3 text-gray-300 font-light">|</span>
+              <span className="mx-2 text-gray-300">|</span>
             </>
           )}
           {item.institutionType && (
             <>
               <div className="flex items-center gap-1.5">
-                <Award className="w-4 h-4 text-gray-400" />
-                <span className="font-semibold text-slate-700">{item.institutionType}</span>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+                <span>{item.institutionType}</span>
               </div>
-              <span className="mx-3 text-gray-300 font-light">|</span>
+              <span className="mx-2 text-gray-300">|</span>
             </>
           )}
           {item.location && (
             <div className="flex min-w-0 flex-1 items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-gray-400" />
-              <span className="group/location block min-w-0 truncate font-semibold text-slate-700 line-clamp-1" title={item.location}>
-                <span className="truncate block">{item.location}</span>
-              </span>
+              <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              <span className="truncate" title={item.location}>{item.location}</span>
             </div>
           )}
         </div>
-
-        {(item.university || item.website) && (
-          <div className="flex items-start gap-2 text-[14px] text-gray-500 mb-2">
-            <Award className="w-4 h-4 text-gray-400 shrink-0 mt-0.5" />
-            <p className="leading-snug pr-4 font-semibold text-slate-700 line-clamp-1">
-              <span className="truncate block">{item.university || ""}</span>
-            </p>
+        {displayUrl && (
+          <div className="flex items-center gap-1.5 text-[12.5px] text-[#64748b] mb-2 hover:text-[#0d6efd] transition-colors cursor-pointer w-fit">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" /></svg>
+            <span>{displayUrl}</span>
           </div>
         )}
-
-        {item.website && (
-          <div className="flex items-center gap-2 text-[14px] text-gray-500 mb-3">
-            <Globe className="w-4 h-4 text-gray-400 shrink-0" />
-            <a
-              href={item.website.match(/^https?:\/\//) ? item.website : `https://${item.website}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline font-medium truncate"
-            >
-              {item.website.replace(/^https?:\/\//, "")}
-            </a>
-          </div>
-        )}
-
-        <div className="mt-2 flex items-center gap-4 mb-3">
-          <Link href={`/find-college/${slug}?tab=admissions`} className="text-[12px] font-medium text-blue-600 hover:text-blue-800 flex items-center transition-colors">
-            Admission
-            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
-            </svg>
-          </Link>
-          <Link href={`/find-college/${slug}?tab=courses`} className="text-[12px] font-medium text-blue-600 hover:text-blue-800 flex items-center transition-colors">
-            Courses & Fees
-            <svg className="w-3 h-3 ml-1" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7 17L17 7M7 7h10v10" />
-            </svg>
-          </Link>
-        </div>
-
-        <div className="flex flex-col gap-3 mt-auto">
-          <div className="flex gap-2">
-            <Link href={`/find-college/${slug}`} className="bg-blue-600 flex-1 flex items-center justify-center gap-1.5 text-white font-medium py-2 px-2 rounded-md transition-colors hover:bg-blue-700 text-[13px]">
-              View Details
-            </Link>
-            <button className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 px-2 rounded-md transition-colors text-[13px]">
-              <MessageSquare className="w-4 h-4 text-gray-500" />
-              Inquiry
-            </button>
-            <button className="w-10 flex items-center justify-center border border-gray-200 hover:bg-gray-50 rounded-md transition-colors shrink-0" title="Bookmark">
-              <Bookmark className="w-4 h-4 text-gray-400" />
-            </button>
-          </div>
+        <div className="mt-auto flex gap-2">
+          <Link href={`/find-college/${slug}`} className="flex-1 flex items-center justify-center rounded-md bg-blue-600 text-white font-medium py-2 text-[13px] hover:bg-blue-700 transition-colors">View Details</Link>
+          <button className="flex-1 flex items-center justify-center gap-1.5 border border-gray-200 hover:bg-gray-50 text-slate-600 font-medium py-2 rounded-md transition-colors text-[13px]">
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            Inquiry
+          </button>
+          <button className="w-9 h-9 flex items-center justify-center border border-gray-200 hover:bg-gray-50 rounded-md transition-colors shrink-0" title="Bookmark">
+            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+          </button>
         </div>
       </div>
     </div>
@@ -549,21 +507,53 @@ function ExamCard({ item }: { item: SearchItem }) {
 
 function AdmissionCard({ item }: { item: SearchItem }) {
   return (
-    <div className="bg-white rounded-md border border-gray-200 p-4 flex flex-col h-full hover:border-blue-500/20 transition-all duration-300">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">Admission</span>
-        {item.institutionType && <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">{item.institutionType}</span>}
-      </div>
-      <h3 className="font-bold text-[17px] text-slate-800 mb-1 line-clamp-2">{item.title}</h3>
-      {item.description && <p className="text-[13px] text-gray-500 line-clamp-2 mb-3">{stripHtml(item.description)}</p>}
-      {item.location && (
-        <div className="flex items-center gap-1.5 text-[13px] text-gray-500 mb-2">
-          <MapPin className="w-3.5 h-3.5 text-gray-400" />
-          <span className="font-semibold">{item.location}</span>
+    <div className="bg-white rounded-md border border-gray-200 hover:border-blue-200 overflow-hidden w-full flex flex-col h-full transition-transform">
+      <div className="p-2.5 pb-0 shrink-0">
+        <div className="relative w-full aspect-[21/9] bg-gray-200 rounded-md overflow-hidden">
+          {item.image ? (
+            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            </div>
+          )}
         </div>
-      )}
-      <div className="mt-auto pt-3 border-t border-gray-100">
-        <span className="text-sm font-semibold text-blue-600">View Details</span>
+      </div>
+      <div className="p-3 pb-3 flex flex-col grow">
+        <div className="flex items-center gap-1.5 mb-1">
+          <h2 title={item.title} className="text-[#0f172a] text-[18px] font-bold leading-tight truncate">{item.title}</h2>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#0d6efd" className="w-5 h-5 shrink-0 mt-0.5">
+            <path fillRule="evenodd" d="M8.603 3.799A4.49 4.49 0 0112 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 013.498 1.307 4.491 4.491 0 011.307 3.497A4.49 4.49 0 0121.75 12a4.49 4.49 0 01-1.549 3.397 4.491 4.491 0 01-1.307 3.497 4.491 4.491 0 01-3.497 1.307A4.49 4.49 0 0112 21.75a4.49 4.49 0 01-3.397-1.549 4.49 4.49 0 01-3.498-1.306 4.491 4.491 0 01-1.307-3.498A4.49 4.49 0 012.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 011.307-3.497 4.49 4.49 0 013.497-1.307zm7.007 6.387a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+          </svg>
+        </div>
+        {item.institutionType && (
+          <div className="flex items-center gap-1.5 text-[12px] text-[#64748b] mb-1.5">
+            <svg className="w-3.75 h-3.75 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>
+            <span>Level: {item.institutionType}</span>
+          </div>
+        )}
+        {item.location && (
+          <div className="flex items-center gap-1.5 text-[12px] text-[#64748b] mb-2">
+            <svg className="w-4 h-4 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            <span className="truncate">{item.location}</span>
+          </div>
+        )}
+        {item.description && (
+          <p className="text-[13px] text-gray-500 line-clamp-2 mb-3">{stripHtml(item.description)}</p>
+        )}
+        <div className="flex items-center gap-1.5 text-[12.5px] font-semibold text-[#2563eb] mb-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+          Admission Open
+        </div>
+        <div className="mt-auto flex items-center gap-1.5">
+          <Link href={`/admissions/bachelor`} className="flex-1 py-2 px-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-100 rounded-md text-[13px] font-semibold transition-colors flex justify-center items-center gap-1">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+            Ask Question
+          </Link>
+          <Link href={`/admissions/bachelor`} className="flex-1 py-2 px-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-[13px] font-bold transition-colors flex justify-center items-center">
+            View Detail
+          </Link>
+        </div>
       </div>
     </div>
   );
