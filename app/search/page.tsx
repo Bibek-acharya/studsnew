@@ -4,11 +4,10 @@ import React, { useState, useEffect, useCallback, Suspense, useMemo } from "reac
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   SearchCollegeCard,
-  SearchInstitutionCard,
   SearchCourseCard,
-  SearchUniversityCard,
-  SearchScholarshipCard,
-  SearchEventCard,
+  SearchEventAdapter,
+  SearchScholarshipAdapter,
+  SearchUniversityAdapter,
   SearchNewsCard,
   SearchBlogCard,
   SearchExamCard,
@@ -57,11 +56,11 @@ interface SearchResponse {
 function SearchResultCard({ item }: { item: SearchResult }) {
   switch (item.type) {
     case "college": return <SearchCollegeCard item={item} />;
-    case "institution": return <SearchInstitutionCard item={item} />;
+    case "institution": return <SearchCollegeCard item={item} />;
     case "course": return <SearchCourseCard item={item} />;
-    case "university": return <SearchUniversityCard item={item} />;
-    case "scholarship": return <SearchScholarshipCard item={item} />;
-    case "event": return <SearchEventCard item={item} />;
+    case "university": return <SearchUniversityAdapter item={item} />;
+    case "scholarship": return <SearchScholarshipAdapter item={item} />;
+    case "event": return <SearchEventAdapter item={item} />;
     case "news": return <SearchNewsCard item={item} />;
     case "blog": return <SearchBlogCard item={item} />;
     case "exam": return <SearchExamCard item={item} />;
