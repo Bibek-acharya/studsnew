@@ -21,8 +21,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 const ENTITY_TYPES = [
   { value: "all", label: "All" },
-  { value: "college", label: "Colleges" },
-  { value: "institution", label: "Institutions" },
+  { value: "college", label: "Colleges & Institutes" },
   { value: "course", label: "Courses" },
   { value: "university", label: "Universities" },
   { value: "scholarship", label: "Scholarships" },
@@ -74,7 +73,7 @@ interface SearchResponse {
 }
 
 function stripHtml(html?: string): string {
-  if (!html) return "";
+  if (!html || typeof html !== "string") return "";
   return html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
 }
 
@@ -606,6 +605,10 @@ function SearchContent() {
 
   const filteredItems = useMemo(() => {
     if (typeFilter === "all") return items;
+    // "college" includes both colleges and institutions
+    if (typeFilter === "college") {
+      return items.filter((item) => item.type === "college" || item.type === "institution");
+    }
     return items.filter((item) => item.type === typeFilter);
   }, [items, typeFilter]);
 
