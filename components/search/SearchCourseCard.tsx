@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import { Building2, Clock, CreditCard, GraduationCap } from "lucide-react";
 import type { SearchResult } from "./types";
 
 const levelBadgeColors: Record<string, string> = {
@@ -26,14 +28,26 @@ export default function SearchCourseCard({ item }: { item: SearchResult }) {
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 w-full p-4 flex flex-col">
-      {/* Banner Area */}
-      <div className="banner-gradient rounded-lg p-6 mb-4 relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[140px]">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
-        <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full -ml-16 -mb-16 blur-2xl"></div>
-        <div className="flex-1 flex items-center justify-center w-full relative z-10">
-          <h2 className="text-white text-[1.1rem] font-bold leading-tight">{item.title}</h2>
+      <div className="banner-gradient rounded-lg mb-4 relative overflow-hidden flex flex-col items-center justify-center text-center min-h-[140px]">
+        {item.banner || item.image ? (
+          <Image
+            src={item.banner || item.image}
+            alt={`${item.title} banner`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+            className="object-cover"
+          />
+        ) : (
+          <>
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-10 -mt-10 blur-xl"></div>
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-white opacity-5 rounded-full -ml-16 -mb-16 blur-2xl"></div>
+          </>
+        )}
+        <div className={`absolute inset-0 ${item.banner || item.image ? "bg-black/35" : ""}`} />
+        <div className="flex flex-1 items-center justify-center w-full relative z-10 p-6">
+          <h2 className="text-white text-[1.1rem] font-bold leading-tight drop-shadow-sm">{item.title}</h2>
         </div>
-        <div className="text-white/80 text-[0.55rem] relative z-10 pt-2 tracking-wide font-medium">studsphere.com</div>
+        <div className="text-white/80 text-[0.55rem] relative z-10 pb-3 tracking-wide font-medium">studsphere.com</div>
       </div>
 
       {/* Badges and Duration Row */}
@@ -41,6 +55,12 @@ export default function SearchCourseCard({ item }: { item: SearchResult }) {
         <span className={`${getLevelColor(levelText)} text-[0.65rem] font-bold px-3 py-1 rounded-md tracking-wider`}>
           {levelText.toUpperCase()}
         </span>
+        {item.duration && (
+          <div className="flex items-center text-gray-500 text-xs font-medium">
+            <Clock className="w-4 h-4 mr-1.5" />
+            <span>{item.duration}</span>
+          </div>
+        )}
       </div>
 
       {/* Main Title */}
@@ -48,10 +68,29 @@ export default function SearchCourseCard({ item }: { item: SearchResult }) {
         {item.title}
       </Link>
 
-      {/* Details List */}
-      {item.description && (
-        <p className="text-[0.8rem] text-gray-500 mb-4 line-clamp-2">{item.description.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim()}</p>
-      )}
+      <div className="space-y-2.5 mb-5">
+        {(item.university || item.nonUniversityAffiliation) && (
+          <div className="flex items-center min-w-0 text-[0.8rem]">
+            <Building2 className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
+            <span className="font-semibold text-gray-800 mr-1">Affiliation:</span>
+            <span className="text-gray-500 truncate">{item.university || item.nonUniversityAffiliation}</span>
+          </div>
+        )}
+        {item.field && (
+          <div className="flex items-center min-w-0 text-[0.8rem]">
+            <GraduationCap className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
+            <span className="font-semibold text-gray-800 mr-1">Field:</span>
+            <span className="text-gray-500 truncate">{item.field}</span>
+          </div>
+        )}
+        {item.estFee && (
+          <div className="flex items-center min-w-0 text-[0.8rem]">
+            <CreditCard className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
+            <span className="font-semibold text-gray-800 mr-1">Est. Fee:</span>
+            <span className="font-bold text-[#0014FF] truncate">{item.estFee}</span>
+          </div>
+        )}
+      </div>
 
       {/* Divider */}
       <div className="border-t border-dashed border-gray-300 mb-4"></div>

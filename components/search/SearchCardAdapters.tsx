@@ -51,13 +51,14 @@ export function SearchUniversityAdapter({ item }: { item: SearchResult }) {
         location: item.location || "",
         rating: String(item.rating || 0),
         type: (item.institutionType as "Public" | "Private" | "") || "",
-        rank: "",
-        programs: 0,
-        colleges: 0,
+        rank: item.rank ? String(item.rank) : "0",
+        programs: item.programs || 0,
+        colleges: item.colleges || 0,
         tags: [],
-        cover: item.image || undefined,
+        cover: item.banner || item.image || undefined,
         website: item.website || undefined,
         verified: item.verified || false,
+        isPopular: item.popular || false,
       }}
     />
   );
