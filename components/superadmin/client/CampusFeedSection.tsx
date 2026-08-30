@@ -10,11 +10,16 @@ import {
   Loader2,
   Pencil,
   Trash2,
+  Flag,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import DynamicIcon from "@/components/shared/DynamicIcon";
 import {
   apiService,
+  type AdminForumReport,
   type ForumCommunity,
+  type ForumComment,
   type ForumPost,
 } from "@/services/api";
 
@@ -24,6 +29,85 @@ function resolveImageUrl(path?: string): string {
   if (!path) return "";
   if (path.startsWith("http")) return path;
   return `${API_BASE}${path}`;
+}
+
+function parseMediaUrls(value?: string): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed.filter((url): url is string => typeof url === "string" && url.length > 0) : [value];
+  } catch {
+    return [value];
+  }
+}
+
+function parsePollOptions(value?: string): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((option) => typeof option === "string" ? option : String(option?.text || "")).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+function AdminCommentTree({
+  comments,
+  deletingCommentId,
+  onDelete,
+  depth = 0,
+}: {
+  comments: ForumComment[];
+  deletingCommentId: number | null;
+  onDelete: (commentId: number) => void;
+  depth?: number;
+}) {
+  return (
+    <div className="space-y-2">
+      {comments.map((comment) => (
+        <div key={comment.id} className={depth === 0 ? "" : "ml-4 border-l border-gray-200 pl-3"}>
+          <div className="rounded-md border border-gray-200 bg-white px-3 py-2.5">
+            <div className="flex items-start gap-2">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100 text-[10px] font-bold text-gray-600">
+                {comment.user?.image_url ? (
+                  <img src={resolveImageUrl(comment.user.image_url)} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  (comment.user?.first_name?.[0] || comment.user_name?.[0] || "U").toUpperCase()
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-xs font-semibold text-gray-900">
+                    {comment.user_name || `${comment.user?.first_name || ""} ${comment.user?.last_name || ""}`.trim() || "Unknown user"}
+                  </span>
+                  <span className="text-[10px] text-gray-400">{new Date(comment.created_at).toLocaleString()}</span>
+                  <button
+                    type="button"
+                    onClick={() => onDelete(comment.id)}
+                    disabled={deletingCommentId === comment.id}
+                    className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded text-gray-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50"
+                    title="Delete comment and replies"
+                    aria-label="Delete comment and replies"
+                  >
+                    {deletingCommentId === comment.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
+                  </button>
+                </div>
+                {comment.parent_user_name && <p className="text-[10px] text-gray-400">Replying to @{comment.parent_user_name}</p>}
+                <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-relaxed text-gray-700">{comment.content}</p>
+                {comment.image_url && <img src={resolveImageUrl(comment.image_url)} alt="Comment attachment" className="mt-2 max-h-48 rounded object-contain" />}
+              </div>
+            </div>
+          </div>
+          {comment.replies && comment.replies.length > 0 && (
+            <div className="mt-2">
+              <AdminCommentTree comments={comment.replies} deletingCommentId={deletingCommentId} onDelete={onDelete} depth={depth + 1} />
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 }
 
 export default function CampusFeedSection() {
@@ -47,6 +131,14 @@ export default function CampusFeedSection() {
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [deletingPostId, setDeletingPostId] = useState<number | null>(null);
+  const [reports, setReports] = useState<AdminForumReport[]>([]);
+  const [reportsLoading, setReportsLoading] = useState(true);
+  const [showReports, setShowReports] = useState(true);
+  const [commentsByPost, setCommentsByPost] = useState<Record<number, ForumComment[]>>({});
+  const [commentsLoadingPostId, setCommentsLoadingPostId] = useState<number | null>(null);
+  const [expandedCommentPosts, setExpandedCommentPosts] = useState<Record<number, boolean>>({});
+  const [deletingCommentId, setDeletingCommentId] = useState<number | null>(null);
+  const [commentDeleteTarget, setCommentDeleteTarget] = useState<{ postId: number; commentId: number } | null>(null);
 
   const fetchCommunities = () => {
     setLoading(true);
@@ -57,8 +149,21 @@ export default function CampusFeedSection() {
       .finally(() => setLoading(false));
   };
 
+  const fetchReports = () => {
+    const token = localStorage.getItem("superadmin_token") || "";
+    setReportsLoading(true);
+    apiService.getAdminForumReports(token)
+      .then((data) => setReports(Array.isArray(data) ? data : []))
+      .catch(() => setReports([]))
+      .finally(() => setReportsLoading(false));
+  };
+
   useEffect(() => {
-    fetchCommunities();
+    const timer = window.setTimeout(() => {
+      fetchCommunities();
+      fetchReports();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -126,6 +231,7 @@ export default function CampusFeedSection() {
       const token = localStorage.getItem("superadmin_token") || "";
       await apiService.adminDeleteForumPost(token, postId);
       setCommunityPosts((p) => p.filter((x) => x.id !== postId));
+      setReports((current) => current.filter((report) => report.post_id !== postId));
     } catch {
       /* ignore */
     } finally {
@@ -133,12 +239,48 @@ export default function CampusFeedSection() {
     }
   };
 
+  const togglePostComments = async (postId: number) => {
+    if (expandedCommentPosts[postId]) {
+      setExpandedCommentPosts((current) => ({ ...current, [postId]: false }));
+      return;
+    }
+    setExpandedCommentPosts((current) => ({ ...current, [postId]: true }));
+    if (commentsByPost[postId]) return;
+
+    const token = localStorage.getItem("superadmin_token") || "";
+    setCommentsLoadingPostId(postId);
+    try {
+      const comments = await apiService.getAdminForumPostComments(token, postId);
+      setCommentsByPost((current) => ({ ...current, [postId]: comments }));
+    } catch {
+      setCommentsByPost((current) => ({ ...current, [postId]: [] }));
+    } finally {
+      setCommentsLoadingPostId(null);
+    }
+  };
+
+  const handleCommentDelete = async (postId: number, commentId: number) => {
+    const token = localStorage.getItem("superadmin_token") || "";
+    setDeletingCommentId(commentId);
+    try {
+      const result = await apiService.adminDeleteForumComment(token, commentId);
+      const comments = await apiService.getAdminForumPostComments(token, postId);
+      setCommentsByPost((current) => ({ ...current, [postId]: comments }));
+      setCommunityPosts((posts) => posts.map((post) => post.id === postId
+        ? { ...post, comment_count: Math.max(0, (post.comment_count || 0) - result.deleted_count) }
+        : post));
+    } finally {
+      setDeletingCommentId(null);
+      setCommentDeleteTarget(null);
+    }
+  };
+
   const viewCommunity = async (community: ForumCommunity) => {
     setSelectedCommunity(community);
     setPostsLoading(true);
     try {
-      const data = await apiService.getForumPosts(50, undefined, community.id) as any;
-      const posts = data?.posts || (Array.isArray(data) ? data : []);
+      const data = await apiService.getForumPosts(50, undefined, community.id);
+      const posts = Array.isArray(data) ? data : data?.posts || [];
       setCommunityPosts(posts);
     } catch {
       setCommunityPosts([]);
@@ -234,17 +376,80 @@ export default function CampusFeedSection() {
                 <p className="text-sm text-gray-600 line-clamp-3">
                   {post.content}
                 </p>
-                {post.image_url && (
-                  <img
-                    src={resolveImageUrl(post.image_url)}
-                    alt=""
-                    className="mt-2 h-40 w-full rounded-md object-cover"
-                  />
+                {parseMediaUrls(post.image_url).length > 0 && (
+                  <div className={`mt-3 grid gap-2 ${parseMediaUrls(post.image_url).length > 1 ? "sm:grid-cols-2" : "grid-cols-1"}`}>
+                    {parseMediaUrls(post.image_url).map((url) => (
+                      <img
+                        key={url}
+                        src={resolveImageUrl(url)}
+                        alt="Post attachment"
+                        className="max-h-80 w-full rounded-md bg-gray-50 object-contain"
+                      />
+                    ))}
+                  </div>
+                )}
+                {post.video_url && (
+                  <video
+                    controls
+                    preload="metadata"
+                    src={resolveImageUrl(post.video_url)}
+                    className="mt-3 max-h-[420px] w-full rounded-md bg-black"
+                  >
+                    Your browser does not support video playback.
+                  </video>
+                )}
+                {post.is_poll && (
+                  <div className="mt-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">Poll results</p>
+                    <div className="space-y-2">
+                      {parsePollOptions(post.poll_options).map((option, optionIndex) => {
+                        const votes = post.poll_results?.[optionIndex] || 0;
+                        const percentage = post.total_votes ? Math.round((votes / post.total_votes) * 100) : 0;
+                        return (
+                          <div key={`${option}-${optionIndex}`}>
+                            <div className="mb-1 flex items-center justify-between gap-3 text-xs">
+                              <span className="font-medium text-gray-700">{option}</span>
+                              <span className="shrink-0 text-gray-500">{votes} votes ({percentage}%)</span>
+                            </div>
+                            <div className="h-1.5 overflow-hidden rounded-full bg-gray-200">
+                              <div className="h-full rounded-full bg-blue-600" style={{ width: `${percentage}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {parsePollOptions(post.poll_options).length === 0 && <p className="text-xs text-gray-400">No poll options available.</p>}
+                    </div>
+                  </div>
                 )}
                 <div className="mt-3 flex items-center gap-4 text-xs text-gray-400">
                   <span>{post.upvotes || 0} likes</span>
-                  <span>{post.comment_count || 0} comments</span>
+                  <button
+                    type="button"
+                    onClick={() => togglePostComments(post.id)}
+                    className="flex items-center gap-1 font-medium text-blue-600 hover:text-blue-700"
+                  >
+                    {commentsLoadingPostId === post.id ? <Loader2 size={12} className="animate-spin" /> : <MessageSquare size={12} />}
+                    {post.comment_count || 0} comments
+                    {expandedCommentPosts[post.id] ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                  </button>
                 </div>
+                {expandedCommentPosts[post.id] && (
+                  <div className="mt-3 rounded-md bg-gray-50 p-3">
+                    {commentsLoadingPostId === post.id ? (
+                      <div className="flex items-center justify-center py-5 text-xs text-gray-400">
+                        <Loader2 size={15} className="mr-2 animate-spin" /> Loading comments...
+                      </div>
+                    ) : (commentsByPost[post.id]?.length || 0) > 0 ? (
+                      <AdminCommentTree
+                        comments={commentsByPost[post.id]}
+                        deletingCommentId={deletingCommentId}
+                        onDelete={(commentId) => setCommentDeleteTarget({ postId: post.id, commentId })}
+                      />
+                    ) : (
+                      <p className="py-3 text-center text-xs text-gray-400">No comments on this post.</p>
+                    )}
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -276,6 +481,34 @@ export default function CampusFeedSection() {
           </div>
         </div>
       )}
+      {commentDeleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-bold text-gray-900">Delete Comment</h3>
+            <p className="mb-4 text-sm text-gray-600">
+              Delete this comment and every reply and sub-reply beneath it? This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleCommentDelete(commentDeleteTarget.postId, commentDeleteTarget.commentId)}
+                disabled={deletingCommentId !== null}
+                className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingCommentId !== null ? "Deleting..." : "Delete comment"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCommentDeleteTarget(null)}
+                disabled={deletingCommentId !== null}
+                className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-300 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
     );
   }
@@ -286,14 +519,72 @@ export default function CampusFeedSection() {
         <h2 className="flex items-center gap-2 text-lg font-bold text-gray-900">
           <Building size={20} className="text-blue-600" /> Manage Campus Feed
         </h2>
-        <button
-          type="button"
-          onClick={() => setShowCreate(true)}
-          className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          <Plus size={16} /> Create Community
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowReports((visible) => !visible)}
+            className={`flex items-center gap-2 rounded-md border px-3 py-2.5 text-sm font-medium transition-colors ${showReports ? "border-red-200 bg-red-50 text-red-700" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}
+          >
+            <Flag size={15} /> Reports {reports.length > 0 && `(${reports.length})`}
+            {showReports ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowCreate(true)}
+            className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+          >
+            <Plus size={16} /> Create Community
+          </button>
+        </div>
       </div>
+
+      {showReports && (
+        <div className="border-b border-gray-200 bg-red-50/40 px-5 py-4">
+          <div className="mb-3 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-gray-900">Reported posts</h3>
+              <p className="text-xs text-gray-500">Review user reports before moderating the related community post.</p>
+            </div>
+            <button type="button" onClick={fetchReports} className="text-xs font-semibold text-blue-600 hover:text-blue-700">Refresh</button>
+          </div>
+          {reportsLoading ? (
+            <div className="flex items-center py-5 text-xs text-gray-400"><Loader2 size={15} className="mr-2 animate-spin" /> Loading reports...</div>
+          ) : reports.length === 0 ? (
+            <p className="rounded-md border border-dashed border-gray-200 bg-white px-4 py-5 text-center text-xs text-gray-400">No reported posts.</p>
+          ) : (
+            <div className="max-h-80 space-y-2 overflow-y-auto pr-1">
+              {reports.map((report) => (
+                <div key={report.id} className="rounded-md border border-red-100 bg-white p-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-gray-900">{report.post.title || "Untitled post"}</p>
+                      <p className="text-[11px] text-gray-500">
+                        {report.post.community?.name || "Unknown community"} · reported by {report.reporter.first_name} {report.reporter.last_name} · {new Date(report.created_at).toLocaleString()}
+                      </p>
+                    </div>
+                    <span className="shrink-0 rounded bg-red-50 px-2 py-1 text-[10px] font-semibold text-red-700">Post #{report.post_id}</span>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {report.reasons.map((reason) => <span key={reason} className="rounded bg-gray-100 px-2 py-1 text-[10px] text-gray-600">{reason}</span>)}
+                  </div>
+                  {report.other_text && <p className="mt-2 rounded bg-gray-50 px-2.5 py-2 text-xs text-gray-600">{report.other_text}</p>}
+                  <button
+                    type="button"
+                    disabled={!communities.some((community) => community.id === report.post.community_id)}
+                    onClick={() => {
+                      const community = communities.find((item) => item.id === report.post.community_id);
+                      if (community) viewCommunity(community);
+                    }}
+                    className="mt-2 text-xs font-semibold text-blue-600 hover:text-blue-700 disabled:text-gray-300"
+                  >
+                    View community posts
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {showCreate && (
         <div className="border-b border-gray-100 bg-gray-50 px-5 py-4">

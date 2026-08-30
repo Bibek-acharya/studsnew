@@ -1391,12 +1391,16 @@ const CampusForumPage: React.FC = () => {
   };
 
   const handleNotInterested = async (postId: number) => {
-    setPosts((p) => p.filter((post) => post.id !== postId));
-    showToast("Post hidden from your feed");
-    if (token) {
-      try {
-        await apiService.notInterestedForumPost(token, postId);
-      } catch {}
+    if (!isAuthenticated || !token) {
+      showToast("Please login to hide posts from your feed");
+      return;
+    }
+    try {
+      await apiService.notInterestedForumPost(token, postId);
+      setPosts((posts) => posts.filter((post) => post.id !== postId));
+      showToast("Post hidden from your feed");
+    } catch {
+      showToast("Failed to hide post");
     }
   };
 
@@ -1416,6 +1420,10 @@ const CampusForumPage: React.FC = () => {
   };
 
   const handleReport = (postId: number) => {
+    if (!isAuthenticated || !token) {
+      showToast("Please login to report posts");
+      return;
+    }
     setReportPostId(postId);
   };
 

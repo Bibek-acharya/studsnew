@@ -753,16 +753,24 @@ const CampusFeedPage: React.FC = () => {
   const [reportPostId, setReportPostId] = useState<number | null>(null);
 
   const handleNotInterested = async (postId: number) => {
-    setPosts((prev) => prev.filter((p) => p.id !== postId));
-    addToast("Post hidden from your feed", "info");
-    if (token) {
-      try {
-        await apiService.notInterestedForumPost(token, postId);
-      } catch {}
+    if (!isAuthenticated || !token) {
+      addToast("Please login to hide posts from your feed", "info");
+      return;
+    }
+    try {
+      await apiService.notInterestedForumPost(token, postId);
+      setPosts((posts) => posts.filter((post) => post.id !== postId));
+      addToast("Post hidden from your feed", "info");
+    } catch {
+      addToast("Failed to hide post", "error");
     }
   };
 
   const handleReport = (postId: number) => {
+    if (!isAuthenticated || !token) {
+      addToast("Please login to report posts", "info");
+      return;
+    }
     setReportPostId(postId);
   };
 

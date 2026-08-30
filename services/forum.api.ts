@@ -1,4 +1,4 @@
-import { type ForumCommunity, type ForumPost, type ForumComment } from "./api";
+import { type AdminForumReport, type ForumCommunity, type ForumPost, type ForumComment } from "./api";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -276,6 +276,45 @@ export const forumApi = {
       credentials: "include",
     });
     if (!response.ok) throw new Error("Failed to delete post");
+  },
+  async getAdminForumReports(token: string): Promise<AdminForumReport[]> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/admin/reports`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Failed to fetch forum reports");
+    const result = await response.json();
+    return result.data || result;
+  },
+  async getAdminForumPostComments(token: string, postId: number): Promise<ForumComment[]> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/admin/posts/${postId}/comments`, {
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+      cache: "no-store",
+    });
+    if (!response.ok) throw new Error("Failed to fetch post comments");
+    const result = await response.json();
+    return result.data || result;
+  },
+  async adminDeleteForumComment(token: string, commentId: number): Promise<{ deleted_count: number }> {
+    const response = await fetch(`${API_BASE_URL}/api/v1/forum/admin/comments/${commentId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: "include",
+    });
+    if (!response.ok) throw new Error("Failed to delete comment");
+    const result = await response.json();
+    return result.data || result;
   },
   async getTrendingForumPosts(): Promise<any[]> {
     const response = await fetch(`${API_BASE_URL}/api/v1/forum/posts/trending`, {

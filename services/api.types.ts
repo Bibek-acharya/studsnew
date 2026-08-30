@@ -615,10 +615,29 @@ export interface ForumComment {
   image_url?: string;
   parent_id?: number;
   parent_user_name?: string;
+  user_name?: string;
+  reply_count?: number;
   created_at: string;
   createdAt?: string;
   user: ForumUser;
   replies?: ForumComment[];
+}
+
+export interface AdminForumReport {
+  id: number;
+  created_at: string;
+  post_id: number;
+  post: ForumPost;
+  user_id: number;
+  reporter: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    image_url?: string;
+  };
+  reasons: string[];
+  other_text?: string;
 }
 
 export interface ForumPost {
