@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, Suspense, useMemo } from "react";
+import React, { useState, useEffect, useCallback, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   SearchCollegeCard,
@@ -50,6 +50,9 @@ interface SearchResponse {
   data: {
     items: SearchResult[];
     meta: PaginationMeta;
+    quality?: string;
+    retrievalErrors?: string[];
+    isVectorEnabled?: boolean;
   };
 }
 
@@ -84,47 +87,101 @@ function SearchContent() {
   );
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const [searchQuality, setSearchQuality] = useState<string>("full");
 
   const currentPage = Math.min(Math.max(pageParam, 1), 5);
-  const loading = !hasLoaded || items.length === 0 && currentPage === 1;
+  const isInitialLoading = !hasLoaded && currentPage === 1;
+  const isEmpty = hasLoaded && items.length === 0;
+  const hasErrorState = error !== null;
+  const loading = isInitialLoading;
 
-  const filteredItems = useMemo(() => {
-    if (typeFilter === "all") return items;
-    if (typeFilter === "college") {
-      return items.filter((item) => item.type === "college" || item.type === "institution");
-    }
-    return items.filter((item) => item.type === typeFilter);
-  }, [items, typeFilter]);
+  const filteredItems = items;
 
   const buildSearchUrl = useCallback(
-    (page: number, sort: string) => `${API_BASE_URL}/api/v1/search?q=${encodeURIComponent(q)}&page=${page}&limit=20&sort=${sort}`,
-    [q]
+    (page: number, sort: string) => {
+      const params = new URLSearchParams();
+      params.set("q", q);
+      params.set("page", String(page));
+      params.set("limit", "20");
+      params.set("sort", sort);
+      if (typeFilter !== "all") {
+        params.set("type", typeFilter);
+      }
+      return `${API_BASE_URL}/api/v1/search?${params.toString()}`;
+    },
+    [q, typeFilter]
   );
 
   useEffect(() => {
     if (!q) return;
+    
     let cancelled = false;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHasLoaded(false);
     const fetchSearch = async () => {
       try {
         const sortValue = SORT_OPTIONS[currentSort] || "relevance";
         const url = buildSearchUrl(currentPage, sortValue);
-        const res = await fetch(url, { credentials: "include" });
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        
+        const res = await fetch(url, { 
+          credentials: "include",
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        
         const json: SearchResponse = await res.json();
-        if (!cancelled && json.success) {
-          setItems(json.data.items || []);
-          setMeta(json.data.meta);
+        
+        if (!cancelled) {
+          if (!json.success) {
+            throw new Error(json.message || "Search failed");
+          }
+          
+          if (json.data.quality === "error") {
+            setError("Search service temporarily unavailable. Please try again.");
+            setItems([]);
+            setMeta({ page: 1, limit: 20, total: 0, pages: 0 });
+          } else if (json.data.quality === "degraded") {
+            setError("Showing keyword-only results (vector search unavailable)");
+            setItems(json.data.items || []);
+            setMeta(json.data.meta);
+            setSearchQuality("degraded");
+          } else {
+            setError(null);
+            setItems(json.data.items || []);
+            setMeta(json.data.meta);
+            setSearchQuality(json.data.quality || "full");
+          }
         }
       } catch (e) {
-        console.error("Search fetch failed:", e);
+        if (!cancelled) {
+          if (e instanceof Error && e.name === "AbortError") {
+            setError("Search timed out (10s). Please try again.");
+          } else {
+            setError(e instanceof Error ? e.message : "Search failed. Please try again.");
+          }
+          console.error("Search fetch failed:", e);
+          
+          if (retryCount < 2) {
+            setTimeout(() => setRetryCount(prev => prev + 1), 1000 * (retryCount + 1));
+          }
+        }
       } finally {
         if (!cancelled) setHasLoaded(true);
       }
     };
+    
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasLoaded(false);
     fetchSearch();
     return () => { cancelled = true; };
-  }, [q, currentPage, currentSort, buildSearchUrl]);
+  }, [q, currentPage, currentSort, buildSearchUrl, retryCount]);
 
   const navigateToPage = (page: number) => {
     const sp = new URLSearchParams();
@@ -164,7 +221,7 @@ function SearchContent() {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="max-w-[1400px] mx-auto w-full pt-8 px-8">
+      <div className="max-w-350 mx-auto w-full pt-8 px-8">
         <div className="flex flex-col w-full mt-8">
           <h1 className="text-[28px] font-bold text-[#0d0c22] mb-1">Search Results</h1>
           {q && <p className="text-[15px] text-[#6e6d7a] mb-6">Showing results for &quot;<span className="font-semibold text-gray-900">{q}</span>&quot;{meta.total > 0 && ` — ${meta.total} found`}</p>}
@@ -208,12 +265,26 @@ function SearchContent() {
             <div className="flex items-center justify-center py-20">
               <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
             </div>
-          ) : filteredItems.length === 0 ? (
+          ) : hasErrorState ? (
+            <div className="flex flex-col items-center justify-center w-full py-16">
+              <h3 className="text-[26px] font-bold text-red-600 mb-3">Search Error</h3>
+              <p className="text-[15px] text-gray-600 text-center max-w-md mb-8">
+                {error}
+              </p>
+              <div className="flex gap-3 flex-wrap justify-center">
+                <button onClick={() => { setError(null); setHasLoaded(false); }} className="px-6 py-3 bg-blue-600 text-white rounded-lg text-[14px] font-semibold hover:bg-blue-700 transition-colors">Retry Search</button>
+                <button onClick={() => router.push("/search")} className="px-6 py-3 bg-gray-200 text-gray-900 rounded-lg text-[14px] font-semibold hover:bg-gray-300 transition-colors">Clear Search</button>
+              </div>
+            </div>
+          ) : isEmpty ? (
             <div className="flex flex-col items-center justify-center w-full py-16">
               <h3 className="text-[26px] font-bold text-gray-900 mb-3">No results found</h3>
               <p className="text-[15px] text-gray-600 text-center max-w-md mb-8">
                 We couldn&apos;t find anything matching &quot;<span className="font-semibold text-gray-900">{q}</span>&quot;. Try different keywords.
               </p>
+              {searchQuality === "degraded" && (
+                <p className="text-[12px] text-gray-500 mb-4">Vector search unavailable - showing keyword results only</p>
+              )}
               <div className="flex gap-3 flex-wrap justify-center">
                 <button onClick={() => router.push("/search")} className="px-6 py-3 bg-blue-600 text-white rounded-lg text-[14px] font-semibold hover:bg-blue-700 transition-colors">Clear Search</button>
                 <button onClick={() => router.push("/search?q=Colleges")} className="px-6 py-3 border border-gray-200 bg-white text-gray-700 rounded-lg text-[14px] font-semibold hover:bg-gray-50 transition-colors">Browse Colleges</button>
@@ -249,7 +320,7 @@ function SearchContent() {
 function SearchLoading() {
   return (
     <main className="min-h-screen bg-gray-50">
-      <div className="max-w-[1400px] mx-auto w-full pt-32 px-8">
+      <div className="max-w-350 mx-auto w-full pt-32 px-8">
         <div className="flex flex-col items-center justify-center py-20">
           <div className="h-8 w-48 animate-pulse rounded bg-gray-200 mb-4"></div>
           <div className="h-4 w-96 animate-pulse rounded bg-gray-200"></div>

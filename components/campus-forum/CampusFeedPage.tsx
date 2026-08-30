@@ -33,8 +33,17 @@ import {
 import { useAuth } from "@/services/AuthContext";
 import ReportPostModal from "./ReportPostModal";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+function imageUrl(path?: string): string {
+  if (!path) return "";
+  if (path.startsWith("http") || path.startsWith("blob:")) return path;
+  return `${API_BASE}${path}`;
+}
+
 interface CommentProps {
   avatar: string;
+  avatarUrl?: string;
   username: string;
   role?: string;
   isAuthor?: boolean;
@@ -97,8 +106,12 @@ const CommentItem: React.FC<{ comment: CommentProps; depth?: number }> = ({
       <div
         className={`flex gap-3 relative z-10 bg-white ${depth > 0 ? "" : ""}`}
       >
-        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 text-sm">
-          {comment.avatar}
+        <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0 text-sm overflow-hidden flex-shrink-0">
+          {comment.avatarUrl ? (
+            <img src={comment.avatarUrl} alt={comment.username} className="w-full h-full object-cover" />
+          ) : (
+            comment.avatar
+          )}
         </div>
         <div className="flex-1">
           <div className="flex items-center justify-between group/btn">
@@ -373,12 +386,14 @@ const PostCardComponent: React.FC<{
                 key={c.id}
                 comment={{
                   avatar: getUserInitials(c.user) || "💬",
+                  avatarUrl: c.user?.image_url ? imageUrl(c.user.image_url) : "",
                   username: `${c.user.first_name} ${c.user.last_name}`,
                   time: formatRelativeTime(c.created_at),
                   content: c.content,
                   upvotes: 0,
                   replies: c.replies?.map((r) => ({
                     avatar: getUserInitials(r.user) || "💬",
+                    avatarUrl: r.user?.image_url ? imageUrl(r.user.image_url) : "",
                     username: `${r.user.first_name} ${r.user.last_name}`,
                     time: formatRelativeTime(r.created_at),
                     content: r.content,
