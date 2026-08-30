@@ -324,14 +324,12 @@ const PostCard: React.FC<{
 const CommentItem: React.FC<{
   comment: CommentData;
   postId: number;
-  onReply: (postId: number, parentId: number, content: string) => void;
+  onReply: (comment: CommentData) => void;
   onVote?: (commentId: number, delta: number) => void;
   isAuthor?: boolean;
-  currentUser?: { first_name: string; last_name: string; image_url?: string } | null;
-}> = ({ comment, postId, onReply, onVote, currentUser }) => {
-  const [showReply, setShowReply] = useState(false);
-  const [replyContent, setReplyContent] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+  depth?: number;
+  replyRefresh?: { parentId: number; sequence: number } | null;
+}> = ({ comment, postId, onReply, onVote, depth = 0, replyRefresh }) => {
   const [likes, setLikes] = useState(0);
   const [dislikes, setDislikes] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
@@ -375,22 +373,6 @@ const CommentItem: React.FC<{
     }
   };
 
-  const handleReply = async () => {
-    if (!replyContent.trim()) return;
-    setSubmitting(true);
-    try {
-      await onReply(postId, comment.id, replyContent.trim());
-      setReplyContent("");
-      setShowReply(false);
-      setLocalReplyCount((c) => c + 1);
-      const result = await apiService.getForumPostComments(postId, 50, 0, undefined, comment.id);
-      setReplies(Array.isArray(result) ? result : result.comments || []);
-      setShowReplies(true);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const toggleReplies = async () => {
     if (showReplies) {
       setShowReplies(false);
@@ -411,6 +393,25 @@ const CommentItem: React.FC<{
   const avatarUrl = comment.user?.image_url ? imageUrl(comment.user.image_url) : "";
 
   const replyCount = localReplyCount;
+
+  useEffect(() => {
+    if (!replyRefresh || replyRefresh.parentId !== comment.id) return;
+
+    let cancelled = false;
+    apiService.getForumPostComments(postId, 50, 0, undefined, comment.id)
+      .then((result) => {
+        if (cancelled) return;
+        const refreshedReplies = Array.isArray(result) ? result : result.comments || [];
+        setReplies(refreshedReplies);
+        setLocalReplyCount(refreshedReplies.length);
+        setShowReplies(true);
+      })
+      .catch(() => {});
+
+    return () => {
+      cancelled = true;
+    };
+  }, [comment.id, postId, replyRefresh]);
 
   return (
     <div className="text-xs overflow-hidden">
@@ -441,34 +442,13 @@ const CommentItem: React.FC<{
                 <ArrowDown size={12} />
               </button>
             </div>
-            <button onClick={() => setShowReply(!showReply)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
+            <button onClick={() => onReply(comment)} className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
               Reply
             </button>
             <button className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]">
               Share
             </button>
           </div>
-          {showReply && (
-            <div className="mt-2 flex gap-2 items-center">
-              <div className="w-5 h-5 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[8px] font-bold text-slate-600">
-                {currentUser?.image_url ? (
-                  <img src={imageUrl(currentUser.image_url)} alt="" className="w-full h-full object-cover" />
-                ) : (
-                  (currentUser?.first_name?.[0] || "U").toUpperCase()
-                )}
-              </div>
-              <input
-                value={replyContent}
-                onChange={(e) => setReplyContent(e.target.value)}
-                placeholder="Write a reply..."
-                className="flex-1 border border-slate-200 rounded-full px-2.5 py-1.5 text-xs outline-none focus:border-[#0000ff]"
-                onKeyDown={(e) => e.key === "Enter" && handleReply()}
-              />
-              <button onClick={handleReply} disabled={submitting} className="text-[#0000ff] font-bold text-xs disabled:opacity-50">
-                {submitting ? "..." : "Reply"}
-              </button>
-            </div>
-          )}
           {replyCount > 0 && !showReplies && (
             <button
               onClick={toggleReplies}
@@ -481,9 +461,17 @@ const CommentItem: React.FC<{
         </div>
       </div>
       {showReplies && replies.length > 0 && (
-        <div className="ml-6 sm:ml-9 mt-2 space-y-3 overflow-hidden">
+        <div className={`${depth === 0 ? "ml-4 sm:ml-9" : "ml-0"} mt-2 space-y-3`}>
           {replies.map((reply) => (
-            <CommentItem key={reply.id} comment={reply} postId={postId} onReply={onReply} onVote={onVote} currentUser={currentUser} />
+            <CommentItem
+              key={reply.id}
+              comment={reply}
+              postId={postId}
+              onReply={onReply}
+              onVote={onVote}
+              depth={depth + 1}
+              replyRefresh={replyRefresh}
+            />
           ))}
           <button
             onClick={() => setShowReplies(false)}
@@ -507,10 +495,14 @@ const CommentSection: React.FC<{
 }> = ({ postId, comments, totalCount, user, onCommentAdded, onRequireLogin }) => {
   const [newComment, setNewComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [replyTarget, setReplyTarget] = useState<CommentData | null>(null);
+  const [replyRefresh, setReplyRefresh] = useState<{ parentId: number; sequence: number } | null>(null);
   const [sortBy, setSortBy] = useState<"popular" | "newest">("newest");
   const [commentImage, setCommentImage] = useState<File | null>(null);
   const [commentImagePreview, setCommentImagePreview] = useState<string | null>(null);
   const commentImageRef = useRef<HTMLInputElement>(null);
+  const commentInputRef = useRef<HTMLInputElement>(null);
+  const replySequenceRef = useRef(0);
   const token = apiService.getToken();
   const [voteCounts, setVoteCounts] = useState<Record<number, number>>({});
 
@@ -534,13 +526,20 @@ const CommentSection: React.FC<{
         const urls = await apiService.uploadForumMedia(token, [commentImage]);
         img = urls[0] || "";
       }
+      const submittedReplyTarget = replyTarget;
       await apiService.createForumComment(token, postId, {
         content: newComment.trim(),
         image_url: img || undefined,
+        parent_id: submittedReplyTarget?.id,
       });
       setNewComment("");
       setCommentImage(null);
       setCommentImagePreview(null);
+      setReplyTarget(null);
+      if (submittedReplyTarget) {
+        replySequenceRef.current += 1;
+        setReplyRefresh({ parentId: submittedReplyTarget.id, sequence: replySequenceRef.current });
+      }
       if (onCommentAdded) {
         onCommentAdded(postId);
       }
@@ -551,23 +550,24 @@ const CommentSection: React.FC<{
     }
   };
 
-  const handleReply = async (pId: number, parentId: number, content: string) => {
+  const handleSelectReply = (comment: CommentData) => {
     if (!token) {
       onRequireLogin?.();
       return;
     }
-    try {
-      await apiService.createForumComment(token, pId, { content, parent_id: parentId });
-      if (onCommentAdded) {
-        onCommentAdded(pId);
-      }
-    } catch (e) {
-      console.error("Failed to post reply:", e);
-    }
+
+    setReplyTarget(comment);
+    requestAnimationFrame(() => {
+      commentInputRef.current?.focus();
+      commentInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   };
 
   const avatarLetter = user ? (user.first_name?.[0] || "U").toUpperCase() : "U";
   const avatarUrl = user?.image_url ? imageUrl(user.image_url) : "";
+  const replyTargetName = replyTarget?.user_name
+    || [replyTarget?.user?.first_name, replyTarget?.user?.last_name].filter(Boolean).join(" ")
+    || "comment";
 
   const commentCount = totalCount ?? (comments as CommentData[]).length;
 
@@ -584,29 +584,49 @@ const CommentSection: React.FC<{
 
   return (
     <div className="pt-3 space-y-3">
-      <div className="flex gap-2 items-center">
-        <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
-          ) : (
-            avatarLetter
-          )}
+      <div className="space-y-1.5">
+        {replyTarget && (
+          <div className="ml-9 flex min-w-0 items-center justify-between gap-2 text-[11px] text-slate-500">
+            <span className="truncate">Replying to <span className="font-semibold text-slate-700">@{replyTargetName}</span></span>
+            <button
+              type="button"
+              onClick={() => setReplyTarget(null)}
+              className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              aria-label="Cancel reply"
+              title="Cancel reply"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              avatarLetter
+            )}
+          </div>
+          <input
+            ref={commentInputRef}
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder={replyTarget ? `Reply to ${replyTargetName}...` : "Write a comment..."}
+            className="min-w-0 flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-500"
+            onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+            disabled={isSubmitting}
+          />
+          <button
+            type="button"
+            onClick={handleAddComment}
+            disabled={isSubmitting || !newComment.trim()}
+            className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-[#2563eb] transition hover:bg-blue-50 disabled:text-gray-300"
+            aria-label={replyTarget ? "Post reply" : "Post comment"}
+            title={replyTarget ? "Post reply" : "Post comment"}
+          >
+            {isSubmitting ? <span className="text-xs">...</span> : <Send size={16} />}
+          </button>
         </div>
-        <input
-          value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
-          placeholder="Write a comment..."
-          className="flex-1 border border-gray-200 rounded-full px-4 py-2 text-sm outline-none focus:border-blue-500"
-          onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-          disabled={isSubmitting}
-        />
-        <button
-          onClick={handleAddComment}
-          disabled={isSubmitting || !newComment.trim()}
-          className="text-[#2563eb] disabled:text-gray-300 transition hover:scale-110"
-        >
-          {isSubmitting ? "..." : "Post"}
-        </button>
       </div>
 
       <div className="flex items-center justify-between">
@@ -626,7 +646,14 @@ const CommentSection: React.FC<{
           <p className="text-xs text-gray-400 text-center py-2">No comments yet. Be the first!</p>
         ) : (
           sortedComments.map((c: CommentData) => (
-            <CommentItem key={c.id} comment={c} postId={postId} onReply={handleReply} onVote={handleVote} currentUser={user} />
+            <CommentItem
+              key={c.id}
+              comment={c}
+              postId={postId}
+              onReply={handleSelectReply}
+              onVote={handleVote}
+              replyRefresh={replyRefresh}
+            />
           ))
         )}
       </div>

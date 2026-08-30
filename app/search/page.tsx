@@ -14,6 +14,7 @@ import {
   SearchAdmissionCard,
   type SearchResult,
 } from "@/components/search";
+import useCourseBookmarks from "@/components/course-finder/useCourseBookmarks";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -56,11 +57,28 @@ interface SearchResponse {
   };
 }
 
-function SearchResultCard({ item }: { item: SearchResult }) {
+function SearchResultCard({
+  item,
+  savedCourseIds,
+  pendingBookmarks,
+  onToggleSaved,
+}: {
+  item: SearchResult;
+  savedCourseIds: number[];
+  pendingBookmarks: Record<number, boolean>;
+  onToggleSaved: (courseId: number) => void;
+}) {
   switch (item.type) {
     case "college": return <SearchCollegeCard item={item} />;
     case "institution": return <SearchCollegeCard item={item} />;
-    case "course": return <SearchCourseCard item={item} />;
+    case "course": return (
+      <SearchCourseCard
+        item={item}
+        isSaved={savedCourseIds.includes(item.id)}
+        isBookmarkPending={!!pendingBookmarks[item.id]}
+        onToggleSaved={onToggleSaved}
+      />
+    );
     case "university": return <SearchUniversityAdapter item={item} />;
     case "scholarship": return <SearchScholarshipAdapter item={item} />;
     case "event": return <SearchEventAdapter item={item} />;
@@ -75,6 +93,7 @@ function SearchResultCard({ item }: { item: SearchResult }) {
 function SearchContent() {
   const params = useSearchParams();
   const router = useRouter();
+  const { savedCourseIds, pendingBookmarks, toggleSaved } = useCourseBookmarks();
   const q = params.get("q") || "";
   const pageParam = parseInt(params.get("page") || "1", 10);
   const sortParam = params.get("sort") || "relevance";
@@ -294,7 +313,13 @@ function SearchContent() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 w-full pb-10">
                 {filteredItems.map((item, idx) => (
-                  <SearchResultCard key={`${item.type}-${item.id}-${idx}`} item={item} />
+                  <SearchResultCard
+                    key={`${item.type}-${item.id}-${idx}`}
+                    item={item}
+                    savedCourseIds={savedCourseIds}
+                    pendingBookmarks={pendingBookmarks}
+                    onToggleSaved={toggleSaved}
+                  />
                 ))}
               </div>
               {meta.pages > 1 && (
