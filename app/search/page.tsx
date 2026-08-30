@@ -78,7 +78,7 @@ function SearchContent() {
   const q = params.get("q") || "";
   const pageParam = parseInt(params.get("page") || "1", 10);
   const sortParam = params.get("sort") || "relevance";
-  const typeFilter = params.get("type") || "all";
+  const typeFilter = params.get("cat") || params.get("type") || "all";
 
   const [items, setItems] = useState<SearchResult[]>([]);
   const [meta, setMeta] = useState<PaginationMeta>({ page: 1, limit: 20, total: 0, pages: 0 });
@@ -107,7 +107,7 @@ function SearchContent() {
       params.set("limit", "20");
       params.set("sort", sort);
       if (typeFilter !== "all") {
-        params.set("type", typeFilter);
+        params.set("cat", typeFilter);
       }
       return `${API_BASE_URL}/api/v1/search?${params.toString()}`;
     },
@@ -188,7 +188,7 @@ function SearchContent() {
     sp.set("q", q);
     sp.set("page", String(page));
     sp.set("sort", SORT_OPTIONS[currentSort] || "relevance");
-    if (typeFilter !== "all") sp.set("type", typeFilter);
+    if (typeFilter !== "all") sp.set("cat", typeFilter);
     router.push(`/search?${sp.toString()}`);
   };
 
@@ -199,7 +199,7 @@ function SearchContent() {
     sp.set("q", q);
     sp.set("page", "1");
     sp.set("sort", SORT_OPTIONS[label] || "relevance");
-    if (typeFilter !== "all") sp.set("type", typeFilter);
+    if (typeFilter !== "all") sp.set("cat", typeFilter);
     router.push(`/search?${sp.toString()}`);
   };
 
