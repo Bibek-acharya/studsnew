@@ -309,16 +309,16 @@ const CourseCreatePage: React.FC = () => {
     if (normalized.eligibilityText) {
       setEligibilityText(normalized.eligibilityText);
     }
-    if (normalized.admissionSteps?.length) {
+    if (Array.isArray(normalized.admissionSteps) && normalized.admissionSteps.length) {
       setAdmissionSteps(normalized.admissionSteps.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (normalized.faqs?.length) {
+    if (Array.isArray(normalized.faqs) && normalized.faqs.length) {
       setFaqs(normalized.faqs.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (normalized.whoShouldChoose?.length) {
+    if (Array.isArray(normalized.whoShouldChoose) && normalized.whoShouldChoose.length) {
       setWhoShouldChoose(normalized.whoShouldChoose.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
-    if (normalized.features?.length) {
+    if (Array.isArray(normalized.features) && normalized.features.length) {
       setFeatures(normalized.features.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
     if (normalized.feeStructure) {
@@ -326,7 +326,7 @@ const CourseCreatePage: React.FC = () => {
     }
     if (normalized.scholarshipDesc || normalized.scholarships?.length || normalized.scholarshipNotes) {
       let text = normalized.scholarshipDesc || "";
-      if (normalized.scholarships?.length) {
+      if (Array.isArray(normalized.scholarships) && normalized.scholarships.length) {
         text += "\n\n" + normalized.scholarships.map((s: any) => {
           let item = `• ${s.title}`;
           if (s.subtitle) item += ` — ${s.subtitle}`;
@@ -340,7 +340,7 @@ const CourseCreatePage: React.FC = () => {
       }
       setScholarshipText(text);
     }
-    if (normalized.curriculum?.length) {
+    if (Array.isArray(normalized.curriculum) && normalized.curriculum.length) {
       setCurriculum(normalized.curriculum.map((x: any, i: number) => ({ ...x, id: i + 1 })));
     }
   };

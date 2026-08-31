@@ -262,7 +262,7 @@ export default function SuperadminAddCourseSection({
           setFeatures(
             res.features.map((x: any, i: number) => ({ ...x, id: i + 1 })),
           );
-        if (res.admissionSteps)
+        if (Array.isArray(res.admissionSteps) && res.admissionSteps.length)
           setAdmissionSteps(
             res.admissionSteps.map((x: any, i: number) => ({
               ...x,
