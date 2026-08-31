@@ -28,122 +28,6 @@ interface CollegesAndCoursesPageProps {
   onBack: () => void;
 }
 
-// ── Mock Data ──────────────────────────────────────────────────────────────
-
-const MOCK_COLLEGES: ApiCollege[] = [
-  {
-    id: 101,
-    name: "KIST Higher Secondary School & College",
-    rating: 4.8,
-    type: "Private",
-    location: "Kamalpokhari, Kathmandu",
-    affiliation: "NEB",
-    image_url:
-      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1000&auto=format&fit=crop",
-    description:
-      "KIST is a premier academic institution in Nepal providing high-quality education in Management and Science.",
-    verified: true,
-    featured: true,
-  },
-  {
-    id: 102,
-    name: "Kathmandu Model College (KMC)",
-    rating: 4.7,
-    type: "Private",
-    location: "Balkumari, Lalitpur",
-    affiliation: "Tribhuvan University",
-    image_url:
-      "https://images.unsplash.com/photo-1523050853064-dbad6f987297?q=80&w=1000&auto=format&fit=crop",
-    description:
-      "KMC has established itself as one of the most prominent academic institutions for higher education in Nepal.",
-    verified: true,
-    featured: false,
-  },
-  {
-    id: 103,
-    name: "St. Xavier's College",
-    rating: 4.9,
-    type: "Public / Govt",
-    location: "Maitighar, Kathmandu",
-    affiliation: "Tribhuvan University",
-    image_url:
-      "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=1000&auto=format&fit=crop",
-    description:
-      "An educational institution of high repute, run by the Nepal Jesuit Society, providing excellence in education.",
-    verified: true,
-    featured: true,
-  },
-  {
-    id: 104,
-    name: "British College",
-    rating: 4.5,
-    type: "Private",
-    location: "Thapathali, Kathmandu",
-    affiliation: "UWE Bristol",
-    image_url:
-      "https://images.unsplash.com/photo-1492538356227-3eb926ca10aa?q=80&w=1000&auto=format&fit=crop",
-    description:
-      "The British College offers internationally recognized degrees in partnership with top UK universities.",
-    verified: true,
-    featured: false,
-  },
-  {
-    id: 105,
-    name: "GoldenGate International College",
-    rating: 4.4,
-    type: "Private",
-    location: "Battisputali, Kathmandu",
-    affiliation: "Tribhuvan University",
-    image_url:
-      "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?q=80&w=1000&auto=format&fit=crop",
-    description:
-      "Providing quality education with a focus on holistic development and research-oriented learning.",
-    verified: false,
-    featured: false,
-  },
-  {
-    id: 106,
-    name: "Trinity International College",
-    rating: 4.6,
-    type: "Private",
-    location: "Dillibazar, Kathmandu",
-    affiliation: "NEB",
-    image_url:
-      "https://images.unsplash.com/photo-1525921429624-479b6a29d810?q=80&w=1000&auto=format&fit=crop",
-    description:
-      "Trinity is a leading college for +2 and Bachelor levels, known for its academic discipline.",
-    verified: true,
-    featured: false,
-  },
-];
-
-const MOCK_COURSES = [
-  {
-    id: "1",
-    title: "BBA (Bachelor of Business Administration)",
-    colleges: "120+",
-  },
-  {
-    id: "2",
-    title: "B.Sc CSIT (B.Sc. in Computer Science & IT)",
-    colleges: "54+",
-  },
-  {
-    id: "3",
-    title: "BIT (Bachelor in Information Technology)",
-    colleges: "35+",
-  },
-  { id: "4", title: "BBM (Bachelor of Business Management)", colleges: "45+" },
-  {
-    id: "5",
-    title: "BIM (Bachelor of Information Management)",
-    colleges: "25+",
-  },
-  { id: "6", title: "Science (+2)", colleges: "200+" },
-  { id: "7", title: "Management (+2)", colleges: "300+" },
-];
-
-// ── Toast ──────────────────────────────────────────────────────────────────
 
 const Toast: React.FC<{ message: string }> = ({ message }) => (
   <motion.div
@@ -230,15 +114,15 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
     queryFn: () => apiService.getCollegeFilterCounts(),
   });
 
-  const { data: coursesResponse } = useQuery({
+  const { data: coursesResponse, isLoading: coursesLoading } = useQuery({
     queryKey: ["education-courses-mini"],
     queryFn: () => apiService.getEducationCourses(),
   });
 
-  const backendCourses = useMemo(() => {
-    const list = coursesResponse?.data?.courses || [];
-    return list.length > 0 ? list : MOCK_COURSES;
-  }, [coursesResponse]);
+  const backendCourses = useMemo(
+    () => coursesResponse?.data?.courses || [],
+    [coursesResponse],
+  );
 
   const { data: collegesResponse, isLoading: collegesLoading } = useQuery({
     queryKey: ["colleges-list-filtered", filters, activeCourseId, currentPage],
@@ -336,37 +220,48 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
             ref={scrollContainerRef}
             className="flex gap-4 md:gap-5 overflow-x-auto snap-x pb-2 no-scrollbar"
           >
-            {backendCourses.map((course: any) => {
-              const isSelected =
-                String(course.id) === String(activeCourseId);
-              return (
-                <div
-                  key={course.id}
-                  onClick={() => {
-                    setActiveCourseId(String(course.id));
-                    setCurrentPage(1);
-                  }}
-                  className={`relative flex-shrink-0 w-[190px] sm:w-[220px] bg-white rounded-md px-4 py-3.5 border-[1.5px] transition-all duration-200 cursor-pointer snap-start flex flex-col justify-between min-h-[92px] ${isSelected ? "border-blue-600" : "border-transparent hover:border-gray-200"}`}
-                  title={course.title}
-                >
-                  <h3 className="text-slate-900 font-semibold text-[13px] leading-[18px] truncate pr-6">
-                    {course.title}
-                  </h3>
-                  <div className="mt-1.5 text-blue-600 text-[11px] font-medium flex items-center">
-                    {isSelected ? `${totalResults || 0} colleges` : `${course.colleges || 0} colleges`}
-                    <ChevronDown size={10} className="-rotate-90 ml-1" />
-                  </div>
-                  {isSelected && (
-                    <div className="absolute top-[14px] right-[14px]">
-                      <Check
-                        size={16}
-                        className="bg-blue-600 rounded-full text-white p-0.5"
-                      />
+            {coursesLoading ? (
+              <div className="flex gap-4 md:gap-5">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-[92px] w-[190px] shrink-0 animate-pulse rounded-md bg-white sm:w-[220px]"
+                  />
+                ))}
+              </div>
+            ) : (
+              backendCourses.map((course: any) => {
+                const isSelected =
+                  String(course.id) === String(activeCourseId);
+                return (
+                  <div
+                    key={course.id}
+                    onClick={() => {
+                      setActiveCourseId(String(course.id));
+                      setCurrentPage(1);
+                    }}
+                    className={`relative flex-shrink-0 w-[190px] sm:w-[220px] bg-white rounded-md px-4 py-3.5 border-[1.5px] transition-all duration-200 cursor-pointer snap-start flex flex-col justify-between min-h-[92px] ${isSelected ? "border-blue-600" : "border-transparent hover:border-gray-200"}`}
+                    title={course.title}
+                  >
+                    <h3 className="text-slate-900 font-semibold text-[13px] leading-[18px] truncate pr-6">
+                      {course.title}
+                    </h3>
+                    <div className="mt-1.5 text-blue-600 text-[11px] font-medium flex items-center">
+                      {isSelected ? `${totalResults || 0} colleges` : `${course.colleges || 0} colleges`}
+                      <ChevronDown size={10} className="-rotate-90 ml-1" />
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                    {isSelected && (
+                      <div className="absolute top-[14px] right-[14px]">
+                        <Check
+                          size={16}
+                          className="bg-blue-600 rounded-full text-white p-0.5"
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
           {canScrollRight && (
             <button
