@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import FilterSidebar from "@/components/find-college/FilterSidebar";
 import { ProgramCard } from "@/components/find-college/CollegeGrid";
 import { College } from "@/services/api";
@@ -18,10 +18,16 @@ interface University {
   colleges_count: number;
 }
 
-export default function Page({ params }: { params: { id: string } }) {
+export default function Page() {
   const router = useRouter();
+  const params = useParams();
+  // Next 16: route params arrive as a Promise prop — useParams() gives the
+  // unwrapped values in client components.
+  const universityId = Number(params?.id) || 0;
   const [universities, setUniversities] = useState<University[]>([]);
-  const [selectedUniId, setSelectedUniId] = useState<number | null>(null);
+  const [selectedUniId, setSelectedUniId] = useState<number | null>(
+    universityId || null,
+  );
   const [colleges, setColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<CollegeFilters>(DEFAULT_COLLEGE_FILTERS);
@@ -65,20 +71,13 @@ export default function Page({ params }: { params: { id: string } }) {
         
         setUniversities(unisWithCounts);
 
-        // Only set selected university if not already set
-        if (!selectedUniId) {
-          const universityId = Number(params.id);
-          if (!isNaN(universityId)) {
-            setSelectedUniId(universityId);
-          } else if (unisWithCounts.length > 0) {
-            setSelectedUniId(unisWithCounts[0].id);
-          }
-        }
+        // Fall back to the first university only if none was pre-selected
+        setSelectedUniId((prev) => prev ?? unisWithCounts[0]?.id ?? null);
       } catch (err) {
         console.error("Failed to fetch universities:", err);
       }
     })();
-  }, [params.id]);
+  }, []);
 
   // Fetch affiliated colleges when university changes
   useEffect(() => {

@@ -411,9 +411,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   const scholarshipsSection = desktopMenuSections.find(
     (section) => section.key === "scholarships",
   );
-  const universitiesSection = desktopMenuSections.find(
-    (section) => section.key === "universities",
-  );
   const admissionSection = desktopMenuSections.find(
     (section) => section.key === "admission",
   );
@@ -426,9 +423,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
   );
   const mobileScholarshipsSection = mobileMenuSections.find(
     (section) => section.key === "scholarships",
-  );
-  const mobileUniversitiesSection = mobileMenuSections.find(
-    (section) => section.key === "universities",
   );
   const mobileAdmissionSection = mobileMenuSections.find(
     (section) => section.key === "admission",
@@ -1223,37 +1217,12 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </DesktopDropdown>
               )}
 
-              {universitiesSection && (
-                <DesktopDropdown
-                  key={universitiesSection.key}
-                  label={universitiesSection.label}
-                  alignRight={universitiesSection.alignRight}
-                  isOpen={activeMenu === universitiesSection.key}
-                  isActive={isSectionActive(universitiesSection)}
-                  onToggle={() =>
-                    setActiveMenu((prev) =>
-                      prev === universitiesSection.key
-                        ? null
-                        : universitiesSection.key,
-                    )
-                  }
-                  onMouseEnter={() =>
-                    handleDropdownMouseEnter(universitiesSection.key)
-                  }
-                  onMouseLeave={handleDropdownMouseLeave}
-                >
-                  {universitiesSection.items.map((item) => (
-                    <DropdownCard
-                      key={item.title}
-                      icon={item.icon}
-                      color={item.color}
-                      title={item.title}
-                      desc={item.desc}
-                      onClick={getDropdownClick(item)}
-                    />
-                  ))}
-                </DesktopDropdown>
-              )}
+              <NavItem
+                onClick={() => go("nepaliUniversities")}
+                isActive={isViewActive("nepaliUniversities")}
+              >
+                Universities
+              </NavItem>
 
               <NavItem
                 onClick={() => go("entranceDiscovery")}
@@ -1492,31 +1461,14 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                   <span>Entrance</span>
                 </button>
 
-                {mobileUniversitiesSection && (
-                  <div>
-                    <button
-                      type="button"
-                      className={`flex w-full items-center justify-between rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600 ${mobileMenus[mobileUniversitiesSection.key] ? "text-blue-600" : ""}`}
-                      onClick={() =>
-                        toggleMobileMenu(mobileUniversitiesSection.key)
-                      }
-                    >
-                      <span className="flex items-center gap-3">
-                        <Landmark size={18} className="text-gray-400 shrink-0" />
-                        <span>{mobileUniversitiesSection.label}</span>
-                      </span>
-                      <ChevronDown
-                        size={14}
-                        className={`text-gray-400 transition-transform duration-200 ${mobileMenus[mobileUniversitiesSection.key] ? "rotate-180" : ""}`}
-                      />
-                    </button>
-                    <div
-                      className={`${mobileMenus[mobileUniversitiesSection.key] ? "flex" : "hidden"} ml-2 mt-1 flex-col gap-1 pl-4 py-2 font-medium`}
-                    >
-                      {mobileUniversitiesSection.items.map(renderMobileAction)}
-                    </div>
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => go("nepaliUniversities")}
+                  className="flex w-full items-center gap-3 rounded-md p-2 text-left transition-colors hover:bg-gray-50 hover:text-blue-600"
+                >
+                  <Landmark size={18} className="text-gray-400 shrink-0" />
+                  <span>Universities</span>
+                </button>
 
                 {mobileMoreSection && (
                   <div>

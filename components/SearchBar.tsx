@@ -3,8 +3,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { useAuth } from "@/services/AuthContext";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+const RECENT_SEARCHES_LIMIT = 5;
 
 const defaultSuggestions = [
   { text: "Colleges in Kathmandu" },
@@ -35,6 +38,8 @@ export const SearchBar: React.FC<{
     { title: string; type: string }[]
   >([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+  const { user, isAuthenticated } = useAuth();
   const isLoadingRef = useRef(false);
   const [showBorder, setShowBorder] = useState(false);
   const [hoverAngle, setHoverAngle] = useState(0);
@@ -45,6 +50,28 @@ export const SearchBar: React.FC<{
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRecentSearches([]);
+      return;
+    }
+    fetch(
+      `${API_BASE_URL}/api/v1/search/history?limit=${RECENT_SEARCHES_LIMIT}`,
+      { credentials: "include" },
+    )
+      .then((res) => res.json())
+      .then((json) => {
+        const queries: string[] = json?.data?.queries || [];
+         
+        setRecentSearches(queries);
+      })
+      .catch(() => {
+         
+        setRecentSearches([]);
+      });
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -109,8 +136,29 @@ export const SearchBar: React.FC<{
     onQueryStateChange?.(query, []);
   };
 
+  const saveRecentSearch = (query: string) => {
+    if (!isAuthenticated || !user) return;
+    const q = query.trim();
+    if (!q) return;
+    setRecentSearches((prev) =>
+      [q, ...prev.filter((s) => s.toLowerCase() !== q.toLowerCase())].slice(
+        0,
+        RECENT_SEARCHES_LIMIT,
+      ),
+    );
+    fetch(`${API_BASE_URL}/api/v1/search/history`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: q }),
+    }).catch(() => {
+      // ignore
+    });
+  };
+
   const handleSearchExecute = (query: string) => {
     if (!query || query.trim() === "") return;
+    saveRecentSearch(query);
     setIsSearchOpen(false);
     router.push(`/search?q=${encodeURIComponent(query)}`);
   };
@@ -123,22 +171,30 @@ export const SearchBar: React.FC<{
   };
 
   const handleDropdownItemClick = (text: string) => {
-    setSearchQuery(text);
-    setIsSearchOpen(false);
-    router.push(`/search?q=${encodeURIComponent(text)}`);
+    handleSearchExecute(text);
   };
 
   const renderDropdown = () => {
     const query = searchQuery.trim();
 
     if (query.length === 0) {
+      const showRecents = isAuthenticated && recentSearches.length > 0;
+      const items = showRecents
+        ? recentSearches
+        : defaultSuggestions.map((item) => item.text);
+
       return (
         <>
-          {defaultSuggestions.map((item, idx) => (
+          {showRecents && (
+            <div className="px-6 pt-1.5 pb-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+              Recent searches
+            </div>
+          )}
+          {items.map((text, idx) => (
             <div
               key={idx}
               className="search-item flex items-center gap-4 px-6 py-3.5 hover:bg-gray-50 cursor-pointer transition-colors"
-              onClick={() => handleDropdownItemClick(item.text)}
+              onClick={() => handleDropdownItemClick(text)}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -155,7 +211,7 @@ export const SearchBar: React.FC<{
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
               </svg>
-              <span className="text-[15px] text-gray-600">{item.text}</span>
+              <span className="text-[15px] text-gray-600">{text}</span>
             </div>
           ))}
         </>
@@ -209,9 +265,6 @@ export const SearchBar: React.FC<{
         className={`group relative flex h-10 w-full items-center overflow-visible rounded-full border border-gray-300 bg-white transition-all focus-within:border-gray-400 sm:h-11.5 ${isMobile ? "" : "focus-within:shadow-sm"}`}
         ref={searchContainerRef}
       >
-        {isMobile && (
-          <Search size={16} className="text-gray-400 ml-3 shrink-0" />
-        )}
         {!isMobile && (
           <button
             type="button"
@@ -272,15 +325,13 @@ export const SearchBar: React.FC<{
         />
 
         <div className="flex items-center shrink-0 pr-[6px]">
-          {!isMobile && (
-            <button
-              onClick={() => handleSearchExecute(searchQuery)}
-              className="flex items-center justify-center w-9 h-9 rounded-full text-white bg-brand-blue hover:bg-brand-hover transition-colors"
-              aria-label="Search"
-            >
-              <Search size={18} />
-            </button>
-          )}
+          <button
+            onClick={() => handleSearchExecute(searchQuery)}
+            className="flex items-center justify-center w-9 h-9 rounded-full text-white bg-brand-blue hover:bg-brand-hover transition-colors"
+            aria-label="Search"
+          >
+            <Search size={18} />
+          </button>
         </div>
 
         {isSearchOpen && showSuggestionDropdown && (

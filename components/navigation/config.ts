@@ -119,26 +119,6 @@ export const desktopMenuSections: DesktopMenuSection[] = [
     ],
   },
   {
-    key: "universities",
-    label: "Universities",
-    items: [
-      {
-        icon: "fa-university",
-        color: "text-red-500",
-        title: "Nepali University",
-        desc: "Explore universities and colleges in Nepal offering diverse programs.",
-        viewKey: "nepaliUniversities",
-      },
-      {
-        icon: "fa-globe",
-        color: "text-blue-500",
-        title: "Foreign University",
-        desc: "Discover top universities abroad and international study opportunities.",
-        viewKey: "foreignUniversities",
-      },
-    ],
-  },
-  {
     key: "admission",
     label: "Admission",
     items: [
@@ -286,24 +266,6 @@ export const mobileMenuSections: MobileMenuSection[] = [
         icon: "fa-check-circle",
         color: "text-green-500",
         viewKey: "scholarshipResultCheck",
-      },
-    ],
-  },
-  {
-    key: "universities",
-    label: "Universities",
-    items: [
-      {
-        label: "Nepali University",
-        icon: "fa-university",
-        color: "text-red-500",
-        viewKey: "nepaliUniversities",
-      },
-      {
-        label: "Foreign University",
-        icon: "fa-globe",
-        color: "text-blue-500",
-        viewKey: "foreignUniversities",
       },
     ],
   },

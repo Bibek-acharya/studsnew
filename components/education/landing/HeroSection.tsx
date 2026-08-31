@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Search, Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import FeedbackWidget from "@/components/FeedbackWidget";
 
 interface HeroSectionProps {
@@ -18,13 +18,9 @@ interface HeroSectionProps {
   }[];
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({
-  onNavigate,
-  slides = [],
-}) => {
+const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
-  const [desktopQuery, setDesktopQuery] = useState("");
   const fetchedRef = useRef(false);
   const [fetchedSlides, setFetchedSlides] = useState(slides);
 
@@ -101,13 +97,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
     };
   }, [currentSlide]);
 
-  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const query = desktopQuery.trim();
-    if (!query) return;
-    onNavigate("findCollege", { search: query });
-  };
-
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
       <main className="relative w-full max-w-350 h-60 sm:h-70 md:h-auto md:min-h-120 lg:h-135 flex items-center justify-center overflow-hidden rounded-xl md:rounded-2xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
@@ -158,28 +147,6 @@ const HeroSection: React.FC<HeroSectionProps> = ({
             insights on admissions, programs, and student reviews to build your
             ideal college list.
           </p>
-
-          <form
-            onSubmit={handleSearch}
-            className="max-w-3xl mx-auto bg-white rounded-md p-2 flex flex-row items-center shadow-lg gap-2 transition-all duration-300"
-          >
-            <div className="w-full grow flex items-center px-4 gap-2">
-              <Search className="w-5 h-5 text-gray-400 shrink-0" />
-              <input
-                type="text"
-                value={desktopQuery}
-                onChange={(e) => setDesktopQuery(e.target.value)}
-                placeholder="Search by college name, location & program..."
-                className="w-full bg-transparent text-gray-800 text-[15px] py-2.5 outline-none placeholder-gray-400"
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-auto bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 px-8 rounded-md transition-colors duration-200  text-[15px] whitespace-nowrap"
-            >
-              Search
-            </button>
-          </form>
 
           {/* <div className="mt-6 flex flex-wrap justify-center items-center gap-3 text-sm font-medium text-gray-200 drop-">
               <span className="font-bold text-white">Your recent visit:</span>
