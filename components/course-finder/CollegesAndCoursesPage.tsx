@@ -28,6 +28,31 @@ interface CollegesAndCoursesPageProps {
   onBack: () => void;
 }
 
+interface CourseListItem {
+  id: number;
+  title: string;
+  colleges?: number;
+}
+
+interface PublicInstitutionListItem {
+  id: number;
+  institution_name: string;
+  card_image_url?: string;
+  banner_url?: string;
+  logo_url?: string;
+  about?: string;
+  rating?: number;
+  review_count?: number;
+  type?: string;
+  district?: string;
+  affiliation?: string;
+  non_university_affiliation?: string;
+  verified?: boolean;
+  claimed?: boolean;
+  featured?: boolean;
+  website_url?: string;
+}
+
 
 const Toast: React.FC<{ message: string }> = ({ message }) => (
   <motion.div
@@ -100,7 +125,10 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
     setTimeout(() => setToasts((prev) => prev.slice(1)), 3000);
   };
 
-  const handleNavigate = (view: string, data?: any) => {
+  const handleNavigate = (
+    view: string,
+    data?: { id?: number | string; tab?: string },
+  ) => {
     if (view === "collegeDetails" && data?.id) {
       const tabParam = data.tab ? `?tab=${data.tab}` : "";
       router.push(`/find-college/${data.id}${tabParam}`);
@@ -109,17 +137,12 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
 
   // ── Data Fetching ────────────────────────────────────────────────────────
 
-  const { data: filterCountsResponse } = useQuery({
-    queryKey: ["collegeFilterCounts"],
-    queryFn: () => apiService.getCollegeFilterCounts(),
-  });
-
   const { data: coursesResponse, isLoading: coursesLoading } = useQuery({
     queryKey: ["education-courses-mini"],
     queryFn: () => apiService.getEducationCourses(),
   });
 
-  const backendCourses = useMemo(
+  const backendCourses = useMemo<CourseListItem[]>(
     () => coursesResponse?.data?.courses || [],
     [coursesResponse],
   );
@@ -127,29 +150,48 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   const { data: collegesResponse, isLoading: collegesLoading } = useQuery({
     queryKey: ["colleges-list-filtered", filters, activeCourseId, currentPage],
     queryFn: () =>
-      apiService.getColleges({
+      apiService.getPublicInstitutions({
         page: currentPage,
-        pageSize: COLLEGES_PER_PAGE,
+        limit: COLLEGES_PER_PAGE,
         search: filters.search || undefined,
         location:
           filters.district[0] || filters.province[0] || undefined,
-        courseId: activeCourseId || undefined,
-        sort: filters.sortBy,
+        course: activeCourseId || undefined,
         academic:
           filters.academic.length > 0 ? filters.academic : undefined,
         type: filters.type.length > 0 ? filters.type.join(",") : undefined,
-        feeMax: filters.feeMax < 2000000 ? filters.feeMax : undefined,
       }),
   });
 
-  const colleges = useMemo(() => {
-    const list = collegesResponse?.data?.colleges || [];
-    return list.length > 0 ? list : [];
+  const colleges = useMemo<ApiCollege[]>(() => {
+    const institutions = collegesResponse?.data?.institutions || [];
+    return institutions.map((institution: PublicInstitutionListItem): ApiCollege => ({
+      id: institution.id,
+      institution_id: institution.id,
+      name: institution.institution_name,
+      image_url:
+        institution.card_image_url ||
+        institution.banner_url ||
+        institution.logo_url,
+      logo_url: institution.logo_url,
+      banner_url: institution.banner_url,
+      description: institution.about,
+      rating: institution.rating,
+      reviews: institution.review_count,
+      type: institution.type,
+      location: institution.district,
+      affiliation: institution.affiliation,
+      non_university_affiliation: institution.non_university_affiliation,
+      verified: institution.verified,
+      claimed: institution.claimed,
+      featured: institution.featured,
+      website: institution.website_url,
+    }));
   }, [collegesResponse]);
 
-  const pagination = collegesResponse?.data?.pagination;
-  const totalResults = pagination?.total || colleges.length;
-  const totalPages = pagination?.totalPages || 1;
+  const pagination = collegesResponse?.data?.meta;
+  const totalResults = pagination?.total ?? colleges.length;
+  const totalPages = Math.max(1, Math.ceil(totalResults / COLLEGES_PER_PAGE));
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
@@ -230,7 +272,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                 ))}
               </div>
             ) : (
-              backendCourses.map((course: any) => {
+              backendCourses.map((course) => {
                 const isSelected =
                   String(course.id) === String(activeCourseId);
                 return (
