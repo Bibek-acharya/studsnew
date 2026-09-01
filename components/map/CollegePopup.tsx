@@ -25,6 +25,7 @@ import {
 import ShareCollegeModal from "@/app/find-college/[id]/ShareCollegeModal";
 import { useBookmark } from "@/app/find-college/[id]/hooks/useBookmark";
 import { useAuth } from "@/services/AuthContext";
+import { getImageUrl } from "@/services/api";
 import { toast } from "sonner";
 
 interface GalleryItem {
@@ -40,6 +41,7 @@ interface CollegePopupProps {
     id: number;
     name: string;
     logo?: string;
+    banner?: string;
     district?: string;
     type?: string;
     rating?: number;
@@ -186,27 +188,47 @@ export default function CollegePopup({ college }: CollegePopupProps) {
               </div>
             </div>
 
-            {/* Rating */}
-            <div className="flex items-center gap-1 text-xs mt-1">
+            {/* Location (pin coordinates) + Rating side by side */}
+            <div className="mt-1.5 flex items-center justify-between gap-2">
+              <div
+                className="flex items-center gap-1 text-gray-600 text-xs min-w-0"
+                title={
+                  college.latitude != null && college.longitude != null
+                    ? `${college.latitude}, ${college.longitude}`
+                    : undefined
+                }
+              >
+                <FaMapMarkerAlt className="text-pink-500 shrink-0 w-3 h-3" />
+                <span className="truncate">
+                  {college.latitude != null && college.longitude != null
+                    ? `${college.latitude.toFixed(5)}, ${college.longitude.toFixed(5)}`
+                    : college.district}
+                </span>
+              </div>
               {(college.rating ?? 0) > 0 && (
-                <>
+                <div className="flex items-center gap-1 text-xs shrink-0">
                   <span className="font-extrabold">{college.rating}</span>
                   <span className="text-amber-400 tracking-tight text-sm">
                     {stars > 0 ? "★".repeat(stars) : ""}
                     {stars < 5 ? "☆".repeat(5 - stars) : ""}
                   </span>
-                </>
-              )}
-              {(college.reviews ?? 0) > 0 && (
-                <span className="text-gray-500">({college.reviews})</span>
+                  {(college.reviews ?? 0) > 0 && (
+                    <span className="text-gray-500">({college.reviews})</span>
+                  )}
+                </div>
               )}
             </div>
 
-            {/* Location */}
-            {college.district && (
-              <div className="mt-1.5 flex items-center gap-1 text-gray-600 text-xs">
-                <FaMapMarkerAlt className="text-pink-500 shrink-0 w-3 h-3" />
-                <span>{college.district}</span>
+            {/* Banner */}
+            {college.banner && (
+              <div className="mt-1.5 h-20 rounded-md overflow-hidden relative bg-gray-200">
+                <Image
+                  src={getImageUrl(college.banner)}
+                  alt={college.name}
+                  fill
+                  sizes="320px"
+                  className="object-cover"
+                />
               </div>
             )}
           </div>
@@ -244,14 +266,14 @@ export default function CollegePopup({ college }: CollegePopupProps) {
           {/* Actions */}
           <section className="px-3 pt-3 pb-3">
             <div className="grid grid-cols-5 gap-1.5">
-              <a href="/find-college" className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline">
-                <span className="w-9 h-9 rounded-full bg-[#0000ff] text-white flex items-center justify-center">
+              <a href="/find-college" style={{ color: "#374151" }} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-[10px] font-bold no-underline">
+                <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaBuilding className="w-3.5 h-3.5" />
                 </span>
                 <span>View</span>
               </a>
 
-              <a href={`/find-college/${college.id}`} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline">
+              <a href={`/find-college/${college.id}`} style={{ color: "#374151" }} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-[10px] font-bold no-underline">
                 <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaInfoCircle className="w-3.5 h-3.5" />
                 </span>
@@ -262,7 +284,8 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                 href={college.latitude && college.longitude ? `https://www.google.com/maps/dir/?api=1&destination=${college.latitude},${college.longitude}` : `/find-college/${college.id}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline"
+                style={{ color: "#374151" }}
+                className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-[10px] font-bold no-underline"
               >
                 <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaDirections className="w-3.5 h-3.5" />
@@ -270,7 +293,7 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                 <span>Visit</span>
               </a>
 
-              <a href={`/find-college/${college.id}?tab=courses`} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-gray-700 text-[10px] font-bold no-underline">
+              <a href={`/find-college/${college.id}?tab=courses`} style={{ color: "#374151" }} className="border-0 bg-transparent cursor-pointer flex flex-col items-center gap-1 text-[10px] font-bold no-underline">
                 <span className="w-9 h-9 rounded-full bg-[#0000ff]/10 text-[#0000ff] flex items-center justify-center">
                   <FaComments className="w-3.5 h-3.5" />
                 </span>
@@ -288,7 +311,11 @@ export default function CollegePopup({ college }: CollegePopupProps) {
             <div className="h-px bg-gray-200 my-3" />
 
             <div className="grid grid-cols-2 gap-2">
-              <a href={college.phone ? `tel:${college.phone}` : "#"} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center bg-gray-900 no-underline hover:bg-gray-800 transition-colors">
+              <a
+                href={college.phone ? `tel:${college.phone}` : "#"}
+                style={{ color: "#ffffff" }}
+                className="h-9 border-0 rounded-md text-xs font-extrabold cursor-pointer flex justify-center items-center bg-gray-900 no-underline hover:bg-gray-800 transition-colors"
+              >
                 Call Now
               </a>
               <button onClick={() => setInquiryOpen(true)} className="h-9 border-0 rounded-md text-xs font-extrabold text-white cursor-pointer flex justify-center items-center hover:opacity-90 transition-colors" style={{ backgroundColor: "#0000ff" }}>

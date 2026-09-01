@@ -11,6 +11,7 @@ interface CollegeMarkerProps {
     latitude?: number;
     longitude?: number;
     logo?: string;
+    banner?: string;
     district?: string;
     type?: string;
     rating?: number;

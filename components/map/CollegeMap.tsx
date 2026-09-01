@@ -37,6 +37,7 @@ interface College {
   type?: string;
   reviews?: number;
   logo?: string;
+  banner?: string;
   district?: string;
   rating?: number;
   gallery?: any[];
