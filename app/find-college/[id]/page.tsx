@@ -196,6 +196,7 @@ const CollegeDetailsPage = ({
         locationText={data.locationText}
         rating={data.rating}
         reviewsCount={data.reviewsCount}
+        onReviewsClick={() => setActiveTab("review")}
         website={data.website}
         websiteHref={data.websiteHref}
         instLogo={data.instLogo}  
@@ -272,6 +273,9 @@ const CollegeDetailsPage = ({
             <TabReview
               reviewsData={data.reviewsData}
               reviewsLoading={data.reviewsLoading}
+              reviewsPage={data.reviewsPage}
+              onPageChange={data.loadReviews}
+              onVote={data.voteOnReview}
             />
           )}
           {activeTab === "news" && (

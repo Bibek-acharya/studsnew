@@ -8,7 +8,7 @@ import { College } from "@/services/api";
 import { universityApi } from "@/services/university.api";
 import { useAuth } from "@/services/AuthContext";
 import { isCollegeVerified, CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
-import { SlidersHorizontal, ChevronLeft, ChevronRight } from "lucide-react";
+import { SlidersHorizontal, ChevronLeft, ChevronRight, FolderOpen } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 import ClaimCollegeModal from "@/components/find-college/ClaimCollegeModal";
 
@@ -235,6 +235,15 @@ export default function Page() {
     };
   }, [universities]);
 
+  const initialUniScrollDone = useRef(false);
+  useEffect(() => {
+    if (universities.length === 0 || initialUniScrollDone.current) return;
+    initialUniScrollDone.current = true;
+    uniScrollRef.current
+      ?.querySelector(`[data-uni-id="${selectedUniId}"]`)
+      ?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [universities, selectedUniId]);
+
   const scrollUniversities = (direction: "left" | "right") => {
     if (uniScrollRef.current) {
       const scrollAmount = 260;
@@ -266,15 +275,16 @@ export default function Page() {
               {universities.map((uni) => (
                 <button
                   key={uni.id}
+                  data-uni-id={uni.id}
                   onClick={() => setSelectedUniId(uni.id)}
-                  className={`snap-start shrink-0 w-60 h-31 rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
+                  className={`snap-start shrink-0 w-[190px] sm:w-60 h-31 rounded-xl p-5 cursor-pointer border-2 transition-all duration-200 flex flex-col justify-between ${
                     selectedUniId === uni.id
                       ? "border-[#2563eb] bg-white"
                       : "border-transparent bg-white"
                   }`}
                 >
                   <div className="flex justify-between items-start gap-3">
-                    <h3 className="text-[14px] font-bold text-[#0f172a] leading-[1.3] tracking-tight pr-2">{uni.name}</h3>
+                    <h3 className="text-[13px] font-bold text-[#0f172a] leading-[1.3] tracking-tight pr-2">{uni.name}</h3>
                     {selectedUniId === uni.id && (
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[22px] h-[22px] text-[#2563eb] flex-shrink-0 mt-0.5">
                         <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clipRule="evenodd" />
@@ -350,7 +360,12 @@ export default function Page() {
           {loading ? (
             <div className="text-center py-16 text-gray-400">Loading...</div>
           ) : filteredColleges.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">No affiliated colleges found.</div>
+            <div className="col-span-1 flex flex-col items-center justify-center py-20 px-4 md:col-span-2 xl:col-span-3">
+              <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
+                <FolderOpen className="w-10 h-10 text-gray-300" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900">No Colleges Found</h3>
+            </div>
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">

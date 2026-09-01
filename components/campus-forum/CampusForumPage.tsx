@@ -475,7 +475,7 @@ const CommentItem: React.FC<{
           ))}
           <button
             onClick={() => setShowReplies(false)}
-            className="text-[10px] font-bold text-slate-400 hover:text-[#0000ff]"
+            className={`text-[10px] font-bold text-slate-400 hover:text-[#0000ff] ${depth === 0 ? "ml-[22px] sm:ml-0.5" : "ml-[38px]"}`}
           >
             Hide replies
           </button>

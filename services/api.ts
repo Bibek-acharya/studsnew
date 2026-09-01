@@ -440,7 +440,7 @@ export const apiService = {
   getUserReviews: reviewApi.getUserReviews.bind(reviewApi),
   updateReview: reviewApi.updateReview.bind(reviewApi),
   deleteReview: reviewApi.deleteReview.bind(reviewApi),
-  markReviewHelpful: reviewApi.markReviewHelpful.bind(reviewApi),
+  voteReview: reviewApi.voteReview.bind(reviewApi),
   reportReview: reviewApi.reportReview.bind(reviewApi),
   submitTestimonial: reviewApi.submitTestimonial.bind(reviewApi),
   getUserTestimonials: reviewApi.getUserTestimonials.bind(reviewApi),

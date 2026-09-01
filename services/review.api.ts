@@ -89,9 +89,14 @@ export const reviewApi = {
       ...options,
     });
   },
-  async markReviewHelpful(reviewId: number, options?: ApiRequestOptions): Promise<any> {
+  async voteReview(
+    reviewId: number,
+    vote: "up" | "down",
+    options?: ApiRequestOptions,
+  ): Promise<any> {
     return apiRequest<any>(`/api/v1/education/reviews/${reviewId}/helpful`, {
       method: "POST",
+      body: JSON.stringify({ vote }),
       ...options,
     });
   },

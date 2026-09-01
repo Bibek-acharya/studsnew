@@ -4,10 +4,16 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import { RatingBar, ReviewCard } from "./index";
 import EmptyTabState from "./EmptyTabState";
+import { getImageUrl } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
+import Pagination from "@/components/ui/Pagination";
 
 interface TabReviewProps {
   reviewsData: any;
   reviewsLoading: boolean;
+  reviewsPage: number;
+  onPageChange: (page: number) => void;
+  onVote: (reviewId: number, vote: "up" | "down") => Promise<void>;
 }
 
 interface ReviewLike {
@@ -15,8 +21,9 @@ interface ReviewLike {
   ratings?: Record<string, number>;
 }
 
-const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) => {
+const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading, reviewsPage, onPageChange, onVote }) => {
   const router = useRouter();
+  const { isAuthenticated } = useAuth();
   const hasReviews = reviewsData?.reviews?.length > 0;
 
   // API returns snake_case fields plus a precomputed per-review rating.
@@ -78,8 +85,13 @@ const TabReview: React.FC<TabReviewProps> = ({ reviewsData, reviewsLoading }) =>
       {hasReviews ? (
         <div className="space-y-5">
           {reviewsData.reviews.map((review: any, idx: number) => {
-            return <ReviewCard key={review.id} initials={review.user_initials || "U"} name={review.user_name || "Anonymous"} subtitle={`${review.course ? `${review.course} · ` : ""}Batch ${review.batch_year}`} rating={Math.round(reviewRating(review))} pros={review.pros} cons={review.cons} tone={idx % 2 === 0 ? "blue" : "purple"} yearlyFee={review.yearly_fee} scholarship={review.scholarship} internshipOutcome={review.internship_outcome} ratings={review.ratings} />;
+            return <ReviewCard key={review.id} initials={review.user_initials || "U"} name={review.user_name || "Anonymous"} profileImage={review.user_profile_image ? getImageUrl(review.user_profile_image) : undefined} subtitle={`${review.course ? `${review.course} · ` : ""}Batch ${review.batch_year}`} rating={Math.round(reviewRating(review))} pros={review.pros} cons={review.cons} tone={idx % 2 === 0 ? "blue" : "purple"} yearlyFee={review.yearly_fee} scholarship={review.scholarship} internshipOutcome={review.internship_outcome} ratings={review.ratings} helpfulUpvotes={review.helpful_upvotes} helpfulDownvotes={review.helpful_downvotes} myVote={review.my_vote} onVote={isAuthenticated ? (vote) => onVote(review.id, vote) : undefined} />;
           })}
+          <Pagination
+            currentPage={reviewsData?.meta?.page || reviewsPage}
+            totalPages={reviewsData?.meta?.total_pages || 1}
+            onPageChange={onPageChange}
+          />
         </div>
       ) : (
         <EmptyTabState

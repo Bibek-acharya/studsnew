@@ -144,7 +144,7 @@ export async function markReviewHelpfulAction(
   reviewId: number
 ): Promise<ActionResponse> {
   try {
-    const response = await apiService.markReviewHelpful(reviewId, await getAuthOptions());
+    const response = await apiService.voteReview(reviewId, "up", await getAuthOptions());
     return {
       success: true,
       data: response,

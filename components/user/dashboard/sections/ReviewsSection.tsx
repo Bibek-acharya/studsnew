@@ -92,23 +92,24 @@ export default function ReviewsSection() {
         const mappedReviews: Review[] = result.data.data.reviews.map(
           (r: any) => ({
             id: r.id,
-            collegeId: r.collegeId,
-            collegeName: r.collegeName || r.college || `College ${r.collegeId}`,
+            collegeId: r.college_id ?? r.collegeId,
+            collegeName:
+              r.college_name || r.collegeName || r.college || `College ${r.college_id}`,
             course: r.course,
             rating: r.ratings
               ? calculateAverageRating(r.ratings)
               : r.rating || 0,
-            title: r.summaryTitle || r.title || "",
-            summaryTitle: r.summaryTitle,
+            title: r.summary_title || r.summaryTitle || r.title || "",
+            summaryTitle: r.summary_title || r.summaryTitle,
             pros: r.pros,
             cons: r.cons,
-            date: r.createdAt,
+            date: r.created_at || r.createdAt,
             ratings: r.ratings,
-            studentType: r.studentType,
+            studentType: r.student_type || r.studentType,
             level: r.level,
-            batchYear: r.batchYear,
-            isVerified: r.isVerified,
-            helpfulCount: r.helpfulCount,
+            batchYear: r.batch_year || r.batchYear,
+            isVerified: r.is_verified || r.isVerified,
+            helpfulCount: r.helpful_count || r.helpfulCount,
           }),
         );
         setReviews(mappedReviews);

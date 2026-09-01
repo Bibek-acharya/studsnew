@@ -11,6 +11,7 @@ interface CollegeHeaderProps {
   locationText: string;
   rating: number;
   reviewsCount: string;
+  onReviewsClick?: () => void;
   website: string;
   websiteHref: string;
   instLogo: string | null;
@@ -38,6 +39,7 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
   locationText,
   rating,
   reviewsCount,
+  onReviewsClick,
   website,
   websiteHref,
   instLogo,
@@ -130,9 +132,13 @@ const CollegeHeader: React.FC<CollegeHeaderProps> = ({
                 <div className="flex items-center gap-1.5 shrink-0">
                   <i className="fa-solid fa-star text-yellow-400"></i>
                   <span className="font-bold text-gray-900">{rating}</span>
-                  <span className="text-gray-500 whitespace-nowrap">
+                  <button
+                    type="button"
+                    onClick={onReviewsClick}
+                    className="text-gray-500 whitespace-nowrap cursor-pointer hover:text-gray-900 hover:underline transition-colors"
+                  >
                     ({reviewsCount} Reviews)
-                  </span>
+                  </button>
                 </div>
                 {college?.featured && website && (
                   <a

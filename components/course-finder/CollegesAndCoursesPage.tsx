@@ -2,9 +2,18 @@
 
 import React, { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown, Check, FolderOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronDown,
+  Check,
+  FolderOpen,
+  ChevronLeft,
+  ChevronRight,
+  SlidersHorizontal,
+} from "lucide-react";
+import { FaMap } from "react-icons/fa6";
 import { apiService, College as ApiCollege } from "../../services/api";
 import {
   CollegeFilters,
@@ -19,13 +28,12 @@ import Pagination from "@/components/ui/Pagination";
 
 interface SelectedCourseContext {
   id?: string;
-  title: string;
+  title?: string;
   collegesCount?: number;
 }
 
 interface CollegesAndCoursesPageProps {
   selectedCourse: SelectedCourseContext;
-  onBack: () => void;
 }
 
 interface CourseListItem {
@@ -79,6 +87,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
   const [filters, setFilters] = useState<CollegeFilters>(
     DEFAULT_COLLEGE_FILTERS,
   );
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [quickApplyMode, setQuickApplyMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -146,6 +155,16 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
     () => coursesResponse?.data?.courses || [],
     [coursesResponse],
   );
+
+  const initialScrollDone = useRef(false);
+  useEffect(() => {
+    if (coursesLoading || initialScrollDone.current) return;
+    initialScrollDone.current = true;
+    const el = scrollContainerRef.current?.querySelector(
+      `[data-course-id="${activeCourseId}"]`,
+    );
+    el?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+  }, [coursesLoading, activeCourseId]);
 
   const { data: collegesResponse, isLoading: collegesLoading } = useQuery({
     queryKey: ["colleges-list-filtered", filters, activeCourseId, currentPage],
@@ -278,6 +297,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                 return (
                   <div
                     key={course.id}
+                    data-course-id={course.id}
                     onClick={() => {
                       setActiveCourseId(String(course.id));
                       setCurrentPage(1);
@@ -285,7 +305,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                     className={`relative flex-shrink-0 w-[190px] sm:w-[220px] bg-white rounded-md px-4 py-3.5 border-[1.5px] transition-all duration-200 cursor-pointer snap-start flex flex-col justify-between min-h-[92px] ${isSelected ? "border-blue-600" : "border-transparent hover:border-gray-200"}`}
                     title={course.title}
                   >
-                    <h3 className="text-slate-900 font-semibold text-[13px] leading-[18px] truncate pr-6">
+                    <h3 className="text-slate-900 font-semibold text-[12px] leading-[16px] truncate pr-6">
                       {course.title}
                     </h3>
                     <div className="mt-1.5 text-blue-600 text-[11px] font-medium flex items-center">
@@ -336,6 +356,25 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                 of {totalResults.toLocaleString()}{" "}
                 <span className="font-bold">Colleges</span>
               </h1>
+            </div>
+
+            {/* Mobile: Filters + View on Map */}
+            <div className="grid grid-cols-2 gap-3 lg:hidden pb-2">
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(true)}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <SlidersHorizontal size={14} />
+                Filters
+              </button>
+              <Link
+                href="/map"
+                className="flex items-center justify-center gap-2 rounded-md border border-black/20 px-4 py-2.5 text-gray-700 hover:text-brand-blue transition-all duration-200 text-[13px] font-semibold"
+              >
+                <FaMap />
+                <span>View on Map</span>
+              </Link>
             </div>
 
             <div className="flex flex-row justify-between items-center gap-4 pt-2 pb-4">
@@ -439,6 +478,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
                 key={college.id}
                 college={college}
                 isVerified={isCollegeVerified(college.verified)}
+                isClaimed={!!college.claimed}
                 isSaved={savedIds.includes(college.id)}
                 isSelected={selectedIds.includes(college.id)}
                 isQuickInquiryMode={quickApplyMode}
@@ -472,6 +512,26 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
           )}
         </main>
       </div>
+
+      {/* Mobile filter bottom drawer */}
+      {showMobileFilters && (
+        <div
+          className="fixed inset-0 z-50 lg:hidden"
+          onClick={() => setShowMobileFilters(false)}
+        >
+          <div className="absolute inset-0 bg-black/50" />
+          <div
+            className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <FilterSidebar
+              filters={filters}
+              setFilters={setFilters}
+              onClose={() => setShowMobileFilters(false)}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Toast Notifications */}
       <div className="fixed bottom-5 right-5 flex flex-col gap-2 z-[100]">

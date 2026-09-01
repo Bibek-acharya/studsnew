@@ -58,6 +58,10 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
   const [isBooking, setIsBooking] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [bookingResult, setBookingResult] = useState<{
+    status: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionRef = useRef<HTMLDivElement>(null);
@@ -295,20 +299,42 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
 
       setIsBooking(false);
       setIsConfirmed(true);
-      setTimeout(() => {
-        setIsConfirmed(false);
-        window.alert(
+      setBookingResult({
+        status: "success",
+        message:
           "Counseling session booked successfully! A confirmation email will be sent shortly.",
-        );
-      }, 3000);
+      });
     } catch (error) {
       setIsBooking(false);
-      setSubmitError(
+      const message =
         error instanceof Error
           ? error.message
-          : "Failed to book counselling session",
-      );
+          : "Failed to book counselling session";
+      setSubmitError(message);
+      setBookingResult({ status: "error", message });
     }
+  };
+
+  const closeBookingResult = () => {
+    setBookingResult(null);
+    if (bookingResult?.status === "success") {
+      setCollegeInput("");
+      setSelectedCollegeId(null);
+      setShowSuggestions(false);
+      setHighlightedIdx(-1);
+      setSessions([]);
+      setSelectedDate(null);
+      setSelectedSession(null);
+      setProgram("");
+      setCourse("");
+      setIsOnline(false);
+      setStudentName("");
+      setStudentPhone("+977-");
+      setStudentEmail("");
+      setStudentNotes("");
+      setSubmitError("");
+    }
+    setIsConfirmed(false);
   };
 
   return (
@@ -831,6 +857,42 @@ const BookCounsellingPage: React.FC<BookCounsellingPageProps> = () => {
           </div>
         </div>
       </div>
+
+      {/* Booking Result Dialog */}
+      {bookingResult && (
+        <div
+          className="fixed inset-0 z-[210] flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm"
+          onClick={closeBookingResult}
+        >
+          <div
+            className="w-full max-w-sm rounded-md bg-white p-6 text-center shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {bookingResult.status === "success" ? (
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-green-100">
+                <i className="fa-solid fa-check text-2xl text-green-600"></i>
+              </div>
+            ) : (
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+                <i className="fa-solid fa-xmark text-2xl text-red-600"></i>
+              </div>
+            )}
+            <p className="text-lg font-bold text-gray-900">
+              {bookingResult.status === "success"
+                ? "Booking Confirmed!"
+                : "Booking Failed"}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">{bookingResult.message}</p>
+            <button
+              type="button"
+              onClick={closeBookingResult}
+              className="mt-6 w-full rounded-md bg-brand-blue px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

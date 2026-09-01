@@ -18,6 +18,7 @@ export function useCollegeData(idStr: string) {
   const [loading, setLoading] = useState(true);
   const [reviewsData, setReviewsData] = useState<any>(null);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsPage, setReviewsPage] = useState(1);
 
   useEffect(() => {
     if (!idStr) {
@@ -381,21 +382,47 @@ export function useCollegeData(idStr: string) {
     filteredScholarships,
     reviewsData,
     reviewsLoading,
-    loadReviews: () => {
-      if (collegeId && !reviewsData) {
-        setReviewsLoading(true);
-        const isInst = idStr.startsWith("inst_");
-        apiService
-          .getCollegeReviews(
-            isInst ? 0 : collegeId,
-            { page: 1, limit: 10, ...(isInst ? { inst_id: collegeId } : {}) },
-            { suppressAuthExpired: true },
-          )
-          .then((res) => {
-            if (res?.data) setReviewsData(res.data);
-          })
-          .catch(console.error)
-          .finally(() => setReviewsLoading(false));
+    reviewsPage,
+    loadReviews: (page: number = 1) => {
+      if (!collegeId) return;
+      if (reviewsData && page === reviewsPage) return;
+      setReviewsLoading(true);
+      const isInst = idStr.startsWith("inst_");
+      apiService
+        .getCollegeReviews(
+          isInst ? 0 : collegeId,
+          { page, limit: 5, ...(isInst ? { inst_id: collegeId } : {}) },
+          { suppressAuthExpired: true },
+        )
+        .then((res) => {
+          if (res?.data) {
+            setReviewsData(res.data);
+            setReviewsPage(page);
+          }
+        })
+        .catch(console.error)
+        .finally(() => setReviewsLoading(false));
+    },
+    voteOnReview: async (reviewId: number, vote: "up" | "down") => {
+      try {
+        const res = await apiService.voteReview(reviewId, vote);
+        if (res?.data && reviewsData) {
+          setReviewsData({
+            ...reviewsData,
+            reviews: reviewsData.reviews.map((r: any) =>
+              r.id === reviewId
+                ? {
+                    ...r,
+                    helpful_upvotes: res.data.helpful_upvotes,
+                    helpful_downvotes: res.data.helpful_downvotes,
+                    my_vote: res.data.my_vote,
+                  }
+                : r,
+            ),
+          });
+        }
+      } catch {
+        // vote failed — leave counts unchanged
       }
     },
   };

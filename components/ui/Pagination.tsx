@@ -15,6 +15,11 @@ const Pagination: React.FC<PaginationProps> = ({
 }) => {
   if (totalPages <= 1) return null;
 
+  const handlePageChange = (page: number) => {
+    onPageChange(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const visiblePages = [1, 2, 3].filter((page) => page <= totalPages);
 
   return (
@@ -22,7 +27,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         className="flex items-center gap-1 rounded-[8px] border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-400 transition-colors disabled:cursor-not-allowed"
         disabled={currentPage === 1}
-        onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
       >
         <i className="fa-solid fa-chevron-left text-xs"></i>
         <span className="hidden sm:inline">Prev</span>
@@ -31,7 +36,7 @@ const Pagination: React.FC<PaginationProps> = ({
       {visiblePages.map((page) => (
         <button
           key={page}
-          onClick={() => onPageChange(page)}
+          onClick={() => handlePageChange(page)}
           className={`flex h-9 w-9 items-center justify-center rounded-[8px] text-sm font-medium transition-colors ${
             page === currentPage
               ? "bg-brand-blue text-white  hover:bg-[#0000CC]"
@@ -50,7 +55,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       {totalPages > 4 && (
         <button
-          onClick={() => onPageChange(totalPages)}
+          onClick={() => handlePageChange(totalPages)}
           className={`flex h-9 w-9 items-center justify-center rounded-[8px] text-sm font-medium transition-colors ${
             currentPage === totalPages
               ? "bg-brand-blue text-white  hover:bg-[#0000CC]"
@@ -64,7 +69,7 @@ const Pagination: React.FC<PaginationProps> = ({
       <button
         className="flex items-center gap-1 rounded-[8px] border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-400"
         disabled={currentPage === totalPages}
-        onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
+        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
       >
         <span className="hidden sm:inline">Next</span>
         <i className="fa-solid fa-chevron-right text-xs"></i>

@@ -340,7 +340,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
         <div className="bg-white min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
             <div className="bg-brand-blue w-full max-w-350 md:mx-auto relative flex flex-col rounded-2xl">
 
-                <main className="relative z-10 flex-1 flex flex-col items-center justify-center py-12">
+                <main className="relative z-10 flex-1 flex flex-col items-center justify-center py-12 px-4 md:px-0">
                     <div className="text-center mb-10 max-w-3xl">
                         <h1 className="text-white text-4xl md:text-5xl lg:text-[52px] font-bold leading-tight tracking-tight mb-4">
                             Compare colleges to<br />find the best fit
