@@ -337,7 +337,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     );
 
     return (
-        <div className="bg-white min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6">
+        <div className="bg-white min-h-screen flex flex-col items-center w-full font-sans pb-16 pt-6 px-4 md:px-0">
             <div className="bg-brand-blue w-full max-w-350 mx-4 md:mx-auto relative flex flex-col rounded-lg">
 
                 <main className="relative z-10 flex-1 flex flex-col items-center justify-center py-12 px-4 md:px-0">
