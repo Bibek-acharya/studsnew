@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Settings,
   Brain,
@@ -15,9 +15,43 @@ export default function SettingsSection() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const [statusMessage, setStatusMessage] = useState("");
+  const [progress, setProgress] = useState<{
+    running: boolean;
+    force: boolean;
+    table: string;
+    processed: number;
+    total: number;
+    error?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    if (retrainStatus !== "loading") return;
+    let active = true;
+    const poll = async () => {
+      try {
+        const next = await apiService.getReindexProgress();
+        if (active) {
+          setProgress(next);
+          if (!next.running && next.total > 0) {
+            setRetrainStatus(next.error ? "error" : "success");
+            setStatusMessage(next.error || "Embedding reindex completed");
+          }
+        }
+      } catch {
+        // The initial request may complete before the worker status is visible.
+      }
+    };
+    poll();
+    const timer = window.setInterval(poll, 1500);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [retrainStatus]);
 
   const handleRetrain = async (force: boolean) => {
     setRetrainStatus("loading");
+    setProgress(null);
     setStatusMessage(
       force
         ? "Full AI retrain started — this may take several minutes..."
@@ -25,16 +59,11 @@ export default function SettingsSection() {
     );
     try {
       const res = await apiService.reindexEmbeddings(force);
-      setRetrainStatus("success");
-      setStatusMessage(res.message || "AI retrain completed");
-    } catch (err: any) {
+      setStatusMessage(res.message || "AI retrain started");
+    } catch (err: unknown) {
       setRetrainStatus("error");
-      setStatusMessage(err.message || "Retrain failed");
+      setStatusMessage(err instanceof Error ? err.message : "Retrain failed");
     }
-    setTimeout(() => {
-      setRetrainStatus("idle");
-      setStatusMessage("");
-    }, 6000);
   };
 
   return (
@@ -93,6 +122,20 @@ export default function SettingsSection() {
             Full Retrain (All Embeddings)
           </button>
         </div>
+        {retrainStatus === "loading" && progress && (
+          <div className="mt-5 rounded-md border border-blue-100 bg-blue-50 p-4">
+            <div className="mb-2 flex items-center justify-between text-sm font-medium text-blue-900">
+              <span>{progress.table ? `Processing ${progress.table}` : "Preparing embeddings..."}</span>
+              <span>{progress.total > 0 ? `${Math.round((progress.processed / progress.total) * 100)}%` : "..."}</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-blue-100">
+              <div className="h-full bg-blue-600 transition-all" style={{ width: `${progress.total > 0 ? Math.min(100, (progress.processed / progress.total) * 100) : 5}%` }} />
+            </div>
+            <div className="mt-2 text-xs text-blue-700">
+              {progress.total > 0 ? `${progress.processed.toLocaleString()} of ${progress.total.toLocaleString()} records` : "Starting background job"}
+            </div>
+          </div>
+        )}
         {statusMessage && (
           <div
             className={`mt-4 flex items-center gap-2 rounded-md p-3 text-sm ${

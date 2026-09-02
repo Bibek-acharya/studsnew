@@ -159,4 +159,12 @@ export const educationApi = {
       { method: "POST", authToken: token || undefined },
     );
   },
+  async getReindexProgress(): Promise<{ running: boolean; force: boolean; table: string; processed: number; total: number; error?: string }> {
+    const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const res = await apiRequest<{ success: boolean; data: { running: boolean; force: boolean; table: string; processed: number; total: number; error?: string } }>(
+      "/api/v1/admin/search/reindex/status",
+      { authToken: token || undefined },
+    );
+    return res.data;
+  },
 };
