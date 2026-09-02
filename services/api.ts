@@ -462,6 +462,7 @@ export const apiService = {
   getPublicVolunteerByID: educationApi.getPublicVolunteerByID.bind(educationApi),
   submitVolunteerApplication: educationApi.submitVolunteerApplication.bind(educationApi),
   reindexEmbeddings: educationApi.reindexEmbeddings.bind(educationApi),
+  getReindexProgress: educationApi.getReindexProgress.bind(educationApi),
 
   // FAQ
   getFAQCategories: faqApi.getFAQCategories.bind(faqApi),
