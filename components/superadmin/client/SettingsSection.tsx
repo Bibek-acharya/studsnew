@@ -24,6 +24,10 @@ export default function SettingsSection() {
   } | null>(null);
 
   const wasRunning = useRef(false);
+  const lastRunning = useRef<{
+    processed: number;
+    total: number;
+  } | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -34,11 +38,28 @@ export default function SettingsSection() {
         setProgress(next);
         if (next.running) {
           wasRunning.current = true;
+          lastRunning.current = {
+            processed: next.processed,
+            total: next.total,
+          };
           setRetrainStatus("loading");
         } else if (wasRunning.current) {
           wasRunning.current = false;
-          setRetrainStatus(next.error ? "error" : "success");
-          setStatusMessage(next.error || "Embedding reindex completed");
+          const last = lastRunning.current;
+          lastRunning.current = null;
+          if (next.error) {
+            setRetrainStatus("error");
+            setStatusMessage(next.error);
+          } else if (last && last.total > 0 && last.processed < last.total) {
+            // Backend restarted and dropped the in-memory job.
+            setRetrainStatus("idle");
+            setStatusMessage(
+              "Reindex was interrupted (backend restarted). Click Quick Reindex to resume — it only processes the remaining records.",
+            );
+          } else {
+            setRetrainStatus("success");
+            setStatusMessage("Embedding reindex completed");
+          }
         }
       } catch {
         // Status endpoint may be briefly unavailable; retry on next tick.
