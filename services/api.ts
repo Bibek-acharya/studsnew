@@ -46,6 +46,10 @@ export async function apiRequest<T>(
       token =
         localStorage.getItem("scholarshipProviderToken") ||
         localStorage.getItem("token");
+    } else if (path.includes("/superadmin") || path.includes("/admin/")) {
+      token =
+        localStorage.getItem("superadmin_token") ||
+        localStorage.getItem("token");
     } else {
       token = localStorage.getItem("token");
     }
