@@ -2,10 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  eslint: {
-    // Lint runs locally/CI before deploys; type checking still runs during build.
-    ignoreDuringBuilds: true,
-  },
   async headers() {
     return [
       {
