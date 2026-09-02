@@ -1,8 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Settings,
   Brain,
   RotateCcw,
   CheckCircle2,
@@ -24,21 +23,25 @@ export default function SettingsSection() {
     error?: string;
   } | null>(null);
 
+  const wasRunning = useRef(false);
+
   useEffect(() => {
-    if (retrainStatus !== "loading") return;
     let active = true;
     const poll = async () => {
       try {
         const next = await apiService.getReindexProgress();
-        if (active) {
-          setProgress(next);
-          if (!next.running && next.total > 0) {
-            setRetrainStatus(next.error ? "error" : "success");
-            setStatusMessage(next.error || "Embedding reindex completed");
-          }
+        if (!active) return;
+        setProgress(next);
+        if (next.running) {
+          wasRunning.current = true;
+          setRetrainStatus("loading");
+        } else if (wasRunning.current) {
+          wasRunning.current = false;
+          setRetrainStatus(next.error ? "error" : "success");
+          setStatusMessage(next.error || "Embedding reindex completed");
         }
       } catch {
-        // The initial request may complete before the worker status is visible.
+        // Status endpoint may be briefly unavailable; retry on next tick.
       }
     };
     poll();
@@ -47,7 +50,7 @@ export default function SettingsSection() {
       active = false;
       window.clearInterval(timer);
     };
-  }, [retrainStatus]);
+  }, []);
 
   const handleRetrain = async (force: boolean) => {
     setRetrainStatus("loading");
@@ -104,7 +107,7 @@ export default function SettingsSection() {
           <button
             type="button"
             onClick={() => handleRetrain(false)}
-            disabled={retrainStatus === "loading"}
+            disabled={retrainStatus === "loading" || !!progress?.running}
             className="flex items-center gap-2 rounded-md bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-indigo-700 disabled:opacity-50"
           >
             <RotateCcw
@@ -115,14 +118,14 @@ export default function SettingsSection() {
           <button
             type="button"
             onClick={() => handleRetrain(true)}
-            disabled={retrainStatus === "loading"}
+            disabled={retrainStatus === "loading" || !!progress?.running}
             className="flex items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-5 py-2.5 text-sm font-medium text-amber-700 transition-colors hover:bg-amber-100 disabled:opacity-50"
           >
             <Brain className="h-4 w-4" />
             Full Retrain (All Embeddings)
           </button>
         </div>
-        {retrainStatus === "loading" && progress && (
+        {progress && (progress.running || retrainStatus === "loading") && (
           <div className="mt-5 rounded-md border border-blue-100 bg-blue-50 p-4">
             <div className="mb-2 flex items-center justify-between text-sm font-medium text-blue-900">
               <span>{progress.table ? `Processing ${progress.table}` : "Preparing embeddings..."}</span>
