@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import FilterSidebar from "@/components/find-college/FilterSidebar";
 import { ProgramCard } from "@/components/find-college/CollegeGrid";
 import { College } from "@/services/api";
@@ -9,6 +10,7 @@ import { universityApi } from "@/services/university.api";
 import { useAuth } from "@/services/AuthContext";
 import { isCollegeVerified, CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
 import { SlidersHorizontal, ChevronLeft, ChevronRight, FolderOpen } from "lucide-react";
+import { FaMap } from "react-icons/fa6";
 import Pagination from "@/components/ui/Pagination";
 import ClaimCollegeModal from "@/components/find-college/ClaimCollegeModal";
 
@@ -255,7 +257,7 @@ export default function Page() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen px-4 md:px-6 lg:px-8">
       {/* University Cards Header */}
       <div className="mx-auto max-w-350 pt-8">
         <h2 className="text-[20px] mb-2 font-bold text-[#0f172a]">Affiliated Colleges</h2>
@@ -315,28 +317,18 @@ export default function Page() {
       </div>
 
       {/* Main Content */}
-      <div className="mx-auto max-w-350 mt-6 flex flex-col lg:flex-row gap-8 bg-white">
+      <div className="mx-auto max-w-350 mt-6 flex flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
         {/* Left Sidebar - Filters */}
-        <aside className="hidden lg:block w-full shrink-0 lg:w-[280px]">
+        <aside className="hidden lg:block w-full shrink-0 lg:w-75">
           <FilterSidebar filters={filters} setFilters={setFilters} />
         </aside>
-
-        {/* Mobile filter drawer */}
-        {showMobileFilters && (
-          <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <FilterSidebar filters={filters} setFilters={setFilters} onClose={() => setShowMobileFilters(false)} />
-            </div>
-          </div>
-        )}
 
         {/* Right Content */}
         <section className="flex-1 w-full min-w-0">
           {/* Header */}
           <div className="mb-6">
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-4">
-              <h2 className="text-[15px] font-semibold text-gray-800">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-2">
+              <h2 className="text-base text-gray-900">
                 Showing <span className="text-blue-600 font-bold">{filteredColleges.length}</span> {selectedUni?.name || "university"} affiliated colleges
               </h2>
               <div className="relative w-full sm:w-72">
@@ -350,15 +342,50 @@ export default function Page() {
                 <svg className="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               </div>
             </div>
-            {/* Mobile filter button */}
-            <button onClick={() => setShowMobileFilters(true)} className="lg:hidden flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 hover:bg-gray-50">
-              <SlidersHorizontal size={14} /> Filters
-            </button>
+
+            {/* Mobile: Filters + View on Map */}
+            <div className="grid grid-cols-2 gap-3 lg:hidden pb-2">
+              <button
+                type="button"
+                onClick={() => setShowMobileFilters(true)}
+                className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-white border border-gray-200 rounded-md text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <SlidersHorizontal size={14} />
+                Filters
+              </button>
+              <Link
+                href="/map"
+                className="flex items-center justify-center gap-2 rounded-md border border-black/20 px-4 py-2.5 text-gray-700 hover:text-brand-blue transition-all duration-200 text-[13px] font-semibold"
+              >
+                <FaMap />
+                <span>View on Map</span>
+              </Link>
+            </div>
           </div>
 
           {/* College Cards */}
           {loading ? (
-            <div className="text-center py-16 text-gray-400">Loading...</div>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4"
+                >
+                  <div className="h-35 w-full rounded-md bg-gray-200" />
+                  <div className="mt-3 space-y-2.5">
+                    <div className="h-5 w-3/4 rounded bg-gray-200" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                    <div className="h-3 w-2/3 rounded bg-gray-100" />
+                    <div className="h-3 w-1/2 rounded bg-gray-100" />
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <div className="h-9 flex-1 rounded-md bg-gray-200" />
+                    <div className="h-9 flex-1 rounded-md bg-gray-200" />
+                    <div className="h-9 w-10 rounded-md bg-gray-200" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : filteredColleges.length === 0 ? (
             <div className="col-span-1 flex flex-col items-center justify-center py-20 px-4 md:col-span-2 xl:col-span-3">
               <div className="w-24 h-24 rounded-full bg-gray-50 flex items-center justify-center mb-6">
@@ -368,7 +395,7 @@ export default function Page() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
                 {paginatedColleges.map((college) => (
                   <ProgramCard
                     key={college.id}
@@ -405,6 +432,16 @@ export default function Page() {
           )}
         </section>
       </div>
+
+      {/* Mobile filter bottom drawer */}
+      {showMobileFilters && (
+        <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] bg-white rounded-t-2xl shadow-xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <FilterSidebar filters={filters} setFilters={setFilters} onClose={() => setShowMobileFilters(false)} />
+          </div>
+        </div>
+      )}
 
       {/* Single College Inquiry Modal */}
       <div

@@ -64,6 +64,9 @@ const SphereAIPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<(() => void) | null>(null);
+  const typerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const bufferRef = useRef("");
+  const doneRef = useRef(false);
 
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
@@ -81,9 +84,53 @@ const SphereAIPage: React.FC = () => {
   useEffect(
     () => () => {
       abortRef.current?.();
+      if (typerRef.current) clearInterval(typerRef.current);
     },
     [],
   );
+
+  const appendToStreamingMsg = useCallback((chunk: string) => {
+    setMessages((prev) => {
+      const next = [...prev];
+      for (let i = next.length - 1; i >= 0; i--) {
+        if (next[i].role === "ai" && next[i].streaming) {
+          next[i] = { ...next[i], text: next[i].text + chunk };
+          break;
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  const finalizeStream = useCallback(() => {
+    setMessages((prev) => {
+      const next = [...prev];
+      for (let i = next.length - 1; i >= 0; i--) {
+        if (next[i].role === "ai" && next[i].streaming) {
+          next[i] = { ...next[i], streaming: false };
+          break;
+        }
+      }
+      return next;
+    });
+    setIsStreaming(false);
+    abortRef.current = null;
+  }, []);
+
+  const stopTypewriter = () => {
+    if (typerRef.current) {
+      clearInterval(typerRef.current);
+      typerRef.current = null;
+    }
+  };
+
+  const flushAndFinalize = useCallback(() => {
+    stopTypewriter();
+    const rest = bufferRef.current;
+    bufferRef.current = "";
+    if (rest) appendToStreamingMsg(rest);
+    finalizeStream();
+  }, [appendToStreamingMsg, finalizeStream]);
 
   const sendMessage = useCallback(
     (text: string) => {
@@ -98,6 +145,10 @@ const SphereAIPage: React.FC = () => {
       setMessages((prev) => [...prev, userMsg, aiMsg]);
       setIsStreaming(true);
 
+      bufferRef.current = "";
+      doneRef.current = false;
+      stopTypewriter();
+
       const history: SphereAIMessage[] = messages.map((m) => ({
         role: m.role === "user" ? "user" : "assistant",
         content: m.text,
@@ -105,33 +156,17 @@ const SphereAIPage: React.FC = () => {
 
       const stop = streamSphereAIChat(trimmed, history, {
         onToken: (token) => {
-          setMessages((prev) => {
-            const next = [...prev];
-            for (let i = next.length - 1; i >= 0; i--) {
-              if (next[i].role === "ai" && next[i].streaming) {
-                next[i] = { ...next[i], text: next[i].text + token };
-                break;
-              }
-            }
-            return next;
-          });
+          bufferRef.current += token;
         },
         onDone: () => {
-          setMessages((prev) => {
-            const next = [...prev];
-            for (let i = next.length - 1; i >= 0; i--) {
-              if (next[i].role === "ai" && next[i].streaming) {
-                next[i] = { ...next[i], streaming: false };
-                break;
-              }
-            }
-            return next;
-          });
-          setIsStreaming(false);
-          abortRef.current = null;
+          doneRef.current = true;
         },
         onError: (error) => {
           setErrorMsg(error);
+          stopTypewriter();
+          const rest = bufferRef.current;
+          bufferRef.current = "";
+          if (rest) appendToStreamingMsg(rest);
           setMessages((prev) => {
             const next = [...prev];
             for (let i = next.length - 1; i >= 0; i--) {
@@ -151,8 +186,20 @@ const SphereAIPage: React.FC = () => {
         },
       });
       abortRef.current = stop;
+
+      // ponytail: fixed reveal rate with catch-up; tune 150 if pacing feels off
+      typerRef.current = setInterval(() => {
+        const buffered = bufferRef.current;
+        if (!buffered) {
+          if (doneRef.current) flushAndFinalize();
+          return;
+        }
+        const step = Math.max(2, Math.ceil(buffered.length / 150));
+        appendToStreamingMsg(buffered.slice(0, step));
+        bufferRef.current = buffered.slice(step);
+      }, 16);
     },
-    [messages, isStreaming],
+    [messages, isStreaming, appendToStreamingMsg, flushAndFinalize],
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -165,17 +212,7 @@ const SphereAIPage: React.FC = () => {
   const handleStop = () => {
     abortRef.current?.();
     abortRef.current = null;
-    setIsStreaming(false);
-    setMessages((prev) => {
-      const next = [...prev];
-      for (let i = next.length - 1; i >= 0; i--) {
-        if (next[i].role === "ai" && next[i].streaming) {
-          next[i] = { ...next[i], streaming: false };
-          break;
-        }
-      }
-      return next;
-    });
+    flushAndFinalize();
   };
 
   const handleQuickCard = (prompt: string) => {
