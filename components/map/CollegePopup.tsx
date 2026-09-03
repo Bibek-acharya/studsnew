@@ -66,9 +66,31 @@ export default function CollegePopup({ college }: CollegePopupProps) {
   const { isAuthenticated } = useAuth();
   const { isBookmarked, toggleBookmark } = useBookmark(college.id);
 
+  const hasCoords = college.latitude != null && college.longitude != null;
+  const [placeName, setPlaceName] = useState<string | null>(null);
+
   useEffect(() => {
     setOrigin(window.location.origin);
   }, []);
+
+  useEffect(() => {
+    if (!hasCoords) return;
+    let cancelled = false;
+    fetch(
+      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${college.latitude}&longitude=${college.longitude}&localityLanguage=en`,
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return;
+        setPlaceName(
+          data.locality || data.city || data.principalSubdivision || null,
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [hasCoords, college.latitude, college.longitude]);
 
   const stars = Math.round(college.rating || 0);
 
@@ -198,11 +220,13 @@ export default function CollegePopup({ college }: CollegePopupProps) {
                     : undefined
                 }
               >
-                <FaMapMarkerAlt className="text-pink-500 shrink-0 w-3 h-3" />
+                <FaMapMarkerAlt className="text-brand-blue shrink-0 w-3 h-3" />
                 <span className="truncate">
-                  {college.latitude != null && college.longitude != null
-                    ? `${college.latitude.toFixed(5)}, ${college.longitude.toFixed(5)}`
-                    : college.district}
+                  {placeName ||
+                    college.district ||
+                    (hasCoords
+                      ? `${college.latitude!.toFixed(5)}, ${college.longitude!.toFixed(5)}`
+                      : "")}
                 </span>
               </div>
               {(college.rating ?? 0) > 0 && (

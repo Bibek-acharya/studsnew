@@ -15,6 +15,7 @@ interface CollegeMarkerProps {
     district?: string;
     type?: string;
     rating?: number;
+    phone?: string;
   };
   isHighlighted?: boolean;
 }
