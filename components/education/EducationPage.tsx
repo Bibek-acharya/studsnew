@@ -18,6 +18,7 @@ import {
   EducationNewsItem,
   ScholarshipItem,
 } from "@/services/api";
+import CourseCategoriesSection from "./landing/CourseCategoriesSection";
 
 interface EducationPageProps {
   featuredColleges: College[];
@@ -129,7 +130,7 @@ const EducationPage: React.FC<EducationPageProps> = ({
       {/* Section 3: Event Carousel */}
       <EventShowcaseSection onNavigate={handleNavigate} />
       {/* Section 4: Right Course. Right College. */}
-      {/* <CourseCategoriesSection onNavigate={handleNavigate} /> */}
+      <CourseCategoriesSection onNavigate={handleNavigate} />
       {/* Section 5: Explore Featured Colleges & Universities */}
       {featuredColleges.length > 0 && ( 
         <FeaturedInstitutionsSection

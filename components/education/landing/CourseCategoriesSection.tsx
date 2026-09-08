@@ -87,12 +87,12 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
               onClick={() => onNavigate("courseCategory", { category: course.title })}
             >
               <div className="flex justify-between items-start mb-1">
-                <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-[#0000FF] transition-all duration-300 tracking-tight">
+                <h3 className="text-[17px] xs:text-[18px] sm:text-[19px] font-semibold text-gray-900 group-hover:text-brand-blue transition-all duration-300 tracking-tight">
                   {course.title}
                 </h3>
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-0.5 group-hover:text-[#0000FF] transition-colors duration-300 transform group-hover:translate-x-1" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 mt-0.5 group-hover:text-brand-blue transition-colors duration-300 transform group-hover:translate-x-1" />
               </div>
-              <p className={`text-xs sm:text-sm ${course.isActive ? 'text-[#0000FF] font-medium' : 'text-gray-500'} mb-5 sm:mb-6 group-hover:text-[#0000CC] transition-all duration-300`}>
+              <p className={`text-xs sm:text-sm ${course.isActive ? 'text-brand-blue font-medium' : 'text-gray-500'} mb-5 sm:mb-6 group-hover:text-brand-hover transition-all duration-300`}>
                 {course.count}
               </p>
               {partnerLogos.length > 0 && (

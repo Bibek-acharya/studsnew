@@ -14,7 +14,7 @@ interface EventShowcaseSectionProps {
   onNavigate: (view: string, data?: any) => void;
 }
 
-const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ onNavigate }) => {
+const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [slides, setSlides] = useState<ShowcaseSlide[]>([]);
 
