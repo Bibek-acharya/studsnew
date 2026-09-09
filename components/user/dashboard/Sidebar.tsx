@@ -2,10 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
-import { useAuth } from "@/services/AuthContext";
-import { apiService } from "@/services/api";
+import { useStudentNotifications } from "./notifications-context";
 import {
   LayoutDashboard,
   MessageSquare,
@@ -35,10 +34,9 @@ export default function Sidebar({
   onLogoutClick,
 }: SidebarProps) {
   const pathname = usePathname();
-  const router = useRouter();
-  const { logout } = useAuth();
   const [unreadMessages, setUnreadMessages] = useState(0);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
+  // Same hook instance the header bell reads — badge and bell agree.
+  const { unreadCount: unreadNotifications } = useStudentNotifications();
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -46,18 +44,6 @@ export default function Sidebar({
     };
     window.addEventListener("messaging-unread-changed", handler);
     return () => window.removeEventListener("messaging-unread-changed", handler);
-  }, []);
-
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const notifRes = await apiService.getStudentNotifications();
-        setUnreadNotifications(notifRes.data.unread_count);
-      } catch {
-        // keep default (0)
-      }
-    };
-    fetchNotifications();
   }, []);
 
   const navItems = [
@@ -120,7 +106,7 @@ export default function Sidebar({
       id: "notifications",
       label: "Notifications",
       icon: Bell,
-      href: "/user/dashboard/notifications",
+      href: "/notifications",
       badge: unreadNotifications > 0 ? String(unreadNotifications) : undefined,
     },
     {

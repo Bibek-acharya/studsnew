@@ -50,8 +50,22 @@ export async function apiRequest<T>(
       token =
         localStorage.getItem("superadmin_token") ||
         localStorage.getItem("token");
+    } else if (path.includes("/api/v1/institution")) {
+      // v1-anchored prefix covering both /institution/* and /institutions/*
+      // (the plural carries authenticated endpoints like /institutions/preferences).
+      token =
+        localStorage.getItem("institutionToken") ||
+        localStorage.getItem("token");
     } else {
-      token = localStorage.getItem("token");
+      // Shared role-agnostic endpoints (e.g. /api/v1/notifications): the
+      // default key first, then role keys so institution/provider/superadmin
+      // sessions work through the same hook with no per-caller plumbing.
+      // ponytail: first-settled key wins; per-endpoint keys if roles collide.
+      token =
+        localStorage.getItem("token") ||
+        localStorage.getItem("institutionToken") ||
+        localStorage.getItem("scholarshipProviderToken") ||
+        localStorage.getItem("superadmin_token");
     }
   }
 
@@ -117,8 +131,6 @@ export type {
   SuperadminDashboardStats,
   PublicNotificationItem,
   PublicNotificationsResponse,
-  StudentNotificationItem,
-  StudentNotificationsResponse,
   EducationEvent,
   EducationEventsResponse,
   EducationEventResponse,
@@ -408,9 +420,6 @@ export const apiService = {
 
   // Notifications
   getPublicNotifications: notificationApi.getPublicNotifications.bind(notificationApi),
-  getStudentNotifications: notificationApi.getStudentNotifications.bind(notificationApi),
-  markNotificationRead: notificationApi.markNotificationRead.bind(notificationApi),
-  markAllNotificationsRead: notificationApi.markAllNotificationsRead.bind(notificationApi),
 
   // Bookmarks
   getBookmarksByType: bookmarkApi.getBookmarksByType.bind(bookmarkApi),

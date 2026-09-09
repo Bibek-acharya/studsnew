@@ -1,11 +1,15 @@
 "use client";
 
-import React, { useState, lazy, Suspense, useCallback, useEffect, useRef } from "react";
+import React, { useState, lazy, Suspense, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { clearAllAuthSessions, clearCookie } from "@/services/authSession";
 import { apiService } from "@/services/api";
-import NotificationBell, { NotificationItem } from "@/components/shared/NotificationBell";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import {
+  NotificationsProvider,
+  useSuperadminNotifications,
+} from "./notifications-context";
 import MessageBell from "@/components/shared/MessageBell";
 import {
   LayoutDashboard,
@@ -401,6 +405,14 @@ const navItems: NavItemData[] = [
 ];
 
 export default function DashboardShell() {
+  return (
+    <NotificationsProvider options={{ limit: 20 }}>
+      <DashboardShellInner />
+    </NotificationsProvider>
+  );
+}
+
+function DashboardShellInner() {
   const [activeSection, setActiveSection] = useState<SectionType>("overview");
   const [dropdowns, setDropdowns] = useState<Record<string, boolean>>({});
   const [lockedSections, setLockedSections] = useState<Record<string, boolean>>(
@@ -413,12 +425,22 @@ export default function DashboardShell() {
     role: string;
   } | null>(null);
   const [unreadInquiries, setUnreadInquiries] = useState(0);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [notifLoading, setNotifLoading] = useState(false);
+  // Shared inbox state — the header bell and the manage-notifications page
+  // read this same instance; the badge equals server unread_count.
+  const {
+    items,
+    unreadCount: unreadNotifications,
+    loading: notifLoading,
+    markRead,
+    markAllRead,
+  } = useSuperadminNotifications();
   const [notifOpen, setNotifOpen] = useState(false);
+
+  const quiet = (promise: Promise<unknown>) => {
+    promise.catch(() => {});
+  };
 
   React.useEffect(() => {
     const stored = localStorage.getItem("superadmin_user");
@@ -442,78 +464,12 @@ export default function DashboardShell() {
       .catch(() => {});
   }, []);
 
-  const fetchNotifications = useCallback(async () => {
-    setNotifLoading(true);
-    try {
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = localStorage.getItem("superadmin_token");
-      if (!token) return;
-      const res = await fetch(
-        `${API_BASE_URL}/api/v1/notifications?page=1&limit=20`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const data = await res.json();
-      const items = (data?.data?.notifications || []).map((n: any) => ({
-        id: n.id,
-        title: n.title || n.message,
-        message: n.message || "",
-        read: n.isRead || n.read,
-        created_at: n.created_at || n.createdAt,
-      }));
-      setNotifications(items);
-      setUnreadNotifications(data?.data?.unread_count || items.filter((n: NotificationItem) => !n.read).length);
-    } catch {
-      setNotifications([]);
-    } finally {
-      setNotifLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
-
   const toggleDropdown = (name: string) => {
     setDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
   const navigateTo = (section: string) => {
     setActiveSection(section as SectionType);
-  };
-
-  const handleMarkNotifRead = async (id: number | string) => {
-    try {
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = localStorage.getItem("superadmin_token");
-      if (!token) return;
-      await fetch(`${API_BASE_URL}/api/v1/notifications/${id}/read`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-      );
-      setUnreadNotifications((prev) => Math.max(0, prev - 1));
-    } catch {}
-  };
-
-  const handleMarkAllNotifRead = async () => {
-    try {
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = localStorage.getItem("superadmin_token");
-      if (!token) return;
-      await fetch(`${API_BASE_URL}/api/v1/notifications/read-all`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      setUnreadNotifications(0);
-    } catch {}
   };
 
   const handleLogout = useCallback(async () => {
@@ -861,14 +817,14 @@ export default function DashboardShell() {
               onClick={() => setActiveSection("message-inquiry")}
             />
             <NotificationBell
-              notifications={notifications}
+              notifications={items.slice(0, 10)}
               unreadCount={unreadNotifications}
               loading={notifLoading}
               isOpen={notifOpen}
               onToggle={() => setNotifOpen(!notifOpen)}
               onClose={() => setNotifOpen(false)}
-              onMarkRead={handleMarkNotifRead}
-              onMarkAllRead={handleMarkAllNotifRead}
+              onMarkRead={(id) => quiet(markRead(id))}
+              onMarkAllRead={() => quiet(markAllRead())}
               onViewAll={() => {
                 setActiveSection("manage-notification");
                 setNotifOpen(false);

@@ -23,8 +23,12 @@ import {
   DashboardStats,
   RecentApplicationItem,
   CalendarEventItem,
-  StudentNotificationItem,
 } from "@/services/api";
+import { notificationClient } from "@/services/notificationClient";
+import {
+  toNotificationItem,
+  type NotificationItem,
+} from "@/features/notifications/types";
 import { useAuth } from "@/services/AuthContext";
 import { SkeletonStatsGrid } from "@/components/ui/Skeleton";
 import { AlertTriangle } from "lucide-react";
@@ -38,7 +42,7 @@ export default function DashboardSection() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [recentApps, setRecentApps] = useState<RecentApplicationItem[]>([]);
   const [events, setEvents] = useState<CalendarEventItem[]>([]);
-  const [activities, setActivities] = useState<StudentNotificationItem[]>([]);
+  const [activities, setActivities] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,13 +54,13 @@ export default function DashboardSection() {
             apiService.getDashboardStats(),
             apiService.getRecentApplications(),
             apiService.getCalendarEvents(),
-            apiService.getStudentNotifications(1, 5),
+            notificationClient.listNotifications(1, { limit: 5 }),
             apiService.getDeletionStatus(),
           ]);
         setStats(statsRes.data);
         setRecentApps(appsRes.data.applications);
         setEvents(eventsRes.data);
-        setActivities(notifRes.data.notifications);
+        setActivities(notifRes.data.notifications.map(toNotificationItem));
         if (delRes.data?.scheduled_deletion_at)
           setDeletionInfo(delRes.data as any);
       } catch {
@@ -587,11 +591,11 @@ export default function DashboardSection() {
             {activities.length > 0 ? (
               <div className="space-y-4">
                 {activities.slice(0, 5).map((a, idx) => {
-                  const Icon = getActivityIcon(a.type);
+                  const Icon = getActivityIcon(a.category);
                   return (
                     <div key={a.id || idx} className="flex items-start gap-3">
                       <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${getActivityIconBg(a.type)}`}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${getActivityIconBg(a.category)}`}
                       >
                         <Icon className="w-4 h-4" />
                       </div>
@@ -600,7 +604,7 @@ export default function DashboardSection() {
                           {a.title}
                         </p>
                         <p className="text-xs text-gray-500 mt-0.5">
-                          {a.message} • {timeAgo(a.created_at)}
+                          {a.body} • {timeAgo(a.created_at)}
                         </p>
                       </div>
                     </div>

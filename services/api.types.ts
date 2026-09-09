@@ -83,31 +83,6 @@ export interface PublicNotificationsResponse {
   message: string;
 }
 
-export interface StudentNotificationItem {
-  id: number;
-  user_id: number;
-  title: string;
-  message: string;
-  type: string;
-  read: boolean;
-  link: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface StudentNotificationsResponse {
-  data: {
-    notifications: StudentNotificationItem[];
-    unread_count: number;
-    meta: {
-      total: number;
-      page: number;
-      limit: number;
-    };
-  };
-  message: string;
-}
-
 // ─── Education Events ────────────────────────────────────────────────────────
 
 export interface EducationEvent {

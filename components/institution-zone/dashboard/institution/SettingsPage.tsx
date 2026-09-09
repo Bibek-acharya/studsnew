@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import SectionHeader from "../shared/SectionHeader";
 import { authApi } from "@/services/api";
+import PreferencesForm from "@/features/notifications/PreferencesForm";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -114,7 +115,6 @@ const SettingsPage: React.FC = () => {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [notifSettings, setNotifSettings] = useState<Record<string, boolean>>({});
   const [msg, setMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const [preferences, setPreferences] = useState<Record<string, any>>({});
@@ -125,28 +125,6 @@ const SettingsPage: React.FC = () => {
 
   const token = typeof window !== "undefined" ? localStorage.getItem("institutionToken") : null;
   const authHeaders = { "Content-Type": "application/json", Authorization: `Bearer ${token}` };
-
-  useEffect(() => {
-    if (!token) return;
-    fetch(`${API_BASE_URL}/api/v1/institution/settings`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
-      .then(d => {
-        const s = d?.data || {};
-        setNotifSettings({
-          application: s.email_notifications ?? true,
-          scholarship: s.email_notifications ?? true,
-          messages: true,
-          campus: true,
-          engagement: true,
-          admin: true,
-          performance: true,
-          reminders: true,
-          settings_alerts: true,
-          preferences: true,
-        });
-      })
-      .catch(() => {});
-  }, [token]);
 
   useEffect(() => {
     fetchPreferences();
@@ -207,17 +185,6 @@ const SettingsPage: React.FC = () => {
     } catch (e: any) { showMsg("error", e.message); }
   };
 
-  const handleSaveNotif = async () => {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/institution/settings`, {
-        method: "PUT", headers: authHeaders,
-        body: JSON.stringify({ email_notifications: notifSettings.application }),
-      });
-      if (!res.ok) throw new Error("Failed");
-      showMsg("success", "Notification settings saved");
-    } catch { showMsg("error", "Failed to save settings"); }
-  };
-
   const handleSavePreferences = async () => {
     setPrefsSaving(true);
     try {
@@ -266,19 +233,6 @@ const SettingsPage: React.FC = () => {
     if (Array.isArray(val)) return val.join(", ");
     return val || "Not set";
   };
-
-  const notifItems = [
-    { key: "application", title: "Application & Admission Notifications", desc: "Updates on application status and admission processes" },
-    { key: "scholarship", title: "Scholarship Notifications", desc: "Scholarship offers and updates" },
-    { key: "messages", title: "Messages & Communication Notifications", desc: "New messages and communications" },
-    { key: "campus", title: "Campus Feed Activity Notifications", desc: "Updates from campus activities and posts" },
-    { key: "engagement", title: "Engagement & Interest Notifications", desc: "Updates on engagement and interests" },
-    { key: "admin", title: "Admin & System Alerts", desc: "System alerts and administrative updates" },
-    { key: "performance", title: "Performance & Insights Notifications", desc: "Performance metrics and insights" },
-    { key: "reminders", title: "Reminder Notifications", desc: "Reminders for important deadlines and tasks" },
-    { key: "settings_alerts", title: "Settings Notifications", desc: "Settings alerts and login notifications" },
-    { key: "preferences", title: "Notification Preferences & Controls", desc: "Manage notification preferences and controls" },
-  ];
 
   return (
     <div className="p-4 md:p-6 lg:p-8">
@@ -398,31 +352,9 @@ const SettingsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Notification Settings */}
+          {/* Notification Preferences (shared inbox client) */}
           <div className="bg-white rounded-lg border border-gray-100 p-8 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <i className="ph ph-bell text-yellow-600" /> Notification Settings
-              </h2>
-              <button onClick={handleSaveNotif} className="px-6 h-10 bg-[#0000ff] text-white rounded-md font-medium hover:bg-blue-700 transition-colors">
-                Save Settings
-              </button>
-            </div>
-            <div className="space-y-3">
-              {notifItems.map((item) => (
-                <div key={item.key} className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{item.title}</p>
-                    <p className="text-xs text-gray-500">{item.desc}</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-                    <input type="checkbox" className="sr-only peer" checked={notifSettings[item.key] ?? true}
-                      onChange={() => setNotifSettings(prev => ({ ...prev, [item.key]: !prev[item.key] }))} />
-                    <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
-                  </label>
-                </div>
-              ))}
-            </div>
+            <PreferencesForm />
           </div>
 
           {/* Danger Zone */}

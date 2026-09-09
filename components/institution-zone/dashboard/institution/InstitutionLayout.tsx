@@ -1,7 +1,11 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import NotificationBell, { NotificationItem } from "@/components/shared/NotificationBell";
+import NotificationBell from "@/components/notifications/NotificationBell";
+import {
+  NotificationsProvider,
+  useInstitutionNotifications,
+} from "./notifications-context";
 import MessageBell from "@/components/shared/MessageBell";
 import InstitutionOnboarding from "@/components/institution-zone/InstitutionOnboarding";
 import {
@@ -87,7 +91,7 @@ interface NavSection {
   isLogout?: boolean;
 }
 
-const InstitutionLayout: React.FC<Props> = ({
+const InstitutionShell: React.FC<Props> = ({
   activePage,
   onNavigate,
   children,
@@ -100,15 +104,25 @@ const InstitutionLayout: React.FC<Props> = ({
   const [accessDisabled, setAccessDisabled] = useState<Record<string, boolean>>(
     {},
   );
-  const [notifCount, setNotifCount] = useState(0);
   const [msgCount, setMsgCount] = useState(0);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [notifLoading, setNotifLoading] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [instName, setInstName] = useState("");
   const [instLogo, setInstLogo] = useState("");
   const [subType, setSubType] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  // Shared inbox state — the bell badge reads the server unread_count through
+  // the same instance the notifications page reads (no fabricated counters).
+  const {
+    items,
+    unreadCount,
+    loading: notifLoading,
+    markRead,
+    markAllRead,
+  } = useInstitutionNotifications();
+
+  const quiet = (promise: Promise<unknown>) => {
+    promise.catch(() => {});
+  };
 
   useEffect(() => {
     const API_BASE_URL =
@@ -367,93 +381,6 @@ const InstitutionLayout: React.FC<Props> = ({
     },
   ];
 
-  const fetchNotifications = useCallback(async () => {
-    const API_BASE_URL =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-    const token = localStorage.getItem("institutionToken");
-    if (!token) return;
-    try {
-      const dashRes = await fetch(`${API_BASE_URL}/api/v1/institution/dashboard`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then((r) => r.json());
-      const dash = dashRes?.data || {};
-      setNotifCount(Number(dash.pending_bookings || 0));
-
-      const items: NotificationItem[] = [];
-      if (dash.pending_bookings > 0)
-        items.push({
-          id: `booking-${Date.now()}`,
-          title: "Pending Bookings",
-          message: `${dash.pending_bookings} pending counselling bookings`,
-          read: false,
-          created_at: new Date().toISOString(),
-          icon: <UserPlus className="text-blue-600 text-sm" />,
-          iconBg: "bg-blue-50",
-        });
-      if (dash.unread_messages > 0)
-        items.push({
-          id: `message-${Date.now()}`,
-          title: "Unread Messages",
-          message: `${dash.unread_messages} unread messages`,
-          read: false,
-          created_at: new Date().toISOString(),
-          icon: <LayoutDashboard className="text-green-600 text-sm" />,
-          iconBg: "bg-green-50",
-        });
-      setNotifications(items);
-    } catch {
-      /* skip */
-    }
-  }, []);
-
-  const handleMarkNotifRead = async (id: number | string) => {
-    try {
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = localStorage.getItem("institutionToken");
-      if (!token) return;
-      await fetch(`${API_BASE_URL}/api/v1/institution/notifications/read-all`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-      );
-      setNotifCount((prev) => Math.max(0, prev - 1));
-    } catch {}
-  };
-
-  const handleMarkAllNotifRead = async () => {
-    try {
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-      const token = localStorage.getItem("institutionToken");
-      if (!token) return;
-      await fetch(`${API_BASE_URL}/api/v1/institution/notifications/read-all`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      setNotifCount(0);
-      window.dispatchEvent(new Event("institution-notifications-read"));
-    } catch {}
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 60000);
-    return () => clearInterval(interval);
-  }, [fetchNotifications]);
-
-  useEffect(() => {
-    const handler = () => fetchNotifications();
-    if (typeof window !== "undefined") {
-      window.addEventListener("institution-notifications-read", handler);
-      return () =>
-        window.removeEventListener("institution-notifications-read", handler);
-    }
-  }, [fetchNotifications]);
-
   useEffect(() => {
     const handler = (e: Event) => setMsgCount((e as CustomEvent).detail);
     if (typeof window !== "undefined") {
@@ -588,14 +515,14 @@ const InstitutionLayout: React.FC<Props> = ({
               onClick={() => onNavigate("message")}
             />
             <NotificationBell
-              notifications={notifications}
-              unreadCount={notifCount}
+              notifications={items.slice(0, 10)}
+              unreadCount={unreadCount}
               loading={notifLoading}
               isOpen={notifOpen}
               onToggle={() => setNotifOpen(!notifOpen)}
               onClose={() => setNotifOpen(false)}
-              onMarkRead={handleMarkNotifRead}
-              onMarkAllRead={handleMarkAllNotifRead}
+              onMarkRead={(id) => quiet(markRead(id))}
+              onMarkAllRead={() => quiet(markAllRead())}
               onViewAll={() => {
                 onNavigate("notification");
                 setNotifOpen(false);
@@ -782,5 +709,13 @@ function NavDropdown({
     </div>
   );
 }
+
+// Provider sits inside the layout so the header bell and every page rendered
+// as children share one hook instance (one 60s poll, badge always agrees).
+const InstitutionLayout: React.FC<Props> = (props) => (
+  <NotificationsProvider>
+    <InstitutionShell {...props} />
+  </NotificationsProvider>
+);
 
 export default InstitutionLayout;
