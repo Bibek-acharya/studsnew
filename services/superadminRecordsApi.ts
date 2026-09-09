@@ -114,12 +114,20 @@ export const superadminEntranceApi = {
 export const superadminGlobalCourseApi = {
   async list(
     page = 1,
-    limit = 50,
+    limit = 20,
+    level = "",
+    search = "",
   ): Promise<{
     courses: any[];
     meta: { total: number; page: number; limit: number; pages: number };
   }> {
-    return superadminFetch(`/api/v1/admin/courses?page=${page}&limit=${limit}`);
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+    });
+    if (level) params.set("level", level);
+    if (search) params.set("search", search);
+    return superadminFetch(`/api/v1/admin/courses?${params.toString()}`);
   },
 
   async listPending(

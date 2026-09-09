@@ -201,12 +201,10 @@ export default function InstitutionZone() {
       errors.panNumber = "PAN must be exactly 9 digits.";
     if (!registrationNumber.trim())
       errors.registrationNumber = "Registration number is required.";
-    else if (
-      !/^[A-Za-z0-9]{4}-[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$/.test(
-        registrationNumber
-      )
-    )
-      errors.registrationNumber = "Format must be XXXX-XXX-XXX.";
+    else if (registrationNumber.replace(/-/g, "").trim().length < 10)
+      errors.registrationNumber = "Registration number must be at least 10 characters.";
+    else if (registrationNumber.replace(/-/g, "").trim().length > 11)
+      errors.registrationNumber = "Registration number must be at most 11 characters.";
     if (!website.trim()) errors.website = "Website is required.";
     else if (!/^https?:\/\/.+\..+/.test(website.trim()))
       errors.website = "Please enter a valid URL (e.g. https://www.example.com).";
@@ -232,7 +230,7 @@ export default function InstitutionZone() {
     try {
       await apiService.institutionRegister({
         institution_name: schoolName.trim(),
-        registration_number: registrationNumber,
+        registration_number: registrationNumber.trim(),
         email: officialEmail.trim(),
         contact_number: officialContact,
         province: selectedProvince,
