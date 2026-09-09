@@ -7,7 +7,6 @@ import ConfirmDialog from "@/components/user/dashboard/ConfirmDialog";
 import {
   AlertTriangle,
   Bell,
-  CheckCircle2,
   Laptop,
   Lock,
   ShieldCheck,
@@ -15,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Toast } from "@/components/ui/Toast";
+import PreferencesForm from "@/features/notifications/PreferencesForm";
 
 type TabId = "security" | "notifications" | "danger";
 
@@ -30,20 +30,6 @@ export default function SettingsSection() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    newsletter: true,
-    profileVisibility: "friends",
-    compactSidebar: false,
-    applicationUpdates: true,
-    messagesFromColleges: true,
-    scholarshipAlerts: true,
-    systemNotifications: true,
-    emailDigest: false,
-    timezone: "Pacific Time (PT)",
-    dateFormat: "MM/DD/YYYY",
-  });
   const [activeModal, setActiveModal] = useState<null | "totp">(null);
   const [dangerAction, setDangerAction] = useState<
     "deactivate" | "delete" | null
@@ -80,10 +66,6 @@ export default function SettingsSection() {
     }>
   >([]);
   const [sessionsLoading, setSessionsLoading] = useState(true);
-
-  const toggleSetting = (key: keyof typeof settings) => {
-    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
   const showToast = (message: string) => {
     setToastMessage(message);
@@ -507,115 +489,8 @@ export default function SettingsSection() {
         )}
 
         {activeTab === "notifications" && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-            <div className="bg-white rounded-md  border border-slate-200 p-6">
-              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2">
-                <Bell className="w-5 h-5 text-brand-blue" /> Notification
-                Preferences
-              </h3>
-              <div className="space-y-0 divide-y divide-slate-100">
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      Application Updates
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Get notified when your application status changes.
-                    </p>
-                  </div>
-                  <label className="relative inline-block w-11 h-6">
-                    <input
-                      type="checkbox"
-                      checked={settings.applicationUpdates}
-                      onChange={() => toggleSetting("applicationUpdates")}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      Messages from Colleges
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Receive alerts when an institution contacts you.
-                    </p>
-                  </div>
-                  <label className="relative inline-block w-11 h-6">
-                    <input
-                      type="checkbox"
-                      checked={settings.messagesFromColleges}
-                      onChange={() => toggleSetting("messagesFromColleges")}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      Scholarship Alerts
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      New matching scholarships and deadlines.
-                    </p>
-                  </div>
-                  <label className="relative inline-block w-11 h-6">
-                    <input
-                      type="checkbox"
-                      checked={settings.scholarshipAlerts}
-                      onChange={() => toggleSetting("scholarshipAlerts")}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      System Notifications
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Platform updates, maintenance, and security alerts.
-                    </p>
-                  </div>
-                  <label className="relative inline-block w-11 h-6">
-                    <input
-                      type="checkbox"
-                      checked={settings.systemNotifications}
-                      onChange={() => toggleSetting("systemNotifications")}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
-                  </label>
-                </div>
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-medium text-slate-800">
-                      Email Notifications
-                    </p>
-                    <p className="text-sm text-slate-500">
-                      Send a daily digest of unread notifications to email.
-                    </p>
-                  </div>
-                  <label className="relative inline-block w-11 h-6">
-                    <input
-                      type="checkbox"
-                      checked={settings.emailDigest}
-                      onChange={() => toggleSetting("emailDigest")}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-brand-blue peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:"></div>
-                  </label>
-                </div>
-              </div>
-            </div>
-            <div className="sticky bottom-0 bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 rounded-md  mt-4 flex justify-end">
-              <button className="bg-brand-blue text-white px-4 py-2.5 rounded-md text-sm font-semibold hover:bg-brand-hover transition-colors flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" /> Save Changes
-              </button>
-            </div>
+          <div className="bg-white rounded-md border border-slate-200 p-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <PreferencesForm />
           </div>
         )}
 

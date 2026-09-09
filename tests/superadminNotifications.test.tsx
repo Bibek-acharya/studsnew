@@ -121,11 +121,16 @@ describe("superadmin notification surfaces", () => {
     expect(container.textContent).not.toContain("SMS Alerts");
     expect(container.textContent).not.toContain("Push Notifications");
 
-    // The shared inbox endpoint feeds the list (single fetch per provider).
+    // The moderation tab owns a filtered instance (category=moderation) so
+    // paging/counts scope correctly; the shell provider fetches once beside
+    // it for the bell badge.
     const listCalls = mockedApiRequest.mock.calls.filter((call) =>
       String(call[0]).includes("/notifications?"),
     );
-    expect(listCalls).toHaveLength(1);
+    expect(listCalls).toHaveLength(2);
+    expect(
+      listCalls.some((call) => String(call[0]).includes("category=moderation")),
+    ).toBe(true);
   });
 
   test("broadcast form posts the doc 05 body shape; 202 shows a campaign banner", async () => {

@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { BadgeCheck } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import MessageBell from "@/components/shared/MessageBell";
-import { resolveIcon } from "@/components/notifications/icons";
 import { useNotifications } from "@/features/notifications/useNotifications";
 
 interface TopBarProps {
@@ -32,23 +31,6 @@ const TopBar: React.FC<TopBarProps> = ({
     markAllRead,
   } = useNotifications({ limit: 10 });
 
-  const notifications = useMemo(
-    () =>
-      items.slice(0, 10).map((n) => {
-        const { icon: Icon, color, bg } = resolveIcon(n.category, n.event_key);
-        return {
-          id: n.id,
-          title: n.title,
-          message: n.body,
-          read: n.read_at !== null,
-          created_at: n.created_at,
-          icon: <Icon size={14} className={color} />,
-          iconBg: bg,
-        };
-      }),
-    [items],
-  );
-
   const act = (promise: Promise<unknown>) => {
     promise.then(() => onNotificationUpdate?.()).catch(() => {});
   };
@@ -72,13 +54,13 @@ const TopBar: React.FC<TopBarProps> = ({
           onClick={() => onNavigate?.("sec-messages")}
         />
         <NotificationBell
-          notifications={notifications}
+          notifications={items.slice(0, 10)}
           unreadCount={notifUnreadCount}
           loading={notifLoading}
           isOpen={showNotifDropdown}
           onToggle={() => setShowNotifDropdown(!showNotifDropdown)}
           onClose={() => setShowNotifDropdown(false)}
-          onMarkRead={(id) => act(markRead(Number(id)))}
+          onMarkRead={(id) => act(markRead(id))}
           onMarkAllRead={() => act(markAllRead())}
           onViewAll={() => {
             setShowNotifDropdown(false);

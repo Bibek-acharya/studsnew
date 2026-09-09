@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, memo, useEffect } from "react";
-import { Home, Mail, Key, Bell, Eye, EyeOff } from "lucide-react";
+import { Home, Mail, Key, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { providerRbacApi } from "@/services/providerRbac";
 import { scholarshipProviderApi, ProviderProfile } from "@/services/scholarshipProviderApi";
+import PreferencesForm from "@/features/notifications/PreferencesForm";
 
 interface SettingsProps {
   profile?: ProviderProfile;
@@ -35,7 +36,6 @@ const Settings: React.FC<SettingsProps> = memo(({ profile: initialProfile, onLog
   const [showCurPass, setShowCurPass] = useState(false);
   const [showNewPass, setShowNewPass] = useState(false);
   const [showConNewPass, setShowConNewPass] = useState(false);
-  const [notifs, setNotifs] = useState({ email: true, newApp: true, payment: true, deadline: true });
   const [twoFA, setTwoFA] = useState(false);
   const [passLoading, setPassLoading] = useState(false);
   const [passError, setPassError] = useState("");
@@ -58,13 +58,6 @@ const Settings: React.FC<SettingsProps> = memo(({ profile: initialProfile, onLog
       setCurrentEmail(initialProfile.email || "");
     }
   }, [initialProfile]);
-
-  const Toggle = ({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) => (
-    <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
-      <input type="checkbox" className="sr-only peer" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-checked:bg-blue-600 after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
-    </label>
-  );
 
   const handleChangeEmail = async () => {
     setEmailError("");
@@ -333,29 +326,9 @@ const Settings: React.FC<SettingsProps> = memo(({ profile: initialProfile, onLog
         </div>
       </div>
 
-      {/* Notification Settings */}
+      {/* Notification Preferences (shared inbox client) */}
       <div className="bg-white rounded-lg p-8 border border-slate-100">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-            <Bell className="w-5 h-5 text-yellow-600" /> Notification Settings
-          </h2>
-        </div>
-        <div className="space-y-3">
-          {[
-            { key: "email", label: "Email Notifications", desc: "Send updates to providers and applicants via email" },
-            { key: "newApp", label: "New Application Alert", desc: "Get notified when a new application is submitted" },
-            { key: "payment", label: "Payment Confirmation Alert", desc: "Notify when application fee is received" },
-            { key: "deadline", label: "Deadline Reminder", desc: "Auto-remind applicants 3 days before deadline" },
-          ].map((n) => (
-            <div key={n.key} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
-              <div>
-                <p className="text-sm font-medium text-gray-900">{n.label}</p>
-                <p className="text-xs text-gray-500">{n.desc}</p>
-              </div>
-              <Toggle checked={(notifs as any)[n.key]} onChange={(v) => setNotifs((prev) => ({ ...prev, [n.key]: v }))} />
-            </div>
-          ))}
-        </div>
+        <PreferencesForm />
       </div>
 
       {/* Maintenance & Data */}

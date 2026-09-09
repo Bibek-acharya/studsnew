@@ -2,22 +2,17 @@
 
 import React, { useRef, useEffect } from "react";
 import { Bell, X } from "lucide-react";
+import type { NotificationItem } from "@/features/notifications/types";
+import { resolveIcon } from "./icons";
 
-export interface NotificationItem {
-  id: number | string;
-  title: string;
-  message: string;
-  read: boolean;
-  created_at: string;
-  icon?: React.ReactNode;
-  iconBg?: string;
-}
-
+// Bell dropdown over the unified NotificationItem (features/notifications).
+// Icons derive from category/event_key via icons.ts — never from stored
+// styles. Consumers pass hook items directly; no local view-model mapping.
 interface NotificationBellProps {
   notifications: NotificationItem[];
   unreadCount: number;
   loading?: boolean;
-  onMarkRead: (id: number | string) => void;
+  onMarkRead: (id: number) => void;
   onMarkAllRead: () => void;
   onViewAll: () => void;
   isOpen: boolean;
@@ -112,45 +107,50 @@ export default function NotificationBell({
                 <p className="text-xs font-medium">No notifications yet</p>
               </div>
             ) : (
-              displayNotifications.map((notif) => (
-                <button
-                  key={notif.id}
-                  onClick={() => {
-                    if (!notif.read) onMarkRead(notif.id);
-                  }}
-                  className={`w-full text-left p-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-start gap-3 ${
-                    !notif.read ? "bg-blue-50/30" : ""
-                  }`}
-                >
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                      notif.iconBg || "bg-gray-100"
+              displayNotifications.map((notif) => {
+                const { icon: Icon, color, bg } = resolveIcon(
+                  notif.category,
+                  notif.event_key,
+                );
+                const read = notif.read_at !== null;
+                return (
+                  <button
+                    key={notif.id}
+                    onClick={() => {
+                      if (!read) onMarkRead(notif.id);
+                    }}
+                    className={`w-full text-left p-3 border-b border-gray-50 hover:bg-gray-50 transition-colors flex items-start gap-3 ${
+                      !read ? "bg-blue-50/30" : ""
                     }`}
                   >
-                    {notif.icon || <Bell size={14} className="text-gray-400" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-xs font-semibold truncate ${
-                        !notif.read ? "text-gray-900" : "text-gray-600"
-                      }`}
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${bg}`}
                     >
-                      {notif.title}
-                    </p>
-                    <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
-                      {notif.message}
-                    </p>
-                    {notif.created_at && (
-                      <p className="text-[10px] text-gray-400 font-medium mt-1">
-                        {timeAgo(notif.created_at)}
+                      <Icon size={14} className={color} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p
+                        className={`text-xs font-semibold truncate ${
+                          !read ? "text-gray-900" : "text-gray-600"
+                        }`}
+                      >
+                        {notif.title}
                       </p>
+                      <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2 leading-relaxed">
+                        {notif.body}
+                      </p>
+                      {notif.created_at && (
+                        <p className="text-[10px] text-gray-400 font-medium mt-1">
+                          {timeAgo(notif.created_at)}
+                        </p>
+                      )}
+                    </div>
+                    {!read && (
+                      <div className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 shrink-0" />
                     )}
-                  </div>
-                  {!notif.read && (
-                    <div className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 shrink-0" />
-                  )}
-                </button>
-              ))
+                  </button>
+                );
+              })
             )}
           </div>
 

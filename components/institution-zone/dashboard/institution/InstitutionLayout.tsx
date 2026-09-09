@@ -1,8 +1,7 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import { resolveIcon } from "@/components/notifications/icons";
 import {
   NotificationsProvider,
   useInstitutionNotifications,
@@ -120,23 +119,6 @@ const InstitutionShell: React.FC<Props> = ({
     markRead,
     markAllRead,
   } = useInstitutionNotifications();
-
-  const notifications = useMemo(
-    () =>
-      items.slice(0, 10).map((n) => {
-        const { icon: Icon, color, bg } = resolveIcon(n.category, n.event_key);
-        return {
-          id: n.id,
-          title: n.title,
-          message: n.body,
-          read: n.read_at !== null,
-          created_at: n.created_at,
-          icon: <Icon size={14} className={color} />,
-          iconBg: bg,
-        };
-      }),
-    [items],
-  );
 
   const quiet = (promise: Promise<unknown>) => {
     promise.catch(() => {});
@@ -533,13 +515,13 @@ const InstitutionShell: React.FC<Props> = ({
               onClick={() => onNavigate("message")}
             />
             <NotificationBell
-              notifications={notifications}
+              notifications={items.slice(0, 10)}
               unreadCount={unreadCount}
               loading={notifLoading}
               isOpen={notifOpen}
               onToggle={() => setNotifOpen(!notifOpen)}
               onClose={() => setNotifOpen(false)}
-              onMarkRead={(id) => quiet(markRead(Number(id)))}
+              onMarkRead={(id) => quiet(markRead(id))}
               onMarkAllRead={() => quiet(markAllRead())}
               onViewAll={() => {
                 onNavigate("notification");

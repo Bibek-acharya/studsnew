@@ -11,7 +11,6 @@ import {
   useStudentNotifications,
 } from "../components/user/dashboard/notifications-context";
 import Sidebar from "../components/user/dashboard/Sidebar";
-import NotificationsSection from "../components/user/dashboard/sections/NotificationsSection";
 import NotificationsPage from "../components/notifications/NotificationsPage";
 import { resolveRoute } from "../features/notifications/routes";
 
@@ -154,18 +153,14 @@ describe("student notification surfaces", () => {
     expect(sidebarText.match(/3/g)!.length).toBeGreaterThanOrEqual(2);
   });
 
-  test("section tabs derive from shared categories and items link via resolveRoute", async () => {
-    const container = render(
-      <NotificationsProvider>
-        <NotificationsSection />
-      </NotificationsProvider>,
-    );
+  test("canonical inbox tabs derive from shared categories and items link via resolveRoute", async () => {
+    const container = render(<NotificationsPage />);
     await act(async () => {});
 
     const tabs = Array.from(
       container.querySelectorAll('[role="tablist"] button'),
     ).map((b) => b.textContent);
-    expect(tabs).toEqual(["All", "application", "content"]);
+    expect(tabs).toEqual(expect.arrayContaining(["All", "application", "content"]));
 
     const contentTab = Array.from(
       container.querySelectorAll('[role="tablist"] button'),
@@ -182,17 +177,23 @@ describe("student notification surfaces", () => {
     );
   });
 
-  test("section source deleted the SVG-injection path", () => {
-    const src = fs.readFileSync(
-      path.join(
-        __dirname,
-        "../components/user/dashboard/sections/NotificationsSection.tsx",
+  test("dashboard notifications route is unified on /notifications", () => {
+    // The duplicate live inbox is gone: the dashboard section is deleted and
+    // the dashboard route redirects to the canonical provider-backed page.
+    expect(
+      fs.existsSync(
+        path.join(
+          __dirname,
+          "../components/user/dashboard/sections/NotificationsSection.tsx",
+        ),
       ),
+    ).toBe(false);
+    const src = fs.readFileSync(
+      path.join(__dirname, "../app/user/dashboard/notifications/page.tsx"),
       "utf8",
     );
+    expect(src).toContain('redirect("/notifications")');
     expect(src).not.toContain("dangerouslySetInnerHTML");
-    expect(src).not.toContain("getSvgForCategory");
-    expect(src).not.toContain("mapTypeToCategory");
   });
 
   test("page folds following into content and wires a real archive tab", async () => {

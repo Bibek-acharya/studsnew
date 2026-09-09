@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SectionHeader from "../shared/SectionHeader";
 import { CheckCheck } from "lucide-react";
 import NotificationList from "@/components/notifications/NotificationList";
 import { resolveRoute } from "@/features/notifications/routes";
+import { useNotifications } from "@/features/notifications/useNotifications";
 import { useInstitutionNotifications } from "./notifications-context";
 
 // Real institution inbox on the shared client. Tabs are the registry
@@ -13,6 +14,20 @@ import { useInstitutionNotifications } from "./notifications-context";
 // messaging stays behind MessageBell.
 const NotificationsPage: React.FC = () => {
   const [tab, setTab] = useState("all");
+  const archivedView = tab === "archive";
+  const inbox = useInstitutionNotifications();
+  // Dedicated archived instance: the archive tab must not flip the shared
+  // bell/badge instance's filter. It stays disabled until the tab opens, then
+  // refreshes on entry (no poller — the bell owns the 60s poll).
+  const archive = useNotifications({
+    limit: 50,
+    archived: true,
+    enabled: archivedView,
+  });
+  const { refresh: refreshArchive } = archive;
+  useEffect(() => {
+    if (archivedView) void refreshArchive();
+  }, [archivedView, refreshArchive]);
   const {
     items,
     unreadCount,
@@ -21,7 +36,9 @@ const NotificationsPage: React.FC = () => {
     refresh,
     markRead,
     markAllRead,
-  } = useInstitutionNotifications();
+    setArchived,
+    remove,
+  } = archivedView ? archive : inbox;
 
   const quiet = (promise: Promise<unknown>) => {
     promise.catch(() => {});
@@ -62,9 +79,13 @@ const NotificationsPage: React.FC = () => {
           onMarkRead={(id) => quiet(markRead(id))}
           activeCategory={tab}
           onCategoryChange={setTab}
+          extraTabs={["archive"]}
           getHref={(item) =>
             item.link ? resolveRoute("institution", item.link) : null
           }
+          onSetArchived={(id, toArchived) => quiet(setArchived(id, toArchived))}
+          onRemove={(id) => quiet(remove(id))}
+          archivedView={archivedView}
         />
       </div>
     </div>

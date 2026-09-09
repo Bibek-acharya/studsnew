@@ -1,9 +1,11 @@
-import NotificationsSection from "@/components/user/dashboard/sections/NotificationsSection";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Notifications | MeroCollege Student",
 };
 
+// Unified on /notifications (the shared-client inbox with the real archive
+// tab). This redirect keeps dashboard deep links and bookmarks working.
 export default function Page() {
-  return <NotificationsSection />;
+  redirect("/notifications");
 }

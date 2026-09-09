@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { Bell, CheckCheck, Megaphone } from "lucide-react";
 import NotificationList from "@/components/notifications/NotificationList";
 import { resolveRoute } from "@/features/notifications/routes";
+import { useNotifications } from "@/features/notifications/useNotifications";
 import { notificationClient } from "@/services/notificationClient";
 import type {
   BroadcastAudience,
   Priority,
 } from "@/features/notifications/types";
-import { useSuperadminNotifications } from "./notifications-context";
 
 const AUDIENCES: BroadcastAudience[][] = [
   ["user"],
@@ -60,12 +60,10 @@ export default function NotificationSection() {
 }
 
 function ModerationInbox() {
+  // Own filtered instance: paging/counts scope to moderation. Mark-all-read
+  // stays global (the backend read-all endpoint takes no category filter).
   const { items, unreadCount, loading, error, refresh, markRead, markAllRead } =
-    useSuperadminNotifications();
-  const moderation = useMemo(
-    () => items.filter((n) => n.category === "moderation"),
-    [items],
-  );
+    useNotifications({ limit: 20, category: "moderation" });
 
   const quiet = (promise: Promise<unknown>) => {
     promise.catch(() => {});
@@ -77,7 +75,7 @@ function ModerationInbox() {
         <p className="text-sm text-gray-500">
           {loading
             ? "Loading..."
-            : `${moderation.length} moderation event${moderation.length !== 1 ? "s" : ""}`}
+            : `${items.length} moderation event${items.length !== 1 ? "s" : ""}`}
         </p>
         {unreadCount > 0 && (
           <button
@@ -91,7 +89,7 @@ function ModerationInbox() {
         )}
       </div>
       <NotificationList
-        items={moderation}
+        items={items}
         loading={loading}
         error={error}
         onRetry={() => quiet(refresh())}

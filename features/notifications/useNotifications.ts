@@ -9,6 +9,7 @@ const POLL_INTERVAL_MS = 60_000;
 export interface UseNotificationsOptions {
   page?: number;
   limit?: number;
+  category?: string;
   archived?: boolean;
   // False while logged out (e.g. the guest navbar): skip the fetch and the
   // poll so public pages never 401 against the inbox endpoints.
@@ -39,6 +40,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       const [inbox, count] = await Promise.all([
         notificationClient.listNotifications(optionsRef.current.page ?? 1, {
           limit: optionsRef.current.limit,
+          category: optionsRef.current.category,
           archived: optionsRef.current.archived,
         }),
         notificationClient.fetchUnreadCount(),

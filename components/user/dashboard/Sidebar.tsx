@@ -106,7 +106,7 @@ export default function Sidebar({
       id: "notifications",
       label: "Notifications",
       icon: Bell,
-      href: "/user/dashboard/notifications",
+      href: "/notifications",
       badge: unreadNotifications > 0 ? String(unreadNotifications) : undefined,
     },
     {

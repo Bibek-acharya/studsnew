@@ -8,7 +8,6 @@ import { Menu, Search } from "lucide-react";
 import { getImageUrl } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import NotificationBell from "@/components/notifications/NotificationBell";
-import { resolveIcon } from "@/components/notifications/icons";
 import {
   NotificationsProvider,
   useStudentNotifications,
@@ -50,23 +49,6 @@ function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
     return "Student";
   }, [user]);
 
-  const bellNotifications = useMemo(
-    () =>
-      items.slice(0, 10).map((n) => {
-        const { icon: Icon, color, bg } = resolveIcon(n.category, n.event_key);
-        return {
-          id: n.id,
-          title: n.title,
-          message: n.body,
-          read: n.read_at !== null,
-          created_at: n.created_at,
-          icon: <Icon size={14} className={color} />,
-          iconBg: bg,
-        };
-      }),
-    [items],
-  );
-
   const quiet = (promise: Promise<unknown>) => {
     promise.catch(() => {});
   };
@@ -94,16 +76,16 @@ function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
 
       <div className="flex items-center gap-4 lg:gap-6">
         <NotificationBell
-          notifications={bellNotifications}
+          notifications={items.slice(0, 10)}
           unreadCount={unreadCount}
           loading={loading}
           isOpen={notifOpen}
           onToggle={() => setNotifOpen(!notifOpen)}
           onClose={() => setNotifOpen(false)}
-          onMarkRead={(id) => quiet(markRead(Number(id)))}
+          onMarkRead={(id) => quiet(markRead(id))}
           onMarkAllRead={() => quiet(markAllRead())}
           onViewAll={() => {
-            router.push("/user/dashboard/notifications");
+            router.push("/notifications");
             setNotifOpen(false);
           }}
         />

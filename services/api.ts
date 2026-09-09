@@ -131,8 +131,6 @@ export type {
   SuperadminDashboardStats,
   PublicNotificationItem,
   PublicNotificationsResponse,
-  StudentNotificationItem,
-  StudentNotificationsResponse,
   EducationEvent,
   EducationEventsResponse,
   EducationEventResponse,
@@ -422,9 +420,6 @@ export const apiService = {
 
   // Notifications
   getPublicNotifications: notificationApi.getPublicNotifications.bind(notificationApi),
-  getStudentNotifications: notificationApi.getStudentNotifications.bind(notificationApi),
-  markNotificationRead: notificationApi.markNotificationRead.bind(notificationApi),
-  markAllNotificationsRead: notificationApi.markAllNotificationsRead.bind(notificationApi),
 
   // Bookmarks
   getBookmarksByType: bookmarkApi.getBookmarksByType.bind(bookmarkApi),
