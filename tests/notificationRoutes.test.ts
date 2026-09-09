@@ -35,6 +35,10 @@ describe("resolveRoute", () => {
       );
     });
 
+    test("passes through /careers (route exists, jobs.status_changed)", () => {
+      expect(resolveRoute("user", "/careers")).toBe("/careers");
+    });
+
     test("falls back when /campus-forum/post/<id> has no real route", () => {
       expect(resolveRoute("user", "/campus-forum/post/42")).toBe(
         "/notifications",
@@ -59,6 +63,32 @@ describe("resolveRoute", () => {
         "/user/dashboard/applications",
       );
       expect(resolveRoute("user", "/user/dashboard")).toBe("/user/dashboard");
+    });
+
+    test("falls back on /user/dashboard/admit-card (no real route)", () => {
+      expect(resolveRoute("user", "/user/dashboard/admit-card")).toBe(
+        "/notifications",
+      );
+    });
+
+    test("remaps legacy /user/* paths to their /user/dashboard counterparts", () => {
+      expect(resolveRoute("user", "/user/counselling")).toBe(
+        "/user/dashboard/counselling",
+      );
+      expect(resolveRoute("user", "/user/settings")).toBe(
+        "/user/dashboard/settings",
+      );
+      expect(resolveRoute("user", "/user/calendar")).toBe(
+        "/user/dashboard/calendar",
+      );
+    });
+
+    test("falls back on registry links with no real page", () => {
+      expect(resolveRoute("user", "/user/inquiries")).toBe("/notifications");
+      expect(resolveRoute("user", "/user/security")).toBe("/notifications");
+      expect(resolveRoute("user", "/followers")).toBe("/notifications");
+      expect(resolveRoute("user", "/reviews")).toBe("/notifications");
+      expect(resolveRoute("user", "/projectshiksha")).toBe("/notifications");
     });
 
     test("falls back on unknown link", () => {
@@ -88,6 +118,12 @@ describe("resolveRoute", () => {
       );
       expect(resolveRoute("institution", "blog-directory")).toBe(
         "/institution-zone/dashboard/blogs/directory",
+      );
+    });
+
+    test("student /user/dashboard/* links fall back (boundary)", () => {
+      expect(resolveRoute("institution", "/user/dashboard/applications")).toBe(
+        "/institution-zone/dashboard/notifications",
       );
     });
 

@@ -38,14 +38,25 @@ const INSTITUTION_DIRECTORY_ROUTES: Record<string, string> = {
   "blog-directory": "/institution-zone/dashboard/blogs/directory",
 };
 
-// Link prefixes whose target routes actually exist in app/ — pass through.
-// `/campus-forum/post/<id>` is deliberately absent: the real post route is
-// `/campus-forum/[id]`, so the dead prefix falls back like any unknown link.
+// Legacy /user/* paths from the registry whose real pages live under
+// /user/dashboard — remapped, user role only.
+const USER_LINK_REMAPS: Record<string, string> = {
+  "/user/calendar": "/user/dashboard/calendar",
+  "/user/counselling": "/user/dashboard/counselling",
+  "/user/settings": "/user/dashboard/settings",
+};
+
+// Public-template prefixes whose target routes exist in app/ — pass through
+// for any role. Two registry subpaths have no real page and are excluded:
+// `/campus-forum/post/<id>` (real post route is `/campus-forum/[id]`) and
+// `/user/dashboard/admit-card` (no such page; handled in the user branch).
 const PASS_THROUGH_PREFIXES = [
   "/scholarship-pay/",
   "/campus-forum",
-  "/user/dashboard",
+  "/careers",
 ];
+
+const DEAD_PREFIXES = ["/campus-forum/post/", "/user/dashboard/admit-card"];
 
 export function resolveRoute(role: Role, link: string): string {
   if (!link) return ROLE_FALLBACK[role];
@@ -55,7 +66,12 @@ export function resolveRoute(role: Role, link: string): string {
   if (role === "institution" && INSTITUTION_DIRECTORY_ROUTES[link]) {
     return INSTITUTION_DIRECTORY_ROUTES[link];
   }
-  if (link.startsWith("/campus-forum/post/")) return ROLE_FALLBACK[role];
+  if (DEAD_PREFIXES.some((p) => link.startsWith(p))) return ROLE_FALLBACK[role];
+  const remap = USER_LINK_REMAPS[link];
+  if (remap) return role === "user" ? remap : ROLE_FALLBACK[role];
+  if (role === "user" && (link === "/user/dashboard" || link.startsWith("/user/dashboard/"))) {
+    return link;
+  }
   if (PASS_THROUGH_PREFIXES.some((p) => link.startsWith(p))) return link;
   return ROLE_FALLBACK[role];
 }
