@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { Bell } from "lucide-react";
+import Link from "next/link";
+import { Archive, ArchiveRestore, Bell, Trash2 } from "lucide-react";
 import type { NotificationItem } from "@/features/notifications/types";
 import { resolveIcon } from "@/components/notifications/icons";
 import { SkeletonNotificationList } from "@/components/ui/Skeleton";
@@ -14,6 +15,15 @@ interface NotificationListProps {
   onMarkRead: (id: number) => void;
   activeCategory?: string;
   onCategoryChange?: (category: string) => void;
+  // Tabs beyond the item-derived categories (e.g. "archive") — selecting one
+  // does not filter the rows; the parent swaps the item set instead.
+  extraTabs?: string[];
+  // When provided, rows render as links (deep-linked via routes.ts).
+  getHref?: (item: NotificationItem) => string | null;
+  // When provided, rows show archive/unarchive + delete affordances.
+  onSetArchived?: (id: number, archived: boolean) => void;
+  onRemove?: (id: number) => void;
+  archivedView?: boolean;
 }
 
 function dayLabel(date: Date, now: Date): string {
@@ -39,6 +49,11 @@ export default function NotificationList({
   onMarkRead,
   activeCategory,
   onCategoryChange,
+  extraTabs = [],
+  getHref,
+  onSetArchived,
+  onRemove,
+  archivedView = false,
 }: NotificationListProps) {
   if (loading) {
     return <SkeletonNotificationList count={4} />;
@@ -78,7 +93,9 @@ export default function NotificationList({
   }
 
   const filtered =
-    activeCategory && activeCategory !== "all"
+    activeCategory &&
+    activeCategory !== "all" &&
+    !extraTabs.includes(activeCategory)
       ? items.filter((item) => item.category === activeCategory)
       : items;
 
@@ -101,7 +118,7 @@ export default function NotificationList({
           role="tablist"
           className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-gray-100"
         >
-          {["all", ...categories].map((category) => (
+          {["all", ...categories, ...extraTabs].map((category) => (
             <button
               key={category}
               onClick={() => onCategoryChange(category)}
@@ -132,16 +149,15 @@ export default function NotificationList({
                 notif.category,
                 notif.event_key,
               );
-              return (
-                <button
-                  key={notif.id}
-                  onClick={() => {
-                    if (!read) onMarkRead(notif.id);
-                  }}
-                  className={`w-full text-left p-3 hover:bg-gray-50 transition-colors flex items-start gap-3 ${
-                    read ? "" : "bg-blue-50/30"
-                  }`}
-                >
+              const href = getHref?.(notif) ?? null;
+              const mark = () => {
+                if (!read) onMarkRead(notif.id);
+              };
+              const rowClass = `w-full text-left p-3 hover:bg-gray-50 transition-colors flex items-start gap-3 ${
+                read ? "" : "bg-blue-50/30"
+              }`;
+              const body = (
+                <>
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${bg}`}
                   >
@@ -168,7 +184,48 @@ export default function NotificationList({
                   {!read && (
                     <div className="w-2 h-2 rounded-full bg-blue-600 mt-1.5 shrink-0" />
                   )}
-                </button>
+                </>
+              );
+              return (
+                <div key={notif.id} className="relative">
+                  {href ? (
+                    <Link href={href} onClick={mark} className={rowClass}>
+                      {body}
+                    </Link>
+                  ) : (
+                    <button onClick={mark} className={rowClass}>
+                      {body}
+                    </button>
+                  )}
+                  {(onSetArchived || onRemove) && (
+                    <div className="absolute bottom-3 right-3 flex gap-1">
+                      {onSetArchived && (
+                        <button
+                          aria-label={archivedView ? "Unarchive" : "Archive"}
+                          onClick={() =>
+                            onSetArchived(notif.id, !archivedView)
+                          }
+                          className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                        >
+                          {archivedView ? (
+                            <ArchiveRestore size={14} />
+                          ) : (
+                            <Archive size={14} />
+                          )}
+                        </button>
+                      )}
+                      {onRemove && (
+                        <button
+                          aria-label="Delete notification"
+                          onClick={() => onRemove(notif.id)}
+                          className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
               );
             })}
           </section>

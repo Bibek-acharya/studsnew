@@ -9,6 +9,7 @@ const POLL_INTERVAL_MS = 60_000;
 export interface UseNotificationsOptions {
   page?: number;
   limit?: number;
+  archived?: boolean;
 }
 
 // One hook instance per mounted provider; the unread badge and the bell read
@@ -35,6 +36,7 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
       const [inbox, count] = await Promise.all([
         notificationClient.listNotifications(optionsRef.current.page ?? 1, {
           limit: optionsRef.current.limit,
+          archived: optionsRef.current.archived,
         }),
         notificationClient.fetchUnreadCount(),
       ]);
