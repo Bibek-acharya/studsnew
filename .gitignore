@@ -46,3 +46,5 @@ CLAUDE.md
 .antigravitycli
 pnpm-workspace.yaml
 /docs/
+# SDD worktrees
+.worktrees/
