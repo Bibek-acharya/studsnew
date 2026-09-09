@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { BadgeCheck } from "lucide-react";
-import { scholarshipProviderApi, ProviderNotification } from "@/services/scholarshipProviderApi";
-import NotificationBell, { NotificationItem } from "@/components/shared/NotificationBell";
+import NotificationBell from "@/components/notifications/NotificationBell";
 import MessageBell from "@/components/shared/MessageBell";
+import { resolveIcon } from "@/components/notifications/icons";
+import { useNotifications } from "@/features/notifications/useNotifications";
 
 interface TopBarProps {
   providerUser: any;
@@ -13,6 +14,9 @@ interface TopBarProps {
   onNotificationUpdate?: () => void;
 }
 
+// Provider bell on the shared inbox client. The hook owns fetch + 60s poll +
+// visibility refresh; the badge reads the server unread_count through the
+// same state the dropdown lists (no local counters, no provider-scoped fetch).
 const TopBar: React.FC<TopBarProps> = ({
   providerUser,
   unreadMessages,
@@ -20,60 +24,34 @@ const TopBar: React.FC<TopBarProps> = ({
   onNotificationUpdate,
 }) => {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [notifUnreadCount, setNotifUnreadCount] = useState(0);
-  const [notifLoading, setNotifLoading] = useState(false);
+  const {
+    items,
+    unreadCount: notifUnreadCount,
+    loading: notifLoading,
+    markRead,
+    markAllRead,
+  } = useNotifications({ limit: 10 });
 
-  useEffect(() => {
-    loadNotifications();
-    const interval = setInterval(loadNotifications, 60000);
-    return () => clearInterval(interval);
-  }, []);
+  const notifications = useMemo(
+    () =>
+      items.slice(0, 10).map((n) => {
+        const { icon: Icon, color, bg } = resolveIcon(n.category, n.event_key);
+        return {
+          id: n.id,
+          title: n.title,
+          message: n.body,
+          read: n.read_at !== null,
+          created_at: n.created_at,
+          icon: <Icon size={14} className={color} />,
+          iconBg: bg,
+        };
+      }),
+    [items],
+  );
 
-  async function loadNotifications() {
-    setNotifLoading(true);
-    try {
-      const res = await scholarshipProviderApi.getNotifications(1, 10);
-      const items: NotificationItem[] = (res.notifications || []).map((n) => ({
-        id: n.id,
-        title: n.title,
-        message: n.message,
-        read: n.read,
-        created_at: n.created_at,
-      }));
-      setNotifications(items);
-      setNotifUnreadCount(res.unread_count || 0);
-    } catch {
-      setNotifications([]);
-      setNotifUnreadCount(0);
-    } finally {
-      setNotifLoading(false);
-    }
-  }
-
-  async function handleMarkRead(id: number | string) {
-    try {
-      await scholarshipProviderApi.markNotificationRead(Number(id));
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true } : n)),
-      );
-      setNotifUnreadCount((prev) => Math.max(0, prev - 1));
-      onNotificationUpdate?.();
-    } catch {
-      // ignore
-    }
-  }
-
-  async function handleMarkAllRead() {
-    try {
-      await scholarshipProviderApi.markAllNotificationsRead();
-      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-      setNotifUnreadCount(0);
-      onNotificationUpdate?.();
-    } catch {
-      // ignore
-    }
-  }
+  const act = (promise: Promise<unknown>) => {
+    promise.then(() => onNotificationUpdate?.()).catch(() => {});
+  };
 
   const getInitials = (name: string) => {
     return name
@@ -100,8 +78,8 @@ const TopBar: React.FC<TopBarProps> = ({
           isOpen={showNotifDropdown}
           onToggle={() => setShowNotifDropdown(!showNotifDropdown)}
           onClose={() => setShowNotifDropdown(false)}
-          onMarkRead={handleMarkRead}
-          onMarkAllRead={handleMarkAllRead}
+          onMarkRead={(id) => act(markRead(Number(id)))}
+          onMarkAllRead={() => act(markAllRead())}
           onViewAll={() => {
             setShowNotifDropdown(false);
             onNavigate?.("sec-notifications");
