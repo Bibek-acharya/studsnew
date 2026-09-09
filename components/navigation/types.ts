@@ -80,17 +80,3 @@ export interface MobileMenuSection {
   label: string;
   items: MobileMenuItem[];
 }
-
-export interface NavbarNotification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  time: string;
-  isRead: boolean;
-  isArchived: boolean;
-  isFollowing: boolean;
-  icon: string;
-  color: string;
-  bgColor: string;
-}

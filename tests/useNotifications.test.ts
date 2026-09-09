@@ -227,6 +227,20 @@ describe("useNotifications", () => {
     expect(mockedApiRequest.mock.calls.length).toBe(callsAtUnmount);
   });
 
+  test("enabled:false skips the fetch and the poll (guest navbar)", async () => {
+    const { result } = renderHook(() => useNotifications({ enabled: false }));
+    await act(async () => {});
+    expect(mockedApiRequest).not.toHaveBeenCalled();
+    expect(result.current.loading).toBe(false);
+    expect(result.current.items).toEqual([]);
+
+    await act(async () => {
+      jest.advanceTimersByTime(120_000);
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(mockedApiRequest).not.toHaveBeenCalled();
+  });
+
   test("surfaces API errors without throwing", async () => {
     mockedApiRequest.mockRejectedValue(new Error("boom"));
     const { result } = renderHook(() => useNotifications());

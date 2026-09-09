@@ -37,7 +37,6 @@ import {
 } from "lucide-react";
 import {
   desktopMenuSections,
-  initialNotifications,
   mobileMenuSections,
   notificationTabs,
   partnerMobileItems,
@@ -54,6 +53,7 @@ import {
 import Image from "next/image";
 import { trendingSearches } from "@/utils/searchDatabase";
 import { apiService, DashboardStats, getImageUrl, stripHtml } from "@/services/api";
+import { useNotifications } from "@/features/notifications/useNotifications";
 import TopBar from "./TopBar";
 
 const EducationNavbar: React.FC<EducationNavbarProps> = ({
@@ -136,55 +136,40 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   const [currentNotifTab, setCurrentNotifTab] =
     useState<NotificationTab>("all");
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const [studentNotifLoaded, setStudentNotifLoaded] = useState(false);
+  // Guest bell (public banner list below) is a separate concern — the inbox
+  // hook stays disabled while logged out so guests never 401.
+  const isInboxEnabled = user != null;
+  const {
+    items: inboxItems,
+    unreadCount: unreadNotificationCount,
+    loading: notifLoading,
+    error: notifError,
+    refresh: refreshInbox,
+    markRead: markInboxRead,
+    markAllRead: markInboxAllRead,
+    setArchived: setInboxArchived,
+    remove: removeInboxItem,
+  } = useNotifications({
+    limit: 50,
+    archived: currentNotifTab === "archive",
+    enabled: isInboxEnabled,
+  });
 
   useEffect(() => {
-    if (!user) return;
-    apiService
-      .getStudentNotifications(1, 50)
-      .then((res) => {
-        const list = res?.data?.notifications;
-        if (Array.isArray(list) && list.length > 0) {
-          setNotifications(
-            list.map((n: any) => ({
-              id: String(n.id),
-              type: n.type || "system",
-              title: n.title,
-              message: n.message,
-              time: n.created_at
-                ? new Date(n.created_at).toLocaleDateString()
-                : "",
-              isRead: n.read,
-              isArchived: false,
-              isFollowing: false,
-              icon: "fa-bell",
-              color: "text-gray-500",
-              bgColor: "bg-gray-100",
-            })),
-          );
-        }
-        setStudentNotifLoaded(true);
-      })
-      .catch(() => setStudentNotifLoaded(true));
-  }, [user]);
+    if (isInboxEnabled) void refreshInbox();
+  }, [currentNotifTab, isInboxEnabled, refreshInbox]);
 
+  // "following" folded into content-family categories; "system" is a real
+  // registry category; all/archive arrive pre-filtered from the server.
   const visibleNotifications = useMemo(() => {
-    return notifications.filter((n) => {
-      if (currentNotifTab === "all") return !n.isArchived;
-      if (currentNotifTab === "following")
-        return !n.isArchived && n.isFollowing;
-      if (currentNotifTab === "system")
-        return !n.isArchived && n.type === "system";
-      if (currentNotifTab === "archive") return n.isArchived;
-      return true;
-    });
-  }, [currentNotifTab, notifications]);
-
-  const unreadNotificationCount = useMemo(
-    () => notifications.filter((n) => !n.isRead && !n.isArchived).length,
-    [notifications],
-  );
+    if (currentNotifTab === "system")
+      return inboxItems.filter((n) => n.category === "system");
+    if (currentNotifTab === "following")
+      return inboxItems.filter((n) =>
+        ["content", "community", "social"].includes(n.category),
+      );
+    return inboxItems;
+  }, [currentNotifTab, inboxItems]);
 
   const [publicNotifList, setPublicNotifList] = useState<
     {
@@ -222,48 +207,22 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       .catch(() => {});
   }, []);
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-    );
-    if (user) {
-      apiService.markNotificationRead(Number(id)).catch(() => {});
-    }
+  const markAsRead = (id: number) => {
+    void markInboxRead(id);
   };
 
-  const toggleArchive = (id: string, e: React.MouseEvent) => {
+  const toggleArchive = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isArchived: !n.isArchived } : n)),
-    );
+    void setInboxArchived(id, currentNotifTab !== "archive");
   };
 
-  const removeNotification = (id: string, e: React.MouseEvent) => {
+  const removeNotification = (id: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    void removeInboxItem(id);
   };
 
   const markAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((n) => {
-        if (currentNotifTab === "all" && !n.isArchived)
-          return { ...n, isRead: true };
-        if (currentNotifTab === "following" && !n.isArchived && n.isFollowing)
-          return { ...n, isRead: true };
-        if (
-          currentNotifTab === "system" &&
-          !n.isArchived &&
-          n.type === "system"
-        )
-          return { ...n, isRead: true };
-        if (currentNotifTab === "archive" && n.isArchived)
-          return { ...n, isRead: true };
-        return n;
-      }),
-    );
-    if (user) {
-      apiService.markAllNotificationsRead().catch(() => {});
-    }
+    void markInboxAllRead();
   };
 
   useEffect(() => {
@@ -685,6 +644,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             : "notification-menu",
                         )
                       }
+                      aria-label="Notifications"
                       className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
                     >
                       <Bell size={18} />
@@ -733,14 +693,34 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                             ))}
                           </div>
                           <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
-                            {visibleNotifications.map((notif) => (
+                            {notifLoading ? (
+                              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                <p className="text-sm">Loading…</p>
+                              </div>
+                            ) : notifError ? (
+                              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                <p className="text-sm">{notifError}</p>
+                                <button
+                                  onClick={() => void refreshInbox()}
+                                  className="mt-2 text-sm font-medium text-blue-600 hover:text-blue-900"
+                                >
+                                  Retry
+                                </button>
+                              </div>
+                            ) : visibleNotifications.length === 0 ? (
+                              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+                                <Bell size={32} className="mb-2 opacity-50" />
+                                <p className="text-sm">No notifications</p>
+                              </div>
+                            ) : (
+                              visibleNotifications.map((notif) => (
                               <div
                                 key={notif.id}
                                 className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
                                 onClick={() => markAsRead(notif.id)}
                               >
                                 <div
-                                  className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
+                                  className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-gray-500`}
                                 >
                                   <i className="fa-solid fa-bell text-sm"></i>
                                 </div>
@@ -749,28 +729,24 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                     <p className="truncate text-sm font-semibold text-black">
                                       {notif.title}
                                     </p>
-                                    {notif.isFollowing && (
-                                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-600 whitespace-nowrap">
-                                        Following
-                                      </span>
-                                    )}
                                   </div>
                                    <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
-                                    {stripHtml(notif.message)}
+                                    {stripHtml(notif.body)}
                                   </p>
                                   <p className="mt-1.5 flex items-center gap-1 text-xs text-gray-500">
-                                    <Clock size={12} /> {notif.time}
+                                    <Clock size={12} /> {new Date(notif.created_at).toLocaleDateString()}
                                   </p>
                                 </div>
-                                {!notif.isRead && (
+                                {!notif.read_at && (
                                   <div className="absolute right-3 top-3 h-2 w-2 rounded-full bg-blue-500"></div>
                                 )}
                                 <div className="absolute bottom-3 right-3 flex gap-1 opacity-0 transition-all group-hover:opacity-100">
                                   <button
                                     onClick={(e) => toggleArchive(notif.id, e)}
+                                    aria-label={currentNotifTab === "archive" ? "Unarchive notification" : "Archive notification"}
                                     className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
                                   >
-                                    {notif.isArchived ? (
+                                    {currentNotifTab === "archive" ? (
                                       <ArchiveRestore size={16} />
                                     ) : (
                                       <Archive size={16} />
@@ -780,13 +756,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                     onClick={(e) =>
                                       removeNotification(notif.id, e)
                                     }
+                                    aria-label="Delete notification"
                                     className="rounded-md p-1 px-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
                                   >
                                     <Trash2 size={16} />
                                   </button>
                                 </div>
                               </div>
-                            ))}
+                              ))
+                            )}
                           </div>
                           <div className="border-t border-gray-100 bg-gray-50/50 p-3">
                             <button

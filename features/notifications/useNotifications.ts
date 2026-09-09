@@ -10,6 +10,9 @@ export interface UseNotificationsOptions {
   page?: number;
   limit?: number;
   archived?: boolean;
+  // False while logged out (e.g. the guest navbar): skip the fetch and the
+  // poll so public pages never 401 against the inbox endpoints.
+  enabled?: boolean;
 }
 
 // One hook instance per mounted provider; the unread badge and the bell read
@@ -50,9 +53,11 @@ export function useNotifications(options: UseNotificationsOptions = {}) {
   }, []);
 
   useEffect(() => {
-    // Mount-time fetch is the whole point of this polling hook — the setState
-    // calls inside refresh() are intentional here.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if ((optionsRef.current.enabled ?? true) === false) {
+      setLoading(false);
+      return;
+    }
+    // Mount-time fetch is the whole point of this polling hook.
     void refresh();
     const poll = setInterval(() => {
       notificationClient
