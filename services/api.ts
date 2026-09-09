@@ -50,7 +50,9 @@ export async function apiRequest<T>(
       token =
         localStorage.getItem("superadmin_token") ||
         localStorage.getItem("token");
-    } else if (path.includes("/institution")) {
+    } else if (path.includes("/api/v1/institution")) {
+      // v1-anchored prefix covering both /institution/* and /institutions/*
+      // (the plural carries authenticated endpoints like /institutions/preferences).
       token =
         localStorage.getItem("institutionToken") ||
         localStorage.getItem("token");

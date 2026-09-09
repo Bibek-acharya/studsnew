@@ -41,8 +41,14 @@ describe("apiRequest token sniffing", () => {
       (globalThis as { localStorage: { getItem: (key: string) => string | null } }).localStorage,
       "getItem",
     );
+    // Singular prefix…
     await apiRequest("/api/v1/institution/dashboard");
     expect(getItem.mock.calls[0][0]).toBe("institutionToken");
+    // …and the plural variant used by authenticated institution endpoints
+    // (e.g. /api/v1/institutions/preferences), which the strict
+    // "/api/v1/institution/" prefix would miss.
+    await apiRequest("/api/v1/institutions/preferences");
+    expect(getItem.mock.calls[1][0]).toBe("institutionToken");
   });
 
   test("provider, superadmin and default paths keep their existing keys", async () => {

@@ -136,6 +136,23 @@ describe("useNotifications", () => {
     expect(listCalls).toBe(listCallsAfterMount + 1);
   });
 
+  test("does not refresh on visibilitychange while hidden", async () => {
+    renderHook(() => useNotifications());
+    await act(async () => {});
+    const listCallsAfterMount = listCalls;
+
+    Object.defineProperty(document, "visibilityState", {
+      value: "hidden",
+      configurable: true,
+    });
+    await act(async () => {
+      document.dispatchEvent(new Event("visibilitychange"));
+    });
+    expect(listCalls).toBe(listCallsAfterMount);
+
+    delete (document as Record<string, unknown>).visibilityState;
+  });
+
   test("markRead PUTs :id/read, marks the item, and decrements the badge", async () => {
     const { result } = renderHook(() => useNotifications());
     await act(async () => {});

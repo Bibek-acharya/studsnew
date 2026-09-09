@@ -38,8 +38,10 @@ export interface RawNotificationItem {
 export function toNotificationItem(raw: RawNotificationItem): NotificationItem {
   return {
     id: raw.id,
-    event_key: raw.event_key ?? raw.type ?? "",
-    category: raw.category ?? "",
+    // event_key is v2-only; legacy `type` is the CATEGORY (backend
+    // handler.go:146 `Type: r.Category`), never an event key.
+    event_key: raw.event_key ?? "",
+    category: raw.category ?? raw.type ?? "",
     priority: (raw.priority as Priority) ?? "normal",
     title: raw.title,
     body: raw.body ?? raw.message ?? "",

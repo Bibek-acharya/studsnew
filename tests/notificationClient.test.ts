@@ -141,21 +141,23 @@ describe("toNotificationItem", () => {
   });
 
   test("normalizes the legacy envelope (message/read/type) into NotificationItem", () => {
+    // Legacy `type` is the CATEGORY (backend handler.go:146 `Type: r.Category`),
+    // not an event key — v2-only fields stay empty.
     const item = toNotificationItem({
       id: 2,
       title: "Status changed",
       message: "Your application moved on",
-      type: "application.status_changed",
+      type: "application",
       read: true,
       link: "/applications/4",
       created_at: "2026-09-08T09:00:00Z",
       updated_at: "2026-09-08T11:00:00Z",
     });
     expect(item.body).toBe("Your application moved on");
-    expect(item.event_key).toBe("application.status_changed");
+    expect(item.category).toBe("application");
+    expect(item.event_key).toBe("");
     expect(item.read_at).toBe("2026-09-08T11:00:00Z");
     expect(item.priority).toBe("normal");
-    expect(item.category).toBe("");
   });
 
   test("legacy unread notification has a null read_at", () => {
@@ -163,11 +165,13 @@ describe("toNotificationItem", () => {
       id: 3,
       title: "Welcome",
       message: "hi",
-      type: "account.welcome",
+      type: "account",
       read: false,
       created_at: "2026-09-08T09:00:00Z",
     });
     expect(item.read_at).toBeNull();
+    expect(item.category).toBe("account");
+    expect(item.event_key).toBe("");
   });
 
   test("v2 body wins over a legacy message when both are present", () => {
