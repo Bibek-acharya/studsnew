@@ -64,4 +64,30 @@ describe("apiRequest token sniffing", () => {
     await apiRequest("/api/v1/notifications");
     expect(getItem.mock.calls[2][0]).toBe("token");
   });
+
+  test("shared inbox endpoints fall back to role tokens when the default key is absent", async () => {
+    (global as Record<string, unknown>).window = {};
+    const store: Record<string, string | null> = {
+      token: null,
+      institutionToken: "inst-token",
+    };
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: { getItem: (key: string): string | null => store[key] ?? null },
+    });
+    global.fetch = jest.fn(async () =>
+      new Response(JSON.stringify({ ok: true }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    ) as unknown as typeof fetch;
+
+    await apiRequest("/api/v1/notifications?limit=20");
+    const [, options] = (global.fetch as jest.Mock).mock.calls[0] as [
+      string,
+      { headers: Record<string, string> },
+    ];
+    // Same hook, institution role: the institutionToken carries the request.
+    expect(options.headers.Authorization).toBe("Bearer inst-token");
+  });
 });
