@@ -50,6 +50,10 @@ export async function apiRequest<T>(
       token =
         localStorage.getItem("superadmin_token") ||
         localStorage.getItem("token");
+    } else if (path.includes("/institution")) {
+      token =
+        localStorage.getItem("institutionToken") ||
+        localStorage.getItem("token");
     } else {
       token = localStorage.getItem("token");
     }
