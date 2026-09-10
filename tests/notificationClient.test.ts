@@ -111,6 +111,23 @@ describe("notificationClient", () => {
       body: JSON.stringify(payload),
     });
   });
+
+  test("auth overrides merge through without changing the default wire shape", async () => {
+    mockedApiRequest.mockResolvedValue({ data: { notifications: [] }, message: "ok" });
+    await notificationClient.listNotifications(1, { limit: 20 }, {
+      authToken: "role-token",
+      suppressAuthExpired: true,
+    });
+    expect(mockedApiRequest).toHaveBeenCalledWith(
+      "/api/v1/notifications?page=1&limit=20",
+      { authToken: "role-token", suppressAuthExpired: true },
+    );
+    await notificationClient.markRead(5, { authToken: "role-token" });
+    expect(mockedApiRequest).toHaveBeenCalledWith("/api/v1/notifications/5/read", {
+      method: "PUT",
+      authToken: "role-token",
+    });
+  });
 });
 
 describe("toNotificationItem", () => {

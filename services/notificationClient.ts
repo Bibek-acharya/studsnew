@@ -1,4 +1,4 @@
-import { apiRequest } from "./api";
+import { apiRequest, type ApiRequestOptions } from "./api";
 import type {
   Broadcast,
   CreateBroadcastPayload,
@@ -61,45 +61,54 @@ function inboxQuery(page: number, opts: InboxListOptions): string {
 }
 
 export const notificationClient = {
-  listNotifications(page = 1, opts: InboxListOptions = {}): Promise<InboxResponse> {
-    return apiRequest<InboxResponse>(`${BASE}?${inboxQuery(page, opts)}`);
+  listNotifications(page = 1, opts: InboxListOptions = {}, req?: ApiRequestOptions): Promise<InboxResponse> {
+    return call<InboxResponse>(`${BASE}?${inboxQuery(page, opts)}`, {}, req);
   },
-  fetchUnreadCount(): Promise<UnreadCountResponse> {
-    return apiRequest<UnreadCountResponse>(`${BASE}/unread-count`);
+  fetchUnreadCount(req?: ApiRequestOptions): Promise<UnreadCountResponse> {
+    return call<UnreadCountResponse>(`${BASE}/unread-count`, {}, req);
   },
-  markRead(id: number): Promise<void> {
-    return apiRequest<void>(`${BASE}/${id}/read`, { method: "PUT" });
+  markRead(id: number, req?: ApiRequestOptions): Promise<void> {
+    return call<void>(`${BASE}/${id}/read`, { method: "PUT" }, req);
   },
-  markAllRead(): Promise<void> {
-    return apiRequest<void>(`${BASE}/read-all`, { method: "PUT" });
+  markAllRead(req?: ApiRequestOptions): Promise<void> {
+    return call<void>(`${BASE}/read-all`, { method: "PUT" }, req);
   },
-  setArchived(id: number, archived: boolean): Promise<void> {
-    return apiRequest<void>(`${BASE}/${id}/${archived ? "archive" : "unarchive"}`, {
+  setArchived(id: number, archived: boolean, req?: ApiRequestOptions): Promise<void> {
+    return call<void>(`${BASE}/${id}/${archived ? "archive" : "unarchive"}`, {
       method: "PUT",
-    });
+    }, req);
   },
-  remove(id: number): Promise<void> {
-    return apiRequest<void>(`${BASE}/${id}`, { method: "DELETE" });
+  remove(id: number, req?: ApiRequestOptions): Promise<void> {
+    return call<void>(`${BASE}/${id}`, { method: "DELETE" }, req);
   },
-  fetchPreferences(): Promise<PreferencesResponse> {
-    return apiRequest<PreferencesResponse>(`${BASE}/preferences`);
+  fetchPreferences(req?: ApiRequestOptions): Promise<PreferencesResponse> {
+    return call<PreferencesResponse>(`${BASE}/preferences`, {}, req);
   },
-  updatePreferences(payload: UpdatePreferencesPayload): Promise<PreferencesResponse> {
-    return apiRequest<PreferencesResponse>(`${BASE}/preferences`, {
+  updatePreferences(payload: UpdatePreferencesPayload, req?: ApiRequestOptions): Promise<PreferencesResponse> {
+    return call<PreferencesResponse>(`${BASE}/preferences`, {
       method: "PUT",
       body: JSON.stringify(payload),
-    });
+    }, req);
   },
-  createBroadcast(payload: CreateBroadcastPayload): Promise<BroadcastResponse> {
-    return apiRequest<BroadcastResponse>(`${BASE}/broadcast`, {
+  createBroadcast(payload: CreateBroadcastPayload, req?: ApiRequestOptions): Promise<BroadcastResponse> {
+    return call<BroadcastResponse>(`${BASE}/broadcast`, {
       method: "POST",
       body: JSON.stringify(payload),
-    });
+    }, req);
   },
-  listBroadcasts(): Promise<BroadcastsResponse> {
-    return apiRequest<BroadcastsResponse>(`${BASE}/broadcasts`);
+  listBroadcasts(req?: ApiRequestOptions): Promise<BroadcastsResponse> {
+    return call<BroadcastsResponse>(`${BASE}/broadcasts`, {}, req);
   },
-  cancelBroadcast(id: number): Promise<void> {
-    return apiRequest<void>(`${BASE}/broadcasts/${id}/cancel`, { method: "POST" });
+  cancelBroadcast(id: number, req?: ApiRequestOptions): Promise<void> {
+    return call<void>(`${BASE}/broadcasts/${id}/cancel`, { method: "POST" }, req);
   },
+};
+
+// Merges the caller's auth overrides without changing the default wire
+// shape: no overrides → the exact single/double-arg call as before.
+function call<T>(path: string, init: ApiRequestOptions = {}, req?: ApiRequestOptions): Promise<T> {
+  const merged = { ...init, ...req };
+  return Object.keys(merged).length > 0
+    ? apiRequest<T>(path, merged)
+    : apiRequest<T>(path);
 };

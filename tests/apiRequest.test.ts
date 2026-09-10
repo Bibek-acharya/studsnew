@@ -91,3 +91,69 @@ describe("apiRequest token sniffing", () => {
     expect(options.headers.Authorization).toBe("Bearer inst-token");
   });
 });
+
+describe("apiRequest 401 handling (superadmin redirect-to-landing regression)", () => {
+  function setup401(
+    store: Record<string, string | null>,
+    status = 401,
+  ): jest.Mock {
+    const dispatchEvent = jest.fn();
+    (global as Record<string, unknown>).window = { dispatchEvent };
+    Object.defineProperty(globalThis, "localStorage", {
+      configurable: true,
+      value: { getItem: (key: string): string | null => store[key] ?? null },
+    });
+    global.fetch = jest.fn(async () =>
+      new Response(JSON.stringify({ message: "Unauthorized" }), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      }),
+    ) as unknown as typeof fetch;
+    return dispatchEvent;
+  }
+
+  test("explicit authToken wins verbatim over stored keys (superadmin escape hatch)", async () => {
+    setup401({ token: "stale-user-token", superadmin_token: "good-superadmin" });
+    await apiRequest("/api/v1/notifications?limit=20", {
+      authToken: "good-superadmin",
+      suppressAuthExpired: true,
+    }).catch(() => {});
+    const [, options] = (global.fetch as jest.Mock).mock.calls[0] as [
+      string,
+      { headers: Record<string, string> },
+    ];
+    expect(options.headers.Authorization).toBe("Bearer good-superadmin");
+  });
+
+  test("401 on a user-token request still dispatches auth-expired", async () => {
+    const dispatchEvent = setup401({ token: "user-token" });
+    await expect(apiRequest("/api/v1/notifications")).rejects.toThrow();
+    expect(dispatchEvent).toHaveBeenCalledTimes(1);
+  });
+
+  test("401 on a role-token (superadmin fallback) request does NOT dispatch auth-expired", async () => {
+    const dispatchEvent = setup401({
+      token: null,
+      superadmin_token: "good-superadmin",
+    });
+    await expect(apiRequest("/api/v1/notifications")).rejects.toThrow();
+    expect(dispatchEvent).not.toHaveBeenCalled();
+  });
+
+  test("401 with an explicit token matching a stored role token does NOT dispatch auth-expired", async () => {
+    const dispatchEvent = setup401({
+      token: "user-token",
+      superadmin_token: "good-superadmin",
+    });
+    await expect(
+      apiRequest("/api/v1/admin/inquiries", { authToken: "good-superadmin" }),
+    ).rejects.toThrow();
+    expect(dispatchEvent).not.toHaveBeenCalled();
+  });
+
+  test("thrown request errors carry the HTTP status", async () => {
+    setup401({ token: "user-token" });
+    const err = await apiRequest("/api/v1/notifications").catch((e) => e);
+    expect((err as { status?: number }).status).toBe(401);
+  });
+});

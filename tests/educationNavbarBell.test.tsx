@@ -186,4 +186,17 @@ describe("EducationNavbar notification bell", () => {
     expect(src).not.toContain("Stanford");
     expect(src).not.toContain("Cornell");
   });
+
+  test("guests get no notification bell and no public-notifications fetch", async () => {
+    const { apiService } = jest.requireMock("../services/api");
+    const container = render(<EducationNavbar user={null} />);
+    await act(async () => {});
+
+    expect(
+      container.querySelector('[aria-label="Notifications"]'),
+    ).toBeNull();
+    expect(container.textContent).not.toContain("View all activity");
+    expect(apiService.getPublicNotifications).not.toHaveBeenCalled();
+    expect(mockedApiRequest).not.toHaveBeenCalled();
+  });
 });

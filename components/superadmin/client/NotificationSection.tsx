@@ -6,6 +6,7 @@ import NotificationList from "@/components/notifications/NotificationList";
 import { resolveRoute } from "@/features/notifications/routes";
 import { useNotifications } from "@/features/notifications/useNotifications";
 import { notificationClient } from "@/services/notificationClient";
+import { superadminInboxAuth } from "./notifications-context";
 import type {
   BroadcastAudience,
   Priority,
@@ -63,7 +64,7 @@ function ModerationInbox() {
   // Own filtered instance: paging/counts scope to moderation. Mark-all-read
   // stays global (the backend read-all endpoint takes no category filter).
   const { items, unreadCount, loading, error, refresh, markRead, markAllRead } =
-    useNotifications({ limit: 20, category: "moderation" });
+    useNotifications({ limit: 20, category: "moderation", ...superadminInboxAuth() });
 
   const quiet = (promise: Promise<unknown>) => {
     promise.catch(() => {});
@@ -118,13 +119,14 @@ function BroadcastForm() {
     setBanner(null);
     setError(null);
     try {
+      const { authToken, suppressAuthExpired } = superadminInboxAuth();
       const res = await notificationClient.createBroadcast({
         title,
         body,
         ...(link.trim() ? { link: link.trim() } : {}),
         audience: [audience],
         priority,
-      });
+      }, { ...(authToken ? { authToken } : {}), suppressAuthExpired });
       setBanner(`Broadcast queued — campaign #${res.data.broadcast_id} accepted.`);
       setTitle("");
       setBody("");

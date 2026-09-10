@@ -249,4 +249,28 @@ describe("useNotifications", () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.items).toEqual([]);
   });
+
+  test("role authToken threads through and 401s route to onUnauthorized", async () => {
+    const onUnauthorized = jest.fn();
+    renderHook(() =>
+      useNotifications({ authToken: "role-token", onUnauthorized }),
+    );
+    await act(async () => {});
+
+    const listCall = mockedApiRequest.mock.calls.find((call) =>
+      String(call[0]).includes("/notifications?"),
+    )!;
+    expect(listCall[1]).toMatchObject({
+      authToken: "role-token",
+      suppressAuthExpired: true,
+    });
+
+    const err = new Error("Unauthorized") as Error & { status: number };
+    err.status = 401;
+    mockedApiRequest.mockRejectedValue(err);
+    await act(async () => {
+      jest.advanceTimersByTime(60_000);
+    });
+    expect(onUnauthorized).toHaveBeenCalled();
+  });
 });

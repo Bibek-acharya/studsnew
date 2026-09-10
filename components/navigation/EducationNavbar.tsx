@@ -171,42 +171,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
     return inboxItems;
   }, [currentNotifTab, inboxItems]);
 
-  const [publicNotifList, setPublicNotifList] = useState<
-    {
-      id: number;
-      title: string;
-      message: string;
-      type: string;
-      icon: string;
-      color: string;
-      bgColor: string;
-    }[]
-  >([]);
-
-  const unreadPublicCount = publicNotifList.length;
-
-  useEffect(() => {
-    apiService
-      .getPublicNotifications()
-      .then((res) => {
-        const data = res?.data;
-        if (Array.isArray(data)) {
-          setPublicNotifList(
-            data.map((n: any) => ({
-              id: n.id,
-              title: n.title,
-              message: n.message,
-              type: n.type,
-              icon: n.icon || "fa-bell",
-              color: n.color || "text-gray-500",
-              bgColor: n.bgColor || "bg-gray-100",
-            })),
-          );
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   const markAsRead = (id: number) => {
     void markInboxRead(id);
   };
@@ -494,79 +458,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     <i className="fa-solid fa-pen-to-square text-sm"></i>
                     <span>Write a Review</span>
                   </button>
-
-                  {/* Notification Bell - Desktop (Public) */}
-                  <div className="menu-anchor relative hidden md:block">
-                    <button
-                      onClick={() =>
-                        setActiveMenu((prev) =>
-                          prev === "public-notifications"
-                            ? null
-                            : "public-notifications",
-                        )
-                      }
-                      className="relative flex items-center justify-center w-9.5 h-9.5 rounded-full border border-gray-200 hover:bg-gray-50 transition-colors text-[#475569] shrink-0"
-                    >
-                      <Bell size={18} />
-                      {unreadPublicCount > 0 && (
-                        <span className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-[#f44336] text-[11px] font-bold text-white">
-                          {unreadPublicCount}
-                        </span>
-                      )}
-                    </button>
-
-                    {activeMenu === "public-notifications" && (
-                      <div className="absolute top-full right-0 z-[200] mt-2 cursor-default font-inter sm:-right-2">
-                        <div className="absolute -top-1.5 right-6 z-30 h-3 w-3 rotate-45 border-l border-t border-gray-200 bg-white"></div>
-                        <div className="relative z-20 flex w-[320px] flex-col overflow-hidden rounded-md border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.12)] sm:w-95">
-                          <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                              Notifications
-                            </h3>
-                          </div>
-                          <div className="no-scrollbar flex max-h-75 flex-col overflow-y-auto">
-                            {publicNotifList.length === 0 ? (
-                              <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-                                <Bell size={32} className="mb-2 opacity-50" />
-                                <p className="text-sm">No notifications</p>
-                              </div>
-                            ) : (
-                              publicNotifList.map((notif) => (
-                                <div
-                                  key={notif.id}
-                                  className="group relative flex cursor-pointer items-start gap-3 border-b border-gray-50 bg-white p-3 transition-colors hover:bg-gray-50"
-                                >
-                                  <div
-                                    className={`mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${notif.bgColor} ${notif.color}`}
-                                  >
-                                    <i
-                                      className={`fa-solid ${notif.icon || "fa-bell"} text-sm`}
-                                    ></i>
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="mb-0.5 text-sm font-semibold text-black">
-                                      {notif.title}
-                                    </p>
-                                    <p className="line-clamp-2 text-sm leading-relaxed text-gray-800">
-                                      {stripHtml(notif.message)}
-                                    </p>
-                                  </div>
-                                </div>
-                              ))
-                            )}
-                          </div>
-                          <div className="border-t border-gray-100 bg-gray-50/50 p-3">
-                            <button
-                              onClick={() => go("login")}
-                              className="w-full rounded-md py-2 text-center text-sm font-medium text-gray-600 transition-colors hover:text-blue-600"
-                            >
-                              View all activity
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
 
                   <div className="flex items-center">
                     <button

@@ -41,31 +41,49 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const { suppressAuthExpired, authToken, ...requestOptions } = options;
   let token: string | null = authToken ?? null;
-  if (!token && typeof window !== "undefined") {
-    if (path.includes("/scholarship-providers/")) {
-      token =
-        localStorage.getItem("scholarshipProviderToken") ||
-        localStorage.getItem("token");
-    } else if (path.includes("/superadmin") || path.includes("/admin/")) {
-      token =
-        localStorage.getItem("superadmin_token") ||
-        localStorage.getItem("token");
-    } else if (path.includes("/api/v1/institution")) {
-      // v1-anchored prefix covering both /institution/* and /institutions/*
-      // (the plural carries authenticated endpoints like /institutions/preferences).
-      token =
-        localStorage.getItem("institutionToken") ||
-        localStorage.getItem("token");
+  // True when the request authenticates as a role session (institution /
+  // provider / superadmin) rather than the main user session. A 401 here
+  // must NOT fire the global auth-expired nuke (AuthContext wipes every
+  // session and redirects to the landing page) — role surfaces own their
+  // 401 handling and redirect to their own login pages.
+  let roleToken = false;
+  if (typeof window !== "undefined") {
+    const stored = (key: string): string | null => localStorage.getItem(key);
+    if (token) {
+      roleToken =
+        stored("token") !== token &&
+        ["institutionToken", "scholarshipProviderToken", "superadmin_token"].some(
+          (key) => stored(key) === token,
+        );
     } else {
-      // Shared role-agnostic endpoints (e.g. /api/v1/notifications): the
-      // default key first, then role keys so institution/provider/superadmin
-      // sessions work through the same hook with no per-caller plumbing.
-      // ponytail: first-settled key wins; per-endpoint keys if roles collide.
-      token =
-        localStorage.getItem("token") ||
-        localStorage.getItem("institutionToken") ||
-        localStorage.getItem("scholarshipProviderToken") ||
-        localStorage.getItem("superadmin_token");
+      const pick = (key: string): boolean => {
+        const value = stored(key);
+        if (value) {
+          token = value;
+          roleToken = key !== "token";
+          return true;
+        }
+        return false;
+      };
+      if (path.includes("/scholarship-providers/")) {
+        if (!pick("scholarshipProviderToken")) pick("token");
+      } else if (path.includes("/superadmin") || path.includes("/admin/")) {
+        if (!pick("superadmin_token")) pick("token");
+      } else if (path.includes("/api/v1/institution")) {
+        // v1-anchored prefix covering both /institution/* and /institutions/*
+        // (the plural carries authenticated endpoints like /institutions/preferences).
+        if (!pick("institutionToken")) pick("token");
+      } else {
+        // Shared role-agnostic endpoints (e.g. /api/v1/notifications): the
+        // default key first, then role keys so institution/provider/superadmin
+        // sessions work through the same hook with no per-caller plumbing.
+        // ponytail: first-settled key wins; per-endpoint keys if roles collide.
+        if (!pick("token")) {
+          if (!pick("institutionToken")) {
+            if (!pick("scholarshipProviderToken")) pick("superadmin_token");
+          }
+        }
+      }
     }
   }
 
@@ -107,12 +125,15 @@ export async function apiRequest<T>(
       response.status === 401 &&
       typeof window !== "undefined" &&
       !suppressAuthExpired &&
+      !roleToken &&
       !path.includes("/auth/login") &&
       !path.includes("/auth/register")
     ) {
       window.dispatchEvent(new CustomEvent("auth-expired"));
     }
-    throw new Error(errorMessage);
+    const err = new Error(errorMessage) as Error & { status?: number };
+    err.status = response.status;
+    throw err;
   }
 
   return data as T;

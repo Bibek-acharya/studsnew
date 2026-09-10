@@ -195,10 +195,38 @@ describe("superadmin notification surfaces", () => {
           audience: ["all"],
           priority: "critical",
         }),
+        // Superadmin calls authenticate explicitly and never trip the
+        // global user-session auth-expired nuke.
+        suppressAuthExpired: true,
       },
     );
     // 202 accepted → campaign banner (acceptance #4 hook).
     expect(container.textContent).toContain("Broadcast queued");
+  });
+
+  test("superadmin inbox calls carry the superadmin token verbatim", async () => {
+    localStorage.setItem("superadmin_token", "good-superadmin");
+    localStorage.setItem("token", "stale-user-token");
+    try {
+      renderSection();
+      await act(async () => {});
+
+      const listCalls = mockedApiRequest.mock.calls.filter((call) =>
+        String(call[0]).includes("/notifications?"),
+      );
+      expect(listCalls.length).toBeGreaterThan(0);
+      for (const call of listCalls) {
+        // Explicit superadmin token wins over the stale default key, and
+        // the global auth-expired nuke stays off for role sessions.
+        expect(call[1]).toMatchObject({
+          authToken: "good-superadmin",
+          suppressAuthExpired: true,
+        });
+      }
+    } finally {
+      localStorage.removeItem("superadmin_token");
+      localStorage.removeItem("token");
+    }
   });
 
   test("DashboardShell deleted the raw student-endpoint fetch and read hedging", () => {
