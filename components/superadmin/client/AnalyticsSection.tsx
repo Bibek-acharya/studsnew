@@ -4,6 +4,8 @@ import React, { useState } from "react";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend } from "chart.js";
 import UserPanel from "./analytics/UserPanel";
 import FunnelPanel from "./analytics/FunnelPanel";
+import SupplyPanel from "./analytics/SupplyPanel";
+import OpsPanel from "./analytics/OpsPanel";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend);
 
@@ -42,6 +44,8 @@ export default function AnalyticsSection() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <UserPanel from={from} to={to} />
         <FunnelPanel from={from} to={to} />
+        <SupplyPanel from={from} to={to} />
+        <OpsPanel from={from} to={to} />
       </div>
     </div>
   );

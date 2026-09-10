@@ -69,6 +69,27 @@ beforeEach(() => {
       series: [{ bucket: "2026-09-09", values: { "admissions:pending": 2 } }],
     },
   });
+  mockedApi.getSupply.mockResolvedValue({
+    data: {
+      totals: { colleges: 0, scholarships_published: 0, events: 0, blogs: 0, news: 0 },
+      approval_aging: {
+        institutions: { lt_24h: 0, d1_3: 0, gt_3d: 0 },
+        providers: { lt_24h: 0, d1_3: 0, gt_3d: 0 },
+      },
+      top_bookmarked: [],
+      top_followed: [],
+      stale_scholarships: [],
+      series: [],
+    },
+  });
+  mockedApi.getOps.mockResolvedValue({
+    data: {
+      totals: { forum_reports: 0, review_reports: 0, feedback: 0, broadcasts: 0, broadcasts_failed: 0 },
+      inquiries_by_status: {},
+      recent_broadcasts: [],
+      series: [],
+    },
+  });
 });
 
 afterEach(() => {
@@ -130,5 +151,43 @@ describe("AnalyticsSection", () => {
       "utf8",
     );
     expect(src).toContain('window.location.href = "/superadmin/login"');
+  });
+
+  test("supply panel renders aging buckets and stale scholarships", async () => {
+    mockedApi.getSupply.mockResolvedValue({
+      data: {
+        totals: { colleges: 5, scholarships_published: 3, events: 2, blogs: 1, news: 4 },
+        approval_aging: {
+          institutions: { lt_24h: 1, d1_3: 2, gt_3d: 0 },
+          providers: { lt_24h: 0, d1_3: 0, gt_3d: 1 },
+        },
+        top_bookmarked: [{ kind: "college", id: 7, count: 9 }],
+        top_followed: [{ kind: "institution", id: 9, count: 4 }],
+        stale_scholarships: [{ id: 3, title: "Old Grant", deadline: "2026-08-01T00:00:00Z" }],
+        series: [{ bucket: "2026-09-09", values: { colleges: 1 } }],
+      },
+    });
+    const container = render();
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    expect(container.textContent).toContain("Old Grant");
+    expect(container.textContent).toContain("college #7");
+  });
+
+  test("ops panel renders inquiry statuses and recent broadcasts", async () => {
+    mockedApi.getOps.mockResolvedValue({
+      data: {
+        totals: { forum_reports: 2, review_reports: 1, feedback: 3, broadcasts: 4, broadcasts_failed: 1 },
+        inquiries_by_status: { new: 2, replied: 1 },
+        recent_broadcasts: [{ id: 9, status: "completed", audience: "all", created_at: "2026-09-09T10:00:00Z" }],
+        series: [{ bucket: "2026-09-09", values: { forum_reports: 1 } }],
+      },
+    });
+    const container = render();
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    expect(container.textContent).toContain("Broadcast #9");
   });
 });
