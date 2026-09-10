@@ -5,14 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Line } from "react-chartjs-2";
 import { superadminAnalyticsApi } from "../../../../services/superadminAnalyticsApi";
 import { seriesToCSV, downloadCSV } from "./csv";
-import { Panel, redirectOnUnauthorized } from "./Panel";
-
-const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#ca8a04", "#7c3aed", "#0891b2"];
+import { Panel, Tile, COLORS, redirectOnUnauthorized } from "./Panel";
 
 export default function UserPanel({ from, to }: { from: string; to: string }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["superadmin-analytics", "users", from, to],
     queryFn: () => superadminAnalyticsApi.getUsers(from, to),
+    retry: (failureCount, error) => ((error as { status?: number })?.status === 401 ? false : failureCount < 1),
   });
 
   useEffect(() => {
@@ -45,6 +44,8 @@ export default function UserPanel({ from, to }: { from: string; to: string }) {
   }
 
   const keys = Array.from(new Set(users.series.flatMap((p) => Object.keys(p.values)))).sort();
+  const statuses = Object.entries(users.user_status_breakdown ?? {}).sort((a, b) => b[1] - a[1]);
+  const statusTotal = statuses.reduce((sum, [, count]) => sum + count, 0);
 
   return (
     <Panel title="Users" onExport={() => downloadCSV(`users-${from}-${to}.csv`, seriesToCSV(users.series))}>
@@ -57,6 +58,25 @@ export default function UserPanel({ from, to }: { from: string; to: string }) {
         <Tile label="Pending providers" value={users.totals.pending_providers} />
         <Tile label="Activation" value={`${users.totals.activation_pct}%`} />
       </div>
+      {statuses.length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold text-gray-900">Status breakdown</h4>
+          <div className="mt-2 space-y-1">
+            {statuses.map(([status, count]) => (
+              <div key={status} className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="w-24 truncate">{status}</span>
+                <div className="h-2 flex-1 rounded bg-gray-100">
+                  <div
+                    className="h-2 rounded bg-blue-600"
+                    style={{ width: `${statusTotal ? (count / statusTotal) * 100 : 0}%` }}
+                  />
+                </div>
+                <span className="w-12 text-right">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {users.series.length > 0 ? (
         <div className="mt-4">
           <Line
@@ -75,14 +95,5 @@ export default function UserPanel({ from, to }: { from: string; to: string }) {
         <p className="mt-4 text-sm text-gray-500">No trend data for this range.</p>
       )}
     </Panel>
-  );
-}
-
-function Tile({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-lg bg-gray-50 p-3">
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="mt-1 text-xs text-gray-500">{label}</p>
-    </div>
   );
 }

@@ -12,6 +12,7 @@ export function useLiveHealth() {
   const query = useQuery({
     queryKey: ["superadmin-analytics", "health"],
     queryFn: () => superadminAnalyticsApi.getHealth().then((res) => res.data),
+    retry: (failureCount, error) => ((error as { status?: number })?.status === 401 ? false : failureCount < 1),
     refetchInterval: 15_000,
     refetchIntervalInBackground: false,
   });

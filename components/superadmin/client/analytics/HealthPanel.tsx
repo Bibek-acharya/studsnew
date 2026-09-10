@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import { useLiveHealth } from "./useLiveHealth";
 import { downloadCSV } from "./csv";
-import { Panel, redirectOnUnauthorized } from "./Panel";
+import { Panel, Tile, redirectOnUnauthorized } from "./Panel";
 
 export function formatBytes(bytes: number): string {
   if (!bytes) return "0 B";
@@ -81,9 +81,32 @@ export default function HealthPanel() {
         <Tile label="DB size" value={formatBytes(snapshot.database.size_bytes)} />
         <Tile label="Pool in-use/open" value={`${snapshot.database.pool_in_use}/${snapshot.database.pool_open}`} />
         <Tile label="Email pending/failed" value={`${snapshot.queues.email.pending}/${snapshot.queues.email.failed}`} />
+        <Tile label="Email active" value={snapshot.queues.email.active} />
+        <Tile label="Email service" value={snapshot.queues.email.available ? "available" : "unavailable"} />
         <Tile label="Outbox pending" value={snapshot.queues.outbox_pending} />
         <Tile label="5xx errors" value={snapshot.api.server_errors_5xx} />
       </div>
+      {snapshot.api.top_endpoints.length > 0 && (
+        <div className="mt-4">
+          <h4 className="text-sm font-semibold text-gray-900">Top endpoints</h4>
+          <table className="mt-2 w-full text-sm text-gray-700">
+            <thead>
+              <tr className="text-left text-xs text-gray-500">
+                <th className="py-1">Endpoint</th>
+                <th className="py-1">Requests</th>
+              </tr>
+            </thead>
+            <tbody>
+              {snapshot.api.top_endpoints.map((endpoint) => (
+                <tr key={endpoint.path}>
+                  <td className="py-1">{endpoint.path}</td>
+                  <td className="py-1">{endpoint.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
       <p className="mt-3 text-xs text-gray-500">live window — last ~10 min, not history</p>
       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
@@ -124,14 +147,5 @@ export default function HealthPanel() {
         </div>
       </div>
     </Panel>
-  );
-}
-
-function Tile({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-lg bg-gray-50 p-3">
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="mt-1 text-xs text-gray-500">{label}</p>
-    </div>
   );
 }

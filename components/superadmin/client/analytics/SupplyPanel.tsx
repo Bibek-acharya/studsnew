@@ -5,14 +5,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Line } from "react-chartjs-2";
 import { superadminAnalyticsApi } from "../../../../services/superadminAnalyticsApi";
 import { seriesToCSV, downloadCSV } from "./csv";
-import { Panel, redirectOnUnauthorized } from "./Panel";
-
-const COLORS = ["#2563eb", "#16a34a", "#dc2626", "#ca8a04", "#7c3aed", "#0891b2"];
+import { Panel, Tile, COLORS, redirectOnUnauthorized } from "./Panel";
 
 export default function SupplyPanel({ from, to }: { from: string; to: string }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["superadmin-analytics", "supply", from, to],
     queryFn: () => superadminAnalyticsApi.getSupply(from, to),
+    retry: (failureCount, error) => ((error as { status?: number })?.status === 401 ? false : failureCount < 1),
   });
 
   useEffect(() => {
@@ -145,14 +144,5 @@ export default function SupplyPanel({ from, to }: { from: string; to: string }) 
         </div>
       )}
     </Panel>
-  );
-}
-
-function Tile({ label, value }: { label: string; value: string | number }) {
-  return (
-    <div className="rounded-lg bg-gray-50 p-3">
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      <p className="mt-1 text-xs text-gray-500">{label}</p>
-    </div>
   );
 }

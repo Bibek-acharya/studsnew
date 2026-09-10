@@ -15,6 +15,11 @@ describe("analytics CSV", () => {
     );
   });
 
+  test("escapeCell neutralizes spreadsheet formulas with a leading quote", () => {
+    const series: SeriesPoint[] = [{ bucket: "=1+1", values: { n: 1 } }];
+    expect(seriesToCSV(series)).toBe("bucket,n\n'=1+1,1");
+  });
+
   test("downloadCSV triggers a blob download with the given filename", () => {
     const createObjectURL = jest.fn(() => "blob:fake");
     const revokeObjectURL = jest.fn();

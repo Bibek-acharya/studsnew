@@ -1,7 +1,9 @@
 import type { SeriesPoint } from "../../../../services/superadminAnalyticsApi";
 
 function escapeCell(value: string | number): string {
-  const s = String(value);
+  let s = String(value);
+  // Formula-injection guard: neutralize cells a spreadsheet would execute.
+  if (/^[=+\-@]/.test(s)) s = `'${s}`;
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
