@@ -24,6 +24,13 @@ jest.mock("next/navigation", () => ({
   useRouter: () => ({ push: jest.fn() }),
 }));
 
+// HealthPanel polls every 15s, which runAllTimersAsync below would chase
+// forever — stub it here (covered by superadminAnalyticsHealth.test.tsx).
+jest.mock("../components/superadmin/client/analytics/HealthPanel", () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
 const mockedApi = superadminAnalyticsApi as unknown as Record<string, jest.Mock>;
@@ -151,6 +158,14 @@ describe("AnalyticsSection", () => {
       "utf8",
     );
     expect(src).toContain('window.location.href = "/superadmin/login"');
+  });
+
+  test("analytics section mounts the health panel", () => {
+    const src = fs.readFileSync(
+      path.join(__dirname, "../components/superadmin/client/AnalyticsSection.tsx"),
+      "utf8",
+    );
+    expect(src).toContain("<HealthPanel");
   });
 
   test("supply panel renders aging buckets and stale scholarships", async () => {

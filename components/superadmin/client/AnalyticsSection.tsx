@@ -6,6 +6,7 @@ import UserPanel from "./analytics/UserPanel";
 import FunnelPanel from "./analytics/FunnelPanel";
 import SupplyPanel from "./analytics/SupplyPanel";
 import OpsPanel from "./analytics/OpsPanel";
+import HealthPanel from "./analytics/HealthPanel";
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend);
 
@@ -46,6 +47,7 @@ export default function AnalyticsSection() {
         <FunnelPanel from={from} to={to} />
         <SupplyPanel from={from} to={to} />
         <OpsPanel from={from} to={to} />
+        <HealthPanel />
       </div>
     </div>
   );
