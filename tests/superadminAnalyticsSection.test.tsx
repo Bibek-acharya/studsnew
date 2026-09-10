@@ -168,6 +168,15 @@ describe("AnalyticsSection", () => {
     expect(src).toContain("<HealthPanel");
   });
 
+  test("no hardcoded mock numbers remain in the analytics section", () => {
+    const src = fs.readFileSync(
+      path.join(__dirname, "../components/superadmin/client/AnalyticsSection.tsx"),
+      "utf8",
+    );
+    expect(src).not.toContain("+12.5%");
+    expect(src).not.toContain("847");
+  });
+
   test("supply panel renders aging buckets and stale scholarships", async () => {
     mockedApi.getSupply.mockResolvedValue({
       data: {
