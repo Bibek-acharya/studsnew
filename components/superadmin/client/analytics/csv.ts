@@ -1,4 +1,4 @@
-import type { SeriesPoint } from "../../../services/superadminAnalyticsApi";
+import type { SeriesPoint } from "../../../../services/superadminAnalyticsApi";
 
 function escapeCell(value: string | number): string {
   const s = String(value);
