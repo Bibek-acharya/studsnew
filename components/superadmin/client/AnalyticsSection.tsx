@@ -1,45 +1,48 @@
 "use client";
 
-import React from "react";
-import { ArrowRight, Users, Percent } from "lucide-react";
+import React, { useState } from "react";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend } from "chart.js";
+import UserPanel from "./analytics/UserPanel";
+import FunnelPanel from "./analytics/FunnelPanel";
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Tooltip, Legend);
+
+type RangeDays = 7 | 30 | 90;
+
+const RANGES: RangeDays[] = [7, 30, 90];
+
+function toISODate(date: Date): string {
+  return date.toISOString().slice(0, 10);
+}
 
 export default function AnalyticsSection() {
+  const [range, setRange] = useState<RangeDays>(30);
+
+  const to = toISODate(new Date());
+  const fromDate = new Date();
+  fromDate.setDate(fromDate.getDate() - range);
+  const from = toISODate(fromDate);
+
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-      <InfoTile title="User Growth" value="+12.5%" note="Last 30 days" icon={<TrendingUpIcon />} />
-      <InfoTile title="Approval Rate" value="12.5%" note="Of total applications" icon={<Percent className="h-6 w-6 text-slate-400" />} />
-      <InfoTile title="Active Users" value="847" note="Last 7 days" icon={<Users className="h-6 w-6 text-slate-400" />} />
-      <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm xl:col-span-3">
-        <h3 className="text-lg font-bold text-gray-900">Analytics</h3>
-        <p className="mt-1 text-sm text-gray-500">Detailed analytics panels can be added here to match the production dashboard.</p>
+    <div className="space-y-6">
+      <div className="flex items-center gap-2">
+        {RANGES.map((days) => (
+          <button
+            key={days}
+            type="button"
+            onClick={() => setRange(days)}
+            className={`rounded-md px-3 py-1.5 text-sm font-medium ${
+              range === days ? "bg-blue-600 text-white" : "text-gray-600 hover:bg-gray-100"
+            }`}
+          >
+            {days}d
+          </button>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <UserPanel from={from} to={to} />
+        <FunnelPanel from={from} to={to} />
       </div>
     </div>
   );
-}
-
-function InfoTile({
-  title,
-  value,
-  note,
-  icon,
-}: {
-  title: string;
-  value: string;
-  note: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
-      <div className="flex items-center justify-between">
-        {icon}
-        <span className="text-2xl font-bold text-gray-900">{value}</span>
-      </div>
-      <p className="mt-4 text-sm font-semibold text-gray-700">{title}</p>
-      <p className="mt-1 text-xs text-gray-500">{note}</p>
-    </div>
-  );
-}
-
-function TrendingUpIcon() {
-  return <ArrowRight className="h-6 w-6 rotate-[-45deg] text-slate-400" />;
 }
