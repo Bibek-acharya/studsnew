@@ -199,12 +199,16 @@ export default function InstitutionZone() {
     if (!panNumber.trim()) errors.panNumber = "PAN number is required.";
     else if (!/^\d{9}$/.test(panNumber))
       errors.panNumber = "PAN must be exactly 9 digits.";
-    if (!registrationNumber.trim())
+    const regVal = registrationNumber.trim();
+    if (!regVal)
       errors.registrationNumber = "Registration number is required.";
-    else if (registrationNumber.replace(/-/g, "").trim().length < 10)
+    else if (/[A-Za-z]/.test(regVal))
+      errors.registrationNumber =
+        "Only numbers and special characters allowed.";
+    else if (regVal.length < 10)
       errors.registrationNumber = "Registration number must be at least 10 characters.";
-    else if (registrationNumber.replace(/-/g, "").trim().length > 11)
-      errors.registrationNumber = "Registration number must be at most 11 characters.";
+    else if (regVal.length > 15)
+      errors.registrationNumber = "Registration number must be at most 15 characters.";
     if (!website.trim()) errors.website = "Website is required.";
     else if (!/^https?:\/\/.+\..+/.test(website.trim()))
       errors.website = "Please enter a valid URL (e.g. https://www.example.com).";
@@ -866,17 +870,13 @@ export default function InstitutionZone() {
                           </label>
                           <input
                             type="text"
-                            placeholder="XXXX-XXX-XXX"
+                            placeholder="Enter registration number"
                             value={registrationNumber}
+                            maxLength={15}
                             onChange={(e) => {
-                              const val = e.target.value
-                                .replace(/[^A-Za-z0-9]/g, "")
-                                .slice(0, 10);
-                              const parts: string[] = [];
-                              if (val.length > 0) parts.push(val.slice(0, 4));
-                              if (val.length > 4) parts.push(val.slice(4, 7));
-                              if (val.length > 7) parts.push(val.slice(7, 10));
-                              setRegistrationNumber(parts.join("-"));
+                              setRegistrationNumber(
+                                e.target.value.replace(/[A-Za-z]/g, "").slice(0, 15)
+                              );
                             }}
                             className={inputClass(
                               !!fieldErrors.registrationNumber

@@ -41,7 +41,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6">
+    <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-6">
       <div className="flex w-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
         <div className="z-10 flex items-center justify-between border-b border-gray-100 bg-white px-4 py-3">
           <div className="flex items-center gap-2">

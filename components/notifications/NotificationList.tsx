@@ -76,11 +76,18 @@ export default function NotificationList({
   }
 
   if (items.length === 0) {
-    // Empty inbox: text only — no splash art, never mock data (doc 13 §8).
+    // Empty inbox — matches dashboard empty-state pattern, never mock data.
     return (
-      <div className="py-10 text-center text-gray-400">
-        <Bell size={20} className="mx-auto mb-2 opacity-50" />
-        <p className="text-xs font-medium">You&apos;re all caught up</p>
+      <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+        <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+          <Bell className="w-10 h-10 text-slate-300" />
+        </div>
+        <h3 className="text-lg font-semibold text-slate-800 mb-2">
+          You&apos;re all caught up
+        </h3>
+        <p className="text-sm text-slate-500 max-w-sm">
+          When you get new notifications, they&apos;ll show up here.
+        </p>
       </div>
     );
   }
@@ -109,6 +116,44 @@ export default function NotificationList({
     } else {
       groups.push({ label, items: [item] });
     }
+  }
+
+  if (filtered.length === 0) {
+    return (
+      <div>
+        {onCategoryChange && (
+          <div
+            role="tablist"
+            className="flex gap-1 overflow-x-auto px-3 py-2 border-b border-gray-100"
+          >
+            {["all", ...categories, ...extraTabs].map((category) => (
+              <button
+                key={category}
+                onClick={() => onCategoryChange(category)}
+                className={`px-2.5 py-1 rounded-full text-[11px] font-semibold capitalize whitespace-nowrap transition-colors ${
+                  (activeCategory ?? "all") === category
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {category === "all" ? "All" : category}
+              </button>
+            ))}
+          </div>
+        )}
+        <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
+          <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+            <Bell className="w-10 h-10 text-slate-300" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-800 mb-2">
+            No notifications here
+          </h3>
+          <p className="text-sm text-slate-500 max-w-sm">
+            There are no notifications in this view right now.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
