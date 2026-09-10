@@ -38,7 +38,7 @@ const mockedApi = superadminAnalyticsApi as unknown as Record<string, jest.Mock>
 const containers: HTMLElement[] = [];
 const roots: Root[] = [];
 
-function render() {
+function render(onNavigate?: (section: string) => void) {
   const container = document.createElement("div");
   document.body.appendChild(container);
   containers.push(container);
@@ -47,11 +47,22 @@ function render() {
   act(() => {
     root.render(
       <QueryClientProvider client={new QueryClient()}>
-        <AnalyticsSection />
+        <AnalyticsSection onNavigate={onNavigate} />
       </QueryClientProvider>,
     );
   });
   return container;
+}
+
+function clickButton(container: HTMLElement, text: string) {
+  const btn = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === text,
+  );
+  if (!btn) throw new Error(`button with text "${text}" not found`);
+  act(() => {
+    btn.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+  });
+  return btn;
 }
 
 beforeEach(() => {
@@ -213,5 +224,100 @@ describe("AnalyticsSection", () => {
       await jest.runAllTimersAsync();
     });
     expect(container.textContent).toContain("Broadcast #9");
+  });
+
+  test("stale-scholarship row navigates to manage-scholarship", async () => {
+    mockedApi.getSupply.mockResolvedValue({
+      data: {
+        totals: { colleges: 5, scholarships_published: 3, events: 0, blogs: 0, news: 0 },
+        approval_aging: {
+          institutions: { lt_24h: 1, d1_3: 0, gt_3d: 0 },
+          providers: { lt_24h: 0, d1_3: 0, gt_3d: 0 },
+        },
+        top_bookmarked: [],
+        top_followed: [],
+        stale_scholarships: [{ id: 3, title: "Old Grant", deadline: "2026-08-01T00:00:00Z" }],
+        series: [],
+      },
+    });
+    const onNavigate = jest.fn();
+    const container = render(onNavigate);
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    clickButton(container, "Old Grant");
+    expect(onNavigate).toHaveBeenCalledWith("manage-scholarship");
+  });
+
+  test("aging cell navigates to pending-institutions", async () => {
+    mockedApi.getSupply.mockResolvedValue({
+      data: {
+        totals: { colleges: 0, scholarships_published: 0, events: 0, blogs: 0, news: 0 },
+        approval_aging: {
+          institutions: { lt_24h: 4, d1_3: 0, gt_3d: 0 },
+          providers: { lt_24h: 0, d1_3: 0, gt_3d: 0 },
+        },
+        top_bookmarked: [],
+        top_followed: [],
+        stale_scholarships: [],
+        series: [],
+      },
+    });
+    const onNavigate = jest.fn();
+    const container = render(onNavigate);
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    clickButton(container, "4");
+    expect(onNavigate).toHaveBeenCalledWith("pending-institutions");
+  });
+
+  test("aging providers cell navigates to pending-providers", async () => {
+    mockedApi.getSupply.mockResolvedValue({
+      data: {
+        totals: { colleges: 0, scholarships_published: 0, events: 0, blogs: 0, news: 0 },
+        approval_aging: {
+          institutions: { lt_24h: 0, d1_3: 0, gt_3d: 0 },
+          providers: { lt_24h: 0, d1_3: 5, gt_3d: 0 },
+        },
+        top_bookmarked: [],
+        top_followed: [],
+        stale_scholarships: [],
+        series: [],
+      },
+    });
+    const onNavigate = jest.fn();
+    const container = render(onNavigate);
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    clickButton(container, "5");
+    expect(onNavigate).toHaveBeenCalledWith("pending-providers");
+  });
+
+  test("ops tiles and rows navigate to dashboard sections", async () => {
+    mockedApi.getOps.mockResolvedValue({
+      data: {
+        totals: { forum_reports: 2, review_reports: 1, feedback: 3, broadcasts: 4, broadcasts_failed: 1 },
+        inquiries_by_status: { new: 2, replied: 1 },
+        recent_broadcasts: [{ id: 9, status: "completed", audience: "all", created_at: "2026-09-09T10:00:00Z" }],
+        series: [{ bucket: "2026-09-09", values: { forum_reports: 1 } }],
+      },
+    });
+    const onNavigate = jest.fn();
+    const container = render(onNavigate);
+    await act(async () => {
+      await jest.runAllTimersAsync();
+    });
+    clickButton(container, "2Forum reports");
+    expect(onNavigate).toHaveBeenCalledWith("manage-campus-feed");
+    clickButton(container, "1Review reports");
+    expect(onNavigate).toHaveBeenCalledWith("university-reviews");
+    clickButton(container, "3Feedback");
+    expect(onNavigate).toHaveBeenCalledWith("manage-feedback");
+    clickButton(container, "new");
+    expect(onNavigate).toHaveBeenCalledWith("message-inquiry");
+    clickButton(container, "Broadcast #9");
+    expect(onNavigate).toHaveBeenCalledWith("manage-notification");
   });
 });

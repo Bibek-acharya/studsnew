@@ -21,7 +21,7 @@ export function toISODate(date: Date): string {
   return `${year}-${month}-${day}`;
 }
 
-export default function AnalyticsSection() {
+export default function AnalyticsSection({ onNavigate }: { onNavigate?: (section: string) => void }) {
   const [range, setRange] = useState<RangeDays>(30);
 
   const to = toISODate(new Date());
@@ -48,8 +48,8 @@ export default function AnalyticsSection() {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <UserPanel from={from} to={to} />
         <FunnelPanel from={from} to={to} />
-        <SupplyPanel from={from} to={to} />
-        <OpsPanel from={from} to={to} />
+        <SupplyPanel from={from} to={to} onNavigate={onNavigate} />
+        <OpsPanel from={from} to={to} onNavigate={onNavigate} />
         <HealthPanel />
       </div>
     </div>

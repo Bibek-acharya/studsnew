@@ -7,7 +7,7 @@ import { superadminAnalyticsApi } from "../../../../services/superadminAnalytics
 import { seriesToCSV, downloadCSV } from "./csv";
 import { Panel, Tile, COLORS, redirectOnUnauthorized } from "./Panel";
 
-export default function SupplyPanel({ from, to }: { from: string; to: string }) {
+export default function SupplyPanel({ from, to, onNavigate }: { from: string; to: string; onNavigate?: (section: string) => void }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["superadmin-analytics", "supply", from, to],
     queryFn: () => superadminAnalyticsApi.getSupply(from, to),
@@ -85,15 +85,15 @@ export default function SupplyPanel({ from, to }: { from: string; to: string }) 
           <tbody>
             <tr>
               <td className="py-1">Institutions</td>
-              <td className="py-1">{supply.approval_aging.institutions.lt_24h}</td>
-              <td className="py-1">{supply.approval_aging.institutions.d1_3}</td>
-              <td className="py-1">{supply.approval_aging.institutions.gt_3d}</td>
+              <td className="py-1"><AgingCell value={supply.approval_aging.institutions.lt_24h} target="pending-institutions" onNavigate={onNavigate} /></td>
+              <td className="py-1"><AgingCell value={supply.approval_aging.institutions.d1_3} target="pending-institutions" onNavigate={onNavigate} /></td>
+              <td className="py-1"><AgingCell value={supply.approval_aging.institutions.gt_3d} target="pending-institutions" onNavigate={onNavigate} /></td>
             </tr>
             <tr>
               <td className="py-1">Providers</td>
-              <td className="py-1">{supply.approval_aging.providers.lt_24h}</td>
-              <td className="py-1">{supply.approval_aging.providers.d1_3}</td>
-              <td className="py-1">{supply.approval_aging.providers.gt_3d}</td>
+              <td className="py-1"><AgingCell value={supply.approval_aging.providers.lt_24h} target="pending-providers" onNavigate={onNavigate} /></td>
+              <td className="py-1"><AgingCell value={supply.approval_aging.providers.d1_3} target="pending-providers" onNavigate={onNavigate} /></td>
+              <td className="py-1"><AgingCell value={supply.approval_aging.providers.gt_3d} target="pending-providers" onNavigate={onNavigate} /></td>
             </tr>
           </tbody>
         </table>
@@ -135,7 +135,15 @@ export default function SupplyPanel({ from, to }: { from: string; to: string }) 
             <tbody>
               {supply.stale_scholarships.map((s) => (
                 <tr key={s.id}>
-                  <td className="py-1">{s.title}</td>
+                  <td className="py-1">
+                    {onNavigate ? (
+                      <button type="button" onClick={() => onNavigate("manage-scholarship")} className="hover:text-blue-600 hover:underline">
+                        {s.title}
+                      </button>
+                    ) : (
+                      s.title
+                    )}
+                  </td>
                   <td className="py-1">{s.deadline.slice(0, 10)}</td>
                 </tr>
               ))}
@@ -144,5 +152,14 @@ export default function SupplyPanel({ from, to }: { from: string; to: string }) 
         </div>
       )}
     </Panel>
+  );
+}
+
+function AgingCell({ value, target, onNavigate }: { value: string | number; target: string; onNavigate?: (section: string) => void }) {
+  if (!onNavigate) return <>{value}</>;
+  return (
+    <button type="button" onClick={() => onNavigate(target)} className="hover:text-blue-600 hover:underline">
+      {value}
+    </button>
   );
 }

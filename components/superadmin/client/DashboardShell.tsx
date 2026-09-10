@@ -632,7 +632,7 @@ function DashboardShellInner() {
       case "scholarship-provider":
         return <VerifiedProvidersSection />;
       case "analytics":
-        return <AnalyticsSection />;
+        return <AnalyticsSection onNavigate={navigateTo} />;
       case "manage-ads":
         return <ManageAdsSection />;
       case "manage-feedback":
