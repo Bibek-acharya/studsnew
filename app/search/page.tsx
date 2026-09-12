@@ -131,38 +131,46 @@ function SearchContent() {
 
     let cancelled = false;
     const fetchSearch = async () => {
-      try {
-        const sortValue = SORT_OPTIONS[currentSort] || "relevance";
-        const url = buildSearchUrl(currentPage, sortValue);
+      // ponytail: retry once on transport failure only; genuine empties break immediately.
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          const sortValue = SORT_OPTIONS[currentSort] || "relevance";
+          const url = buildSearchUrl(currentPage, sortValue);
 
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-        const res = await fetch(url, {
-          credentials: "include",
-          signal: controller.signal,
-        });
-        clearTimeout(timeoutId);
+          const res = await fetch(url, {
+            credentials: "include",
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
 
-        const json: SearchResponse = await res.json();
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          const json: SearchResponse = await res.json();
+          if (!json.success) throw new Error(json.message || "Search failed");
 
-        if (!cancelled) {
-          // ponytail: failures and partial results surface as plain results /
-          // "No results found" — no error, retry, or quality notices by design.
-          setItems(json?.data?.items || []);
-          setMeta(
-            json?.data?.meta || { page: 1, limit: 20, total: 0, pages: 0 },
-          );
-        }
-      } catch (e) {
-        if (!cancelled) {
+          if (!cancelled) {
+            // ponytail: failures and partial results surface as plain results /
+            // "No results found" — no error, retry, or quality notices by design.
+            setItems(json?.data?.items || []);
+            setMeta(
+              json?.data?.meta || { page: 1, limit: 20, total: 0, pages: 0 },
+            );
+          }
+          break;
+        } catch (e) {
+          if (cancelled) return;
+          if (attempt === 0) {
+            await new Promise((r) => setTimeout(r, 800));
+            continue;
+          }
           setItems([]);
           setMeta({ page: 1, limit: 20, total: 0, pages: 0 });
           console.error("Search fetch failed:", e);
         }
-      } finally {
-        if (!cancelled) setHasLoaded(true);
       }
+      if (!cancelled) setHasLoaded(true);
     };
 
     // eslint-disable-next-line react-hooks/set-state-in-effect
