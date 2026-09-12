@@ -105,4 +105,22 @@ export const scholarshipEducationApi = {
       body: JSON.stringify(data),
     });
   },
+  async createAdminScholarship(data: any): Promise<any> {
+    return apiRequest(`/api/v1/admin/scholarships`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+  async getAdminScholarshipById(id: string | number): Promise<any> {
+    const res = await apiRequest<any>(`/api/v1/admin/scholarships/${id}`, {
+      cache: "no-store",
+    });
+    return res?.data ?? res;
+  },
+  async updateAdminScholarship(id: string | number, data: any): Promise<any> {
+    return apiRequest(`/api/v1/admin/scholarships/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+  },
 };

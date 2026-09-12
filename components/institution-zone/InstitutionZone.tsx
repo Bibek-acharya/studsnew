@@ -196,19 +196,19 @@ export default function InstitutionZone() {
     const errors: Record<string, string> = {};
     if (!organizationType)
       errors.organizationType = "Please select organization type.";
-    if (!panNumber.trim()) errors.panNumber = "PAN number is required.";
-    else if (!/^\d{9}$/.test(panNumber))
+    const panVal = panNumber.trim();
+    if (panVal && !/^\d{9}$/.test(panVal))
       errors.panNumber = "PAN must be exactly 9 digits.";
     const regVal = registrationNumber.trim();
-    if (!regVal)
-      errors.registrationNumber = "Registration number is required.";
-    else if (/[A-Za-z]/.test(regVal))
-      errors.registrationNumber =
-        "Only numbers and special characters allowed.";
-    else if (regVal.length < 10)
-      errors.registrationNumber = "Registration number must be at least 10 characters.";
-    else if (regVal.length > 15)
-      errors.registrationNumber = "Registration number must be at most 15 characters.";
+    if (regVal) {
+      if (/[A-Za-z]/.test(regVal))
+        errors.registrationNumber =
+          "Only numbers and special characters allowed.";
+      else if (regVal.length < 10)
+        errors.registrationNumber = "Registration number must be at least 10 characters.";
+      else if (regVal.length > 15)
+        errors.registrationNumber = "Registration number must be at most 15 characters.";
+    }
     if (!website.trim()) errors.website = "Website is required.";
     else if (!/^https?:\/\/.+\..+/.test(website.trim()))
       errors.website = "Please enter a valid URL (e.g. https://www.example.com).";
@@ -845,7 +845,7 @@ export default function InstitutionZone() {
                           )}
                         </div>
                         <div>
-                          <label className={labelClass}>PAN Number</label>
+                          <label className={labelClass}>PAN Number <span className="text-gray-400 font-normal">(Optional)</span></label>
                           <input
                             type="text"
                             placeholder="Enter 9-digit PAN Number"
@@ -866,7 +866,7 @@ export default function InstitutionZone() {
                         </div>
                         <div>
                           <label className={labelClass}>
-                            Registration Number
+                            Registration Number <span className="text-gray-400 font-normal">(Optional)</span>
                           </label>
                           <input
                             type="text"

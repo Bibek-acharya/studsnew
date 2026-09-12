@@ -9,6 +9,7 @@ import {
   FileText,
   X,
   Eye,
+  Pencil,
   Star,
   Trash2,
 } from "lucide-react";
@@ -303,6 +304,14 @@ export default function ScholarshipListSection({
                           icon={<Eye size={16} />}
                           color="blue"
                           title="View Details"
+                        />
+                        <ActionBtn
+                          icon={<Pencil size={16} />}
+                          color="green"
+                          title="Edit Scholarship"
+                          onClick={() =>
+                            setActiveSection(`edit-scholarship-${s.id}`)
+                          }
                         />
                         <ActionBtn
                           icon={

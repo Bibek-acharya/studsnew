@@ -467,6 +467,9 @@ export const apiService = {
   deleteScholarship: scholarshipEducationApi.deleteScholarship.bind(scholarshipEducationApi),
   toggleScholarshipFeature: scholarshipEducationApi.toggleScholarshipFeature.bind(scholarshipEducationApi),
   updateScholarship: scholarshipEducationApi.updateScholarship.bind(scholarshipEducationApi),
+  createAdminScholarship: scholarshipEducationApi.createAdminScholarship.bind(scholarshipEducationApi),
+  getAdminScholarshipById: scholarshipEducationApi.getAdminScholarshipById.bind(scholarshipEducationApi),
+  updateAdminScholarship: scholarshipEducationApi.updateAdminScholarship.bind(scholarshipEducationApi),
 
   // Reviews
   getCollegeReviews: reviewApi.getCollegeReviews.bind(reviewApi),

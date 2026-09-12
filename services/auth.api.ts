@@ -156,7 +156,7 @@ export const authApi = {
   },
   async institutionRegister(data: {
     institution_name: string;
-    registration_number: string;
+    registration_number?: string;
     email: string;
     contact_number?: string;
     province?: string;

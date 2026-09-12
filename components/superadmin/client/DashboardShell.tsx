@@ -551,6 +551,20 @@ function DashboardShellInner() {
         );
       }
     }
+    if (activeSection.startsWith("edit-scholarship-")) {
+      const editId = parseInt(
+        activeSection.replace("edit-scholarship-", ""),
+        10,
+      );
+      if (!isNaN(editId)) {
+        return (
+          <CreateScholarshipSection
+            setActiveSection={navigateTo}
+            scholarshipId={editId}
+          />
+        );
+      }
+    }
     switch (activeSection) {
       case "overview":
         return <OverviewSection setActiveSection={navigateTo} />;
@@ -572,11 +586,7 @@ function DashboardShellInner() {
         return <ScholarshipListSection setActiveSection={navigateTo} />;
       case "create-scholarship":
         return (
-          <CreateScholarshipSection
-            setActiveSection={navigateTo}
-            lockedSections={lockedSections}
-            setLockedSections={setLockedSections}
-          />
+          <CreateScholarshipSection setActiveSection={navigateTo} />
         );
       case "manage-entrance":
         return <EntranceListSection setActiveSection={navigateTo} />;
