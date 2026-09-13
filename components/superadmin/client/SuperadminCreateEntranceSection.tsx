@@ -641,7 +641,6 @@ export default function SuperadminCreateEntranceSection({
         title: examTitle,
         description,
         date: startDate,
-        total_seats: 0,
         hero_banner: heroBanner,
         status: publish ? "published" : "draft",
         application_fee: applicationFee,
@@ -652,6 +651,7 @@ export default function SuperadminCreateEntranceSection({
         institution_link: institutionFields.link,
         institution_affiliation: institutionFields.affiliation,
         institution_logo: institutionFields.logo,
+        institution_id: institutionFields.institution_id || undefined,
         overview_details: [...overviewDetails.map(({ id, ...rest }) => rest)],
         exam_date_schedules: examDateSchedules,
         eligibility_list: eligibilityList,
@@ -678,6 +678,9 @@ export default function SuperadminCreateEntranceSection({
         ),
         programs_offered: programsOffered.map(({ id, ...rest }) => rest),
       };
+      if (!editId) {
+        payload.total_seats = 0;
+      }
       if (editId) {
         await superadminEntranceApi.update(editId, payload);
       } else {

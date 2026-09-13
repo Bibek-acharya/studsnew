@@ -72,7 +72,7 @@ export default function InstitutionSelector({
       setSearching(true);
       try {
         const res = await fetch(
-          `${API_BASE_URL}/api/v1/superadmin/institutions?search=${encodeURIComponent(q)}`,
+          `${API_BASE_URL}/api/v1/superadmin/institutions/search?search=${encodeURIComponent(q)}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("superadmin_token")}`,
