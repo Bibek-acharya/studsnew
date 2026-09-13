@@ -8,11 +8,11 @@ import {
   MapPin,
   GraduationCap,
   Calendar,
-  Building,
-  BadgeCheckIcon,
+  BadgeCheck,
+  Banknote,
+  Image as ImageIcon,
 } from "lucide-react";
 import { ScholarshipItem } from "@/services/api";
-import HoverTooltip from "./HoverTooltip";
 
 function getScholarshipDateStatus(
   startDate?: string,
@@ -129,33 +129,45 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
             return (
               <div
                 key={scholarship.id}
-                className="bg-white rounded-xl p-5 sm:p-6 md:p-7 flex flex-col h-full hover:-translate-y-1 border border-gray-200 hover:border-blue-500/20 transition-all duration-300 cursor-pointer"
+                className="relative flex flex-col bg-white rounded-md border border-gray-200/80 transition-all duration-300 p-3"
               >
                 {/* Image Area */}
-                <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
-                  <Image
-                    src={
-                      getImageUrl(scholarship.image) ||
-                      "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"
-                    }
-                    alt={scholarship.title}
-                    width={600}
-                    height={400}
-                    unoptimized
-                    className="w-full h-full object-cover"
-                    onError={(e: SyntheticEvent<HTMLImageElement>) => {
-                      e.currentTarget.src =
-                        "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship";
-                    }}
-                  />
+                <div className="h-32 w-full bg-gray-100 relative overflow-hidden rounded-md mb-3">
+                  {getImageUrl(scholarship.image) ? (
+                    <Image
+                      src={getImageUrl(scholarship.image)}
+                      alt={scholarship.title}
+                      width={600}
+                      height={400}
+                      unoptimized
+                      className="w-full h-full object-cover"
+                      onError={(e: SyntheticEvent<HTMLImageElement>) => {
+                        e.currentTarget.src =
+                          "https://placehold.co/600x400/f1f5f9/94a3b8?text=Scholarship";
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full p-3 flex items-start bg-linear-to-br from-gray-200 to-gray-50">
+                      <span className="text-gray-600 text-[13px] font-medium flex items-start gap-1.5 leading-snug">
+                        <ImageIcon className="w-4 h-4 mt-0.5 text-gray-400 shrink-0" />
+                        {scholarship.title || "Scholarship"}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Content Area */}
-                <div className="flex flex-col grow px-0.5 sm:px-1">
-                  {/* Tags */}
-                  <div className="flex items-center gap-2 sm:gap-2.5 mb-2.5 sm:mb-3">
-                    <span className="text-blue-600 bg-blue-50 px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide max-w-[100px] truncate">
-                      {scholarship.scholarship_type || "MERIT-BASED"}
+                <div className="flex flex-col grow px-1">
+                  {/* Badges */}
+                  <div className="flex items-center gap-2 mb-2.5">
+                    <span className="group relative inline-flex">
+                      <span className="text-blue-600 bg-blue-50 text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wide max-w-[100px] truncate inline-block">
+                        {scholarship.scholarship_type || "MERIT-BASED"}
+                      </span>
+                      <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        {scholarship.scholarship_type || "MERIT-BASED"}
+                        <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                      </span>
                     </span>
                     <div
                       className={`flex items-center gap-1.5 px-2 py-1 rounded-md ${statusStyle.statusBg}`}
@@ -171,34 +183,37 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
                     </div>
                   </div>
 
-                  {/* Title & Institution */}
-                  <HoverTooltip label={scholarship.title || "Scholarship"}>
-                    <h3 className="text-[15px] xs:text-[16px] sm:text-[17px] font-bold text-[#0f172a] leading-[1.35] mb-1 sm:mb-1.5 line-clamp-2 hover:text-[#0000ff]">
-                      {scholarship.title || "Scholarship"}
-                    </h3>
-                  </HoverTooltip>
-                  <div className="flex items-center text-[12px] xs:text-[13px] sm:text-[13.5px] text-[#64748b] mb-4 sm:mb-5 line-clamp-1">
-                    <Building className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1 sm:mr-1.5 shrink-0" />
-                    <span>
+                  {/* Title & Organization */}
+                  <h3
+                    className="font-bold text-[16px] leading-tight text-slate-900 mb-1 hover:text-brand-blue line-clamp-2"
+                  >
+                    {scholarship.title || "Scholarship"}
+                  </h3>
+                  <div className="flex items-center gap-1.5 text-[12.5px] text-gray-500 mb-3.5 line-clamp-1">
+                    <span className="text-gray-500">
                       {scholarship.provider || "Tribhuvan University, Nepal"}
                     </span>
-                    <BadgeCheckIcon className="w-3.25 h-3.25 sm:w-3.75 sm:h-3.75 text-white fill-blue-500 ml-0.5 sm:ml-1 shrink-0" />
+                    <BadgeCheck className="w-3.5 h-3.5 text-white fill-[#2563eb]" />
                   </div>
 
                   {/* Details Box */}
-                  <div className="bg-[#f8fafc] rounded-md sm:rounded-md p-2.5 sm:p-3 md:p-3.5 flex flex-col gap-2 sm:gap-3 mt-auto border border-[#f1f5f9]">
+                  <div className="bg-[#f9fafb] rounded-md p-3.5 border border-gray-100 mb-4 mt-auto flex flex-col gap-2.5">
                     {/* Row 1: Split */}
-                    <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <span className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0 font-bold text-xs sm:text-sm">
-                          $
-                        </span>
-                        <span className="truncate font-medium">
-                          {scholarship.amount || "100% Tuition"}
+                    <div className="grid grid-cols-2 gap-x-2">
+                      <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium min-w-0">
+                        <Banknote className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                        <span className="group relative inline-flex">
+                          <span className="max-w-[100px] truncate inline-block">
+                            {scholarship.amount || "100% Tuition"}
+                          </span>
+                          <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 whitespace-nowrap rounded-md bg-slate-900 px-2 py-1 text-[10px] font-semibold text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            {scholarship.amount || "100% Tuition"}
+                            <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
+                          </span>
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 sm:gap-2">
-                        <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                      <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                         <span className="truncate">
                           {scholarship.location || "Bagmati"}
                         </span>
@@ -206,8 +221,8 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
                     </div>
 
                     {/* Row 2: Level */}
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] text-[#475569]">
-                      <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#94a3b8] shrink-0" />
+                    <div className="flex items-center gap-1.5 text-[12px] text-gray-600 font-medium">
+                      <GraduationCap className="w-3.5 h-3.5 text-gray-400 shrink-0" />
                       <span className="truncate">
                         {scholarship.eligibility ||
                           "Bachelor (+2 Sci: 2.8+ GPA)"}
@@ -215,16 +230,16 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
                     </div>
 
                     {/* Row 3: Deadline */}
-                    <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] xs:text-[12px] sm:text-[13px] md:text-[13.5px] text-[#ef4444] font-medium mt-0.5">
-                      <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#ef4444] shrink-0" />
-                      <span>
-                        Ends: {scholarship.deadline || "Aug 15, 2026"}
+                    <div className="flex items-center gap-1.5 text-[12px] text-gray-800 font-medium">
+                      <Calendar className="w-3.5 h-3.5 text-[#f43f5e] shrink-0" />
+                      <span className="text-red-500">
+                        Deadline: {scholarship.deadline || "Aug 15, 2026"}
                       </span>
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-2 sm:gap-2.5 mt-4 sm:mt-5 mb-1">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() =>
                         onNavigate(
@@ -232,38 +247,30 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
                           scholarship as unknown as { [key: string]: unknown },
                         )
                       }
-                      className="flex-1 bg-white border border-[#cbd5e1] text-[#334155] rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-[#f8fafc] hover:text-[#0f172a] transition-all duration-200"
+                      className="flex-1 py-2 text-[13px] font-semibold text-gray-700 bg-white border border-gray-200 rounded-md hover:bg-gray-50 transition-colors"
                     >
                       Details
                     </button>
-                    <button className="flex-1 bg-brand-blue text-white rounded-md py-2 sm:py-2.5 text-[12px] sm:text-[13px] md:text-[14px] font-semibold hover:bg-brand-hover hover: transition-all duration-200">
+                    <button className="flex-[1.2] py-2 text-[13px] font-semibold text-white bg-brand-blue rounded-md hover:bg-[#0000cc] transition-colors">
                       Apply
                     </button>
-                    <HoverTooltip
-                      label={
+                    <button
+                      className={`p-2 border rounded-md transition-colors flex items-center justify-center ${
+                        bookmarked.has(scholarship.id)
+                          ? "border-blue-200 bg-blue-50"
+                          : "border-gray-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                      }`}
+                      onClick={(e) => toggleBookmark(e, scholarship.id)}
+                      title={
                         bookmarked.has(scholarship.id)
                           ? "Remove Bookmark"
                           : "Bookmark"
                       }
                     >
-                      <button
-                        className={`w-9 sm:w-10 md:w-11 shrink-0 rounded-md flex items-center justify-center transition-all duration-200 ${
-                          bookmarked.has(scholarship.id)
-                            ? "border-blue-200 bg-blue-50"
-                            : "bg-white border border-[#cbd5e1] text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#64748b]"
-                        }`}
-                        onClick={(e) => toggleBookmark(e, scholarship.id)}
-                        aria-label={
-                          bookmarked.has(scholarship.id)
-                            ? "Remove Bookmark"
-                            : "Bookmark"
-                        }
-                      >
-                        <Bookmark
-                          className={`w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-4.5 md:h-4.5 ${bookmarked.has(scholarship.id) ? "text-[#0000ff] fill-[#0000ff]" : ""}`}
-                        />
-                      </button>
-                    </HoverTooltip>
+                      <Bookmark
+                        className={`w-4.5 h-4.5 ${bookmarked.has(scholarship.id) ? "text-brand-blue fill-brand-blue" : ""}`}
+                      />
+                    </button>
                   </div>
                 </div>
               </div>
