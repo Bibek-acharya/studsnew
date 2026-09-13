@@ -15,7 +15,7 @@ import {
   ChevronDown,
   SlidersHorizontal,
 } from "lucide-react";
-import { apiService, ScholarshipItem } from "@/services/api";
+import { apiService, getImageUrl, ScholarshipItem } from "@/services/api";
 import type { Scholarship } from "@/services/scholarship.api";
 import { useAuth } from "@/services/AuthContext";
 import AlertDialog from "@/components/ui/AlertDialog";
@@ -57,7 +57,7 @@ function mapBackendItem(item: ScholarshipItem): Scholarship {
       ""
     ).toUpperCase(),
     status: item.status || "OPEN",
-    imageUrl: item.image || undefined,
+    imageUrl: getImageUrl(item.image),
     imagePlaceholder: item.title,
     courseStream: "",
     providerType: "",

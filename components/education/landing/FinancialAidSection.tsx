@@ -2,6 +2,7 @@
 
 import { useState, type MouseEvent, type SyntheticEvent } from "react";
 import Image from "next/image";
+import { getImageUrl } from "@/services/api";
 import {
   Bookmark,
   MapPin,
@@ -134,7 +135,7 @@ const FinancialAidSection: React.FC<FinancialAidSectionProps> = ({
                 <div className="w-full h-30 rounded-[10px] sm:rounded-md overflow-hidden mb-3 sm:mb-4 relative">
                   <Image
                     src={
-                      scholarship.image ||
+                      getImageUrl(scholarship.image) ||
                       "https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=600&auto=format&fit=crop"
                     }
                     alt={scholarship.title}

@@ -3,6 +3,7 @@
 import { EventCard } from "@/components/cards/EventCard";
 import { ScholarshipCard } from "@/components/cards/ScholarshipCard";
 import UniversityCard from "@/components/education/university-listing/UniversityCard";
+import { getImageUrl } from "@/services/api";
 import type { SearchResult } from "./types";
 
 function stripHtml(html?: string): string {
@@ -36,7 +37,7 @@ export function SearchScholarshipAdapter({ item }: { item: SearchResult }) {
         org: item.university || "",
         badgeType: item.institutionType || undefined,
         location: item.location || undefined,
-        imageUrl: item.image || undefined,
+        imageUrl: getImageUrl(item.image),
       }}
     />
   );
