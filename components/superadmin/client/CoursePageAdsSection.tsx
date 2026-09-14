@@ -10,10 +10,8 @@ import {
 import { apiRequest } from "@/services/api";
 
 const POSITION_TABS = [
-  { id: "all", label: "All" },
-  { id: "carousel", label: "Carousel" },
-  { id: "panel", label: "Panel" },
-  { id: "banner", label: "Banner" },
+  { id: "carousel", label: "Carousel (Colleges)" },
+  { id: "panel", label: "Panel (Courses)" },
 ] as const;
 
 const PAGE_SIZE = 10;
@@ -50,7 +48,7 @@ export default function CoursePageAdsSection() {
   const [ads, setAds] = useState<AdminAd[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [positionTab, setPositionTab] = useState<string>("all");
+  const [positionTab, setPositionTab] = useState<string>("carousel");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
@@ -93,9 +91,9 @@ export default function CoursePageAdsSection() {
   }, []);
 
   const openCreateForm = useCallback(() => {
-    const entityType = positionTab === "carousel" ? "college" : positionTab === "panel" ? "course" : "none";
+    const entityType = positionTab === "carousel" ? "college" : "course";
     setEditingAd(null);
-    setForm({ ...emptyForm, position: positionTab === "all" ? "carousel" : positionTab, entity_type: entityType });
+    setForm({ ...emptyForm, position: positionTab, entity_type: entityType });
     setSelectedEntities([]);
     setEntityResults([]);
     setShowForm(true);
@@ -519,9 +517,8 @@ export default function CoursePageAdsSection() {
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
                   >
-                    <option value="carousel">Carousel (College)</option>
-                    <option value="panel">Panel (Course)</option>
-                    <option value="banner">Banner (Standalone)</option>
+                    <option value="carousel">Carousel (Colleges)</option>
+                    <option value="panel">Panel (Courses)</option>
                   </select>
                 </div>
 

@@ -21,9 +21,9 @@ const CourseCarouselAd: React.FC = () => {
 
   const slides = ads.map((ad) => ({
     title: ad.college_name || ad.title,
-    location: ad.college_location || ad.location || "Nepal",
-    rating: ad.college_rating || "4.8",
-    image: ad.college_image || ad.image_url,
+    location: ad.college_location || "",
+    rating: ad.college_rating || 0,
+    image: ad.college_image || "",
     link: ad.link_url || "#",
     ad,
   }));
@@ -55,7 +55,7 @@ const CourseCarouselAd: React.FC = () => {
               onClick={() => slide.ad && trackAdClick(slide.ad.id)}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-lg overflow-hidden min-w-[220px] max-w-[240px] flex-shrink-0 border border-gray-100 flex flex-col transition-transform hover:-translate-y-1 no-underline"
+              className="bg-white rounded-lg overflow-hidden min-w-[220px] max-w-[240px] flex-shrink-0 border border-gray-100 flex flex-col no-underline"
               style={{ scrollSnapAlign: "start" }}
             >
               {slide.image && (
@@ -66,15 +66,19 @@ const CourseCarouselAd: React.FC = () => {
               <div className="p-3 flex flex-col flex-1">
                 <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight">{slide.title}</h3>
                 <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-600">
-                  <span className="flex items-center gap-0.5">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{slide.rating}
-                  </span>
-                  <span className="flex items-center gap-0.5">
-                    <MapPin className="w-3 h-3 text-slate-400" />{slide.location}
-                  </span>
+                  {slide.rating > 0 && (
+                    <span className="flex items-center gap-0.5">
+                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{slide.rating}
+                    </span>
+                  )}
+                  {slide.location && (
+                    <span className="flex items-center gap-0.5">
+                      <MapPin className="w-3 h-3 text-slate-400" />{slide.location}
+                    </span>
+                  )}
                 </div>
                 <div className="mt-auto">
-                  <span className="block text-center text-[11px] font-semibold text-white bg-blue-600 rounded py-1.5 px-3 hover:bg-blue-700 transition-colors">
+                  <span className="block text-center text-[11px] font-semibold text-white bg-blue-600 rounded py-1.5 px-3">
                     View Details
                   </span>
                 </div>
