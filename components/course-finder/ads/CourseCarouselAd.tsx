@@ -24,7 +24,7 @@ const CourseCarouselAd: React.FC = () => {
     location: ad.college_location || "",
     rating: ad.college_rating || 0,
     image: ad.college_image || "",
-    link: ad.link_url || "#",
+    link: ad.college_id ? `/find-college/${ad.college_id}` : ad.link_url || "#",
     ad,
   }));
 
@@ -47,24 +47,26 @@ const CourseCarouselAd: React.FC = () => {
       </div>
 
       <div className="overflow-x-auto" ref={carouselRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-        <div className="flex gap-4 pb-3" style={{ scrollSnapType: "x mandatory" }}>
+        <div className="flex gap-4 pb-3 items-stretch" style={{ scrollSnapType: "x mandatory" }}>
           {slides.map((slide, idx) => (
             <a
               key={slide.ad?.id || idx}
               href={slide.link}
               onClick={() => slide.ad && trackAdClick(slide.ad.id)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-white rounded-lg overflow-hidden min-w-[220px] max-w-[240px] flex-shrink-0 border border-gray-100 flex flex-col no-underline"
+              className="bg-white rounded-lg overflow-hidden min-w-[220px] max-w-[240px] w-[220px] flex-shrink-0 border border-gray-100 flex flex-col no-underline"
               style={{ scrollSnapAlign: "start" }}
             >
-              {slide.image && (
+              {slide.image ? (
                 <div className="w-full h-[120px] bg-gray-100 overflow-hidden">
                   <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
                 </div>
+              ) : (
+                <div className="w-full h-[120px] bg-gradient-to-br from-[#1126ef] to-[#0014FF] flex items-center justify-center p-4">
+                  <h3 className="text-white text-[13px] font-bold text-center leading-tight line-clamp-3">{slide.title}</h3>
+                </div>
               )}
               <div className="p-3 flex flex-col flex-1">
-                <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight">{slide.title}</h3>
+                <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight line-clamp-2">{slide.title}</h3>
                 <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-600">
                   {slide.rating > 0 && (
                     <span className="flex items-center gap-0.5">

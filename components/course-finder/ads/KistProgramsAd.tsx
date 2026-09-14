@@ -27,7 +27,7 @@ const KistProgramsAd: React.FC = () => {
     field: ad.course_field || "-",
     estFee: "-",
     accent: ad.accent || "#ebfbf1",
-    link: ad.link_url || "#",
+    link: ad.course_id ? `/course-finder/${ad.course_id}` : ad.link_url || "#",
     ad,
   }));
 
@@ -55,7 +55,7 @@ const KistProgramsAd: React.FC = () => {
       </div>
 
       <div className="overflow-x-auto snap-x snap-mandatory" ref={carouselRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-        <div className="flex gap-4 pb-2">
+        <div className="flex gap-4 pb-2 items-stretch">
           {programs.map((program, idx) => (
             <a
               key={program.ad?.id || idx}
@@ -66,9 +66,9 @@ const KistProgramsAd: React.FC = () => {
               className="w-[290px] flex-shrink-0 bg-white rounded-xl border border-gray-200 p-4 snap-center flex flex-col no-underline"
             >
               {/* Blue gradient header matching CourseCard style */}
-              <div className="relative mb-3 flex min-h-[80px] flex-col items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#1126ef] to-[#0014FF] p-4 text-center">
+              <div className="relative mb-3 flex h-[80px] flex-col items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#1126ef] to-[#0014FF] p-4 text-center">
                 <div className="absolute -mr-6 -mt-6 right-0 top-0 h-20 w-20 rounded-full bg-white opacity-5 blur-xl" />
-                <h2 className="relative z-10 text-[0.9rem] font-bold leading-tight text-white">{program.title}</h2>
+                <h2 className="relative z-10 text-[0.9rem] font-bold leading-tight text-white line-clamp-3">{program.title}</h2>
               </div>
 
               {/* Level badge + duration */}
