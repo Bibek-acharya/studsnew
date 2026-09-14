@@ -148,26 +148,20 @@ export default function CoursePageAdsSection() {
       }
       debounceRef.current = setTimeout(async () => {
         try {
-          const data: Record<string, unknown> = await apiRequest(
-            endpoint + "?q=" + encodeURIComponent(query)
+          // institution search uses ?search=, course search uses ?q=
+          const param = endpoint.includes("institutions") ? "search" : "q";
+          const raw: Record<string, unknown> = await apiRequest(
+            endpoint + "?" + param + "=" + encodeURIComponent(query)
           );
-          if (endpoint.includes("institutions")) {
-            const list = (data.institutions || []) as Record<string, unknown>[];
-            setResults(
-              list.map((i) => ({
-                id: i.id as number,
-                name: i.name as string,
-              }))
-            );
-          } else {
-            const list = (data.courses || []) as Record<string, unknown>[];
-            setResults(
-              list.map((c) => ({
-                id: c.id as number,
-                name: c.title as string,
-              }))
-            );
-          }
+          // apiRequest returns the full {success, data, message} wrapper
+          const body = (raw.data ?? raw) as Record<string, unknown>;
+          const list = (body.institutions || body.courses || []) as Record<string, unknown>[];
+          setResults(
+            list.map((i) => ({
+              id: i.id as number,
+              name: (i.name || i.title) as string,
+            }))
+          );
         } catch {
           setResults([]);
         }

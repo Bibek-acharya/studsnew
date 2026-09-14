@@ -45,10 +45,10 @@ export function useCoursePageAds(position?: string) {
     queryFn: async () => {
       const params = new URLSearchParams({ page: "course-finder" });
       if (position) params.set("position", position);
-      const res = await apiRequest<AdsApiResponse>(
+      const res = await apiRequest<{ data: CoursePageAd[] }>(
         `/api/v1/system/ads?${params.toString()}`,
       );
-      return res.data.ads;
+      return (Array.isArray(res.data) ? res.data : []) as CoursePageAd[];
     },
     staleTime: 5 * 60 * 1000,
   });
