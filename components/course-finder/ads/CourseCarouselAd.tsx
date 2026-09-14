@@ -2,12 +2,7 @@
 
 import React, { useRef } from "react";
 import { ChevronLeft, ChevronRight, Star, MapPin } from "lucide-react";
-import { useCoursePageAds, trackAdClick, type CoursePageAd } from "./useCoursePageAds";
-
-const FALLBACK_SLIDES = [
-  { title: "KIST College", location: "Kathmandu", rating: "4.8", image: "https://kist.edu.np/resources/assets/img/logo_small.jpg", link: "#", ad: undefined as undefined },
-  { title: "Trinity College", location: "Pokhara", rating: "4.5", image: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg", link: "#", ad: undefined as undefined },
-];
+import { useCoursePageAds, trackAdClick } from "./useCoursePageAds";
 
 const CourseCarouselAd: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
@@ -24,6 +19,7 @@ const CourseCarouselAd: React.FC = () => {
     location: ad.college_location || "",
     rating: ad.college_rating || 0,
     image: ad.college_image || "",
+    website: ad.college_website || "",
     link: ad.college_id ? `/find-college/${ad.college_id}` : ad.link_url || "#",
     ad,
   }));
@@ -61,13 +57,13 @@ const CourseCarouselAd: React.FC = () => {
                   <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="w-full h-[120px] bg-gradient-to-br from-[#1126ef] to-[#0014FF] flex items-center justify-center p-4">
-                  <h3 className="text-white text-[13px] font-bold text-center leading-tight line-clamp-3">{slide.title}</h3>
+                <div className="w-full h-[120px] flex items-center justify-center p-4" style={{ backgroundColor: accent }}>
+                  <h3 className="text-white text-[13px] font-bold text-center leading-tight line-clamp-2" title={slide.title}>{slide.title}</h3>
                 </div>
               )}
               <div className="p-3 flex flex-col flex-1">
-                <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight line-clamp-2">{slide.title}</h3>
-                <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-600">
+                <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight line-clamp-2" title={slide.title}>{slide.title}</h3>
+                <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-600 flex-wrap">
                   {slide.rating > 0 && (
                     <span className="flex items-center gap-0.5">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{slide.rating}
@@ -79,6 +75,17 @@ const CourseCarouselAd: React.FC = () => {
                     </span>
                   )}
                 </div>
+                {slide.website && (
+                  <a
+                    href={slide.website.startsWith("http") ? slide.website : `https://${slide.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[11px] text-blue-600 hover:underline truncate mb-2 block"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {slide.website}
+                  </a>
+                )}
                 <div className="mt-auto">
                   <span className="block text-center text-[11px] font-semibold text-white bg-blue-600 rounded py-1.5 px-3">
                     View Details

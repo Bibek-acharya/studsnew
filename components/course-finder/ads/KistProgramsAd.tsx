@@ -68,7 +68,7 @@ const KistProgramsAd: React.FC = () => {
               {/* Blue gradient header matching CourseCard style */}
               <div className="relative mb-3 flex h-[80px] flex-col items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#1126ef] to-[#0014FF] p-4 text-center">
                 <div className="absolute -mr-6 -mt-6 right-0 top-0 h-20 w-20 rounded-full bg-white opacity-5 blur-xl" />
-                <h2 className="relative z-10 text-[0.9rem] font-bold leading-tight text-white line-clamp-3">{program.title}</h2>
+                <h2 className="relative z-10 text-[0.9rem] font-bold leading-tight text-white line-clamp-2" title={program.title}>{program.title}</h2>
               </div>
 
               {/* Level badge + duration */}

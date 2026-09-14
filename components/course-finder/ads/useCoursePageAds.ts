@@ -25,6 +25,7 @@ export interface CoursePageAd {
   college_image: string;
   college_rating: number;
   college_location: string;
+  college_website: string;
   course_title: string;
   course_level: string;
   course_duration: string;
