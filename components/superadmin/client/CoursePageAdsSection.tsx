@@ -29,10 +29,7 @@ const emptyForm = {
   end_date: "",
   active: true,
   entity_type: "college" as "none" | "college" | "course",
-  college_id: 0,
-  course_id: 0,
-  college_search: "",
-  course_search: "",
+  entity_search: "",
   description: "",
   accent: "#0000ff",
 };
@@ -63,10 +60,8 @@ export default function CoursePageAdsSection() {
   const [saving, setSaving] = useState(false);
 
   // Entity search state
-  const [collegeResults, setCollegeResults] = useState<SearchItem[]>([]);
-  const [courseResults, setCourseResults] = useState<SearchItem[]>([]);
-  const [selectedCollegeName, setSelectedCollegeName] = useState("");
-  const [selectedCourseTitle, setSelectedCourseTitle] = useState("");
+  const [entityResults, setEntityResults] = useState<SearchItem[]>([]);
+  const [selectedEntities, setSelectedEntities] = useState<SearchItem[]>([]);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fetchAds = useCallback(async () => {
@@ -101,10 +96,8 @@ export default function CoursePageAdsSection() {
     const entityType = positionTab === "carousel" ? "college" : positionTab === "panel" ? "course" : "none";
     setEditingAd(null);
     setForm({ ...emptyForm, position: positionTab === "all" ? "carousel" : positionTab, entity_type: entityType });
-    setSelectedCollegeName("");
-    setSelectedCourseTitle("");
-    setCollegeResults([]);
-    setCourseResults([]);
+    setSelectedEntities([]);
+    setEntityResults([]);
     setShowForm(true);
   }, [positionTab]);
 
@@ -122,17 +115,16 @@ export default function CoursePageAdsSection() {
       end_date: ad.end_date ? ad.end_date.slice(0, 10) : "",
       active: ad.active,
       entity_type: entityType as "none" | "college" | "course",
-      college_id: ad.college_id || 0,
-      course_id: ad.course_id || 0,
-      college_search: "",
-      course_search: "",
+      entity_search: "",
       description: ad.description || "",
       accent: ad.accent || "#0000ff",
     });
-    setSelectedCollegeName(ad.college_name || "");
-    setSelectedCourseTitle(ad.course_title || "");
-    setCollegeResults([]);
-    setCourseResults([]);
+    setSelectedEntities(
+      (ad.college_id || ad.course_id)
+        ? [{ id: (ad.college_id || ad.course_id) as number, name: ad.college_name || ad.course_title || "" }]
+        : []
+    );
+    setEntityResults([]);
     setShowForm(true);
   }, []);
 
@@ -140,11 +132,10 @@ export default function CoursePageAdsSection() {
     (
       query: string,
       endpoint: string,
-      setResults: (items: SearchItem[]) => void
     ) => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
       if (!query.trim()) {
-        setResults([]);
+        setEntityResults([]);
         return;
       }
       debounceRef.current = setTimeout(async () => {
@@ -157,22 +148,31 @@ export default function CoursePageAdsSection() {
           const body = (raw.data ?? raw) as Record<string, unknown>;
           const key = endpoint.includes("institutions") ? "institutions" : "courses";
           const list = (body[key] || []) as Record<string, unknown>[];
-          setResults(
+          setEntityResults(
             list.map((i) => ({
               id: Number(i.id),
               name: (i.institution_name || i.name || i.title) as string,
             }))
           );
         } catch {
-          setResults([]);
+          setEntityResults([]);
         }
       }, 300);
     },
     []
   );
 
+  const handleSelectEntity = useCallback((item: SearchItem) => {
+    setSelectedEntities((prev) => {
+      if (prev.some((e) => e.id === item.id)) return prev;
+      return [...prev, item];
+    });
+    setForm((f) => ({ ...f, entity_search: "" }));
+    setEntityResults([]);
+  }, []);
+
   const handleFormSave = useCallback(async () => {
-    if (!form.title.trim()) return;
+    if (!form.title.trim() && selectedEntities.length === 0) return;
     setSaving(true);
     try {
       const payload: AdminAdCreatePayload = {
@@ -186,15 +186,25 @@ export default function CoursePageAdsSection() {
         end_date: form.end_date,
         active: form.active,
         page: "course-finder",
-        college_id: form.college_id || undefined,
-        course_id: form.course_id || undefined,
         description: form.description.trim() || undefined,
         accent: form.accent,
       };
 
       if (editingAd) {
         await adminAdApi.updateAd(editingAd.id, payload);
+      } else if (selectedEntities.length > 0) {
+        // Batch create — one ad per entity
+        for (const entity of selectedEntities) {
+          const entityPayload: AdminAdCreatePayload = {
+            ...payload,
+            title: form.title.trim() || entity.name,
+            college_id: form.entity_type === "college" ? entity.id : undefined,
+            course_id: form.entity_type === "course" ? entity.id : undefined,
+          };
+          await adminAdApi.createAd(entityPayload);
+        }
       } else {
+        // Standalone banner (no entity)
         await adminAdApi.createAd(payload);
       }
       setShowForm(false);
@@ -205,7 +215,7 @@ export default function CoursePageAdsSection() {
     } finally {
       setSaving(false);
     }
-  }, [editingAd, form, fetchAds]);
+  }, [editingAd, form, fetchAds, selectedEntities]);
 
   const handleDelete = useCallback(
     async (id: number) => {
@@ -431,51 +441,62 @@ export default function CoursePageAdsSection() {
             </div>
 
             <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Title <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                  placeholder="Ad title"
-                />
-              </div>
+              {/* Manual fields only for standalone banner (no entity linked) */}
+              {form.entity_type === "none" && (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Title <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={form.title}
+                      onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                      placeholder="Ad title"
+                    />
+                  </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Image URL
-                </label>
-                <input
-                  type="text"
-                  value={form.image_url}
-                  onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                  placeholder="https://..."
-                />
-                {form.image_url && (
-                  <img
-                    src={resolveImageUrl(form.image_url)}
-                    alt="Preview"
-                    className="mt-2 max-h-24 rounded object-contain"
-                  />
-                )}
-              </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Image URL
+                    </label>
+                    <input
+                      type="text"
+                      value={form.image_url}
+                      onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                      placeholder="https://..."
+                    />
+                    {form.image_url && (
+                      <img
+                        src={resolveImageUrl(form.image_url)}
+                        alt="Preview"
+                        className="mt-2 max-h-24 rounded object-contain"
+                      />
+                    )}
+                  </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Link URL
-                </label>
-                <input
-                  type="text"
-                  value={form.link_url}
-                  onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                  placeholder="https://..."
-                />
-              </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Link URL
+                    </label>
+                    <input
+                      type="text"
+                      value={form.link_url}
+                      onChange={(e) => setForm((f) => ({ ...f, link_url: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                      placeholder="https://..."
+                    />
+                  </div>
+                </>
+              )}
+
+              {form.entity_type !== "none" && !form.title && (
+                <p className="text-xs text-gray-400 italic">
+                  Title, image, and link are auto-filled from the linked entity.
+                </p>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -491,15 +512,16 @@ export default function CoursePageAdsSection() {
                         ...f,
                         position: pos,
                         entity_type: entityType,
-                        college_id: entityType === "college" ? f.college_id : 0,
-                        course_id: entityType === "course" ? f.course_id : 0,
+                        entity_search: "",
                       }));
+                      setSelectedEntities([]);
+                      setEntityResults([]);
                     }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
                   >
-                    <option value="carousel">Carousel</option>
-                    <option value="panel">Panel</option>
-                    <option value="banner">Banner</option>
+                    <option value="carousel">Carousel (College)</option>
+                    <option value="panel">Panel (Course)</option>
+                    <option value="banner">Banner (Standalone)</option>
                   </select>
                 </div>
 
@@ -519,18 +541,21 @@ export default function CoursePageAdsSection() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Location
-                </label>
-                <input
-                  type="text"
-                  value={form.location}
-                  onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                  placeholder="Descriptive label"
-                />
-              </div>
+              {/* Location: only for standalone banner */}
+              {form.entity_type === "none" && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={form.location}
+                    onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                    placeholder="Descriptive label"
+                  />
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -558,19 +583,21 @@ export default function CoursePageAdsSection() {
                 </div>
               </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Description
-                </label>
-                <textarea
-                  rows={3}
-                  value={form.description}
-                  onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none resize-none"
-                  placeholder="Ad description"
-                />
-              </div>
+              {/* Description: only for standalone banner */}
+              {form.entity_type === "none" && (
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Description
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={form.description}
+                    onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none resize-none"
+                    placeholder="Ad description"
+                  />
+                </div>
+              )}
 
               {/* Accent Color */}
               <div className="flex items-center gap-3">
@@ -587,105 +614,72 @@ export default function CoursePageAdsSection() {
               </div>
 
               {/* Only show entity linking for carousel (college) and panel (course) */}
-              {form.position !== "banner" && (
+              {form.entity_type !== "none" && (
                 <div className="border-t border-gray-200 pt-4">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Link to {form.position === "carousel" ? "College" : "Course"}
+                    Select {form.position === "carousel" ? "Colleges" : "Courses"}
                   </label>
-
-                  {form.position === "carousel" && (
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={form.college_search}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setForm((f) => ({ ...f, college_search: val }));
-                          debouncedSearch(
-                            val,
-                            "/api/v1/superadmin/institutions/search",
-                            setCollegeResults
-                          );
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                        placeholder="Search colleges..."
-                      />
-                      {collegeResults.length > 0 && (
-                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                          {collegeResults.map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => {
-                                setForm((f) => ({
-                                  ...f,
-                                  college_id: c.id,
-                                  college_search: "",
-                                }));
-                                setSelectedCollegeName(c.name);
-                                setCollegeResults([]);
-                              }}
-                              className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
-                            >
-                              {c.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {selectedCollegeName && (
-                        <p className="mt-1 text-xs text-blue-600 font-medium">
-                          Selected: {selectedCollegeName}
-                        </p>
-                      )}
+                  
+                  {/* Selected entities as chips */}
+                  {selectedEntities.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {selectedEntities.map((entity) => (
+                        <span
+                          key={entity.id}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-sm text-blue-700"
+                        >
+                          {entity.name}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSelectedEntities((prev) => prev.filter((e) => e.id !== entity.id))
+                            }
+                            className="text-blue-400 hover:text-blue-600"
+                          >
+                            <X size={14} />
+                          </button>
+                        </span>
+                      ))}
                     </div>
                   )}
 
-                  {form.position === "panel" && (
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={form.course_search}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setForm((f) => ({ ...f, course_search: val }));
-                          debouncedSearch(
-                            val,
-                            "/api/v1/education/courses/search",
-                            setCourseResults
-                          );
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                        placeholder="Search courses..."
-                      />
-                      {courseResults.length > 0 && (
-                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                          {courseResults.map((c) => (
-                            <button
-                              key={c.id}
-                              type="button"
-                              onClick={() => {
-                                setForm((f) => ({
-                                  ...f,
-                                  course_id: c.id,
-                                  course_search: "",
-                                }));
-                                setSelectedCourseTitle(c.name);
-                                setCourseResults([]);
-                              }}
-                              className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
-                            >
-                              {c.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                      {selectedCourseTitle && (
-                        <p className="mt-1 text-xs text-blue-600 font-medium">
-                          Selected: {selectedCourseTitle}
-                        </p>
-                      )}
-                    </div>
-                  )}
+                  {/* Search input */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={form.entity_search}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setForm((f) => ({ ...f, entity_search: val }));
+                        const endpoint =
+                          form.entity_type === "college"
+                            ? "/api/v1/superadmin/institutions/search"
+                            : "/api/v1/education/courses/search";
+                        debouncedSearch(val, endpoint);
+                      }}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                      placeholder={form.entity_type === "college" ? "Search colleges..." : "Search courses..."}
+                    />
+                    {entityResults.length > 0 && (
+                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                        {entityResults.map((item) => (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => handleSelectEntity(item)}
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
+                          >
+                            {item.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-gray-400">
+                    {selectedEntities.length > 0
+                      ? `${selectedEntities.length} selected — one ad will be created per entity`
+                      : "Search and select multiple — each becomes an ad slide"}
+                  </p>
                 </div>
               )}
 
@@ -712,7 +706,7 @@ export default function CoursePageAdsSection() {
               </button>
               <button
                 onClick={handleFormSave}
-                disabled={saving || !form.title.trim()}
+                disabled={saving || (!form.title.trim() && selectedEntities.length === 0)}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
                 {saving ? "Saving..." : editingAd ? "Update" : "Create"}
