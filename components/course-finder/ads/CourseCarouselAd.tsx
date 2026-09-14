@@ -1,12 +1,12 @@
 "use client";
 
 import React, { useRef } from "react";
-import { ChevronLeft, ChevronRight, Star, MapPin, Calendar, GraduationCap } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, MapPin } from "lucide-react";
 import { useCoursePageAds, trackAdClick, type CoursePageAd } from "./useCoursePageAds";
 
 const FALLBACK_SLIDES = [
-  { title: "BSc. CSIT", subtitle: "Highly sought-after core computing degree.", rating: "4.8+", university: "Top partners", degree: "Bachelor's Degree", location: "Kathmandu", duration: "4 Years (8 Semesters)", logos: [{ name: "KIST College", url: "https://kist.edu.np/resources/assets/img/logo_small.jpg" }] },
-  { title: "BCA", subtitle: "Application development and software engineering.", rating: "4.5+", university: "Top partners", degree: "Bachelor's Degree", location: "Pokhara / Ktm", duration: "4 Years (8 Semesters)", logos: [{ name: "Trinity College", url: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg" }] },
+  { title: "KIST College", location: "Kathmandu", rating: "4.8", image: "https://kist.edu.np/resources/assets/img/logo_small.jpg", link: "#", ad: undefined as undefined },
+  { title: "Trinity College", location: "Pokhara", rating: "4.5", image: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg", link: "#", ad: undefined as undefined },
 ];
 
 const CourseCarouselAd: React.FC = () => {
@@ -19,31 +19,28 @@ const CourseCarouselAd: React.FC = () => {
     carouselRef.current?.scrollBy({ left: direction * 300, behavior: "smooth" });
   };
 
-  const fallbackSlides = FALLBACK_SLIDES.map((s) => ({ ...s, ad: undefined as undefined }));
   const slides = ads.map((ad) => ({
-    title: ad.course_title || ad.title,
-    subtitle: ad.description || ad.course_field || ad.location,
-    rating: ad.college_rating ? `${ad.college_rating}+` : "4.8+",
-    university: ad.college_name || "Top partners",
-    degree: ad.course_level || "Bachelor's Degree",
-    location: ad.college_location || "Kathmandu",
-    duration: ad.course_duration || "4 Years (8 Semesters)",
-    logos: [{ name: ad.college_name || ad.title, url: ad.college_image || ad.image_url }],
-    accent: ad.accent || "#0000ff",
+    title: ad.college_name || ad.title,
+    location: ad.college_location || ad.location || "Nepal",
+    rating: ad.college_rating || "4.8",
+    image: ad.college_image || ad.image_url,
+    link: ad.link_url || "#",
     ad,
   }));
 
+  const accent = slides[0]?.ad?.accent || "#0000ff";
+
   return (
-    <div className="bg-[#0000ff] rounded-md p-5" style={{ backgroundColor: slides[0]?.accent || "#0000ff", boxShadow: `0 10px 30px ${slides[0]?.accent || "#0000ff"}33` }}>
+    <div className="bg-[#0000ff] rounded-md p-5" style={{ backgroundColor: accent, boxShadow: `0 10px 30px ${accent}33` }}>
       <div className="flex justify-between items-center mb-4 gap-3 flex-wrap">
         <h2 className="text-lg font-extrabold text-white tracking-tight">
-          Featured Programs
+          Featured Colleges
         </h2>
         <div className="flex gap-2">
-          <button onClick={() => scroll(-1)} className="w-9 h-9 rounded-full bg-white border-none cursor-pointer flex items-center justify-center hover:bg-gray-50 hover:scale-105 transition-all" style={{ color: slides[0]?.accent || "#0000ff" }}>
+          <button onClick={() => scroll(-1)} className="w-9 h-9 rounded-full bg-white border-none cursor-pointer flex items-center justify-center hover:bg-gray-50 hover:scale-105 transition-all" style={{ color: accent }}>
             <ChevronLeft className="w-4 h-4" />
           </button>
-          <button onClick={() => scroll(1)} className="w-9 h-9 rounded-full bg-white border-none cursor-pointer flex items-center justify-center hover:bg-gray-50 hover:scale-105 transition-all" style={{ color: slides[0]?.accent || "#0000ff" }}>
+          <button onClick={() => scroll(1)} className="w-9 h-9 rounded-full bg-white border-none cursor-pointer flex items-center justify-center hover:bg-gray-50 hover:scale-105 transition-all" style={{ color: accent }}>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -51,42 +48,35 @@ const CourseCarouselAd: React.FC = () => {
 
       <div className="overflow-x-auto" ref={carouselRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <div className="flex gap-4 pb-3" style={{ scrollSnapType: "x mandatory" }}>
-          {(slides.length > 0 ? slides : fallbackSlides).map((course, idx) => (
+          {slides.map((slide, idx) => (
             <a
-              key={course.ad?.id || idx}
-              href={course.ad?.link_url || "#"}
-              onClick={() => course.ad && trackAdClick(course.ad.id)}
+              key={slide.ad?.id || idx}
+              href={slide.link}
+              onClick={() => slide.ad && trackAdClick(slide.ad.id)}
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-white rounded-md p-4 min-w-[220px] max-w-[240px] flex-shrink-0 border border-gray-100 flex flex-col transition-transform hover:-translate-y-1 no-underline"
+              className="bg-white rounded-lg overflow-hidden min-w-[220px] max-w-[240px] flex-shrink-0 border border-gray-100 flex flex-col transition-transform hover:-translate-y-1 no-underline"
               style={{ scrollSnapAlign: "start" }}
             >
-              <h3 className="text-[15px] font-bold text-slate-800 mb-1">{course.title}</h3>
-              <p className="text-[11px] text-slate-500 leading-snug line-clamp-2 mb-2">{course.subtitle}</p>
-              <div className="flex gap-1.5 mb-2">
-                <span className="px-2 py-0.5 rounded-full border border-gray-200 text-[11px] font-semibold text-slate-700 flex items-center gap-1">
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{course.rating}
-                </span>
-                <span className="px-2 py-0.5 rounded-full border border-gray-200 text-[11px] font-semibold text-slate-700 max-w-[120px] truncate">{course.university}</span>
-              </div>
-              <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-[11px] text-slate-600 font-medium mb-3">
-                <div className="flex items-center gap-1 truncate"><GraduationCap className="w-3 h-3 text-slate-400 shrink-0" />{course.degree}</div>
-                <div className="flex items-center gap-1 truncate"><MapPin className="w-3 h-3 text-slate-400 shrink-0" />{course.location}</div>
-                <div className="col-span-2 flex items-center gap-1 truncate"><Calendar className="w-3 h-3 text-slate-400 shrink-0" />{course.duration}</div>
-              </div>
-              <div className="h-px bg-gray-100 my-2" />
-              <div className="mt-auto">
-                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Available at:</p>
-                <div className="flex gap-1 flex-wrap">
-                  {course.logos.map((logo, i) => (
-                    <div key={i} className="relative w-6 h-6 rounded-md border border-gray-100 p-0.5 flex items-center justify-center bg-white cursor-pointer group">
-                      <img src={logo.url} alt={logo.name} className="w-full h-full object-contain rounded opacity-80 hover:opacity-100 transition-opacity" />
-                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-slate-800 text-white text-[10px] font-semibold px-2 py-1 rounded whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                        {logo.name}
-                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
-                      </div>
-                    </div>
-                  ))}
+              {slide.image && (
+                <div className="w-full h-[120px] bg-gray-100 overflow-hidden">
+                  <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+              <div className="p-3 flex flex-col flex-1">
+                <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight">{slide.title}</h3>
+                <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-600">
+                  <span className="flex items-center gap-0.5">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{slide.rating}
+                  </span>
+                  <span className="flex items-center gap-0.5">
+                    <MapPin className="w-3 h-3 text-slate-400" />{slide.location}
+                  </span>
+                </div>
+                <div className="mt-auto">
+                  <span className="block text-center text-[11px] font-semibold text-white bg-blue-600 rounded py-1.5 px-3 hover:bg-blue-700 transition-colors">
+                    View Details
+                  </span>
                 </div>
               </div>
             </a>

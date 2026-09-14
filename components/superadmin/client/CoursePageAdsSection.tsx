@@ -28,7 +28,7 @@ const emptyForm = {
   start_date: "",
   end_date: "",
   active: true,
-  entity_type: "none" as "none" | "college" | "course",
+  entity_type: "college" as "none" | "college" | "course",
   college_id: 0,
   course_id: 0,
   college_search: "",
@@ -98,14 +98,15 @@ export default function CoursePageAdsSection() {
   }, []);
 
   const openCreateForm = useCallback(() => {
+    const entityType = positionTab === "carousel" ? "college" : positionTab === "panel" ? "course" : "none";
     setEditingAd(null);
-    setForm(emptyForm);
+    setForm({ ...emptyForm, position: positionTab === "all" ? "carousel" : positionTab, entity_type: entityType });
     setSelectedCollegeName("");
     setSelectedCourseTitle("");
     setCollegeResults([]);
     setCourseResults([]);
     setShowForm(true);
-  }, []);
+  }, [positionTab]);
 
   const openEditForm = useCallback((ad: AdminAd) => {
     const entityType = ad.college_id ? "college" : ad.course_id ? "course" : "none";
@@ -148,18 +149,18 @@ export default function CoursePageAdsSection() {
       }
       debounceRef.current = setTimeout(async () => {
         try {
-          // institution search uses ?search=, course search uses ?q=
           const param = endpoint.includes("institutions") ? "search" : "q";
           const raw: Record<string, unknown> = await apiRequest(
             endpoint + "?" + param + "=" + encodeURIComponent(query)
           );
-          // apiRequest returns the full {success, data, message} wrapper
+          // apiRequest returns {success, data: {institutions|courses: [...]}, message}
           const body = (raw.data ?? raw) as Record<string, unknown>;
-          const list = (body.institutions || body.courses || []) as Record<string, unknown>[];
+          const key = endpoint.includes("institutions") ? "institutions" : "courses";
+          const list = (body[key] || []) as Record<string, unknown>[];
           setResults(
             list.map((i) => ({
-              id: i.id as number,
-              name: (i.name || i.title) as string,
+              id: Number(i.id),
+              name: (i.institution_name || i.name || i.title) as string,
             }))
           );
         } catch {
@@ -483,7 +484,17 @@ export default function CoursePageAdsSection() {
                   </label>
                   <select
                     value={form.position}
-                    onChange={(e) => setForm((f) => ({ ...f, position: e.target.value }))}
+                    onChange={(e) => {
+                      const pos = e.target.value;
+                      const entityType = pos === "carousel" ? "college" : pos === "panel" ? "course" : "none";
+                      setForm((f) => ({
+                        ...f,
+                        position: pos,
+                        entity_type: entityType,
+                        college_id: entityType === "college" ? f.college_id : 0,
+                        course_id: entityType === "course" ? f.course_id : 0,
+                      }));
+                    }}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
                   >
                     <option value="carousel">Carousel</option>
@@ -575,146 +586,108 @@ export default function CoursePageAdsSection() {
                 <span className="text-xs text-gray-500 font-mono">{form.accent}</span>
               </div>
 
-              {/* Link to Entity */}
-              <div className="border-t border-gray-200 pt-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Link to Entity
-                </label>
-                <div className="flex items-center gap-4 mb-3">
-                  {(["none", "college", "course"] as const).map((et) => (
-                    <label key={et} className="flex items-center gap-1.5 text-sm text-gray-700 cursor-pointer">
+              {/* Only show entity linking for carousel (college) and panel (course) */}
+              {form.position !== "banner" && (
+                <div className="border-t border-gray-200 pt-4">
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">
+                    Link to {form.position === "carousel" ? "College" : "Course"}
+                  </label>
+
+                  {form.position === "carousel" && (
+                    <div className="relative">
                       <input
-                        type="radio"
-                        name="entity_type"
-                        checked={form.entity_type === et}
-                        onChange={() => {
-                          if (et === "none") {
-                            setForm((f) => ({
-                              ...f,
-                              entity_type: "none",
-                              college_id: 0,
-                              course_id: 0,
-                              college_search: "",
-                              course_search: "",
-                            }));
-                            setSelectedCollegeName("");
-                            setSelectedCourseTitle("");
-                            setCollegeResults([]);
-                            setCourseResults([]);
-                          } else {
-                            setForm((f) => ({
-                              ...f,
-                              entity_type: et,
-                              college_id: et === "college" ? f.college_id : 0,
-                              course_id: et === "course" ? f.course_id : 0,
-                              college_search: "",
-                              course_search: "",
-                            }));
-                            setCollegeResults([]);
-                            setCourseResults([]);
-                          }
+                        type="text"
+                        value={form.college_search}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setForm((f) => ({ ...f, college_search: val }));
+                          debouncedSearch(
+                            val,
+                            "/api/v1/superadmin/institutions/search",
+                            setCollegeResults
+                          );
                         }}
-                        className="text-blue-600 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                        placeholder="Search colleges..."
                       />
-                      <span className="capitalize">{et}</span>
-                    </label>
-                  ))}
+                      {collegeResults.length > 0 && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                          {collegeResults.map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                setForm((f) => ({
+                                  ...f,
+                                  college_id: c.id,
+                                  college_search: "",
+                                }));
+                                setSelectedCollegeName(c.name);
+                                setCollegeResults([]);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
+                            >
+                              {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {selectedCollegeName && (
+                        <p className="mt-1 text-xs text-blue-600 font-medium">
+                          Selected: {selectedCollegeName}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {form.position === "panel" && (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={form.course_search}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setForm((f) => ({ ...f, course_search: val }));
+                          debouncedSearch(
+                            val,
+                            "/api/v1/education/courses/search",
+                            setCourseResults
+                          );
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+                        placeholder="Search courses..."
+                      />
+                      {courseResults.length > 0 && (
+                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                          {courseResults.map((c) => (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                setForm((f) => ({
+                                  ...f,
+                                  course_id: c.id,
+                                  course_search: "",
+                                }));
+                                setSelectedCourseTitle(c.name);
+                                setCourseResults([]);
+                              }}
+                              className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
+                            >
+                              {c.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                      {selectedCourseTitle && (
+                        <p className="mt-1 text-xs text-blue-600 font-medium">
+                          Selected: {selectedCourseTitle}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
-
-                {form.entity_type === "college" && (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={form.college_search}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setForm((f) => ({ ...f, college_search: val }));
-                        debouncedSearch(
-                          val,
-                          "/api/v1/institutions/public",
-                          setCollegeResults
-                        );
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                      placeholder="Search colleges..."
-                    />
-                    {collegeResults.length > 0 && (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                        {collegeResults.map((c) => (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => {
-                              setForm((f) => ({
-                                ...f,
-                                college_id: c.id,
-                                college_search: "",
-                              }));
-                              setSelectedCollegeName(c.name);
-                              setCollegeResults([]);
-                            }}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
-                          >
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {selectedCollegeName && (
-                      <p className="mt-1 text-xs text-blue-600 font-medium">
-                        Selected: {selectedCollegeName}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {form.entity_type === "course" && (
-                  <div className="relative">
-                    <input
-                      type="text"
-                      value={form.course_search}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setForm((f) => ({ ...f, course_search: val }));
-                        debouncedSearch(
-                          val,
-                          "/api/v1/education/courses/search",
-                          setCourseResults
-                        );
-                      }}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-                      placeholder="Search courses..."
-                    />
-                    {courseResults.length > 0 && (
-                      <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                        {courseResults.map((c) => (
-                          <button
-                            key={c.id}
-                            type="button"
-                            onClick={() => {
-                              setForm((f) => ({
-                                ...f,
-                                course_id: c.id,
-                                course_search: "",
-                              }));
-                              setSelectedCourseTitle(c.name);
-                              setCourseResults([]);
-                            }}
-                            className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50"
-                          >
-                            {c.name}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    {selectedCourseTitle && (
-                      <p className="mt-1 text-xs text-blue-600 font-medium">
-                        Selected: {selectedCourseTitle}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
+              )}
 
               <label className="flex items-center gap-3 cursor-pointer">
                 <input
