@@ -27,6 +27,8 @@ export interface AdminAd {
   course_duration: string;
   course_field: string;
   course_banner_url: string;
+  course_est_fee: string;
+  course_affiliation: string;
   created_at: string;
   updated_at: string;
 }

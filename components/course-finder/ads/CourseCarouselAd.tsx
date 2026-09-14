@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { ChevronLeft, ChevronRight, Star, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Star, MapPin, Calendar, GraduationCap } from "lucide-react";
 import { useCoursePageAds, trackAdClick } from "./useCoursePageAds";
 
 const CourseCarouselAd: React.FC = () => {
@@ -16,9 +16,13 @@ const CourseCarouselAd: React.FC = () => {
 
   const slides = ads.map((ad) => ({
     title: ad.college_name || ad.title,
+    subtitle: ad.description || ad.college_location || "",
+    rating: ad.college_rating ? `${ad.college_rating}+` : "",
+    university: ad.college_name || "",
+    degree: "",
     location: ad.college_location || "",
-    rating: ad.college_rating || 0,
-    image: ad.college_image || "",
+    duration: "",
+    logos: ad.college_image ? [{ name: ad.college_name || ad.title, url: ad.college_image }] : [],
     website: ad.college_website || "",
     link: ad.college_id ? `/find-college/${ad.college_id}` : ad.link_url || "#",
     ad,
@@ -44,52 +48,53 @@ const CourseCarouselAd: React.FC = () => {
 
       <div className="overflow-x-auto" ref={carouselRef} style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
         <div className="flex gap-4 pb-3 items-stretch" style={{ scrollSnapType: "x mandatory" }}>
-          {slides.map((slide, idx) => (
+          {slides.map((course, idx) => (
             <a
-              key={slide.ad?.id || idx}
-              href={slide.link}
-              onClick={() => slide.ad && trackAdClick(slide.ad.id)}
-              className="bg-white rounded-lg overflow-hidden min-w-[220px] max-w-[240px] w-[220px] flex-shrink-0 border border-gray-100 flex flex-col no-underline"
+              key={course.ad?.id || idx}
+              href={course.link}
+              onClick={() => course.ad && trackAdClick(course.ad.id)}
+              className="bg-white rounded-md p-4 min-w-[220px] max-w-[240px] flex-shrink-0 border border-gray-100 flex flex-col no-underline"
               style={{ scrollSnapAlign: "start" }}
             >
-              {slide.image ? (
-                <div className="w-full h-[120px] bg-gray-100 overflow-hidden">
-                  <img src={slide.image} alt={slide.title} className="w-full h-full object-cover" />
-                </div>
-              ) : (
-                <div className="w-full h-[120px] flex items-center justify-center p-4" style={{ backgroundColor: accent }}>
-                  <h3 className="text-white text-[13px] font-bold text-center leading-tight line-clamp-2" title={slide.title}>{slide.title}</h3>
-                </div>
+              <h3 className="text-[15px] font-bold text-slate-800 mb-1 line-clamp-2" title={course.title}>{course.title}</h3>
+              {course.subtitle && (
+                <p className="text-[11px] text-slate-500 leading-snug line-clamp-2 mb-2">{course.subtitle}</p>
               )}
-              <div className="p-3 flex flex-col flex-1">
-                <h3 className="text-[14px] font-bold text-slate-800 mb-1.5 leading-tight line-clamp-2" title={slide.title}>{slide.title}</h3>
-                <div className="flex items-center gap-2 mb-2 text-[11px] text-slate-600 flex-wrap">
-                  {slide.rating > 0 && (
-                    <span className="flex items-center gap-0.5">
-                      <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{slide.rating}
-                    </span>
-                  )}
-                  {slide.location && (
-                    <span className="flex items-center gap-0.5">
-                      <MapPin className="w-3 h-3 text-slate-400" />{slide.location}
-                    </span>
-                  )}
-                </div>
-                {slide.website && (
-                  <a
-                    href={slide.website.startsWith("http") ? slide.website : `https://${slide.website}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-[11px] text-blue-600 hover:underline truncate mb-2 block"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {slide.website}
-                  </a>
-                )}
-                <div className="mt-auto">
-                  <span className="block text-center text-[11px] font-semibold text-white bg-blue-600 rounded py-1.5 px-3">
-                    View Details
+              <div className="flex gap-1.5 mb-2">
+                {course.rating && (
+                  <span className="px-2 py-0.5 rounded-full border border-gray-200 text-[11px] font-semibold text-slate-700 flex items-center gap-1">
+                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />{course.rating}
                   </span>
+                )}
+                {course.university && (
+                  <span className="px-2 py-0.5 rounded-full border border-gray-200 text-[11px] font-semibold text-slate-700 max-w-[120px] truncate">{course.university}</span>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-x-2 gap-y-2 text-[11px] text-slate-600 font-medium mb-3">
+                {course.location && (
+                  <div className="flex items-center gap-1 truncate"><MapPin className="w-3 h-3 text-slate-400 shrink-0" />{course.location}</div>
+                )}
+                {course.website && (
+                  <div className="col-span-2 flex items-center gap-1 truncate">
+                    <a href={course.website.startsWith("http") ? course.website : `https://${course.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline truncate" onClick={(e) => e.stopPropagation()}>
+                      {course.website}
+                    </a>
+                  </div>
+                )}
+              </div>
+              <div className="h-px bg-gray-100 my-2" />
+              <div className="mt-auto">
+                <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Available at:</p>
+                <div className="flex gap-1 flex-wrap">
+                  {course.logos.map((logo, i) => (
+                    <div key={i} className="relative w-6 h-6 rounded-md border border-gray-100 p-0.5 flex items-center justify-center bg-white cursor-pointer group">
+                      <img src={logo.url} alt={logo.name} className="w-full h-full object-contain rounded opacity-80 hover:opacity-100 transition-opacity" />
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 bg-slate-800 text-white text-[10px] font-semibold px-2 py-1 rounded whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                        {logo.name}
+                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </a>

@@ -31,6 +31,8 @@ export interface CoursePageAd {
   course_duration: string;
   course_field: string;
   course_banner_url: string;
+  course_est_fee: string;
+  course_affiliation: string;
 }
 
 interface AdsApiResponse {

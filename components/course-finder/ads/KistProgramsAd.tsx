@@ -23,9 +23,9 @@ const KistProgramsAd: React.FC = () => {
     title: ad.course_title || ad.title,
     level: ad.course_level || "Bachelor",
     duration: ad.course_duration || "4 Years",
-    affiliation: ad.college_name || "-",
+    affiliation: ad.course_affiliation || ad.college_name || "-",
     field: ad.course_field || "-",
-    estFee: "-",
+    estFee: ad.course_est_fee || "-",
     accent: ad.accent || "#ebfbf1",
     link: ad.course_id ? `/course-finder/${ad.course_id}` : ad.link_url || "#",
     ad,
@@ -37,10 +37,10 @@ const KistProgramsAd: React.FC = () => {
     <div className="w-full border rounded-[20px] p-5" style={{ backgroundColor: accent, borderColor: `${accent}cc` }}>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <div>
-          <h2 className="text-lg md:text-[22px] font-bold text-green-900 tracking-tight leading-snug">
+          <h2 className="text-lg md:text-[22px] font-bold text-white tracking-tight leading-snug">
             Best Programs
           </h2>
-          <p className="text-[13px] text-green-700 font-medium">
+          <p className="text-[13px] text-white/80 font-medium">
             Explore top-rated programs from leading institutions
           </p>
         </div>
