@@ -42,13 +42,12 @@ export default function LandingCoursesTab() {
   const [activeSearchField, setActiveSearchField] = useState<number | null>(null);
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-  const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
-  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
-
   const fetchFields = useCallback(async () => {
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const tok = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const hdrs: Record<string, string> = tok ? { Authorization: `Bearer ${tok}` } : {};
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/landing-courses`, { headers });
+      const res = await fetch(`${base}/api/v1/admin/landing-courses`, { headers: hdrs });
       const json = await res.json();
       if (json.success) {
         setFields(json.data || []);
@@ -76,12 +75,16 @@ export default function LandingCoursesTab() {
       return;
     }
 
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const tok = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const hdrs: Record<string, string> = tok ? { Authorization: `Bearer ${tok}` } : {};
+
     setSearching(true);
     searchTimeout.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `${API_BASE}/api/v1/admin/landing-courses/search?q=${encodeURIComponent(query)}`,
-          { headers },
+          `${base}/api/v1/admin/landing-courses/search?q=${encodeURIComponent(query)}`,
+          { headers: hdrs },
         );
         const json = await res.json();
         setSearchResults(json.data || []);
@@ -95,10 +98,13 @@ export default function LandingCoursesTab() {
   }, []);
 
   const linkInstitution = async (fieldId: number, institution: SearchResults) => {
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const tok = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const hdrs: Record<string, string> = tok ? { Authorization: `Bearer ${tok}` } : {};
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/landing-courses`, {
+      const res = await fetch(`${base}/api/v1/admin/landing-courses`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...headers },
+        headers: { "Content-Type": "application/json", ...hdrs },
         body: JSON.stringify({
           field_id: fieldId,
           institution_id: institution.id,
@@ -123,10 +129,13 @@ export default function LandingCoursesTab() {
   };
 
   const unlinkInstitution = async (instId: number) => {
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const tok = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const hdrs: Record<string, string> = tok ? { Authorization: `Bearer ${tok}` } : {};
     try {
-      const res = await fetch(`${API_BASE}/api/v1/admin/landing-courses/${instId}`, {
+      const res = await fetch(`${base}/api/v1/admin/landing-courses/${instId}`, {
         method: "DELETE",
-        headers,
+        headers: hdrs,
       });
       if (res.ok) fetchFields();
     } catch (err) {
@@ -135,10 +144,13 @@ export default function LandingCoursesTab() {
   };
 
   const toggleFieldActive = async (fieldId: number, isActive: boolean) => {
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const tok = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const hdrs: Record<string, string> = tok ? { Authorization: `Bearer ${tok}` } : {};
     try {
-      await fetch(`${API_BASE}/api/v1/admin/landing-courses/fields/${fieldId}`, {
+      await fetch(`${base}/api/v1/admin/landing-courses/fields/${fieldId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...headers },
+        headers: { "Content-Type": "application/json", ...hdrs },
         body: JSON.stringify({ is_active: isActive }),
       });
       fetchFields();
@@ -162,10 +174,13 @@ export default function LandingCoursesTab() {
 
     setFields(newFields);
 
+    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    const tok = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+    const hdrs: Record<string, string> = tok ? { Authorization: `Bearer ${tok}` } : {};
     try {
-      await fetch(`${API_BASE}/api/v1/admin/landing-courses/fields/reorder`, {
+      await fetch(`${base}/api/v1/admin/landing-courses/fields/reorder`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...headers },
+        headers: { "Content-Type": "application/json", ...hdrs },
         body: JSON.stringify({
           items: newFields.map((f, i) => ({ id: f.id, display_order: i })),
         }),
