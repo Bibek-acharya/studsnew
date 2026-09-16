@@ -16,7 +16,8 @@ ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL \
     NEXT_PUBLIC_MAP_TILE_URL=$NEXT_PUBLIC_MAP_TILE_URL \
     NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL \
     NEXT_TELEMETRY_DISABLED=1
-RUN --mount=type=cache,target=/app/.next/cache pnpm run build
+RUN pnpm tsc --noEmit
+RUN --mount=type=cache,target=/app/.next/cache pnpm run build -- --turbo
 
 FROM node:22-alpine AS runner
 WORKDIR /app
