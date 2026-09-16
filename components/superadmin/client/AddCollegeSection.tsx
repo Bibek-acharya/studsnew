@@ -678,7 +678,7 @@ export default function AddCollegeSection({
 
             <div className="mb-8">
               <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-0">University Overview</label>
+                <label className="block text-sm font-medium text-gray-700 mb-0">Institution Overview</label>
                 <button type="button" onClick={() => addItem(setOverviewRows, { key: "", value: "" })}
                   className="text-sm text-blue-600 bg-blue-50 px-3 py-1.5 rounded-md hover:bg-blue-100 transition-colors font-medium">
                   <i className="fa-solid fa-plus mr-1"></i> Add Row

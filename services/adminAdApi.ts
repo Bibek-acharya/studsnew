@@ -152,4 +152,67 @@ export const adminAdApi = {
       authToken: getSuperadminToken() ?? undefined,
     });
   },
+
+  // Landing Course API methods
+
+  async listLandingCourses() {
+    return extractData(
+      apiRequest("/api/v1/admin/landing-courses", {
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
+  },
+
+  async linkLandingInstitution(data: {
+    field_id: number;
+    institution_id: number;
+    institution_type: string;
+    institution_name: string;
+    institution_logo: string;
+    slug: string;
+  }) {
+    return extractData(
+      apiRequest("/api/v1/admin/landing-courses", {
+        method: "POST",
+        body: JSON.stringify(data),
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
+  },
+
+  async unlinkLandingInstitution(id: number) {
+    await apiRequest(`/api/v1/admin/landing-courses/${id}`, {
+      method: "DELETE",
+      authToken: getSuperadminToken() ?? undefined,
+    });
+  },
+
+  async updateLandingField(id: number, data: { is_active?: boolean; display_order?: number }) {
+    return extractData(
+      apiRequest(`/api/v1/admin/landing-courses/fields/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
+  },
+
+  async reorderLandingFields(items: { id: number; display_order: number }[]) {
+    return extractData(
+      apiRequest("/api/v1/admin/landing-courses/fields/reorder", {
+        method: "PUT",
+        body: JSON.stringify({ items }),
+        authToken: getSuperadminToken() ?? undefined,
+      }),
+    );
+  },
+
+  async searchLandingInstitutions(query: string) {
+    return extractData(
+      apiRequest(
+        `/api/v1/admin/landing-courses/search?q=${encodeURIComponent(query)}`,
+        { authToken: getSuperadminToken() ?? undefined },
+      ),
+    );
+  },
 };
