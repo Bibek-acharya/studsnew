@@ -42,11 +42,17 @@ export default function LandingCoursesTab() {
   const [activeSearchField, setActiveSearchField] = useState<number | null>(null);
   const searchTimeout = useRef<ReturnType<typeof setTimeout>>(null);
 
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+  const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
+  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+
   const fetchFields = useCallback(async () => {
     try {
-      const res = await fetch("/api/v1/admin/landing-courses");
-      const data = await res.json();
-      setFields(data.data || []);
+      const res = await fetch(`${API_BASE}/api/v1/admin/landing-courses`, { headers });
+      const json = await res.json();
+      if (json.success) {
+        setFields(json.data || []);
+      }
     } catch (err) {
       console.error("Failed to fetch landing courses", err);
     } finally {
@@ -74,10 +80,11 @@ export default function LandingCoursesTab() {
     searchTimeout.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/v1/admin/landing-courses/search?q=${encodeURIComponent(query)}`,
+          `${API_BASE}/api/v1/admin/landing-courses/search?q=${encodeURIComponent(query)}`,
+          { headers },
         );
-        const data = await res.json();
-        setSearchResults(data.data || []);
+        const json = await res.json();
+        setSearchResults(json.data || []);
       } catch (err) {
         console.error("Search failed", err);
         setSearchResults([]);
@@ -89,9 +96,9 @@ export default function LandingCoursesTab() {
 
   const linkInstitution = async (fieldId: number, institution: SearchResults) => {
     try {
-      const res = await fetch("/api/v1/admin/landing-courses", {
+      const res = await fetch(`${API_BASE}/api/v1/admin/landing-courses`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({
           field_id: fieldId,
           institution_id: institution.id,
@@ -117,8 +124,9 @@ export default function LandingCoursesTab() {
 
   const unlinkInstitution = async (instId: number) => {
     try {
-      const res = await fetch(`/api/v1/admin/landing-courses/${instId}`, {
+      const res = await fetch(`${API_BASE}/api/v1/admin/landing-courses/${instId}`, {
         method: "DELETE",
+        headers,
       });
       if (res.ok) fetchFields();
     } catch (err) {
@@ -128,9 +136,9 @@ export default function LandingCoursesTab() {
 
   const toggleFieldActive = async (fieldId: number, isActive: boolean) => {
     try {
-      await fetch(`/api/v1/admin/landing-courses/fields/${fieldId}`, {
+      await fetch(`${API_BASE}/api/v1/admin/landing-courses/fields/${fieldId}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({ is_active: isActive }),
       });
       fetchFields();
@@ -155,9 +163,9 @@ export default function LandingCoursesTab() {
     setFields(newFields);
 
     try {
-      await fetch("/api/v1/admin/landing-courses/fields/reorder", {
+      await fetch(`${API_BASE}/api/v1/admin/landing-courses/fields/reorder`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify({
           items: newFields.map((f, i) => ({ id: f.id, display_order: i })),
         }),

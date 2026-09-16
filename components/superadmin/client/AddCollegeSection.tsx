@@ -747,11 +747,23 @@ export default function AddCollegeSection({
                     <i className="fa-solid fa-trash"></i>
                   </button>
                   <div className="space-y-3 pr-10">
-                    <div className="flex gap-3">
-                      <input className={`${inputClass} text-sm font-mono w-24`} placeholder="Icon name" value={f.icon} onChange={e => updateItem(setFacilities, f.id, "icon", e.target.value)} />
-                      <input className={`${inputClass} text-sm flex-1`} placeholder="Facility title" value={f.heading} onChange={e => updateItem(setFacilities, f.id, "heading", e.target.value)} />
-                    </div>
+                    <input className={`${inputClass} text-sm`} placeholder="Facility title (e.g. Library, Sports Complex)" value={f.heading} onChange={e => updateItem(setFacilities, f.id, "heading", e.target.value)} />
                     <textarea className={`${inputClass} text-sm h-16`} placeholder="Short description" value={f.desc} onChange={e => updateItem(setFacilities, f.id, "desc", e.target.value)}></textarea>
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-md border ${f.icon?.trim() ? "bg-blue-50 border-blue-200 text-blue-600" : "bg-gray-100 border-gray-200 text-gray-400"}`}>
+                          {f.icon?.trim() ? (
+                            <i className={`fa-solid fa-${f.icon.trim()} text-lg`}></i>
+                          ) : (
+                            <i className="fa-solid fa-icons text-lg"></i>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input className={`${inputClass} text-sm font-mono`} placeholder="Icon name (e.g. book, laptop, flask)" value={f.icon} onChange={e => { const v = e.target.value.replace(/\s+/g, "-").toLowerCase(); updateItem(setFacilities, f.id, "icon", v); }} />
+                          <p className="mt-1 text-[11px] text-gray-400">Browse icons at <a href="https://fontawesome.com/icons" target="_blank" rel="noreferrer" className="text-blue-600 hover:underline font-medium">fontawesome.com/icons</a></p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               ))}
