@@ -236,10 +236,12 @@ export default function CollegeListSection({
 }) {
   const [institutions, setInstitutions] = useState<Institution[]>([]);
   const [loading, setLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [authError, setAuthError] = useState(false);
 
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("");
   const [verificationFilter, setVerificationFilter] = useState("");
@@ -319,6 +321,7 @@ export default function CollegeListSection({
           setAuthError(true);
         else console.error("Failed to fetch institutions:", error);
       } finally {
+        setHasLoadedOnce(true);
         setLoading(false);
       }
     },
@@ -327,7 +330,7 @@ export default function CollegeListSection({
 
   const refreshWithCurrentFilters = useCallback(() => {
     fetchInstitutions({
-      search: searchQuery,
+      search: debouncedSearchQuery,
       type: typeFilter,
       paymentStatus: paymentFilter,
       verification: verificationFilter,
@@ -336,7 +339,7 @@ export default function CollegeListSection({
       level: activeTab === "all" ? undefined : activeTab,
     });
   }, [
-    searchQuery,
+    debouncedSearchQuery,
     typeFilter,
     paymentFilter,
     verificationFilter,
@@ -350,12 +353,19 @@ export default function CollegeListSection({
     refreshWithCurrentFilters();
   }, [refreshWithCurrentFilters]);
 
+  // Keep search typing instant: the input state updates immediately; the fetch
+  // and page reset below use the debounced value instead.
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearchQuery(searchQuery), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
+
   const totalInstitutions = institutions.length;
 
   useEffect(() => {
     setCurrentPage(1);
   }, [
-    searchQuery,
+    debouncedSearchQuery,
     typeFilter,
     paymentFilter,
     verificationFilter,
@@ -547,7 +557,9 @@ export default function CollegeListSection({
     );
   }
 
-  if (loading) {
+  // Full-screen spinner only on the initial load; keep the table (and the
+  // search input focus) rendered during filter/search refetches.
+  if (loading && !hasLoadedOnce) {
     return (
       <div className="flex min-h-[400px] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
