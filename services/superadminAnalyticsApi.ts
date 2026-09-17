@@ -75,6 +75,12 @@ export interface OpsAnalytics {
   series: SeriesPoint[];
 }
 
+export interface PagesAnalytics {
+  totals: { total_visits: number };
+  top_pages: { path: string; visits: number }[];
+  series: SeriesPoint[];
+}
+
 export interface HealthSnapshot {
   process: { uptime_seconds: number; goroutines: number; heap_alloc_bytes: number; heap_sys_bytes: number };
   database: { pool_open: number; pool_in_use: number; pool_idle: number; pool_wait_count: number; size_bytes: number };
@@ -123,5 +129,18 @@ export const superadminAnalyticsApi = {
   },
   getHealth(): Promise<{ data: HealthSnapshot }> {
     return get<{ data: HealthSnapshot }>(`/api/v1/superadmin/analytics/health`);
+  },
+  getPages(from: string, to: string, granularity: string): Promise<{ data: PagesAnalytics }> {
+    const params = new URLSearchParams({ from, to, granularity });
+    return get<{ data: PagesAnalytics }>(
+      `/api/v1/superadmin/analytics/pages?${params.toString()}`,
+    );
+  },
+  // Public endpoint: no auth required — plain request.
+  trackVisit(path: string, referrer?: string): Promise<unknown> {
+    return apiRequest(`/api/v1/track/visit`, {
+      method: "POST",
+      body: JSON.stringify({ path, ...(referrer ? { referrer } : {}) }),
+    });
   },
 };

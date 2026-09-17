@@ -42,6 +42,7 @@ export default function LandingCoursesTab() {
   const [loading, setLoading] = useState(true);
   const [expandedField, setExpandedField] = useState<FieldKey | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [fieldFilter, setFieldFilter] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
   const [searching, setSearching] = useState(false);
   const [activeSearchField, setActiveSearchField] = useState<FieldKey | null>(null);
@@ -339,7 +340,16 @@ export default function LandingCoursesTab() {
       </div>
 
       <div className="space-y-2">
-        {fields.map((field, idx) => (
+        <input
+          type="text"
+          className="mb-2 w-full max-w-sm border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          placeholder="Search field of study..."
+          value={fieldFilter}
+          onChange={(e) => setFieldFilter(e.target.value)}
+        />
+        {fields
+          .filter((field) => fieldFilter.trim() === "" || field.field_of_study.toLowerCase().includes(fieldFilter.toLowerCase()))
+          .map((field, idx) => (
           <div
             key={field.key}
             onDragOver={(e) => handleDragOverField(e, field)}

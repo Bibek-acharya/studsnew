@@ -32,16 +32,14 @@ export default function UniversityAffiliationSection() {
     (async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem("superadmin_token");
+        // Same source of truth the university public pages use for affiliated colleges:
+        // matches university_id OR affiliation LIKE %<university name>% server-side.
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-        const res = await fetch(`${baseUrl}/api/v1/admin/institutions?limit=500`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await fetch(`${baseUrl}/api/v1/institutions/public/by-university/${selectedUni}`);
         const json = await res.json();
-        const all = (json?.data?.institutions || json?.institutions || []);
-        const filtered = all.filter((i: any) => i.university_id === selectedUni);
-        setInstitutions(filtered.map((i: any) => ({ id: i.id, institution_name: i.institution_name, university_id: i.university_id, is_sponsored: i.is_sponsored || false, district: i.district || "", website_url: i.website_url || "" })));
-      } catch {}
+        const list = (json?.data || json || []);
+        setInstitutions(list.map((i: any) => ({ id: i.id, institution_name: i.institution_name, university_id: i.university_id, is_sponsored: i.is_sponsored || false, district: i.district || "", website_url: i.website_url || "" })));
+      } catch { setInstitutions([]); }
       finally { setLoading(false); }
     })();
   }, [selectedUni]);

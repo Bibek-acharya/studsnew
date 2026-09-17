@@ -116,8 +116,11 @@ export default function AddCollegeSection({
         setLocation(d.district || "");
         setOrganizationType(d.organization_type || "");
         setWebsite(d.website_url || "");
-        setAffiliation(d.non_university_affiliation || d.affiliation || "");
-        setUniversityIds(d.university_affiliations || (d.university_id ? [d.university_id] : []));
+        setAffiliation(d.non_university_affiliation !== undefined ? d.non_university_affiliation : (d.affiliation || ""));
+        const normalizeUniIds = (arr: unknown): number[] =>
+          Array.isArray(arr) ? arr.map((v: any) => Number(v?.id ?? v)).filter((n: number) => !isNaN(n)) : [];
+        const uniIds = normalizeUniIds(d.university_affiliations || d.university_id);
+        setUniversityIds(uniIds.length > 0 || d.university_affiliations ? uniIds : []);
         setAbout(d.about || "");
         setVision(d.vision || "");
         setMission(d.mission || "");
@@ -312,7 +315,7 @@ export default function AddCollegeSection({
         affiliation: level.some(l => l.includes("Bachelor") || l.includes("Master"))
           ? universityIds.map(id => universities.find(u => u.id === id)?.name || "").filter(Boolean).join(", ")
           : "",
-        non_university_affiliation: affiliation || "",
+        non_university_affiliation: level.some(l => l.includes("Bachelor") || l.includes("Master")) ? "" : affiliation,
         university_affiliations: universityIds,
         logo_url: finalLogoUrl.startsWith("data:") ? "" : finalLogoUrl,
         banner_url: finalBannerUrl.startsWith("data:") ? "" : finalBannerUrl,

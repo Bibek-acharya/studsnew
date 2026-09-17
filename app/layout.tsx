@@ -6,6 +6,7 @@ import FooterWrapper from "./footer-wrapper";
 import Providers from "./providers";
 import NavbarWrapper from "./navbar-wrapper";
 import LayoutPaddingWrapper from "./layout-padding-wrapper";
+import PageVisitTracker from "@/components/project-shiksha/PageVisitTracker";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./globals.css";
 
@@ -133,6 +134,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col">
         <Providers>
+          <PageVisitTracker />
           <NavbarWrapper />
           <LayoutPaddingWrapper>
             <main className="flex-1">{children}</main>

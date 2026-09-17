@@ -27,9 +27,14 @@ export default function OpsPanel({ from, to, onNavigate }: { from: string; to: s
   }
 
   if (error) {
+    const msg =
+      (error as { response?: { data?: { error?: string } } })?.response?.data?.error ||
+      (error as { message?: string })?.message ||
+      "";
     return (
       <Panel title="Ops">
         <p className="text-sm text-gray-500">Failed to load ops analytics.</p>
+        {msg && <p className="mt-1 text-xs text-red-500 break-words">{msg}</p>}
       </Panel>
     );
   }
