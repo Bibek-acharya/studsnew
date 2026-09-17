@@ -39,6 +39,7 @@ export default function AddCollegeSection({
 }) {
   const [collegeName, setCollegeName] = useState("");
   const [location, setLocation] = useState("");
+  const [organizationType, setOrganizationType] = useState("");
   const [website, setWebsite] = useState("");
   const [level, setLevel] = useState<string[]>([]);
 
@@ -47,6 +48,7 @@ export default function AddCollegeSection({
   };
 
   const levelOptions = ["+2", "A-Level", "TSLC (CTEVT)", "Diploma (CTEVT)", "PCL", "Bachelor's", "Bachelor's (Honours)", "Postgraduate Diploma (PGD)", "Master's", "MPhil", "PhD"];
+  const organizationTypeOptions = ["Private", "Public / Govt", "Community", "Constituent", "Foreign Affiliated"];
   const [affiliation, setAffiliation] = useState("");
   const [universityIds, setUniversityIds] = useState<number[]>([]);
   const [universities, setUniversities] = useState<{ id: number; name: string }[]>([]);
@@ -110,6 +112,7 @@ export default function AddCollegeSection({
         if (!d) return;
         setCollegeName(d.institution_name || "");
         setLocation(d.district || "");
+        setOrganizationType(d.organization_type || "");
         setWebsite(d.website_url || "");
         setAffiliation(d.non_university_affiliation || d.affiliation || "");
         setUniversityIds(d.university_affiliations || (d.university_id ? [d.university_id] : []));
@@ -293,6 +296,7 @@ export default function AddCollegeSection({
         registration_number: "",
         location,
         website,
+        organization_type: organizationType,
         level: level.join(","),
         contact_email: contactEmail,
         contact_phone: contactPhone,
@@ -527,6 +531,15 @@ export default function AddCollegeSection({
                     </label>
                   ))}
                 </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">College Type</label>
+                <select className={inputClass} value={organizationType} onChange={e => setOrganizationType(e.target.value)}>
+                  <option value="">—</option>
+                  {organizationTypeOptions.map(opt => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
               </div>
               {level.some(l => l.includes("Bachelor") || l.includes("Master")) && (
               <div>
