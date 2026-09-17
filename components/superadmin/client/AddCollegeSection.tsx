@@ -42,6 +42,7 @@ export default function AddCollegeSection({
   const [location, setLocation] = useState("");
   const [organizationType, setOrganizationType] = useState("");
   const [website, setWebsite] = useState("");
+  const [uniSearch, setUniSearch] = useState("");
   const [level, setLevel] = useState<string[]>([]);
 
   const toggleLevel = (value: string) => {
@@ -545,11 +546,22 @@ export default function AddCollegeSection({
               {level.some(l => l.includes("Bachelor") || l.includes("Master")) && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Affiliated Universities</label>
+                {universities.length > 0 && (
+                  <input
+                    type="text"
+                    className={`${inputClass} mb-2`}
+                    placeholder="Search universities..."
+                    value={uniSearch}
+                    onChange={(e) => setUniSearch(e.target.value)}
+                  />
+                )}
                 <div className="border border-gray-300 rounded-md p-2 max-h-40 overflow-y-auto bg-white">
                   {universities.length === 0 ? (
                     <p className="text-sm text-gray-400">Loading universities...</p>
                   ) : (
-                    universities.map(u => (
+                    universities
+                      .filter(u => uniSearch.trim() === "" || u.name.toLowerCase().includes(uniSearch.toLowerCase()))
+                      .map(u => (
                       <label key={u.id} className="flex items-center gap-2 py-1.5 px-2 hover:bg-gray-50 rounded cursor-pointer">
                         <input
                           type="checkbox"
