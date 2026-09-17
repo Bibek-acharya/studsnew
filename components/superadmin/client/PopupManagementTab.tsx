@@ -129,7 +129,8 @@ export default function PopupManagementTab() {
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
               <th className="px-4 py-3">Banner</th>
-              <th className="px-4 py-3">Linked Scholarship</th>
+              <th className="px-4 py-3">Title</th>
+              <th className="px-4 py-3">Redirect Link</th>
               <th className="px-4 py-3">Active</th>
               <th className="px-4 py-3">Clicks</th>
               <th className="px-4 py-3">Created</th>
@@ -139,7 +140,7 @@ export default function PopupManagementTab() {
           <tbody>
             {popups.length === 0 && (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                   No popups created yet.
                 </td>
               </tr>
@@ -153,6 +154,7 @@ export default function PopupManagementTab() {
                     <div className="w-20 h-14 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">No image</div>
                   )}
                 </td>
+                <td className="px-4 py-3 font-medium text-gray-900">{popup.title || "-"}</td>
                 <td className="px-4 py-3 text-gray-600 max-w-[200px] truncate">{popup.link_url}</td>
                 <td className="px-4 py-3">
                   <button

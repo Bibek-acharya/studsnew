@@ -251,7 +251,7 @@ const CollegeCard: React.FC<{
       <div className="flex items-center text-[14px] text-gray-500 mb-2">
         <div className="flex items-center gap-1 font-bold text-slate-700">
           <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-          <span>{college.rating || "4.5"}</span>
+          <span>{college.rating ?? 0}</span>
         </div>
         <span className="mx-3 text-gray-300 font-light">|</span>
         <div className="flex items-center gap-1.5">

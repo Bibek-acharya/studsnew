@@ -9,8 +9,7 @@ interface ShowcaseAd {
   title: string;
   image_url: string;
   link_url: string;
-  location?: string;
-  start_date?: string;
+  description?: string;
   active: boolean;
   created_at: string;
 }
@@ -128,8 +127,7 @@ export default function ShowcaseBannerTab() {
             <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
               <th className="px-4 py-3">Image</th>
               <th className="px-4 py-3">Title</th>
-              <th className="px-4 py-3">Location</th>
-              <th className="px-4 py-3">Date</th>
+              <th className="px-4 py-3">Sub-description</th>
               <th className="px-4 py-3">Active</th>
               <th className="px-4 py-3">Created</th>
               <th className="px-4 py-3 text-center">Actions</th>
@@ -138,7 +136,7 @@ export default function ShowcaseBannerTab() {
           <tbody>
             {ads.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
                   No showcase banners created yet.
                 </td>
               </tr>
@@ -153,8 +151,7 @@ export default function ShowcaseBannerTab() {
                   )}
                 </td>
                 <td className="px-4 py-3 font-medium text-gray-900">{ad.title || "-"}</td>
-                <td className="px-4 py-3 text-gray-600">{ad.location || "-"}</td>
-                <td className="px-4 py-3 text-gray-600 text-xs">{ad.start_date ? new Date(ad.start_date).toLocaleDateString() : "-"}</td>
+                <td className="px-4 py-3 text-gray-600 max-w-[220px] truncate">{ad.description || "-"}</td>
                 <td className="px-4 py-3">
                   <button
                     onClick={() => handleToggleActive(ad)}

@@ -8,8 +8,7 @@ interface ShowcaseAd {
   title: string;
   image_url: string;
   link_url: string;
-  location?: string;
-  start_date?: string;
+  description?: string;
   active: boolean;
 }
 
@@ -33,8 +32,8 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
   const [uploading, setUploading] = useState(false);
   const [title, setTitle] = useState(ad?.title || "");
   const [linkUrl, setLinkUrl] = useState(ad?.link_url || "");
-  const [location, setLocation] = useState(ad?.location || "");
-  const [date, setDate] = useState(ad?.start_date ? ad.start_date.split("T")[0] : "");
+  const [description, setDescription] = useState(ad?.description || "");
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [active, setActive] = useState(ad?.active ?? true);
   const [saving, setSaving] = useState(false);
 
@@ -73,6 +72,11 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
       alert("Please enter a title");
       return;
     }
+    if (!linkUrl.trim()) {
+      setLinkError("Link URL is required");
+      return;
+    }
+    setLinkError(null);
 
     setSaving(true);
     try {
@@ -83,12 +87,11 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
         return;
       }
 
-      const payload: Record<string, any> = {
+      const payload = {
         title: title.trim(),
         image_url: finalImageUrl,
         link_url: linkUrl.trim(),
-        location: location.trim(),
-        start_date: date || null,
+        description: description.trim(),
         page: "landing",
         position: "showcase",
         active,
@@ -153,41 +156,43 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
               )}
               <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
             </label>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Link URL</label>
-            <input
-              type="url"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            />
             <p className="text-xs text-gray-400 mt-1">
-              URL users will go to when clicking the banner.
+              Recommended size: 730 x 420 px
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Link URL <span className="text-red-500">*</span>
+            </label>
             <input
-              type="text"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              placeholder="e.g. Kathmandu, Pokhara"
+              type="url"
+              required
+              value={linkUrl}
+              onChange={(e) => {
+                setLinkUrl(e.target.value);
+                setLinkError(null);
+              }}
+              placeholder="https://example.com"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
             />
+            {linkError && (
+              <p className="text-xs text-red-600 mt-1">{linkError}</p>
+            )}
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Sub-description</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Short supporting text shown under the title"
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none resize-y"
             />
+            <p className="text-xs text-gray-400 mt-1">
+              Optional — shown on the public showcase card under the title.
+            </p>
           </div>
 
           <label className="flex items-center gap-3 cursor-pointer">

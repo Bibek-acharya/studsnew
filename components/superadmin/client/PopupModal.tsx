@@ -1,13 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { X, Upload } from "lucide-react";
-
-interface ScholarshipOption {
-  id: number;
-  slug: string;
-  title: string;
-}
 
 interface PopupAd {
   id: number;
@@ -37,32 +31,11 @@ export default function PopupModal({ popup, onClose }: PopupModalProps) {
   const [imagePreview, setImagePreview] = useState(popup?.image_url ? resolveUrl(popup.image_url) : "");
   const [imageUrl, setImageUrl] = useState(popup?.image_url || "");
   const [uploading, setUploading] = useState(false);
-  const [scholarships, setScholarships] = useState<ScholarshipOption[]>([]);
-  const [selectedScholarshipId, setSelectedScholarshipId] = useState<number | null>(null);
+  const [title, setTitle] = useState(popup?.title || "");
+  const [linkUrl, setLinkUrl] = useState(popup?.link_url || "");
+  const [formError, setFormError] = useState<string | null>(null);
   const [active, setActive] = useState(popup?.active ?? true);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    const fetchScholarships = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/api/v1/admin/scholarships/list`, { headers });
-        const json = await res.json();
-        if (json.success) {
-          const list: ScholarshipOption[] = json.data || [];
-          setScholarships(list);
-          if (popup?.link_url) {
-            const match = popup.link_url.match(/\/scholarship-finder\/apply\/(.+)/);
-            if (match) {
-              const slug = match[1];
-              const found = list.find((s) => s.slug === slug);
-              if (found) setSelectedScholarshipId(found.id);
-            }
-          }
-        }
-      } catch {}
-    };
-    fetchScholarships();
-  }, []);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,11 +68,15 @@ export default function PopupModal({ popup, onClose }: PopupModalProps) {
   };
 
   const handleSave = async () => {
-    const selected = scholarships.find((s) => s.id === selectedScholarshipId);
-    if (!selected) {
-      alert("Please select a scholarship");
+    if (!title.trim()) {
+      setFormError("Title is required");
       return;
     }
+    if (!linkUrl.trim()) {
+      setFormError("Redirect link is required");
+      return;
+    }
+    setFormError(null);
 
     setSaving(true);
     try {
@@ -111,9 +88,9 @@ export default function PopupModal({ popup, onClose }: PopupModalProps) {
       }
 
       const payload = {
-        title: `Landing Popup - ${selected.title}`,
+        title: title.trim(),
         image_url: finalImageUrl,
-        link_url: `/scholarship-finder/apply/${selected.slug}`,
+        link_url: linkUrl.trim(),
         page: "landing",
         position: "popup",
         active,
@@ -155,14 +132,31 @@ export default function PopupModal({ popup, onClose }: PopupModalProps) {
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Banner Image</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Title <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={title}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                setFormError(null);
+              }}
+              placeholder="Enter popup title"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Popup Image</label>
             <label className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 cursor-pointer block">
               {imagePreview ? (
                 <img src={imagePreview} alt="Preview" className="max-h-40 mx-auto rounded object-contain" />
               ) : (
                 <div className="py-6">
                   <Upload className="mx-auto text-gray-400 mb-2" size={32} />
-                  <p className="text-sm text-gray-500">Click to upload banner</p>
+                  <p className="text-sm text-gray-500">Click to upload image</p>
                 </div>
               )}
               <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
@@ -170,23 +164,28 @@ export default function PopupModal({ popup, onClose }: PopupModalProps) {
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Link to Scholarship</label>
-            <select
-              value={selectedScholarshipId ?? ""}
-              onChange={(e) => setSelectedScholarshipId(e.target.value ? Number(e.target.value) : null)}
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Redirect Link <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              required
+              value={linkUrl}
+              onChange={(e) => {
+                setLinkUrl(e.target.value);
+                setFormError(null);
+              }}
+              placeholder="https://example.com or /scholarships"
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            >
-              <option value="">-- Select a scholarship --</option>
-              {scholarships.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.title}
-                </option>
-              ))}
-            </select>
+            />
             <p className="text-xs text-gray-400 mt-1">
-              Clicking the popup on the website will navigate to the selected scholarship application form.
+              Link users go to when clicking the popup — an internal path or an external https:// URL.
             </p>
           </div>
+
+          {formError && (
+            <p className="text-xs text-red-600">{formError}</p>
+          )}
 
           <label className="flex items-center gap-3 cursor-pointer">
             <input

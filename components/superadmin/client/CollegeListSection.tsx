@@ -1068,8 +1068,21 @@ export default function CollegeListSection({
                               <button
                                 type="button"
                                 onClick={() => handleOpenFeature(inst)}
-                                className={`tooltip p-1.5 rounded transition-colors ${inst.featured ? "text-amber-500 hover:bg-amber-50" : "text-gray-400 hover:bg-amber-50 hover:text-amber-500"}`}
-                                title={inst.featured ? "Unfeature" : "Feature"}
+                                disabled={inst.claimed === false}
+                                className={`tooltip p-1.5 rounded transition-colors ${
+                                  inst.claimed === false
+                                    ? "text-gray-300 cursor-not-allowed"
+                                    : inst.featured
+                                      ? "text-amber-500 hover:bg-amber-50"
+                                      : "text-gray-400 hover:bg-amber-50 hover:text-amber-500"
+                                }`}
+                                title={
+                                  inst.claimed === false
+                                    ? "Only claimed institutions can be featured"
+                                    : inst.featured
+                                      ? "Unfeature"
+                                      : "Feature"
+                                }
                               >
                                 <Star className="w-3.5 h-3.5" />
                               </button>

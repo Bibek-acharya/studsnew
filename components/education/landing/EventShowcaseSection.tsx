@@ -6,12 +6,11 @@ interface ShowcaseSlide {
   image: string;
   title: string;
   link_url: string;
-  location?: string;
-  date?: string;
+  description?: string;
 }
 
 interface EventShowcaseSectionProps {
-  onNavigate: (view: string, data?: any) => void;
+  onNavigate: (view: string, data?: unknown) => void;
 }
 
 const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ }) => {
@@ -27,12 +26,11 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ }) => {
         const json = await res.json();
         if (json.success && json.data && json.data.length > 0) {
           setSlides(
-            json.data.map((ad: { image_url: string; title?: string; link_url?: string; location?: string; start_date?: string }) => ({
+            json.data.map((ad: { image_url: string; title?: string; link_url?: string; description?: string }) => ({
               image: ad.image_url.startsWith("/uploads") ? `${API_BASE}${ad.image_url}` : ad.image_url,
               title: ad.title || "Learn More",
-              link_url: ad.link_url || "#",
-              location: ad.location || "",
-              date: ad.start_date ? new Date(ad.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "",
+              link_url: ad.link_url || "",
+              description: ad.description || "",
             }))
           );
         }
@@ -47,10 +45,7 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ }) => {
     badgeText: "Featured",
     title: slide.title,
     link_url: slide.link_url,
-    date: slide.date || "",
-    location: slide.location || "",
-    interested: "",
-    avatars: [],
+    description: slide.description,
   }));
 
   useEffect(() => {
@@ -105,36 +100,27 @@ const EventShowcaseSection: React.FC<EventShowcaseSectionProps> = ({ }) => {
                       <span className="font-medium text-xs sm:text-sm">{slide.badgeText || "Featured"}</span>
                     </div>
 
-                    <h2 className="text-[22px] xs:text-[26px] sm:text-3xl md:text-[36px] lg:text-[40px] font-bold text-gray-900 leading-[1.2] mb-4 sm:mb-5 md:mb-6 tracking-tight">
+                    <h2 className="text-xl xs:text-2xl sm:text-[26px] md:text-[30px] lg:text-[34px] font-bold text-gray-900 leading-[1.2] mb-4 sm:mb-5 md:mb-6 tracking-tight">
                       {slide.title}
                     </h2>
 
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-gray-700 font-medium text-xs sm:text-sm md:text-base mb-6 sm:mb-8">
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <span>{slide.date}</span>
-                      </div>
-                      <span className="text-gray-300 hidden xs:inline">|</span>
-                      <div className="flex items-center gap-1.5">
-                        <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                        <span>{slide.location || "Kathmandu"}</span>
-                      </div>
-                    </div>
+                    {slide.description ? (
+                      <p className="text-gray-600 text-xs sm:text-sm md:text-[15px] leading-relaxed mb-5 sm:mb-6 lg:mb-7 max-w-prose">
+                        {slide.description}
+                      </p>
+                    ) : null}
 
                     <div className="flex flex-wrap items-center gap-3 sm:gap-4 md:gap-6">
-                      <a
-                        href={slide.link_url || "#"}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
-                      >
-                        Apply Now
-                      </a>
+                      {slide.link_url ? (
+                        <a
+                          href={slide.link_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 sm:py-3 md:py-3.5 px-5 sm:px-6 md:px-8 rounded-md transition-colors text-[13px] sm:text-[14px] md:text-[15px]"
+                        >
+                          View Details
+                        </a>
+                      ) : null}
 
 
                     </div>

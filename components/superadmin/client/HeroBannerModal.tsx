@@ -146,6 +146,9 @@ export default function HeroBannerModal({ slide, onClose }: HeroBannerModalProps
               )}
               <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
             </label>
+            <p className="text-xs text-gray-400 mt-1">
+              Recommended size: 1400 x 540 px
+            </p>
           </div>
 
           <div>
