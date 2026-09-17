@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Book,
@@ -15,6 +15,7 @@ import {
   StudyResource,
 } from "@/services/studyResourcesApi";
 import { useAuth } from "@/services/AuthContext";
+import CourseCombobox from "@/components/studyResources/CourseCombobox";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -27,8 +28,9 @@ const RESOURCE_TYPES = [
   { value: "syllabus", label: "Syllabus" },
 ];
 
-const COURSES = ["", "BCA", "BIM", "BBS", "BIT", "BBA"];
-const YEARS = ["", "2081", "2080", "2079"];
+// Courses and years are no longer hardcoded: courses come from the shared
+// course list endpoint (via CourseCombobox) and years are aggregated from
+// the list response (data.years + item values).
 
 function formatFileSize(bytes: number | string): string {
   const size = Number(bytes) || 0;
@@ -56,6 +58,7 @@ export default function StudyResourcesPage() {
   const [typeFilter, setTypeFilter] = useState("");
   const [courseFilter, setCourseFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
+  const [yearOptions, setYearOptions] = useState<string[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -80,6 +83,17 @@ export default function StudyResourcesPage() {
         setResources(items);
         const total = res?.data?.total ?? items.length;
         setTotalPages(Math.max(1, Math.ceil(total / 20)));
+        // Aggregate years from the envelope (when present) and the items.
+        const years = new Set<string>();
+        if (Array.isArray(res?.data?.years)) {
+          res.data.years.forEach((y) => {
+            if (typeof y === "string" && y.trim()) years.add(y.trim());
+          });
+        }
+        items.forEach((item) => {
+          if (item.year && item.year.trim()) years.add(item.year.trim());
+        });
+        setYearOptions(Array.from(years));
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "Failed to load study resources",
@@ -96,6 +110,19 @@ export default function StudyResourcesPage() {
     setSearchQuery(searchInput.trim());
     setPage(1);
   };
+
+  const yearsSortedDesc = useMemo(
+    () =>
+      [...yearOptions].sort((a, b) => {
+        const na = Number(a);
+        const nb = Number(b);
+        if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) {
+          return nb - na;
+        }
+        return b.localeCompare(a);
+      }),
+    [yearOptions],
+  );
 
   const handleReset = () => {
     setSearchInput("");
@@ -198,25 +225,25 @@ export default function StudyResourcesPage() {
                 </option>
               ))}
             </select>
-            <select
-              value={courseFilter}
-              onChange={(e) => setCourseFilter(e.target.value)}
-              className={`${inputClass} sm:flex-1`}
-            >
-              {COURSES.map((c) => (
-                <option key={c} value={c}>
-                  {c || "All courses"}
-                </option>
-              ))}
-            </select>
+            <div className="sm:flex-1">
+              <CourseCombobox
+                value={courseFilter}
+                onChange={setCourseFilter}
+                allowEmpty
+                emptyLabel="All courses"
+                placeholder="All courses"
+                inputClassName={inputClass}
+              />
+            </div>
             <select
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
               className={`${inputClass} sm:flex-1`}
             >
-              {YEARS.map((y) => (
+              <option value="">All years</option>
+              {yearsSortedDesc.map((y) => (
                 <option key={y} value={y}>
-                  {y || "All years"}
+                  {y}
                 </option>
               ))}
             </select>
@@ -239,7 +266,7 @@ export default function StudyResourcesPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
                 {resources.map((resource) => (
                   <article
                     key={resource.id}

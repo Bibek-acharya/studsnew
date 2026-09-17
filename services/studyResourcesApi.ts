@@ -1,4 +1,6 @@
 import { apiRequest } from "./api";
+import { fetchCourses } from "./course-api";
+import type { GlobalCourse } from "@/types/course";
 
 export interface StudyResource {
   id: number;
@@ -20,6 +22,10 @@ export interface StudyResourceListEnvelope {
   limit: number;
   total: number;
   study_resources: StudyResource[];
+  /** Aggregated year values from the backend, when provided. */
+  years?: string[];
+  /** Aggregated course values from the backend, when provided. */
+  courses?: string[];
 }
 
 export interface StudyResourcesResponse {
@@ -65,6 +71,41 @@ export const studyResourcesApi = {
     return payload as StudyResource;
   },
 
+  /** Distinct course names for filter/dropdowns, from one shared source. */
+  async listCourseOptions(): Promise<string[]> {
+    // Preferred: existing courses service.
+    try {
+      const result = await fetchCourses({ limit: 100 });
+      const courses: GlobalCourse[] = Array.isArray(result)
+        ? result
+        : result.courses ?? [];
+      const names = courses
+        .map((c) => c.title || (c as unknown as { name?: string }).name || "")
+        .map((n) => n.trim())
+        .filter(Boolean);
+      if (names.length > 0) return Array.from(new Set(names)).sort();
+    } catch {
+      // Fall through to the simple endpoint below.
+    }
+    const res = await apiRequest<unknown>("/api/v1/courses/simple");
+    const payload = Array.isArray(res)
+      ? res
+      : (res as { data?: unknown }).data ?? [];
+    const items = Array.isArray(payload) ? payload : [];
+    const names = items
+      .map(
+        (item: unknown) =>
+          typeof item === "string"
+            ? item
+            : (item as { name?: string; title?: string })?.name ||
+              (item as { title?: string })?.title ||
+              "",
+      )
+      .map((n: string) => n.trim())
+      .filter(Boolean);
+    return Array.from(new Set(names)).sort();
+  },
+
   // ─── Admin (superadmin) ─────────────────────────────────────────────────────
 
   async createStudyResource(form: FormData): Promise<StudyResource> {
@@ -108,6 +149,25 @@ export const studyResourcesApi = {
       body: JSON.stringify(data),
       authToken: token ?? undefined,
     });
+  },
+
+  /** Replace the file of an existing resource (metadata already saved via PUT). */
+  async replaceStudyResourceFile(
+    id: number,
+    form: FormData,
+  ): Promise<StudyResource> {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("superadmin_token")
+        : null;
+    return apiRequest<StudyResource>(
+      `/api/v1/admin/study-resources/${id}/file`,
+      {
+        method: "POST",
+        body: form,
+        authToken: token ?? undefined,
+      },
+    );
   },
 
   async deleteStudyResource(id: number): Promise<void> {

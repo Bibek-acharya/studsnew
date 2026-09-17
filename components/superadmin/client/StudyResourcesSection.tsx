@@ -16,6 +16,7 @@ import {
   studyResourcesApi,
   StudyResource,
 } from "@/services/studyResourcesApi";
+import CourseCombobox from "@/components/studyResources/CourseCombobox";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -96,6 +97,7 @@ export default function StudyResourcesSection() {
   // Edit modal
   const [editTarget, setEditTarget] = useState<StudyResource | null>(null);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
+  const [editFile, setEditFile] = useState<File | null>(null);
   const [savingEdit, setSavingEdit] = useState(false);
 
   // Delete dialog
@@ -193,6 +195,7 @@ export default function StudyResourcesSection() {
 
   const openEdit = (resource: StudyResource) => {
     setEditTarget(resource);
+    setEditFile(null);
     setEditForm({
       title: resource.title,
       resource_type: resource.resource_type,
@@ -204,6 +207,16 @@ export default function StudyResourcesSection() {
 
   const handleEditField = (field: keyof EditForm, value: string) => {
     setEditForm((prev) => (prev ? { ...prev, [field]: value } : prev));
+  };
+
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null;
+    if (selected && selected.size > MAX_SIZE) {
+      showActionMsg("error", "File exceeds the 20 MB limit.");
+      e.target.value = "";
+      return;
+    }
+    setEditFile(selected);
   };
 
   const handleEditSave = async () => {
@@ -220,9 +233,33 @@ export default function StudyResourcesSection() {
       if (Object.keys(payload).length > 0) {
         await studyResourcesApi.updateStudyResource(editTarget.id, payload);
       }
+      // If a new file was picked, replace it after the metadata PUT succeeds.
+      if (editFile) {
+        const fileData = new FormData();
+        fileData.append("file", editFile);
+        try {
+          await studyResourcesApi.replaceStudyResourceFile(
+            editTarget.id,
+            fileData,
+          );
+        } catch (fileError) {
+          showActionMsg(
+            "error",
+            `Metadata saved, but replacing the file failed: ${
+              fileError instanceof Error
+                ? fileError.message
+                : "unknown error"
+            }`,
+          );
+          setEditFile(null);
+          fetchResources();
+          return;
+        }
+      }
       showActionMsg("success", "Resource updated successfully");
       setEditTarget(null);
       setEditForm(null);
+      setEditFile(null);
       fetchResources();
     } catch (error) {
       showActionMsg(
@@ -357,12 +394,11 @@ export default function StudyResourcesSection() {
                   <label className="mb-1 block text-xs font-medium text-gray-600">
                     Course
                   </label>
-                  <input
-                    type="text"
+                  <CourseCombobox
                     value={course}
-                    onChange={(e) => setCourse(e.target.value)}
-                    className={inputClass}
-                    placeholder="e.g. BCA"
+                    onChange={setCourse}
+                    inputClassName={inputClass}
+                    placeholder="Select or type course (e.g. BCA)"
                   />
                 </div>
                 <div>
@@ -648,12 +684,32 @@ export default function StudyResourcesSection() {
                   <label className="mb-1 block text-xs font-medium text-gray-600">
                     Course
                   </label>
-                  <input
-                    type="text"
+                  <CourseCombobox
                     value={editForm.course}
-                    onChange={(e) => handleEditField("course", e.target.value)}
-                    className={inputClass}
+                    onChange={(v) => handleEditField("course", v)}
+                    inputClassName={inputClass}
+                    placeholder="Select or type course"
                   />
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs font-medium text-gray-600">
+                    Replace file (optional)
+                  </label>
+                  <input
+                    type="file"
+                    accept={ACCEPTED}
+                    onChange={handleEditFileChange}
+                    className="w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100"
+                  />
+                  <p className="mt-1 truncate text-xs text-gray-500">
+                    Current: {editTarget.file_name || "—"}
+                    {editFile && (
+                      <span className="text-blue-600">
+                        {" "}
+                        → New: {editFile.name}
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="sm:col-span-2">
                   <label className="mb-1 block text-xs font-medium text-gray-600">
@@ -686,6 +742,7 @@ export default function StudyResourcesSection() {
                 onClick={() => {
                   setEditTarget(null);
                   setEditForm(null);
+                  setEditFile(null);
                 }}
                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
               >
