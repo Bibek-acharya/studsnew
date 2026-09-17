@@ -25,7 +25,8 @@ const CourseCategoriesSection: React.FC<CourseCategoriesSectionProps> = ({ onNav
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/v1/system/landing-courses")
+    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+    fetch(`${API_BASE}/api/v1/system/landing-courses`)
       .then((res) => res.json())
       .then((data) => setCategories(data.data || []))
       .catch(() => setCategories([]))

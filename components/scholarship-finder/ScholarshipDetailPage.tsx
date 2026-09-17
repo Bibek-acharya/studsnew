@@ -7,7 +7,6 @@ import {
   ChevronRight,
   FileText,
   FileX,
-  SearchX,
   Share2,
 } from "lucide-react";
 import { EligibilityTab } from "./ScholarshipDetailEligibility";
@@ -238,6 +237,86 @@ export default function ScholarshipDetailPage({
     return () => window.removeEventListener("keydown", handleKey);
   }, [lightboxIndex, closeLightbox, changeImage]);
 
+  // ─── Per-tab "has information" checks ───
+  // Each mirrors the condition the corresponding content block uses; "about"
+  // always shows (it has description/about/video/journey fallbacks).
+  const hasScholarshipTab =
+    !!scholarship.scholarship_section_title ||
+    !!scholarship.scholarship_subtitle ||
+    (Array.isArray(scholarship.scholarship_types_new ||
+      scholarship.scholarship_types)) &&
+      ((scholarship.scholarship_types_new || []).length > 0 ||
+        (scholarship.scholarship_types || []).length > 0) ||
+    (Array.isArray(
+      scholarship.selection_rubric_new || scholarship.selection_rubric,
+    ) &&
+      ((scholarship.selection_rubric_new || []).length > 0 ||
+        (scholarship.selection_rubric || []).length > 0));
+
+  const hasEligibilityTab =
+    dynamicEligibility.length > 0 ||
+    dynamicDocs.length > 0 ||
+    dynamicSelectionSteps !== null ||
+    !!scholarship.eligibility_section_title ||
+    !!scholarship.eligibility_subtitle;
+
+  const hasTimelineTab =
+    (dynamicTimeline !== null && dynamicTimeline.length > 0) ||
+    (Array.isArray(scholarship.selection_process_steps) &&
+      scholarship.selection_process_steps.length > 0) ||
+    (Array.isArray(scholarship.selection_process) &&
+      scholarship.selection_process.length > 0) ||
+    dynamicJourneyTimeline.length > 0;
+
+  const hasCentersTab =
+    (Array.isArray(scholarship.exam_centers_new) &&
+      scholarship.exam_centers_new.length > 0) ||
+    (Array.isArray(scholarship.exam_centers) &&
+      scholarship.exam_centers.length > 0);
+
+  const newsItems = Array.isArray(scholarship.news_items)
+    ? scholarship.news_items
+    : [];
+  const hasNewsTab = newsItems.length > 0 || !!scholarship.provider_id || !!scholarship.provider;
+
+  const hasAchievementsTab =
+    (Array.isArray(scholarship.achievements) &&
+      scholarship.achievements.length > 0) ||
+    newsItems.some(
+      (item: Record<string, unknown>) =>
+        String(item?.category ?? "").toLowerCase() === "achievement",
+    ) ||
+    !!scholarship.provider_id ||
+    !!scholarship.provider;
+
+  const hasGalleryTab = galleryImages.length > 0;
+
+  const hasFaqTab = dynamicFaqs.length > 0;
+
+  const hasPartnersTab =
+    (Array.isArray(scholarship.partners) &&
+      scholarship.partners.length > 0) ||
+    (Array.isArray(scholarship.partner_groups) &&
+      scholarship.partner_groups.length > 0);
+
+  const hasReviewTab =
+    Array.isArray(scholarship.reviews) && scholarship.reviews.length > 0;
+
+  const tabVisibility: Record<string, boolean> = {
+    about: true,
+    scholarship: hasScholarshipTab,
+    eligibility: hasEligibilityTab,
+    timeline: hasTimelineTab,
+    centers: hasCentersTab,
+    news: hasNewsTab,
+    achievements: hasAchievementsTab,
+    gallery: hasGalleryTab,
+    faq: hasFaqTab,
+    partners: hasPartnersTab,
+    downloads: hasDownloads,
+    review: hasReviewTab,
+  };
+
   const availableTabs: { id: string; label: string }[] = [
     { id: "about", label: "About" },
     { id: "scholarship", label: "Scholarship" },
@@ -251,7 +330,7 @@ export default function ScholarshipDetailPage({
     { id: "partners", label: "Partners" },
     { id: "downloads", label: "Downloads" },
     { id: "review", label: "Review" },
-  ];
+  ].filter((tab) => tabVisibility[tab.id] ?? false);
 
   useEffect(() => {
     if (
@@ -261,17 +340,6 @@ export default function ScholarshipDetailPage({
       setActiveTab(availableTabs[0].id);
     }
   }, [availableTabs, activeTab]);
-
-  if (availableTabs.length === 0) {
-    return (
-      <div className="mx-auto max-w-350 py-20 text-center">
-        <SearchX size={48} className="mx-auto mb-4 text-gray-300" />
-        <p className="text-lg font-bold text-gray-500">
-          No scholarship details available
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="w-full bg-white">
@@ -615,8 +683,30 @@ export default function ScholarshipDetailPage({
             ))}
 
           {activeTab === "timeline" &&
-            (dynamicTimeline && dynamicTimeline.length > 0 ? (
-              <TimelineTab events={dynamicTimeline} />
+            (hasTimelineTab ? (
+              <TimelineTab
+                events={
+                  dynamicTimeline && dynamicTimeline.length > 0
+                    ? dynamicTimeline
+                    : dynamicSelectionSteps
+                      ? dynamicSelectionSteps.map(
+                          (s: { title: string; desc: string }) => ({
+                            title: s.title || "",
+                            date: "",
+                            desc: s.desc || "",
+                            icon: "",
+                          }),
+                        )
+                      : dynamicJourneyTimeline.map(
+                          (j: { year: string; title: string; description: string }) => ({
+                            title: j.title,
+                            date: j.year,
+                            desc: j.description,
+                            icon: "",
+                          }),
+                        )
+                }
+              />
             ) : (
               <div className="py-16 text-center text-gray-400">
                 <FileX size={56} className="mx-auto mb-3" />

@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useCallback, useEffect } from "react";
+import Image from "next/image";
 import RichTextEditor from "@/components/ScholarshipProvider/common/RichTextEditor";
 import ImageCropperModal from "@/components/ScholarshipProvider/common/ImageCropperModal";
 import { NEPAL_DISTRICTS } from "@/lib/location-data";
 
-interface VideoItem { id: number; url: string; message: string; name: string; designation: string; }
+interface VideoItem { id: number; url: string; message: string; name: string; designation: string; avatar?: string; }
 interface OverviewRow { id: number; key: string; value: string; }
 interface LeadershipRow { id: number; position: string; role: string; holder: string; }
 
@@ -146,7 +147,7 @@ export default function AddCollegeSection({
         if (d.profile_data?.downloads_data) setDownloads(withId(d.profile_data.downloads_data));
         if (d.profile_data?.faqs_data) setFaqs(withId(d.profile_data.faqs_data));
         if (d.profile_data?.brochure_data?.url) setBrochureUrl(d.profile_data.brochure_data.url);
-        if (d.profile_data?.videos) setVideos(withId(d.profile_data.videos));
+        if (d.profile_data?.videos) setVideos(withId(d.profile_data.videos).slice(0, 1));
         if (d.profile_data?.overview_data) setOverviewRows(withId(d.profile_data.overview_data));
         if (d.profile_data?.leadership_data) setLeadershipRows(withId(d.profile_data.leadership_data));
         if (d.profile_data?.facilities_data) setFacilities(withId(d.profile_data.facilities_data));
@@ -646,9 +647,9 @@ export default function AddCollegeSection({
 
             <div className="mb-8">
               <div className="flex justify-between items-center mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-0">Video Links (Max 4)</label>
-                <button type="button" onClick={() => videos.length < 4 && addItem(setVideos, { url: "", message: "", name: "", designation: "" })}
-                  className={`text-sm px-3 py-1.5 rounded-md font-medium ${videos.length >= 4 ? "text-gray-400 bg-gray-100 cursor-not-allowed" : "text-blue-600 bg-blue-50 hover:bg-blue-100"}`}>
+                <label className="block text-sm font-medium text-gray-700 mb-0">Video Link</label>
+                <button type="button" onClick={() => videos.length < 1 && addItem(setVideos, { url: "", message: "", name: "", designation: "", avatar: "" })}
+                  className={`text-sm px-3 py-1.5 rounded-md font-medium ${videos.length >= 1 ? "text-gray-400 bg-gray-100 cursor-not-allowed" : "text-blue-600 bg-blue-50 hover:bg-blue-100"}`}>
                   <i className="fa-solid fa-plus mr-1"></i> Add Video
                 </button>
               </div>
@@ -659,12 +660,42 @@ export default function AddCollegeSection({
                       className="absolute top-3 right-3 text-red-400 hover:text-red-600 hover:bg-red-50 p-1.5 rounded-md transition-colors opacity-0 group-hover:opacity-100">
                       <i className="fa-solid fa-trash"></i>
                     </button>
-                    <div className="space-y-3 pr-10">
-                      <input type="url" className={`${inputClass} text-sm`} placeholder="Video URL" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <input type="text" className={`${inputClass} text-sm`} placeholder="Message / Title" value={v.message} onChange={e => updateItem(setVideos, v.id, "message", e.target.value)} />
-                        <input type="text" className={`${inputClass} text-sm`} placeholder="Person Name" value={v.name} onChange={e => updateItem(setVideos, v.id, "name", e.target.value)} />
-                        <input type="text" className={`${inputClass} text-sm`} placeholder="Designation" value={v.designation} onChange={e => updateItem(setVideos, v.id, "designation", e.target.value)} />
+                    <div className="flex gap-4">
+                      {/* Left: person avatar (same field as the institution-zone About section) */}
+                      <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                        <div className="w-20 h-24 rounded-lg bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300">
+                          {v.avatar ? (
+                            <Image src={v.avatar} alt="Video presenter" width={80} height={96} unoptimized className="w-full h-full object-cover" />
+                          ) : (
+                            <i className="fa-solid fa-user text-gray-400 text-2xl"></i>
+                          )}
+                        </div>
+                        <label className="cursor-pointer text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded transition-colors">
+                          <i className="fa-solid fa-camera mr-1"></i> Photo
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              try {
+                                const url = await uploadFile(file, "institution/video-avatars");
+                                updateItem(setVideos, v.id, "avatar", url);
+                              } catch {}
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      {/* Right: url / name / designation / message rows */}
+                      <div className="flex-1 space-y-3 pr-10">
+                        <input type="url" className={`${inputClass} text-sm`} placeholder="Video URL" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                          <input type="text" className={`${inputClass} text-sm`} placeholder="Message / Title" value={v.message} onChange={e => updateItem(setVideos, v.id, "message", e.target.value)} />
+                          <input type="text" className={`${inputClass} text-sm`} placeholder="Person Name" value={v.name} onChange={e => updateItem(setVideos, v.id, "name", e.target.value)} />
+                          <input type="text" className={`${inputClass} text-sm`} placeholder="Designation" value={v.designation} onChange={e => updateItem(setVideos, v.id, "designation", e.target.value)} />
+                        </div>
                       </div>
                     </div>
                   </div>
