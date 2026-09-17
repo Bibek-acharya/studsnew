@@ -27,7 +27,7 @@ export default async function Home() {
             id: inst.id,
             name: inst.institution_name || inst.name || "",
             card_image_url: inst.card_image_url || "",
-            image_url: inst.logo_url || inst.image_url || "",
+            image_url: inst.image_url || "",
             banner_url: inst.banner_url || "",
             rating: inst.rating || 0,
             type: inst.organization_type || inst.type || "",

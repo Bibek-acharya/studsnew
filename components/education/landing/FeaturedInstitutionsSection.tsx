@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type MouseEvent, type SyntheticEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import Image from "next/image";
 import {
   Star,
@@ -213,22 +213,18 @@ const CollegeCard: React.FC<{
             Featured
           </div>
         )}
-        <Image
-          src={
-            college.card_image_url ||
-            college.image_url ||
-            "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable"
-          }
-          alt={college.name}
-          fill
-          unoptimized
-          sizes="(max-width: 768px) 100vw, 25vw"
-          className="object-cover"
-          onError={(e: SyntheticEvent<HTMLImageElement>) => {
-            e.currentTarget.src =
-              "https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable";
-          }}
-        />
+        {college.card_image_url || college.banner_url ? (
+          <Image
+            src={college.card_image_url || college.banner_url!}
+            alt={college.name}
+            fill
+            unoptimized
+            sizes="(max-width: 768px) 100vw, 25vw"
+            className="object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-brand-blue" />
+        )}
       </div>
 
       <div className="flex items-center gap-1.5 mb-2">

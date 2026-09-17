@@ -187,11 +187,12 @@ export default function ShowcaseBannerModal({ ad, onClose }: ShowcaseBannerModal
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Short supporting text shown under the title"
+              maxLength={500}
               rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none resize-y"
             />
             <p className="text-xs text-gray-400 mt-1">
-              Optional — shown on the public showcase card under the title.
+              Optional — shown on the public showcase card under the title. {description.length}/500
             </p>
           </div>
 
