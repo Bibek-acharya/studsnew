@@ -37,7 +37,7 @@ export default function UniversityAffiliationSection() {
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
         const res = await fetch(`${baseUrl}/api/v1/institutions/public/by-university/${selectedUni}`);
         const json = await res.json();
-        const list = (json?.data || json || []);
+        const list = (json?.data?.institutions || json?.institutions || (Array.isArray(json?.data) ? json.data : []) || []);
         setInstitutions(list.map((i: any) => ({ id: i.id, institution_name: i.institution_name, university_id: i.university_id, is_sponsored: i.is_sponsored || false, district: i.district || "", website_url: i.website_url || "" })));
       } catch { setInstitutions([]); }
       finally { setLoading(false); }
