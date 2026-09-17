@@ -6,10 +6,9 @@ import { CourseFinderFilters } from "./types";
 import Pagination from "@/components/ui/Pagination";
 import CourseCard from "./CourseCard";
 import useCourseBookmarks from "./useCourseBookmarks";
-import CourseCarouselAd from "./ads/CourseCarouselAd";
-import KistProgramsAd from "./ads/KistProgramsAd";
+import MultiCollegeCoursesAd from "./ads/MultiCollegeCoursesAd";
+import SingleCollegeCoursesAd from "./ads/SingleCollegeCoursesAd";
 import SudsphereBannerAd from "./ads/SudsphereBannerAd";
-import { useCoursePageAds } from "./ads/useCoursePageAds";
 
 interface CourseGridProps {
   onNavigate: (
@@ -33,11 +32,6 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const { savedCourseIds, pendingBookmarks, toggleSaved } = useCourseBookmarks();
-
-  const { data: allAds } = useCoursePageAds();
-  const carouselAds = allAds?.filter(a => a.position === "carousel") || [];
-  const panelAds = allAds?.filter(a => a.position === "panel") || [];
-  const bannerAds = allAds?.filter(a => a.position === "banner") || [];
 
   const allCourses = useMemo(() => {
     return courses;
@@ -100,28 +94,25 @@ const CourseGrid: React.FC<CourseGridProps> = ({
               />
               {(index + 1) % 6 === 0 && index !== currentCourses.length - 1 && (() => {
                 const adIndex = Math.floor(index / 6) % 3;
-                if (adIndex === 0 && carouselAds.length > 0) {
+                if (adIndex === 0) {
                   return (
                     <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
-                      <CourseCarouselAd />
+                      <MultiCollegeCoursesAd />
                     </div>
                   );
                 }
-                if (adIndex === 1 && panelAds.length > 0) {
+                if (adIndex === 1) {
                   return (
                     <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
-                      <KistProgramsAd />
+                      <SingleCollegeCoursesAd />
                     </div>
                   );
                 }
-                if (adIndex === 2 && bannerAds.length > 0) {
-                  return (
-                    <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
-                      <SudsphereBannerAd />
-                    </div>
-                  );
-                }
-                return null;
+                return (
+                  <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
+                    <SudsphereBannerAd />
+                  </div>
+                );
               })()}
             </React.Fragment>
           );
