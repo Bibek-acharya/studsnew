@@ -38,6 +38,7 @@ export const routeMap: Record<ViewKey, string> = {
   nepaliUniversities: "/universities/nepali",
   foreignUniversities: "/universities/foreign",
   scholarshipResultCheck: "/scholarship-result",
+  studyResources: "/study-resources",
 };
 
 export const notificationTabs: NotificationTab[] = [
@@ -197,6 +198,14 @@ export const desktopMenuSections: DesktopMenuSection[] = [
         viewKey: "eventsPage",
       },
       {
+        icon: "fa-book",
+        color: "text-blue-500",
+        title: "Study Resources",
+        desc: "Past questions, notes, model questions & syllabus.",
+        viewKey: "studyResources",
+        lucideIcon: "BookOpen",
+      },
+      {
         icon: "fa-envelope",
         color: "text-purple-600",
         title: "Contact Us",
@@ -336,6 +345,12 @@ export const mobileMenuSections: MobileMenuSection[] = [
         icon: "fa-calendar-days",
         color: "text-orange-500",
         viewKey: "eventsPage",
+      },
+      {
+        label: "Study Resources",
+        icon: "fa-book",
+        color: "text-blue-500",
+        viewKey: "studyResources",
       },
       {
         label: "Contact Us",

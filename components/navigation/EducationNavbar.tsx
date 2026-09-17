@@ -34,6 +34,7 @@ import {
   DoorOpen,
   Landmark,
   LayoutGrid,
+  BookOpen,
 } from "lucide-react";
 import {
   desktopMenuSections,
@@ -1040,6 +1041,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       iconElement={
                         item.lucideIcon === "FileSpreadsheet" ? (
                           <FileSpreadsheet className="text-base sm:text-lg" />
+                        ) : item.lucideIcon === "BookOpen" ? (
+                          <BookOpen className="text-base sm:text-lg" />
                         ) : undefined
                       }
                     />
@@ -1123,6 +1126,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       title={item.title}
                       desc={item.desc}
                       onClick={getDropdownClick(item)}
+                      iconElement={
+                        item.lucideIcon === "BookOpen" ? (
+                          <BookOpen className="text-base sm:text-lg" />
+                        ) : undefined
+                      }
                     />
                   ))}
                 </DesktopDropdown>

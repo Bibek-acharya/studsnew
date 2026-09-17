@@ -254,6 +254,7 @@ export { reviewApi } from "./review.api";
 export { faqApi } from "./faq.api";
 export { educationApi } from "./education.api";
 export { careersApi } from "./careers.api";
+export { studyResourcesApi } from "./studyResourcesApi";
 
 // ─── Backward-compatible apiService object ───────────────────────────────────
 import { authApi } from "./auth.api";
@@ -270,6 +271,7 @@ import { scholarshipEducationApi } from "./scholarship-education.api";
 import { reviewApi } from "./review.api";
 import { faqApi } from "./faq.api";
 import { educationApi } from "./education.api";
+import { studyResourcesApi } from "./studyResourcesApi";
 
 export const apiService = {
   // Auth
@@ -509,6 +511,14 @@ export const apiService = {
   createFAQItem: faqApi.createFAQItem.bind(faqApi),
   updateFAQItem: faqApi.updateFAQItem.bind(faqApi),
   deleteFAQItem: faqApi.deleteFAQItem.bind(faqApi),
+
+  // Study Resources
+  listStudyResources: studyResourcesApi.listStudyResources.bind(studyResourcesApi),
+  getStudyResource: studyResourcesApi.getStudyResource.bind(studyResourcesApi),
+  createStudyResource: studyResourcesApi.createStudyResource.bind(studyResourcesApi),
+  adminListStudyResources: studyResourcesApi.adminListStudyResources.bind(studyResourcesApi),
+  updateStudyResource: studyResourcesApi.updateStudyResource.bind(studyResourcesApi),
+  deleteStudyResource: studyResourcesApi.deleteStudyResource.bind(studyResourcesApi),
 };
 
 // ─── Sphere AI (kept here as it uses API_BASE_URL) ──────────────────────────

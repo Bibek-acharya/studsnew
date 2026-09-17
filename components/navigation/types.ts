@@ -43,6 +43,7 @@ export type ViewKey =
   | "nepaliUniversities"
   | "foreignUniversities"
   | "scholarshipResultCheck"
+  | "studyResources"
   ;
 
 export type NotificationTab = "all" | "following" | "system" | "archive";

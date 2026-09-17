@@ -143,6 +143,7 @@ const UniversityReviewSection = lazy(() => import("./UniversityReviewSection"));
 const SuperadminJobDirectorySection = lazy(() => import("./SuperadminJobDirectorySection"));
 const SuperadminCreateJobSection = lazy(() => import("./SuperadminCreateJobSection"));
 const SuperadminJobApplicantsSection = lazy(() => import("./SuperadminJobApplicantsSection"));
+const StudyResourcesSection = lazy(() => import("./StudyResourcesSection"));
 
 type SectionType =
   | "overview"
@@ -219,7 +220,8 @@ type SectionType =
   | "superadmin-job-directory"
   | "superadmin-create-job"
   | `superadmin-edit-job-${number}`
-  | `superadmin-job-applicants-${number}`;
+  | `superadmin-job-applicants-${number}`
+  | "study-resources";
 
 interface NavChild {
   section: SectionType;
@@ -395,6 +397,7 @@ const navItems: NavItemData[] = [
     label: "FAQ Management",
     section: "manage-faq",
   },
+  { icon: <BookOpen size={20} />, label: "Study Resources", section: "study-resources" },
   {
     icon: <MessageSquare size={20} />,
     label: "Message Management",
@@ -649,6 +652,8 @@ function DashboardShellInner() {
         return <FeedbackListSection />;
       case "manage-faq":
         return <FAQManageSection />;
+      case "study-resources":
+        return <StudyResourcesSection />;
       case "create-universities":
         return <AddUniversitySection setActiveSection={navigateTo} />;
       case "draft-universities":
