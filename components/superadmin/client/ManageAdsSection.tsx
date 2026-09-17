@@ -10,8 +10,8 @@ import CoursePageAdsSection from "./CoursePageAdsSection";
 import LandingCoursesTab from "./LandingCoursesTab";
 
 const TABS = [
-  { id: "course-ads", label: "Course Page Ads" },
   { id: "advertise", label: "Advertise Request" },
+  { id: "course-ads", label: "Course Page Ads" },
   { id: "popup", label: "Landing Page Popup" },
   { id: "hero", label: "Hero Banner" },
   { id: "showcase", label: "Showcase Banner" },
