@@ -688,13 +688,16 @@ export default function AddCollegeSection({
                         </label>
                       </div>
 
-                      {/* Right: url / name / designation / message rows */}
+                      {/* Right: url / name + designation / message rows (mirrors the institution-zone About section) */}
                       <div className="flex-1 space-y-3 pr-10">
-                        <input type="url" className={`${inputClass} text-sm`} placeholder="Video URL" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                          <input type="text" className={`${inputClass} text-sm`} placeholder="Message / Title" value={v.message} onChange={e => updateItem(setVideos, v.id, "message", e.target.value)} />
+                        <input type="text" className={`${inputClass} text-sm`} placeholder="YouTube URL, video link, or iframe embed code" value={v.url} onChange={e => updateItem(setVideos, v.id, "url", e.target.value)} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           <input type="text" className={`${inputClass} text-sm`} placeholder="Person Name" value={v.name} onChange={e => updateItem(setVideos, v.id, "name", e.target.value)} />
                           <input type="text" className={`${inputClass} text-sm`} placeholder="Designation" value={v.designation} onChange={e => updateItem(setVideos, v.id, "designation", e.target.value)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-500 mb-1">Message</label>
+                          <RichTextEditor value={v.message} onChange={val => updateItem(setVideos, v.id, "message", val)} placeholder="Write a message..." minHeight={100} />
                         </div>
                       </div>
                     </div>
