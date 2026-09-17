@@ -7,7 +7,6 @@ import {
   Calendar,
   Download,
   FileText,
-  Files,
   Loader2,
   Search,
 } from "lucide-react";
@@ -131,76 +130,18 @@ export default function StudyResourcesPage() {
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
 
-  const totalResources = resources.length;
-  const pastQuestionsCount = resources.filter(
-    (r) =>
-      r.resource_type?.toLowerCase() === "past-questions" ||
-      r.resource_type?.toLowerCase() === "past questions",
-  ).length;
-  const totalDownloads = resources.reduce(
-    (sum, r) => sum + (Number(r.downloads) || 0),
-    0,
-  );
-
   return (
     <div className="min-h-[70vh] bg-gray-50 py-8">
-      <div className="mx-auto w-full max-w-6xl px-5 pb-14">
-        {/* Intro */}
-        <section className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-2 text-xs font-bold uppercase tracking-widest text-brand-blue">
-              Academic library
-            </p>
-            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-              Past Questions &amp; Resources
-            </h1>
-            <p className="mt-2 max-w-xl text-sm text-gray-500">
-              Access past exam papers, study notes, model questions, and other
-              useful academic materials.
-            </p>
-          </div>
-          {!user && (
-            <button
-              onClick={() => router.push("/login")}
-              className="self-start rounded-md bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover sm:self-auto"
-            >
-              Log in
-            </button>
-          )}
-        </section>
-
-        {/* Summary stat cards */}
-        <section className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          {[
-            {
-              icon: <Files className="h-5 w-5" />,
-              value: String(totalResources),
-              label: "Available resources",
-            },
-            {
-              icon: <FileText className="h-5 w-5" />,
-              value: String(pastQuestionsCount),
-              label: "Past question papers",
-            },
-            {
-              icon: <Download className="h-5 w-5" />,
-              value: totalDownloads.toLocaleString(),
-              label: "Total downloads",
-            },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="flex items-center gap-3 rounded-md border border-gray-200 bg-white p-4"
-            >
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-50 text-brand-blue">
-                {stat.icon}
-              </div>
-              <div>
-                <p className="text-xl font-bold text-gray-900">{stat.value}</p>
-                <p className="text-xs text-gray-500">{stat.label}</p>
-              </div>
-            </div>
-          ))}
+      <div className="mx-auto w-full max-w-350 px-4 pb-14 sm:px-0">
+        {/* Header */}
+        <section className="mb-7">
+          <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            Past Questions &amp; Resources
+          </h1>
+          <p className="mt-2 max-w-xl text-sm text-gray-500">
+            Access past exam papers, study notes, model questions, and other
+            useful academic materials.
+          </p>
         </section>
 
         {/* Toolbar */}
