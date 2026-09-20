@@ -18,14 +18,11 @@ import {
   Bookmark,
   Clock,
   GraduationCap,
-  Bell,
-  Send,
   Flame,
   Monitor,
   Globe,
   TrendingUp,
   Building,
-  FileText,
   Banknote,
   Calendar,
 } from "lucide-react";
@@ -413,17 +410,6 @@ export const EntranceCard: React.FC<{
                 </span>
               </span>
             )}
-            {exam.location && exam.affiliation && (
-              <span className="text-[#cbd5e1]">•</span>
-            )}
-            {exam.affiliation && (
-              <span className="flex items-center gap-1">
-                <Award className="w-3.5 h-3.5 text-[#94a3b8] shrink-0" />
-                <span className="truncate" title={exam.affiliation}>
-                  {exam.affiliation}
-                </span>
-              </span>
-            )}
           </div>
 
           {/* Website Link */}
@@ -533,22 +519,21 @@ export const EntranceCard: React.FC<{
           }}
           className="w-full flex items-center justify-center gap-2 py-2.5 px-3 bg-[#1b52e8] text-white font-bold text-[13px] rounded-lg hover:bg-[#1b52e8]/90 transition-colors shadow-sm"
         >
-          <Send className="w-3.5 h-3.5 rotate-45 -translate-y-0.5" /> Apply Now
+          Apply Now
         </button>
         <div className="grid grid-cols-[1fr_1fr_auto] gap-2">
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
             className="flex items-center justify-center gap-1.5 py-2 px-2.5 border border-[#cbd5e1] text-[#475569] font-bold text-[11px] rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <FileText className="w-3.5 h-3.5" /> <span>View Detailed</span>
+            View Detailed
           </button>
           <button
             onClick={() => router.push(`/entrance/${exam.id}`)}
             className="flex items-center justify-center gap-1.5 py-2 px-2.5 border border-[#cbd5e1] text-[#475569] font-bold text-[11px] rounded-lg hover:bg-gray-50 transition-colors"
           >
-            <Bell className="w-3.5 h-3.5" /> Notify
-          </button>
-          <button
+            Notify
+          </button>          <button
             disabled={isPending}
             className={`w-[40px] h-[36px] shrink-0 rounded-lg flex items-center justify-center transition-all duration-200 ${
               isPending

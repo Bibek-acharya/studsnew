@@ -108,6 +108,7 @@ export interface ExamDetails {
   noticeFile?: string;
   contactNumber?: string;
   socialLinks?: { platform: string; url: string }[];
+  examDateSchedules?: { date: string; endDate?: string; event: string }[];
   requiredDocuments?: any[];
   examinationSchedule?: any[];
   programsOffered?: any[];

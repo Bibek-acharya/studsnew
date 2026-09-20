@@ -91,21 +91,23 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+function calcDateStatus(dateStr: string): string {
+  try {
+    const dt = new Date(dateStr);
+    if (isNaN(dt.getTime())) return "";
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    dt.setHours(0, 0, 0, 0);
+    if (dt < now) return "Closed";
+    if (dt.getTime() === now.getTime()) return "Ongoing";
+    return "Upcoming";
+  } catch {
+    return "";
+  }
+}
+
 function mapExamToDetails(exam: Exam): ExamDetails {
-  const calcStatus = (dateStr: string) => {
-    try {
-      const dt = new Date(dateStr);
-      if (isNaN(dt.getTime())) return "";
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      dt.setHours(0, 0, 0, 0);
-      if (dt < now) return "Closed";
-      if (dt.getTime() === now.getTime()) return "Ongoing";
-      return "Upcoming";
-    } catch {
-      return "";
-    }
-  };
+  const calcStatus = (dateStr: string) => calcDateStatus(dateStr);
 
   const mapUpcomingDates = () => {
     if (exam.upcomingDates && exam.upcomingDates.length > 0) {
@@ -187,7 +189,7 @@ function mapExamToDetails(exam: Exam): ExamDetails {
     examLevel: getPatternValue("Exam Level", "Level", "Scope"),
     duration: getPatternValue("Duration", "Exam Duration"),
     questionType: getPatternValue("Question Type", "Questions", "Pattern"),
-    description: exam.description || exam.eligibility || "",
+    description: exam.description || "",
     conductingBody: exam.institution || exam.affiliation || "",
     examFrequency: "",
     examMode: exam.examMode || getPatternValue("Exam Mode", "Mode") || "",
@@ -241,6 +243,11 @@ function mapExamToDetails(exam: Exam): ExamDetails {
     applicationLink: exam.applicationLink,
     noticeFile: exam.noticeFile,
     contactNumber: exam.contactNumber || "",
+    socialLinks: (exam.socialLinks || []).map((s) => ({
+      platform: s.platform || "",
+      url: s.url || "",
+    })),
+    examDateSchedules: exam.examDateSchedules,
     requiredDocuments: exam.requiredDocuments || [],
     examinationSchedule: exam.examinationSchedule || [],
     programsOffered: exam.programsOffered || [],
@@ -575,7 +582,27 @@ const EntranceDetailsPage: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="text-[15px]">
-                      {exam.upcomingDates.map((date, idx) => (
+                      {(exam.examDateSchedules && exam.examDateSchedules.length > 0
+                        ? exam.examDateSchedules.map((d) => {
+                            const status = calcDateStatus(d.date);
+                            const dateEn = (() => {
+                              try {
+                                const dt = new Date(d.date);
+                                return isNaN(dt.getTime())
+                                  ? d.date
+                                  : dt.toLocaleDateString("en-US", {
+                                      month: "short",
+                                      day: "numeric",
+                                      year: "numeric",
+                                    });
+                              } catch {
+                                return d.date;
+                              }
+                            })();
+                            return { date: d.date, dateEn, event: d.event, status, endDate: d.endDate };
+                          })
+                        : exam.upcomingDates
+                      ).map((date, idx) => (
                         <tr
                           key={idx}
                           className="border-b border-gray-200 hover:bg-gray-50"
@@ -1377,6 +1404,7 @@ const EntranceDetailsPage: React.FC = () => {
                 <div className="mt-5 pt-5 border-t border-gray-100">
                   <RichText
                     html={exam.embeddedMap}
+                    allowIframe
                     className="rounded-md overflow-hidden border border-gray-200 [&_iframe]:w-full [&_iframe]:h-[200px]"
                   />
                 </div>

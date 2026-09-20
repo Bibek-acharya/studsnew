@@ -18,12 +18,12 @@ const PURIFY_CONFIG = {
     "pre", "code",
     "table", "thead", "tbody", "tr", "th", "td",
     "span", "div",
-  ],
+  ] as string[],
   ALLOWED_ATTR: [
     "href", "src", "alt", "width", "height",
     "target", "rel",
     "class", "style",
-  ],
+  ] as string[],
   ALLOWED_URI_REGEXP:
     /^(?:(?:https?|mailto|tel):|(?!javascript:))/i,
   ADD_ATTR: ["target"],
@@ -31,11 +31,31 @@ const PURIFY_CONFIG = {
   FORBID_TAGS: [
     "script", "style", "iframe", "video",
     "audio", "embed", "object", "form", "input",
-  ],
+  ] as string[],
   FORBID_ATTR: [
     "onerror", "onload", "onclick",
     "onmouseover", "onfocus", "onblur",
-  ],
+  ] as string[],
+};
+
+const IFRAME_TAGS = ["p", "br", "span", "div", "iframe"];
+const IFRAME_ATTRS = [
+  "href", "src", "alt", "width", "height",
+  "target", "rel",
+  "class", "style",
+  "allow", "allowfullscreen", "frameborder", "loading", "referrerpolicy",
+];
+const IFRAME_URI_REGEXP = /^(?:(?:https):|(?!(?:javascript|data):))/i;
+
+function getConfig(allowIframe: boolean) {
+  if (!allowIframe) return PURIFY_CONFIG;
+  return {
+    ...PURIFY_CONFIG,
+    ALLOWED_TAGS: IFRAME_TAGS,
+    ALLOWED_ATTR: IFRAME_ATTRS,
+    ALLOWED_URI_REGEXP: IFRAME_URI_REGEXP,
+    FORBID_TAGS: PURIFY_CONFIG.FORBID_TAGS.filter((t) => t !== "iframe"),
+  };
 };
 
 type Variant = "sm" | "base" | "lg";
@@ -99,6 +119,8 @@ interface RichTextProps {
   className?: string;
   variant?: Variant;
   as?: keyof React.JSX.IntrinsicElements;
+  /** Allow iframe embeds (e.g. Google Maps). Use only for trusted admin-authored content. */
+  allowIframe?: boolean;
 }
 
 const RichText: React.FC<RichTextProps> = ({
@@ -106,10 +128,11 @@ const RichText: React.FC<RichTextProps> = ({
   className = "",
   variant = "base",
   as: Tag = "div",
+  allowIframe = false,
 }) => {
   const sanitized = useMemo(
-    () => DOMPurify.sanitize(html || "", PURIFY_CONFIG),
-    [html],
+    () => DOMPurify.sanitize(html || "", getConfig(allowIframe)),
+    [html, allowIframe],
   );
   const [renderedHtml, setRenderedHtml] = useState(sanitized);
 
