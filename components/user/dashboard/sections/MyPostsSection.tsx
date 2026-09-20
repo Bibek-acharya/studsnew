@@ -250,7 +250,7 @@ export default function MyPostsSection() {
                       <div className="rounded-lg overflow-hidden mb-3">
                         <img
                           src={imageUrl(images[0])}
-                          alt=""
+                          alt={post.title || "Post image"}
                           className="w-full h-32 sm:h-44 object-cover"
                         />
                       </div>

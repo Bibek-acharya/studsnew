@@ -292,7 +292,7 @@ export default function UniversityReviewSection({ setActiveSection }: { setActiv
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
                                   {uni.logo ? (
-                                    <img src={uni.logo} alt="" className="w-9 h-9 rounded-lg object-cover border border-gray-200" />
+                                    <img src={uni.logo} alt={`${uni.name} logo`} className="w-9 h-9 rounded-lg object-cover border border-gray-200" />
                                   ) : (
                                     <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${getInitialsColors(uni.name)} flex items-center justify-center text-white text-[11px] font-bold`}>
                                       {getInitials(uni.name)}
@@ -356,7 +356,7 @@ export default function UniversityReviewSection({ setActiveSection }: { setActiv
                         <X size={18} />
                       </button>
                       {selectedUni.logo ? (
-                        <img src={selectedUni.logo} alt="" className="w-10 h-10 rounded-lg object-cover border border-gray-200" />
+                        <img src={selectedUni.logo} alt={`${selectedUni.name} logo`} className="w-10 h-10 rounded-lg object-cover border border-gray-200" />
                       ) : (
                         <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${getInitialsColors(selectedUni.name)} flex items-center justify-center text-white text-xs font-bold`}>
                           {getInitials(selectedUni.name)}
@@ -396,7 +396,7 @@ export default function UniversityReviewSection({ setActiveSection }: { setActiv
                           <div className="flex items-start justify-between gap-4">
                             <div className="flex items-start gap-3">
                               {review.user_profile_image ? (
-                                <img src={review.user_profile_image} alt="" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                                <img src={review.user_profile_image} alt={`${review.user_name || "User"} profile picture`} className="w-9 h-9 rounded-full object-cover shrink-0" />
                               ) : (
                                 <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${getInitialsColors(review.user_name || "User")} flex items-center justify-center text-white text-[11px] font-bold shrink-0`}>
                                   {review.user_initials || getInitials(review.user_name || "User")}

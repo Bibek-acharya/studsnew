@@ -1,7 +1,7 @@
 import ShikshaApplicationForm from "@/components/project-shiksha/ShikshaApplicationForm";
 
 export const metadata = {
-  title: "Project Shiksha Scholarship Application | StudSphere",
+  title: "Project Shiksha Scholarship Application",
   description: "Apply for the Project Shiksha Scholarship 2026 for +2. Fully-funded educational opportunities for deserving students.",
 };
 

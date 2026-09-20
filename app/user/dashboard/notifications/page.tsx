@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "Notifications | MeroCollege Student",
+  title: "Notifications",
 };
 
 // Unified on /notifications (the shared-client inbox with the real archive

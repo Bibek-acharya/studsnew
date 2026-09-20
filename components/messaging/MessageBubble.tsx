@@ -84,7 +84,7 @@ export default function MessageBubble({ message, isOwn, otherInitials, otherAvat
   const avatarEl = (
     <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold text-[10px] flex-shrink-0 mr-1 overflow-hidden">
       {otherAvatarUrl ? (
-        <img src={otherAvatarUrl} alt="" className="w-full h-full object-cover" />
+        <img src={otherAvatarUrl} alt={message.sender_name ? `Avatar of ${message.sender_name}` : ""} className="w-full h-full object-cover" />
       ) : (
         otherInitials
       )}
@@ -93,7 +93,7 @@ export default function MessageBubble({ message, isOwn, otherInitials, otherAvat
 
   const ownAvatarEl = ownAvatarUrl && (
     <div className="w-7 h-7 rounded-full flex-shrink-0 ml-1 overflow-hidden">
-      <img src={ownAvatarUrl} alt="" className="w-full h-full object-cover" />
+      <img src={ownAvatarUrl} alt="Your avatar" className="w-full h-full object-cover" />
     </div>
   );
 

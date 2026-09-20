@@ -58,7 +58,7 @@ const ProfileAboutSection: React.FC<Props> = ({
                       <img
                         src={v.avatar}
                         className="w-full h-full object-cover"
-                        alt=""
+                        alt={v.name ? `Video presenter: ${v.name}` : "Video presenter avatar"}
                       />
                     ) : (
                       <i className="fa-solid fa-user text-gray-400 text-2xl"></i>

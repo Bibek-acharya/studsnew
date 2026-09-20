@@ -949,7 +949,7 @@ const OrganizationProfile: React.FC = memo(() => {
               {item.image_url && (
                 <img
                   src={item.image_url}
-                  alt=""
+                  alt={item.title || item.name || ""}
                   className="w-10 h-10 object-cover rounded"
                 />
               )}
@@ -992,7 +992,7 @@ const OrganizationProfile: React.FC = memo(() => {
               {item.image_url ? (
                 <img
                   src={item.image_url}
-                  alt=""
+                  alt={item.title || item.name || ""}
                   className="w-10 h-10 object-cover rounded"
                 />
               ) : (
@@ -1036,7 +1036,7 @@ const OrganizationProfile: React.FC = memo(() => {
               {item.image_url && (
                 <img
                   src={item.image_url}
-                  alt=""
+                  alt={item.title || item.name || ""}
                   className="w-12 h-10 object-cover rounded"
                 />
               )}

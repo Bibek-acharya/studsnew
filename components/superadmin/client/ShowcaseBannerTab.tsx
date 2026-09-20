@@ -145,7 +145,7 @@ export default function ShowcaseBannerTab() {
               <tr key={ad.id} className="hover:bg-gray-50 border-b border-gray-200">
                 <td className="px-4 py-3">
                   {ad.image_url ? (
-                    <img src={resolveImageUrl(ad.image_url)} alt="" className="w-20 h-14 object-cover rounded border" />
+                    <img src={resolveImageUrl(ad.image_url)} alt={ad.title || "Showcase banner image"} className="w-20 h-14 object-cover rounded border" />
                   ) : (
                     <div className="w-20 h-14 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">No image</div>
                   )}

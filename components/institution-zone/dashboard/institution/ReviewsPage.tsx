@@ -189,7 +189,7 @@ export default function ReviewsPage() {
                       <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-xs font-semibold">
                           {review.user_profile_image ? (
-                            <img src={resolveImageUrl(review.user_profile_image)} className="w-8 h-8 rounded-full object-cover" />
+                            <img src={resolveImageUrl(review.user_profile_image)} alt={review.user_name || "Reviewer avatar"} className="w-8 h-8 rounded-full object-cover" />
                           ) : (
                             review.user_initials || review.user_name?.charAt(0)?.toUpperCase() || "?"
                           )}
@@ -261,7 +261,7 @@ export default function ReviewsPage() {
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
                   {selectedReview.user_profile_image ? (
-                    <img src={resolveImageUrl(selectedReview.user_profile_image)} className="w-12 h-12 rounded-full object-cover" />
+                    <img src={resolveImageUrl(selectedReview.user_profile_image)} alt={selectedReview.user_name || "Reviewer avatar"} className="w-12 h-12 rounded-full object-cover" />
                   ) : (
                     selectedReview.user_initials || selectedReview.user_name?.charAt(0)?.toUpperCase() || "?"
                   )}

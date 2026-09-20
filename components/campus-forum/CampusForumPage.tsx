@@ -207,7 +207,7 @@ const PostCard: React.FC<{
         <div className="w-full h-72 rounded-xl overflow-hidden mb-3 bg-gray-100">
           {images.length === 1 ? (
             <div className="relative cursor-pointer group h-full" onClick={() => onLightbox(imageUrl(images[0]), "image")}>
-              <img src={imageUrl(images[0])} alt="" className="w-full h-full object-cover" />
+              <img src={imageUrl(images[0])} alt={post.title ? `Image attached to post: ${post.title}` : "Forum post image"} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                 <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
               </div>
@@ -216,7 +216,7 @@ const PostCard: React.FC<{
             <div className="grid grid-cols-2 gap-1 h-full">
               {images.slice(0, 4).map((url, i) => (
                 <div key={i} className="relative cursor-pointer group" onClick={() => onLightbox(imageUrl(url), "image")}>
-                  <img src={imageUrl(url)} alt="" className="w-full h-full object-cover" />
+                  <img src={imageUrl(url)} alt={post.title ? `Image attached to post: ${post.title}` : "Forum post image"} className="w-full h-full object-cover" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                     <Maximize2 className="h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
@@ -418,7 +418,7 @@ const CommentItem: React.FC<{
       <div className="flex items-start gap-2.5 min-w-0">
         <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+            <img src={avatarUrl} alt={comment.user_name ? `Avatar of ${comment.user_name}` : ""} className="w-full h-full object-cover" />
           ) : (
             avatarLetter
           )}
@@ -602,7 +602,7 @@ const CommentSection: React.FC<{
         <div className="flex min-w-0 items-center gap-2">
           <div className="w-7 h-7 rounded-full overflow-hidden bg-slate-200 flex-shrink-0 flex items-center justify-center text-[10px] font-bold text-slate-600">
             {avatarUrl ? (
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img src={avatarUrl} alt="Your avatar" className="w-full h-full object-cover" />
             ) : (
               avatarLetter
             )}
@@ -1069,7 +1069,7 @@ const Lightbox: React.FC<{
         <X className="h-7 w-7" />
       </button>
       {type === "image" ? (
-        <img src={url} alt="" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
+        <img src={url} alt="Attached image preview" className="max-w-full max-h-[90vh] object-contain rounded-lg" onClick={(e) => e.stopPropagation()} />
       ) : (
         <video src={url} controls autoPlay className="max-w-full max-h-[90vh] rounded-lg" onClick={(e) => e.stopPropagation()} />
       )}
@@ -1573,7 +1573,7 @@ const CampusForumPage: React.FC = () => {
               <div className="flex items-center gap-3 pb-3 border-b border-slate-100">
                 <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm font-bold overflow-hidden">
                   {user?.image_url ? (
-                    <img src={imageUrl(user.image_url)} alt="" className="w-full h-full object-cover" />
+                    <img src={imageUrl(user.image_url)} alt={user?.first_name ? `Your avatar` : ""} className="w-full h-full object-cover" />
                   ) : (
                     (user?.first_name?.[0] || "🎓").toUpperCase()
                   )}

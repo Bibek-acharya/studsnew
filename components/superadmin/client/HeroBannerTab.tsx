@@ -247,7 +247,7 @@ export default function HeroBannerTab() {
                 </td>
                 <td className="px-4 py-3">
                   {slide.image_url ? (
-                    <img src={resolveImageUrl(slide.image_url)} alt="" className="w-20 h-14 object-cover rounded border" />
+                    <img src={resolveImageUrl(slide.image_url)} alt={slide.title || "Hero banner slide image"} className="w-20 h-14 object-cover rounded border" />
                   ) : (
                     <div className="w-20 h-14 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">No image</div>
                   )}

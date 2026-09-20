@@ -250,7 +250,7 @@ export default function UserListSection() {
                       {u.image_url ? (
                         <img
                           src={getImageUrl(u.image_url)}
-                          alt=""
+                          alt={`${[u.first_name, u.last_name].filter(Boolean).join(" ") || "User"} profile picture`}
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
@@ -368,7 +368,7 @@ export default function UserListSection() {
                 {viewUser.image_url ? (
                   <img
                     src={getImageUrl(viewUser.image_url)}
-                    alt=""
+                    alt={`${[viewUser.first_name, viewUser.last_name].filter(Boolean).join(" ") || "User"} profile picture`}
                     className="h-16 w-16 rounded-full object-cover border-2 border-gray-100"
                   />
                 ) : (

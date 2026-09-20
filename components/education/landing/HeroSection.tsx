@@ -139,9 +139,9 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
 
         {/* DESKTOP LAYOUT */}
         <div className="hidden md:block relative z-20 w-full max-w-5xl mx-auto px-6 lg:px-8 text-center sm:pb-0 sm:-mt-10 text-white">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop- leading-tight">
+          <p className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 drop- leading-tight">
             Find Your Perfect College
-          </h1>
+          </p>
           <p className="text-[13px] md:text-sm lg:text-base text-gray-200 max-w-3xl mx-auto mb-6 drop-shadow px-0">
             Discover and compare colleges with our free search tool. Get
             insights on admissions, programs, and student reviews to build your

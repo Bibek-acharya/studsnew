@@ -929,7 +929,7 @@ export default function AddCollegeSection({
                     <div className="flex flex-col items-center gap-2 flex-shrink-0">
                       <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center border-2 border-gray-300">
                         {a.photo ? (
-                          <img src={a.photo} className="w-full h-full object-cover" alt="" />
+                          <img src={a.photo} className="w-full h-full object-cover" alt={a.name || "Alumni photo"} />
                         ) : (
                           <i className="fa-solid fa-user text-gray-400 text-xl"></i>
                         )}

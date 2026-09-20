@@ -1,7 +1,7 @@
 import JobDetailPage from "@/components/careers/JobDetailPage";
 
 export const metadata = {
-  title: "Job Details | StudSphere",
+  title: "Job Details",
 };
 
 export default function JobDetailRoutePage() {

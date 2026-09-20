@@ -96,7 +96,7 @@ const ManageReviews: React.FC = memo(() => {
                 <div className="flex justify-between items-start">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">
-                      {item.avatar_url ? <img src={item.avatar_url} alt="" className="w-full h-full rounded-full object-cover" /> : item.author_name?.charAt(0)}
+                      {item.avatar_url ? <img src={item.avatar_url} alt={item.author_name ? `Avatar of ${item.author_name}` : ""} className="w-full h-full rounded-full object-cover" /> : item.author_name?.charAt(0)}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{item.author_name}</p>

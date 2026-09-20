@@ -716,7 +716,7 @@ export default function StudentsPage() {
                                 <img
                                   className="h-10 w-10 rounded-full object-cover border border-gray-100"
                                   src={resolveImageUrl(f.image_url)}
-                                  alt=""
+                                  alt={`${[f.first_name, f.last_name].filter(Boolean).join(" ") || "Student"} profile picture`}
                                 />
                               ) : (
                                 <div

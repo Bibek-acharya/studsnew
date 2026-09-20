@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import BlogDetailsPage from "@/components/blogs/BlogDetailsPage";
+import JsonLd from "@/components/seo/JsonLd";
+import { absoluteUrl, breadcrumbList } from "@/components/seo/helpers";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -26,6 +28,8 @@ async function fetchMeta(slug: string) {
         title: d.title,
         image: d.image_url || "",
         description: stripHtml(d.short_desc || ""),
+        author: d.author || "Provider",
+        datePublished: d.published_at || d.created_at || "",
       };
     }
     if (slug.startsWith("inst-")) {
@@ -40,6 +44,8 @@ async function fetchMeta(slug: string) {
         title: d.title,
         image: d.image || "",
         description: stripHtml(d.excerpt || ""),
+        author: "Institution",
+        datePublished: d.published_at || d.created_at || "",
       };
     }
     const rawSlug = slug;
@@ -56,6 +62,9 @@ async function fetchMeta(slug: string) {
       title: blog.title,
       image: blog.image || "",
       description: stripHtml(blog.excerpt || ""),
+      author: blog.author || "Admin",
+      datePublished:
+        blog.created_at || blog.published_at || blog.publish_date || "",
     };
   } catch {
     return null;
@@ -74,6 +83,7 @@ export async function generateMetadata({
   return {
     title: meta.title,
     description: meta.description || meta.title,
+    alternates: { canonical: `./${slug}` },
     openGraph: {
       title: meta.title,
       description: meta.description || meta.title,
@@ -90,10 +100,45 @@ export async function generateMetadata({
   };
 }
 
-export default function BlogDetailRoutePage({
+export default async function BlogDetailRoutePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  return <BlogDetailsPage params={params} />;
+  const { slug } = await params;
+  // Reuse the server-side fetchMeta (same data the metadata generator uses)
+  // so JSON-LD carries real fields only — no client-side fetching.
+  const meta = await fetchMeta(slug);
+
+  const pageUrl = absoluteUrl(`/blogs/${slug}`);
+  const blogPosting = meta
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: meta.title,
+        ...(meta.description ? { description: meta.description } : {}),
+        ...(meta.image
+          ? { image: [absoluteUrl(meta.image)].filter(Boolean) }
+          : {}),
+        ...(meta.author ? { author: { "@type": "Person", name: meta.author } } : {}),
+        ...(meta.datePublished
+          ? { datePublished: meta.datePublished }
+          : {}),
+        mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+      }
+    : null;
+
+  return (
+    <>
+      {blogPosting && <JsonLd data={blogPosting} />}
+      <JsonLd
+        data={breadcrumbList([
+          { name: "Home", url: absoluteUrl("/") },
+          { name: "Blogs", url: absoluteUrl("/blogs") },
+          { name: meta?.title || "Blog Post", url: pageUrl },
+        ])}
+      />
+      <BlogDetailsPage params={params} />
+    </>
+  );
 }

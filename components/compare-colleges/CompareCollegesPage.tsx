@@ -318,7 +318,7 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
                         <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-[#2c51c6] flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 {c.image_url ? (
-                                    <img src={getImageUrl(c.image_url)} alt="" className="w-full h-full object-cover" />
+                                    <img src={getImageUrl(c.image_url)} alt={c.name ? `${c.name} logo` : "College logo"} className="w-full h-full object-cover" />
                                 ) : (
                                     <span className="text-white font-bold text-xs">{initials(c.name)}</span>
                                 )}

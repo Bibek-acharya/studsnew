@@ -534,7 +534,7 @@ const InstitutionShell: React.FC<Props> = ({
                 <img
                   className="h-10 w-10 rounded-full object-cover border border-gray-200"
                   src={instLogo}
-                  alt=""
+                  alt={instName ? `${instName} logo` : "Institution logo"}
                 />
               ) : (
                 <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">

@@ -357,7 +357,7 @@ export default function NewsNoticePage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-4 max-w-lg">
                           <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 border border-gray-100 ">
-                            <img src={item.image} className="w-full h-full object-cover" />
+                            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                           </div>
                           <div className="min-w-0">
                             <h4 className="text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors flex items-center gap-1.5">
@@ -434,7 +434,7 @@ export default function NewsNoticePage() {
 
                 <div className="overflow-y-auto no-scrollbar">
                     <div className="relative h-72 sm:h-96 w-full">
-                        <img src={selectedNews.image} className="w-full h-full object-cover" />
+                        <img src={selectedNews.image} alt={selectedNews.title} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
                         <div className="absolute bottom-10 left-10 right-10">
                             <span className={`px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md mb-4 inline-block ${getCategoryStyle(selectedNews.category)} text-white`}>

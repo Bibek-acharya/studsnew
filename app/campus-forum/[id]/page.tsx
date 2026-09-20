@@ -295,7 +295,7 @@ export default function CommunityDetailPage() {
                     <div className="flex items-center gap-2 sm:gap-3">
                       <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
                         {post.user?.image_url ? (
-                          <img src={imageUrl(post.user.image_url)} alt="" className="w-full h-full object-cover" />
+                          <img src={imageUrl(post.user.image_url)} alt="Post author avatar" className="w-full h-full object-cover" />
                         ) : (
                           <span className="text-xs sm:text-sm font-bold text-gray-600">
                             {(post.user?.first_name?.[0] || "U").toUpperCase()}

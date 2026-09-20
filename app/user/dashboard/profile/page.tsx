@@ -1,7 +1,7 @@
 import ProfileSection from "@/components/user/dashboard/sections/ProfileSection";
 
 export const metadata = {
-  title: "My Profile | MeroCollege Student",
+  title: "My Profile",
 };
 
 export default function Page() {

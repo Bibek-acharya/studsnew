@@ -79,7 +79,7 @@ const ReviewCard: React.FC<{
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-center gap-3">
           {profileImage ? (
-            <img src={profileImage} alt="" className="h-10 w-10 rounded-full object-cover" />
+            <img src={profileImage} alt={name} className="h-10 w-10 rounded-full object-cover" />
           ) : (
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-brand-blue/10 text-brand-blue" : "bg-brand-blue/10 text-brand-blue"}`}

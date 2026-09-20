@@ -1,7 +1,7 @@
 import BookmarksSection from "@/components/user/dashboard/sections/BookmarksSection";
 
 export const metadata = {
-  title: "Bookmarks | MeroCollege Student",
+  title: "Bookmarks",
 };
 
 export default function Page() {

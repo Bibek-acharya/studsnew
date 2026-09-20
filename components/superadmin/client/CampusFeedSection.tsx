@@ -71,7 +71,7 @@ function AdminCommentTree({
             <div className="flex items-start gap-2">
               <div className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100 text-[10px] font-bold text-gray-600">
                 {comment.user?.image_url ? (
-                  <img src={resolveImageUrl(comment.user.image_url)} alt="" className="h-full w-full object-cover" />
+                  <img src={resolveImageUrl(comment.user.image_url)} alt={comment.user_name ? `Avatar of ${comment.user_name}` : "Commenter avatar"} className="h-full w-full object-cover" />
                 ) : (
                   (comment.user?.first_name?.[0] || comment.user_name?.[0] || "U").toUpperCase()
                 )}

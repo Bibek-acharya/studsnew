@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  title: "Our Story | StudSphere",
+  title: "Our Story",
   description:
     "Discover the story behind StudSphere — Nepal's AI-powered education ecosystem built by students, for students.",
 };

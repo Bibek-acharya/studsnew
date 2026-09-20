@@ -2345,7 +2345,7 @@ export default function SuperadminCreateAdmissionSection({
                           <img
                             src={cp.image}
                             className="w-full h-full object-cover"
-                            alt=""
+                            alt="Contact person photo"
                           />
                         ) : (
                           <svg

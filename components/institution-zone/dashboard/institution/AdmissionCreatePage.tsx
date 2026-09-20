@@ -2606,7 +2606,7 @@ const AdmissionCreatePage: React.FC = () => {
                           <img
                             src={cp.image}
                             className="w-full h-full object-cover"
-                            alt=""
+                            alt="Contact person photo"
                           />
                         ) : (
                           <svg
@@ -2843,7 +2843,7 @@ const AdmissionCreatePage: React.FC = () => {
                           <img
                             src={t.image}
                             className="w-full h-full object-cover"
-                            alt=""
+                            alt="Profile photo"
                           />
                         ) : (
                           <svg

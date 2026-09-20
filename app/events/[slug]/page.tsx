@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import EventDetailsPage from "@/components/events/EventDetailsPage";
+import JsonLd from "@/components/seo/JsonLd";
+import { absoluteUrl, breadcrumbList } from "@/components/seo/helpers";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -26,6 +28,9 @@ async function fetchMeta(slug: string) {
         title: d.name || d.title,
         image: d.image_url || "",
         description: stripHtml(d.short_desc || ""),
+        startDate: d.start_date || "",
+        endDate: d.end_date || "",
+        location: d.location || "",
       };
     }
     if (slug.startsWith("inst-")) {
@@ -40,6 +45,9 @@ async function fetchMeta(slug: string) {
           title: d.name || d.title,
           image: d.image_url || "",
           description: stripHtml(d.short_desc || ""),
+          startDate: d.start_date || "",
+          endDate: d.end_date || "",
+          location: d.location || "",
         };
       }
       const res2 = await fetch(
@@ -53,6 +61,9 @@ async function fetchMeta(slug: string) {
           title: d.name || d.title,
           image: d.image_url || "",
           description: stripHtml(d.short_desc || ""),
+          startDate: d.start_date || "",
+          endDate: d.end_date || "",
+          location: d.location || "",
         };
       }
       return null;
@@ -70,6 +81,9 @@ async function fetchMeta(slug: string) {
       title: d.title,
       image: d.image || "",
       description: stripHtml(d.excerpt || d.desc || ""),
+      startDate: d.start_date || d.date || "",
+      endDate: d.end_date || "",
+      location: d.location || "",
     };
   } catch {
     return null;
@@ -88,6 +102,7 @@ export async function generateMetadata({
   return {
     title: meta.title,
     description: meta.description || meta.title,
+    alternates: { canonical: `./${slug}` },
     openGraph: {
       title: meta.title,
       description: meta.description || meta.title,
@@ -104,10 +119,52 @@ export async function generateMetadata({
   };
 }
 
-export default function EventDetailRoutePage({
+export default async function EventDetailRoutePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  return <EventDetailsPage params={params} />;
+  const { slug } = await params;
+  // Reuse the server-side fetchMeta (same data the metadata generator uses)
+  // so JSON-LD carries real fields only — no client-side fetching.
+  const meta = await fetchMeta(slug);
+
+  const pageUrl = absoluteUrl(`/events/${slug}`);
+  // Google-required Event fields: name, startDate, location. Omit any we
+  // don't have rather than fabricating values.
+  const eventSchema = meta
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Event",
+        name: meta.title,
+        ...(meta.startDate ? { startDate: meta.startDate } : {}),
+        ...(meta.location
+          ? {
+              location: {
+                "@type": "Place",
+                name: meta.location,
+              },
+            }
+          : {}),
+        ...(meta.description ? { description: meta.description } : {}),
+        ...(meta.image
+          ? { image: [absoluteUrl(meta.image)].filter(Boolean) }
+          : {}),
+        ...(meta.endDate ? { endDate: meta.endDate } : {}),
+      }
+    : null;
+
+  return (
+    <>
+      {eventSchema && <JsonLd data={eventSchema} />}
+      <JsonLd
+        data={breadcrumbList([
+          { name: "Home", url: absoluteUrl("/") },
+          { name: "Events", url: absoluteUrl("/events") },
+          { name: meta?.title || "Event", url: pageUrl },
+        ])}
+      />
+      <EventDetailsPage params={params} />
+    </>
+  );
 }

@@ -1,7 +1,7 @@
 import ApplicationsSection from "@/components/user/dashboard/sections/ApplicationsSection";
 
 export const metadata = {
-  title: "My Applications | MeroCollege Student",
+  title: "My Applications",
 };
 
 export default function Page() {

@@ -689,7 +689,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       {user?.image_url ? (
                         <img
                           src={getImageUrl(user.image_url)}
-                          alt=""
+                          alt={[user?.first_name, user?.last_name].filter(Boolean).join(" ") || "User profile picture"}
                           className="h-full w-full rounded-full object-cover"
                         />
                       ) : (
@@ -826,7 +826,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                         {user.image_url ? (
                           <img
                             src={getImageUrl(user.image_url)}
-                            alt=""
+                            alt={[user.first_name, user.last_name].filter(Boolean).join(" ") || "User profile picture"}
                             className="h-9 w-9 rounded-full object-cover ring-2 ring-white"
                           />
                         ) : (
@@ -1209,7 +1209,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                       {user.image_url ? (
                         <img
                           src={getImageUrl(user.image_url)}
-                          alt=""
+                          alt={[user?.first_name, user?.last_name].filter(Boolean).join(" ") || "User profile picture"}
                           className="h-10 w-10 rounded-full object-cover"
                         />
                       ) : (
@@ -1471,7 +1471,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 {user.image_url ? (
                   <img
                     src={getImageUrl(user.image_url)}
-                    alt=""
+                    alt={[user.first_name, user.last_name].filter(Boolean).join(" ") || "User profile picture"}
                     className="w-7 h-7 rounded-full object-cover ring-2 ring-brand-blue"
                   />
                 ) : (

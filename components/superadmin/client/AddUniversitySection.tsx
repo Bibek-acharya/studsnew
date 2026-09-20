@@ -1701,7 +1701,7 @@ export default function AddUniversitySection({
                         <label className="cursor-pointer block">
                           {img.url ? (
                             <div className="relative">
-                              <img src={img.url} className="w-full h-44 object-cover rounded-2xl" alt="" />
+                              <img src={img.url} alt="University gallery image preview" className="w-full h-44 object-cover rounded-2xl" />
                               <div className="absolute inset-0 bg-black/0 hover:bg-black/20 transition rounded-2xl flex items-center justify-center">
                                 <span className="text-white opacity-0 hover:opacity-100 text-sm font-medium">Click to change</span>
                               </div>

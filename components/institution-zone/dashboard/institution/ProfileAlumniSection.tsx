@@ -76,7 +76,7 @@ const ProfileAlumniSection: React.FC<Props> = ({
                     <img
                       src={a.photo}
                       className="w-full h-full object-cover"
-                      alt=""
+                      alt={a.name || "Alumni photo"}
                     />
                   ) : (
                     <i className="fa-solid fa-user text-gray-400 text-xl"></i>

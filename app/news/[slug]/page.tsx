@@ -1,5 +1,7 @@
 import { Metadata } from "next";
 import NewsDetailsPage from "@/components/news/NewsDetailsPage";
+import JsonLd from "@/components/seo/JsonLd";
+import { absoluteUrl, breadcrumbList } from "@/components/seo/helpers";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
@@ -26,6 +28,8 @@ async function fetchMeta(slug: string) {
         title: d.title,
         image: d.image_url || "",
         description: stripHtml(d.short_desc || ""),
+        author: d.published_by || "Unknown",
+        datePublished: d.publish_date || d.published_at || d.created_at || "",
       };
     }
     if (slug.startsWith("inst-")) {
@@ -40,6 +44,9 @@ async function fetchMeta(slug: string) {
           title: d.title,
           image: d.image_url || d.image || "",
           description: stripHtml(d.short_desc || d.excerpt || d.desc || ""),
+          author: d.published_by || "Institution",
+          datePublished:
+            d.publish_date || d.published_at || d.created_at || "",
         };
       }
       const res2 = await fetch(
@@ -53,6 +60,9 @@ async function fetchMeta(slug: string) {
           title: d.title,
           image: d.image_url || d.image || "",
           description: stripHtml(d.short_desc || d.excerpt || d.desc || ""),
+          author: d.published_by || "Institution",
+          datePublished:
+            d.publish_date || d.published_at || d.created_at || "",
         };
       }
       return null;
@@ -70,6 +80,8 @@ async function fetchMeta(slug: string) {
       title: d.title,
       image: d.image || "",
       description: stripHtml(d.excerpt || d.desc || ""),
+      author: d.author || d.published_by || "",
+      datePublished: d.date || d.created || d.created_at || "",
     };
   } catch {
     return null;
@@ -88,6 +100,7 @@ export async function generateMetadata({
   return {
     title: meta.title,
     description: meta.description || meta.title,
+    alternates: { canonical: `./${slug}` },
     openGraph: {
       title: meta.title,
       description: meta.description || meta.title,
@@ -104,10 +117,45 @@ export async function generateMetadata({
   };
 }
 
-export default function NewsDetailRoutePage({
+export default async function NewsDetailRoutePage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
-  return <NewsDetailsPage params={params} />;
+  const { slug } = await params;
+  // Reuse the server-side fetchMeta (same data the metadata generator uses)
+  // so JSON-LD carries real fields only — no client-side fetching.
+  const meta = await fetchMeta(slug);
+
+  const pageUrl = absoluteUrl(`/news/${slug}`);
+  const newsArticle = meta
+    ? {
+        "@context": "https://schema.org",
+        "@type": "NewsArticle",
+        headline: meta.title,
+        ...(meta.description ? { description: meta.description } : {}),
+        ...(meta.image
+          ? { image: [absoluteUrl(meta.image)].filter(Boolean) }
+          : {}),
+        ...(meta.author ? { author: { "@type": "Person", name: meta.author } } : {}),
+        ...(meta.datePublished
+          ? { datePublished: meta.datePublished }
+          : {}),
+        mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+      }
+    : null;
+
+  return (
+    <>
+      {newsArticle && <JsonLd data={newsArticle} />}
+      <JsonLd
+        data={breadcrumbList([
+          { name: "Home", url: absoluteUrl("/") },
+          { name: "News", url: absoluteUrl("/news") },
+          { name: meta?.title || "News Article", url: pageUrl },
+        ])}
+      />
+      <NewsDetailsPage params={params} />
+    </>
+  );
 }

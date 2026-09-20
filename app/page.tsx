@@ -1,6 +1,24 @@
 import EducationPage from "@/components/education/EducationPage";
 import HomeClientWrapper from "@/components/education/HomeClientWrapper";
 import { apiService, feedbackApi, College } from "@/services/api";
+import type { Metadata } from "next";
+
+const HOME_TITLE = "Find Colleges, Scholarships & Courses in Nepal | Studsphere";
+const HOME_DESCRIPTION =
+  "Discover top colleges in Nepal, compare courses and fees, find scholarships, and get expert admission guidance — your one-stop education platform.";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: HOME_TITLE,
+  },
+  description: HOME_DESCRIPTION,
+  alternates: { canonical: "./" },
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    type: "website",
+  },
+};
 
 export const revalidate = 300;
 

@@ -676,7 +676,7 @@ const NewsManagementPage = () => {
                               <div className="flex items-center gap-4 max-w-md">
                                 <img
                                   src={item.image}
-                                  alt=""
+                                  alt={item.title || "News item image"}
                                   className="w-14 h-14 rounded-md object-cover border border-gray-200 flex-shrink-0 "
                                 />
                                 <div>

@@ -857,7 +857,7 @@ export default function CollegeListSection({
                                 <img
                                   src={inst.logo_url}
                                   className="w-8 h-8 rounded-lg object-contain flex-shrink-0"
-                                  alt=""
+                                  alt={inst.institution_name ? `${inst.institution_name} logo` : "Institution logo"}
                                 />
                               ) : (
                                 <div

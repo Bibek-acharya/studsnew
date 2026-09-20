@@ -149,7 +149,7 @@ export default function PopupManagementTab() {
               <tr key={popup.id} className="hover:bg-gray-50 border-b border-gray-200">
                 <td className="px-4 py-3">
                   {popup.image_url ? (
-                    <img src={resolveImageUrl(popup.image_url)} alt="" className="w-20 h-14 object-cover rounded border" />
+                    <img src={resolveImageUrl(popup.image_url)} alt={popup.title || "Popup image"} className="w-20 h-14 object-cover rounded border" />
                   ) : (
                     <div className="w-20 h-14 bg-gray-100 rounded border flex items-center justify-center text-xs text-gray-400">No image</div>
                   )}

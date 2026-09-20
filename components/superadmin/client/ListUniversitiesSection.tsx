@@ -206,7 +206,7 @@ export default function ListUniversitiesSection({ setActiveSection }: { setActiv
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             {uni.logo ? (
-                              <img src={uni.logo} alt="" className="w-9 h-9 rounded-lg object-cover border border-gray-200" />
+                              <img src={uni.logo} alt={`${uni.name} logo`} className="w-9 h-9 rounded-lg object-cover border border-gray-200" />
                             ) : (
                               <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${getInitialsColors(uni.name)} flex items-center justify-center text-white text-[11px] font-bold`}>
                                 {getInitials(uni.name)}

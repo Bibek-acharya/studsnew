@@ -1,7 +1,7 @@
 import CareersPage from "@/components/careers/CareersPage";
 
 export const metadata = {
-  title: "Careers | StudSphere",
+  title: "Careers",
   description: "Join our team and help shape the future of education technology.",
 };
 

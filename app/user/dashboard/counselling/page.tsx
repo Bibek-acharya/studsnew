@@ -1,7 +1,7 @@
 import CounsellingSection from "@/components/user/dashboard/sections/CounsellingSection";
 
 export const metadata = {
-  title: "Counselling | MeroCollege Student",
+  title: "Counselling",
 };
 
 export default function Page() {

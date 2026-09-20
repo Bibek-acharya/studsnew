@@ -1,7 +1,7 @@
 import DashboardSection from "@/components/user/dashboard/sections/DashboardSection";
 
 export const metadata = {
-  title: "Dashboard | MeroCollege Student",
+  title: "Dashboard",
 };
 
 export default function Page() {

@@ -1,7 +1,7 @@
 import NotificationsPage from "@/components/notifications/NotificationsPage";
 
 export const metadata = {
-  title: "Notifications | MeroCollege Student",
+  title: "Notifications",
 };
 
 export default function Page() {

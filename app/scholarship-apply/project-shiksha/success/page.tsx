@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import ShikshaSuccessPage from "@/components/project-shiksha/ShikshaSuccessPage";
 
 export const metadata = {
-  title: "Application Successful | Project Shiksha | StudSphere",
+  title: "Application Successful | Project Shiksha",
   description: "Your Project Shiksha scholarship application has been submitted successfully.",
 };
 
