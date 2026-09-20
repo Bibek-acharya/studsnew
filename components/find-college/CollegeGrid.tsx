@@ -5,7 +5,8 @@ import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/services/AuthContext";
 import { toast } from "sonner";
 import { College, apiService, getImageUrl } from "@/services/api";
-import { CollegeFilters, isCollegeVerified } from "@/app/find-college/types";
+import { CollegeFilters, isCollegeVerified, DEFAULT_COLLEGE_FILTERS } from "@/app/find-college/types";
+import type { CollegePagination } from "@/services/api.types";
 import { FaMap } from "react-icons/fa6";
 import {
   BadgeCheckIcon,
@@ -32,6 +33,13 @@ interface CollegeGridProps {
   setFilters: React.Dispatch<React.SetStateAction<CollegeFilters>>;
   onNavigate: (view: any, data?: any) => void;
   onMobileFilterClick?: () => void;
+  /** Server-fetched data for the default page-1 view (SSR). Ignored for any other filter/page combo. */
+  initialData?: {
+    data: {
+      colleges: College[];
+      pagination: CollegePagination;
+    };
+  };
 }
 
 type ArrayFilterKey = {
@@ -149,6 +157,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   setFilters,
   onNavigate,
   onMobileFilterClick,
+  initialData,
 }) => {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
@@ -252,8 +261,16 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     [filters.university],
   );
 
+  // SSR: only seed react-query with the server data when the current query is
+  // exactly the default page-1 view it was fetched for. Any other filter/page
+  // combination keeps the previous client-only loading behavior.
+  const isDefaultView =
+    currentPage === 1 &&
+    JSON.stringify(filters) === JSON.stringify(DEFAULT_COLLEGE_FILTERS);
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["colleges", currentPage, filters, isQuickInquiryMode],
+    initialData: isDefaultView ? initialData : undefined,
     queryFn: async () => {
       const sortConfig: Record<
         string,

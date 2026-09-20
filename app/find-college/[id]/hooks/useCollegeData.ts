@@ -11,16 +11,24 @@ import {
   FALLBACK_GALLERY_IMAGES,
 } from "../constants";
 
-export function useCollegeData(idStr: string) {
+export function useCollegeData(
+  idStr: string,
+  initialCollege?: Record<string, unknown>,
+) {
   const collegeId = idStr ? Number(idStr.replace("inst_", "")) : null;
 
-  const [college, setCollege] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [college, setCollege] = useState<any>(initialCollege ?? null);
+  const [loading, setLoading] = useState<boolean>(!initialCollege);
   const [reviewsData, setReviewsData] = useState<any>(null);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewsPage, setReviewsPage] = useState(1);
 
   useEffect(() => {
+    // Server-provided initial data: skip the client fetch entirely.
+    if (initialCollege) {
+      setLoading(false);
+      return;
+    }
     if (!idStr) {
       setLoading(false);
       return;
@@ -46,7 +54,7 @@ export function useCollegeData(idStr: string) {
           })
           .catch(() => setLoading(false));
       });
-  }, [idStr]);
+  }, [idStr, initialCollege]);
 
   const isInstitution = !!college?.institution_name;
 

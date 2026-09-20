@@ -3,6 +3,7 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalCourses, searchGlobalCourses, fetchCourseFilterCounts, CourseFilterCountsResponse } from "@/services/course-api";
+import type { GlobalCourse } from "@/types/course";
 import CourseFilters from "./CourseFilters";
 import {
   CourseFinderFilters,
@@ -14,9 +15,16 @@ import CourseGrid from "./CourseGrid";
 
 interface CourseFinderPageProps {
   onNavigate: (view: any, data?: any) => void;
+  initialData?: {
+    courses: GlobalCourse[];
+    counts?: CourseFilterCountsResponse;
+  };
 }
 
-const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
+const CourseFinderPage: React.FC<CourseFinderPageProps> = ({
+  onNavigate,
+  initialData,
+}) => {
   const [filters, setFilters] = useState<CourseFinderFilters>(
     defaultCourseFinderFilters,
   );
@@ -34,6 +42,9 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   const { data: allData, isLoading } = useQuery({
     queryKey: ["global-courses"],
     queryFn: () => fetchGlobalCourses(1, 100),
+    initialData: initialData
+      ? { courses: initialData.courses, meta: { total: initialData.courses.length } }
+      : undefined,
   });
 
   // Fetch search results when search is active
@@ -47,6 +58,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   const { data: filterCountsData } = useQuery({
     queryKey: ["course-filter-counts"],
     queryFn: fetchCourseFilterCounts,
+    initialData: initialData?.counts,
   });
 
   const allCourses = allData?.courses || [];

@@ -2,9 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { EntranceFilterState } from "@/app/entrance/types";
+import { EntranceFilterState, DEFAULT_ENTRANCE_FILTERS } from "@/app/entrance/types";
 import { Exam } from "@/components/entrance/types";
-import { entranceService, EntranceFilters } from "@/services/entrance.api";
+import { entranceService, EntranceFilters, EntrancesResponse } from "@/services/entrance.api";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import Pagination from "@/components/ui/Pagination";
@@ -32,12 +32,15 @@ interface EntranceGridProps {
   filters: EntranceFilterState;
   setFilters: React.Dispatch<React.SetStateAction<EntranceFilterState>>;
   onMobileFilterClick?: () => void;
+  /** Server-fetched data for the default page-1 view (SSR). Ignored for any other filter/page combo. */
+  initialData?: EntrancesResponse;
 }
 
 const EntranceGrid: React.FC<EntranceGridProps> = ({
   filters,
   setFilters,
   onMobileFilterClick,
+  initialData,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [savedIds, setSavedIds] = useState<number[]>([]);
@@ -123,8 +126,16 @@ const EntranceGrid: React.FC<EntranceGridProps> = ({
     gpa: filters.gpa.length > 0 ? [filters.gpa] : undefined,
   };
 
+  // SSR: only seed react-query with the server data when the current query is
+  // exactly the default page-1 view it was fetched for. Any other filter/page
+  // combination keeps the previous client-only loading behavior.
+  const isDefaultView =
+    currentPage === 1 &&
+    JSON.stringify(filters) === JSON.stringify(DEFAULT_ENTRANCE_FILTERS);
+
   const { data, isLoading } = useQuery({
     queryKey: ["entrances", apiFilters, currentPage],
+    initialData: isDefaultView ? initialData : undefined,
     queryFn: () => entranceService.getEntrances(apiFilters, currentPage, 18),
     staleTime: 5 * 60 * 1000,
   });

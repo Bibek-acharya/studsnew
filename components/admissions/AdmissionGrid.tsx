@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { FolderOpen, SlidersHorizontal } from "lucide-react";
 import { toast } from "sonner";
@@ -12,6 +12,7 @@ import Pagination from "@/components/ui/Pagination";
 import {
   admissionService,
   AdmissionCollegeItem,
+  AdmissionPagination,
 } from "@/services/admission.api";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
@@ -27,6 +28,11 @@ interface AdmissionGridProps {
   onNavigate: (view: string, data?: any) => void;
   level: string;
   onMobileFilterClick?: () => void;
+  /** Server-fetched first page (page.tsx). Skip the initial client fetch when provided. */
+  initialData?: {
+    colleges: AdmissionCollegeItem[];
+    pagination: AdmissionPagination;
+  };
 }
 
 const COLLEGES_PER_PAGE = 18;
@@ -50,15 +56,22 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
   onNavigate,
   level,
   onMobileFilterClick,
+  initialData,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [colleges, setColleges] = useState<AdmissionCollegeItem[]>([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    pageSize: COLLEGES_PER_PAGE,
-    total: 0,
-    totalPages: 1,
-  });
+  // Server-fetched first page is only consumed once (on mount).
+  const initialDataRef = useRef(initialData || null);
+  const [colleges, setColleges] = useState<AdmissionCollegeItem[]>(initialData?.colleges || []);
+  const [pagination, setPagination] = useState<AdmissionPagination>(
+    initialData
+      ? { ...initialData.pagination }
+      : {
+          page: 1,
+          pageSize: COLLEGES_PER_PAGE,
+          total: 0,
+          totalPages: 1,
+        },
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [savedIds, setSavedIds] = useState<number[]>([]);
@@ -208,6 +221,10 @@ const AdmissionGrid: React.FC<AdmissionGridProps> = ({
 
   useEffect(() => {
     const fetchColleges = async () => {
+      if (initialDataRef.current) {
+        initialDataRef.current = null;
+        return;
+      }
       setIsLoading(true);
       setFetchError(null);
       try {

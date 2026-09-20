@@ -1,81 +1,46 @@
-"use client";
+import { notFound } from "next/navigation";
+import { admissionService } from "@/services/admission.api";
+import AdmissionLevelClient, {
+  type AdmissionInitialData,
+} from "./AdmissionLevelClient";
+import { DEFAULT_ADMISSION_FILTERS } from "./types";
 
-import { useState, use } from "react";
-import { useRouter } from "next/navigation";
-import AdmissionFilterSidebar from "@/components/admissions/AdmissionFilterSidebar";
-import AdmissionGrid from "@/components/admissions/AdmissionGrid";
-import { AdmissionFilters, DEFAULT_ADMISSION_FILTERS } from "./types";
+export const revalidate = 300;
 
-export default function AdmissionsLevelPage({
+// Real admission levels exposed publicly (mirrors the sitemap's admission level routes).
+const ADMISSION_LEVELS = ["+2", "bachelor", "master", "a-level", "ctevt"];
+
+export default async function AdmissionsLevelPage({
   params,
 }: {
   params: Promise<{ level: string }>;
 }) {
-  const resolvedParams = use(params);
-  const router = useRouter();
-  const [filters, setFilters] = useState<AdmissionFilters>(
-    DEFAULT_ADMISSION_FILTERS,
-  );
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const { level } = await params;
+  if (!ADMISSION_LEVELS.includes(level)) {
+    notFound();
+  }
 
-  const handleNavigate = (view: string, data?: any) => {
-    if (view === "collegeDetails" && data?.id) {
-      router.push(`/find-college/${data.id}`);
-    } else if (view === "admissionDetails" && data?.id) {
-      const url = `/admissions/${resolvedParams.level}/${data.id}`;
-      if (data.scrollTo) {
-        router.push(`${url}?scrollTo=${data.scrollTo}`);
-      } else {
-        router.push(url);
-      }
-    } else {
-      console.log("Navigate to:", view, data);
-    }
-  };
+  let initialData: AdmissionInitialData | undefined;
+  try {
+    const response = await admissionService.getPublishedAdmissionColleges(
+      level,
+      1,
+      18,
+      { sortBy: DEFAULT_ADMISSION_FILTERS.sortBy },
+    );
+    initialData = {
+      colleges: response?.data?.colleges || [],
+      pagination:
+        response?.data?.pagination || {
+          page: 1,
+          pageSize: 18,
+          total: 0,
+          totalPages: 1,
+        },
+    };
+  } catch {
+    // Let the client fetch handle loading/error states when the initial fetch fails.
+  }
 
-  return (
-    <div className="min-h-screen p-4 text-gray-800 md:p-6 lg:p-8">
-      <div className="mx-auto flex max-w-350 flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
-        {/* Desktop sidebar */}
-        <aside className="hidden w-full shrink-0 lg:block lg:w-75">
-          <AdmissionFilterSidebar
-            filters={filters}
-            setFilters={setFilters}
-            level={resolvedParams.level}
-          />
-        </aside>
-
-        {/* Mobile filter bottom drawer */}
-        {showMobileFilters && (
-          <div
-            className="fixed inset-0 z-50 lg:hidden"
-            onClick={() => setShowMobileFilters(false)}
-          >
-            <div className="absolute inset-0 bg-black/50" />
-            <div
-              className="absolute bottom-0 left-0 right-0 max-h-[70vh] rounded-t-2xl bg-white shadow-xl overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <AdmissionFilterSidebar
-                filters={filters}
-                setFilters={setFilters}
-                level={resolvedParams.level}
-                onClose={() => setShowMobileFilters(false)}
-              />
-            </div>
-          </div>
-        )}
-
-        <main className="min-w-0 flex-1">
-          <AdmissionGrid
-            filters={filters}
-            onNavigate={handleNavigate}
-            setFilters={setFilters}
-            level={resolvedParams.level}
-            onMobileFilterClick={() => setShowMobileFilters(true)}
-          />
-        </main>
-      </div>
-    </div>
-  );
+  return <AdmissionLevelClient level={level} initialData={initialData} />;
 }

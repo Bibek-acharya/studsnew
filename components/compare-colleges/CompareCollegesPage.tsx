@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { apiService, getImageUrl } from "@/services/api";
 import type { College } from "@/services/api";
+import type { PopularComparison } from "@/app/compare-colleges/popularTypes";
 
 interface InstitutionResult {
     id: number;
@@ -20,18 +21,10 @@ interface InstitutionResult {
     university_id?: number;
 }
 
-interface PopularComparison {
-  college1_id: number;
-  college1_name: string;
-  college1_logo_url: string;
-  college2_id: number;
-  college2_name: string;
-  college2_logo_url: string;
-  count: number;
-}
-
 interface CompareCollegesPageProps {
     onNavigate: (view: string, data?: { college1: Partial<College> | string; college2: Partial<College> | string }) => void;
+    /** Server-fetched popular comparisons (page.tsx). Client fetch is skipped when provided. */
+    initialPopular?: PopularComparison[];
 }
 
 type SearchError = {
@@ -39,7 +32,10 @@ type SearchError = {
     message: string;
 } | null;
 
-const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate }) => {
+const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({
+    onNavigate,
+    initialPopular,
+}) => {
     const [college1, setCollege1] = useState("");
     const [college2, setCollege2] = useState("");
     const [selectedCollege1, setSelectedCollege1] = useState<College | null>(null);
@@ -50,16 +46,20 @@ const CompareCollegesPage: React.FC<CompareCollegesPageProps> = ({ onNavigate })
     const [colleges2, setColleges2] = useState<College[]>([]);
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
-    const [popularComparisons, setPopularComparisons] = useState<PopularComparison[]>([]);
+    const [popularComparisons, setPopularComparisons] = useState<PopularComparison[]>(initialPopular || []);
     const [error, setError] = useState<SearchError>(null);
-    const [loadingPopular, setLoadingPopular] = useState(true);
+    const [loadingPopular, setLoadingPopular] = useState(initialPopular === undefined);
 
     const wrapperRef1 = useRef<HTMLDivElement>(null);
     const wrapperRef2 = useRef<HTMLDivElement>(null);
     const debounceRef1 = useRef<NodeJS.Timeout | null>(null);
     const debounceRef2 = useRef<NodeJS.Timeout | null>(null);
+    const initialPopularRef = useRef(initialPopular !== undefined);
 
     useEffect(() => {
+        // Server-provided popular comparisons mean no client fetch is needed.
+        if (initialPopularRef.current) return;
+
         const resolveCollege = async (id: number, name: string) => {
             let college: College | undefined;
             try {

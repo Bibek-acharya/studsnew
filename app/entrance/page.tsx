@@ -1,37 +1,61 @@
-"use client";
+import { DEFAULT_ENTRANCE_FILTERS } from "@/app/entrance/types";
+import { mapRawEntrance, type EntrancesResponse } from "@/services/entrance.api";
+import EntranceView from "./EntranceView";
 
-import React, { useState } from "react";
-import { X } from "lucide-react";
-import EntranceFilters from "@/components/entrance/EntranceFilters";
-import EntranceGrid from "@/components/entrance/EntranceGrid";
-import { EntranceFilterState, DEFAULT_ENTRANCE_FILTERS } from "@/app/entrance/types";
+/**
+ * Server-side fetch of the default "page 1 / default filters" entrances list
+ * so the entrance grid is server-rendered. Uses the same POST /api/v1/entrances
+ * endpoint and body shape the client EntranceGrid query builds, with ISR
+ * revalidation, then returns the entranceService-style response.
+ */
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
-const EntrancePage: React.FC = () => {
-  const [filters, setFilters] = useState<EntranceFilterState>(DEFAULT_ENTRANCE_FILTERS);
-  const [showMobileFilters, setShowMobileFilters] = useState(false);
+async function fetchInitialEntrances(): Promise<EntrancesResponse | null> {
+  try {
+    // Mirrors EntranceGrid's apiFilters built from DEFAULT_ENTRANCE_FILTERS.
+    const f = DEFAULT_ENTRANCE_FILTERS;
+    const filters = {
+      search: f.search || undefined,
+      academicLevel: f.academicLevel.length > 0 ? f.academicLevel : undefined,
+      stream: f.stream.length > 0 ? f.stream : undefined,
+      status: f.status.length > 0 ? f.status : undefined,
+      sortBy: f.sortBy || undefined,
+      location: f.location || undefined,
+      institutionType:
+        f.institutionType.length > 0 ? f.institutionType : undefined,
+      province: f.province.length > 0 ? f.province : undefined,
+      district: f.district.length > 0 ? f.district : undefined,
+      localLevel: f.localLevel.length > 0 ? f.localLevel : undefined,
+      applicationFee:
+        f.applicationFee.length > 0 ? f.applicationFee : undefined,
+      scholarship: f.scholarship.length > 0 ? f.scholarship : undefined,
+      gpa: f.gpa.length > 0 ? [f.gpa] : undefined,
+    };
 
-  return (
-    <div className="min-h-screen p-4 text-gray-800 md:p-6 lg:p-8">
-      <div className="mx-auto flex max-w-350 flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
-        <aside className="hidden w-full shrink-0 lg:block lg:w-80">
-          <EntranceFilters filters={filters} setFilters={setFilters} />
-        </aside>
+    const res = await fetch(`${API_BASE}/api/v1/entrances`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...filters, page: 1, pageSize: 18 }),
+      next: { revalidate: 300 },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as {
+      data?: { entrances?: unknown[]; total?: number; page?: number; pageSize?: number };
+    } | null;
+    return {
+      data: {
+        entrances: (json?.data?.entrances ?? []).map(mapRawEntrance),
+        total: json?.data?.total ?? 0,
+        page: json?.data?.page ?? 1,
+        pageSize: json?.data?.pageSize ?? 18,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
 
-        {showMobileFilters && (
-          <div className="fixed inset-0 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
-            <div className="absolute inset-0 bg-black/50" />
-            <div className="absolute bottom-0 left-0 right-0 max-h-[70vh] overflow-y-auto rounded-t-2xl bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
-              <EntranceFilters filters={filters} setFilters={setFilters} onClose={() => setShowMobileFilters(false)} />
-            </div>
-          </div>
-        )}
-
-        <main className="min-w-0 flex-1">
-          <EntranceGrid filters={filters} setFilters={setFilters} onMobileFilterClick={() => setShowMobileFilters(true)} />
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default EntrancePage;
+export default async function EntrancePage() {
+  const initialData = await fetchInitialEntrances();
+  return <EntranceView initialData={initialData ?? undefined} />;
+}
