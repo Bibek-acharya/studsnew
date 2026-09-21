@@ -32,12 +32,16 @@ async function fetchInitialEntrances(): Promise<EntrancesResponse | null> {
       gpa: f.gpa.length > 0 ? [f.gpa] : undefined,
     };
 
-    const res = await fetch(`${API_BASE}/api/v1/entrances`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...filters, page: 1, pageSize: 18 }),
-      next: { revalidate: 300 },
-    });
+      // Bound the fetch so slow/hung upstreams during CI builds can't blow
+      // Next.js's 60s per-page static-generation deadline: abort quickly and
+      // let the client-side grid hydrate instead (initialData is optional).
+      const res = await fetch(`${API_BASE}/api/v1/entrances`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...filters, page: 1, pageSize: 18 }),
+        next: { revalidate: 300 },
+        signal: AbortSignal.timeout(10_000),
+      });
     if (!res.ok) return null;
     const json = (await res.json()) as {
       data?: { entrances?: unknown[]; total?: number; page?: number; pageSize?: number };
