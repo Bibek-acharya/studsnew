@@ -9,6 +9,11 @@ WORKDIR /app
 RUN npm install -g pnpm@9
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Pin the build-time API origin to this server so `pnpm run build`'s server
+# fetches go straight to the local Traefik instead of hairpinning through
+# Cloudflare (Paris edge -> origin), which intermittently returns 5xx/520 and
+# bloats build time. Keep in sync with the actual server IP.
+RUN echo "23.111.14.27 ai.studsphere.com storage.studsphere.com" >> /etc/hosts
 ARG NEXT_PUBLIC_API_URL=https://ai.studsphere.com
 ARG NEXT_PUBLIC_MAP_TILE_URL=https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key=0rGVA9NHe6T721hozAdq
 ARG NEXT_PUBLIC_SITE_URL=
