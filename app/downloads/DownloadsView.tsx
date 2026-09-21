@@ -176,7 +176,7 @@ function DownloadRow({ item }: { item: DownloadItem }) {
   const href = getDownloadEndpoint(item.id);
 
   return (
-    <article className="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 hover:shadow-md hover:shadow-blue-500/5 sm:gap-6 sm:p-6">
+    <article className="group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:border-blue-500/20 sm:gap-6 sm:p-6">
       {/* File icon */}
       <div
         className={`relative flex h-14 w-14 shrink-0 items-center justify-center rounded-xl ${meta.band} transition-transform duration-300 group-hover:scale-105 sm:h-16 sm:w-16`}
@@ -315,11 +315,7 @@ export default function DownloadsView({
         <div className="absolute top-1/2 left-1/3 h-32 w-32 rounded-full bg-white/[0.03]" />
 
         <div className="relative mx-auto max-w-3xl px-4 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold tracking-widest text-blue-100 uppercase">
-            <i className="fa-solid fa-cloud-arrow-down text-[10px]" aria-hidden />
-            Resource Center
-          </span>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
             Downloads
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
@@ -331,10 +327,10 @@ export default function DownloadsView({
 
       {/* ==================== CONTENT ==================== */}
       <section className="bg-gray-50 pb-20">
-        <div className="mx-auto w-full max-w-350 px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full max-w-[87.5rem] px-4 md:px-0">
           {/* Category tabs */}
           <div
-            className="-mt-8 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 shadow-sm"
+            className="mt-8 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-2"
             role="tablist"
             aria-label="Filter by category"
           >
