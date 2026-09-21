@@ -144,6 +144,12 @@ const SuperadminJobDirectorySection = lazy(() => import("./SuperadminJobDirector
 const SuperadminCreateJobSection = lazy(() => import("./SuperadminCreateJobSection"));
 const SuperadminJobApplicantsSection = lazy(() => import("./SuperadminJobApplicantsSection"));
 const StudyResourcesSection = lazy(() => import("./StudyResourcesSection"));
+const SuperadminMediaPressSection = lazy(
+  () => import("./SuperadminMediaPressSection"),
+);
+const SuperadminDownloadsSection = lazy(
+  () => import("./SuperadminDownloadsSection"),
+);
 
 type SectionType =
   | "overview"
@@ -221,6 +227,8 @@ type SectionType =
   | "superadmin-create-job"
   | `superadmin-edit-job-${number}`
   | `superadmin-job-applicants-${number}`
+  | "superadmin-media-press"
+  | "superadmin-downloads"
   | "study-resources";
 
 interface NavChild {
@@ -286,6 +294,15 @@ const navItems: NavItemData[] = [
       { section: "superadmin-entrance-directory", label: "All Entrances" },
       { section: "superadmin-entrance-applicants", label: "Applicants" },
       { section: "superadmin-entrance-results", label: "Results" },
+    ],
+  },
+  {
+    icon: <Newspaper size={20} />,
+    label: "Content Management",
+    section: "superadmin-media-press",
+    children: [
+      { section: "superadmin-media-press", label: "Media & Press Management" },
+      { section: "superadmin-downloads", label: "Downloads Management" },
     ],
   },
   {
@@ -694,6 +711,10 @@ function DashboardShellInner() {
         return (
           <SuperadminEntranceResultsSection setActiveSection={navigateTo} />
         );
+      case "superadmin-media-press":
+        return <SuperadminMediaPressSection setActiveSection={navigateTo} />;
+      case "superadmin-downloads":
+        return <SuperadminDownloadsSection setActiveSection={navigateTo} />;
       case "superadmin-admission-directory":
         return (
           <SuperadminAdmissionDirectorySection setActiveSection={navigateTo} />

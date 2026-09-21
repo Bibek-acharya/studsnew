@@ -1,10 +1,37 @@
-export default function MediaPressPage() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 pt-32">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Media &amp; Press</h1>
-        <p className="mt-2 text-gray-600">Coming soon. Check back for press releases and media resources.</p>
-      </div>
-    </div>
-  );
+import type { Metadata } from "next";
+import {
+  fetchMediaPressList,
+  type MediaPressListResponse,
+} from "@/services/mediaPress.api";
+import MediaPressView from "./MediaPressView";
+
+export const metadata: Metadata = {
+  title: "Media & Press | Studsphere",
+  description:
+    "Official StudSphere press releases, news and media coverage — announcements from Nepal's education ecosystem.",
+  alternates: { canonical: "./" },
+  openGraph: {
+    title: "Media & Press | Studsphere",
+    description:
+      "Official StudSphere press releases, news and media coverage — announcements from Nepal's education ecosystem.",
+    type: "website",
+  },
+};
+
+const PAGE_LIMIT = 9;
+
+/**
+ * Server component: fetches the first page of media & press items with ISR
+ * revalidation and hands off to the client view for filtering, detail modal
+ * and pagination. Falls back to a client-side fetch when the API is
+ * unreachable (dev-tolerance) — the page never crashes on a bad backend.
+ */
+export default async function MediaPressPage() {
+  const initialData: MediaPressListResponse = await fetchMediaPressList({
+    page: 1,
+    limit: PAGE_LIMIT,
+    revalidate: 300,
+  });
+
+  return <MediaPressView initialData={initialData} />;
 }

@@ -1,10 +1,37 @@
-export default function DownloadsPage() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50 pt-32">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900">Downloads</h1>
-        <p className="mt-2 text-gray-600">Coming soon. Resources and downloads will be available here.</p>
-      </div>
-    </div>
-  );
+import type { Metadata } from "next";
+import {
+  fetchDownloadsList,
+  type DownloadListResponse,
+} from "@/services/downloads.api";
+import DownloadsView from "./DownloadsView";
+
+export const metadata: Metadata = {
+  title: "Downloads | Studsphere",
+  description:
+    "Download StudSphere brochures, forms and official documents — brochures, application forms and resources in one place.",
+  alternates: { canonical: "./" },
+  openGraph: {
+    title: "Downloads | Studsphere",
+    description:
+      "Download StudSphere brochures, forms and official documents — brochures, application forms and resources in one place.",
+    type: "website",
+  },
+};
+
+const PAGE_LIMIT = 9;
+
+/**
+ * Server component: fetches the first page of downloads with ISR revalidation
+ * and hands off to the client view for category filtering and pagination.
+ * Falls back to a client-side fetch when the API is unreachable
+ * (dev-tolerance) — the page never crashes on a bad backend.
+ */
+export default async function DownloadsPage() {
+  const initialData: DownloadListResponse = await fetchDownloadsList({
+    page: 1,
+    limit: PAGE_LIMIT,
+    revalidate: 300,
+  });
+
+  return <DownloadsView initialData={initialData} />;
 }
