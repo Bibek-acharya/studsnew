@@ -2,10 +2,18 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { FaCheckCircle } from "react-icons/fa";
-import { getAdPlacement } from "@/lib/ad-controller";
+import { submitCollegeRecommendationFeedback } from "@/services/collegeAdApi";
+
+const CHECKBOX_KEYS = ["notInterested", "wrongLocation", "outOfBudget", "alreadyAdmitted"] as const;
+
+const REASON_LABELS: Record<(typeof CHECKBOX_KEYS)[number], string> = {
+  notInterested: "I am not interested in this Course / Degree",
+  wrongLocation: "Colleges shown are not in my location of preference",
+  outOfBudget: "The fees for colleges are out of my budget",
+  alreadyAdmitted: "I have already taken admission/shortlisted colleges",
+};
 
 const RecommendationFeedback: React.FC = () => {
-  const placement = getAdPlacement("find-college-feedback");
   const [selection, setSelection] = useState<"up" | "down" | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLikeModal, setShowLikeModal] = useState(false);
@@ -57,8 +65,6 @@ const RecommendationFeedback: React.FC = () => {
     }
   }, [showModal, showLikeModal, toggleBodyScroll]);
 
-  if (!placement.enabled) return null;
-
   const showToast = (message: string) => {
     setToast({ show: true, message });
     setTimeout(() => setToast({ show: false, message: "" }), 2500);
@@ -98,6 +104,14 @@ const RecommendationFeedback: React.FC = () => {
   };
 
   const handleSubmitFeedback = () => {
+    const reasons = CHECKBOX_KEYS.filter((key) => checkboxes[key]).map(
+      (key) => REASON_LABELS[key],
+    );
+    submitCollegeRecommendationFeedback({
+      helpful: false,
+      reasons,
+      comment: checkboxes.other ? otherText.trim() || undefined : undefined,
+    }).catch(() => {});
     setShowModal(false);
     showToast("Thank you, we value your feedback");
     setCheckboxes({
@@ -111,6 +125,10 @@ const RecommendationFeedback: React.FC = () => {
   };
 
   const handleSubmitLike = () => {
+    submitCollegeRecommendationFeedback({
+      helpful: true,
+      comment: likeText.trim() || undefined,
+    }).catch(() => {});
     setShowLikeModal(false);
     showToast("Thank you, we value your feedback");
     setLikeText("");
@@ -120,7 +138,7 @@ const RecommendationFeedback: React.FC = () => {
     <>
       <div className="bg-white px-6 sm:px-8 py-5 w-full rounded-md border border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
         <span className="text-[#0c1844] font-semibold text-[16px] text-center sm:text-left leading-snug tracking-tight">
-          {placement.headline}
+          Are these colleges relevant?
         </span>
 
         <div className="flex items-center space-x-3 shrink-0">

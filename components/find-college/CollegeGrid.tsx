@@ -24,8 +24,8 @@ import {
 } from "lucide-react";
 import Pagination from "@/components/ui/Pagination";
 
-// import TrendingCollegesAd from "./ads/TrendingCollegesAd";
-// import RecommendationFeedback from "./ads/RecommendationFeedback";
+import TrendingCollegesAd from "./ads/TrendingCollegesAd";
+import RecommendationFeedback from "./ads/RecommendationFeedback";
 import ClaimCollegeModal from "./ClaimCollegeModal";
 
 interface CollegeGridProps {
@@ -737,12 +737,15 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   setInquiryMessageSingle("");
                 }}
               />
-              {/* {isAfter2Rows && (
-                <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
-                  {adCycleIndex === 0 && <TrendingCollegesAd />}
-                  {adCycleIndex === 1 && <RecommendationFeedback />}
-                </div>
-              )} */}
+              {(index + 1) % 6 === 0 && index !== colleges.length - 1 && (() => {
+                const adIndex = Math.floor(index / 6) % 2;
+                return (
+                  <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
+                    {adIndex === 0 && <TrendingCollegesAd />}
+                    {adIndex === 1 && <RecommendationFeedback />}
+                  </div>
+                );
+              })()}
             </React.Fragment>
           );
         })}

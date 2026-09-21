@@ -1,5 +1,11 @@
+"use client";
+
 import React from "react";
-import { getAdPlacement } from "@/lib/ad-controller";
+import {
+  useTrendingCollegeAds,
+  type TrendingCollegeAd,
+} from "@/services/collegeAdApi";
+import { getImageUrl } from "@/services/api";
 
 type CollegeAdItem = {
   title: string;
@@ -12,75 +18,22 @@ type CollegeAdItem = {
   image: string;
 };
 
-const adData: {
-  monthlySpotlight: CollegeAdItem[];
-  mostSearched: CollegeAdItem[];
-} = {
-  monthlySpotlight: [
-    {
-      title: "Advance Foundation",
-      location: "Lalitpur",
-      rating: "4.8",
-      reviews: "123",
-      programs: "+2, Bachelor, Master",
-      website: "advancefoundation.edu.np",
-      url: "https://advancefoundation.edu.np",
-      image: "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
-    },
-    {
-      title: "KIST College",
-      location: "Kamalpokhari, Kathmandu",
-      rating: "4.6",
-      reviews: "245",
-      programs: "+2, Bachelor, Master",
-      website: "kist.edu.np",
-      url: "https://kist.edu.np",
-      image: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    },
-    {
-      title: "Trinity International College",
-      location: "Dillibazar, Kathmandu",
-      rating: "4.7",
-      reviews: "189",
-      programs: "+2, Bachelor, Master",
-      website: "trinity.edu.np",
-      url: "https://www.trinity.edu.np",
-      image: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-    },
-  ],
-  mostSearched: [
-    {
-      title: "Trinity International College",
-      location: "Dillibazar, Kathmandu",
-      rating: "4.7",
-      reviews: "189",
-      programs: "+2, Bachelor, Master",
-      website: "trinity.edu.np",
-      url: "https://www.trinity.edu.np",
-      image: "https://www.trinity.edu.np/assets/backend/uploads/Logo/trinity%20college%20logo.jpg",
-    },
-    {
-      title: "Advance Foundation",
-      location: "Lalitpur",
-      rating: "4.8",
-      reviews: "123",
-      programs: "+2, Bachelor, Master",
-      website: "advancefoundation.edu.np",
-      url: "https://advancefoundation.edu.np",
-      image: "https://advancefoundation.edu.np/public/assets/img/logo.jpg",
-    },
-    {
-      title: "KIST College",
-      location: "Kamalpokhari, Kathmandu",
-      rating: "4.6",
-      reviews: "245",
-      programs: "+2, Bachelor, Master",
-      website: "kist.edu.np",
-      url: "https://kist.edu.np",
-      image: "https://kist.edu.np/resources/assets/img/logo_small.jpg",
-    },
-  ],
-};
+// Visual defaults for fields the backend does not provide per college.
+const DEFAULT_REVIEWS = "123";
+const DEFAULT_PROGRAMS = "+2, Bachelor, Master";
+const DEFAULT_WEBSITE = "studsphere.com";
+const DEFAULT_URL = "/find-college";
+
+const mapAdToItem = (ad: TrendingCollegeAd): CollegeAdItem => ({
+  title: ad.college?.name || ad.headline || "StudSphere",
+  location: ad.college?.location || "Kathmandu",
+  rating: ad.college?.rating ? Number(ad.college.rating).toFixed(1) : "4.8",
+  reviews: DEFAULT_REVIEWS,
+  programs: DEFAULT_PROGRAMS,
+  website: DEFAULT_WEBSITE,
+  url: DEFAULT_URL,
+  image: getImageUrl(ad.college?.image_url),
+});
 
 const ColumnCard: React.FC<{ item: CollegeAdItem }> = ({ item }) => {
   return (
@@ -132,32 +85,43 @@ const ColumnCard: React.FC<{ item: CollegeAdItem }> = ({ item }) => {
 };
 
 const TrendingCollegesAd: React.FC = () => {
-  const placement = getAdPlacement("find-college-trending");
+  const { data, isLoading } = useTrendingCollegeAds();
 
-  if (!placement.enabled) return null;
+  if (isLoading || !data) return null;
+
+  const spotlightItems = (data.spotlight || []).map(mapAdToItem);
+  const mostSearchedItems = (data.most_searched || []).map(mapAdToItem);
+
+  if (spotlightItems.length === 0 && mostSearchedItems.length === 0) return null;
 
   return (
     <div className="w-full max-w-300">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
-        <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
-          <h3 className="mb-3 text-[17px] font-medium">{placement.headline}</h3>
-          <div className="flex flex-col gap-2">
-            {adData.monthlySpotlight.map((item) => (
-              <ColumnCard key={`spotlight-${item.title}`} item={item} />
-            ))}
+        {spotlightItems.length > 0 && (
+          <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
+            <h3 className="mb-3 text-[17px] font-medium">
+              {data.spotlight[0]?.headline || "Monthly spotlight"}
+            </h3>
+            <div className="flex flex-col gap-2">
+              {spotlightItems.map((item) => (
+                <ColumnCard key={`spotlight-${item.title}`} item={item} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
-          <h3 className="mb-3 text-[17px] font-medium">
-            {placement.description || "Most searched"}
-          </h3>
-          <div className="flex flex-col gap-2">
-            {adData.mostSearched.map((item) => (
-              <ColumnCard key={`searched-${item.title}`} item={item} />
-            ))}
+        {mostSearchedItems.length > 0 && (
+          <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
+            <h3 className="mb-3 text-[17px] font-medium">
+              {data.most_searched[0]?.headline || "Most searched"}
+            </h3>
+            <div className="flex flex-col gap-2">
+              {mostSearchedItems.map((item) => (
+                <ColumnCard key={`searched-${item.title}`} item={item} />
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
