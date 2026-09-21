@@ -173,7 +173,7 @@ function DetailModal({
       }}
     >
       <div
-        className="animate-slide-in relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:rounded-2xl"
+        className="animate-slide-in relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border border-gray-200 bg-white sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header band */}
@@ -267,7 +267,7 @@ function PressCard({
   const hasImage = Boolean(item.imageUrl);
 
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/20 hover:shadow-lg hover:shadow-blue-500/5">
+    <article className="group flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-blue-500/20">
       {/* Cover */}
       <button
         type="button"
@@ -421,11 +421,7 @@ export default function MediaPressView({
         <div className="absolute top-1/2 left-1/3 h-32 w-32 rounded-full bg-white/[0.03]" />
 
         <div className="relative mx-auto max-w-3xl px-4 text-center">
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold tracking-widest text-blue-100 uppercase">
-            <i className="fa-solid fa-bullhorn text-[10px]" aria-hidden />
-            Newsroom
-          </span>
-          <h1 className="mt-5 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
+          <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
             Media &amp; Press
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-blue-100 sm:text-base">
@@ -437,10 +433,10 @@ export default function MediaPressView({
 
       {/* ==================== CONTENT ==================== */}
       <section className="bg-gray-50 pb-20">
-        <div className="mx-auto w-full max-w-350 px-4 sm:px-6 md:px-8">
+        <div className="mx-auto w-full max-w-[87.5rem] px-4 md:px-0">
           {/* Category tabs */}
           <div
-            className="-mt-8 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-2 shadow-sm"
+            className="mt-8 flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white p-2"
             role="tablist"
             aria-label="Filter by category"
           >
