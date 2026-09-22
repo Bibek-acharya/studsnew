@@ -586,7 +586,7 @@ export default function SuperadminCreateAdmissionSection({
         await superadminAdmissionApi.update(Number(editId), collectData(), publish);
       } else {
         const result = await superadminAdmissionApi.create(collectData(), publish);
-        admissionId = (result as any)?.data?.id || 0;
+        admissionId = (result as any)?.id || (result as any)?.data?.id || 0;
       }
 
       localStorage.removeItem("superadmin_edit_admission_id");

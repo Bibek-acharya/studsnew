@@ -196,12 +196,28 @@ export const superadminAdmissionApi = {
   async create(data: any, publish: boolean): Promise<any> {
     return superadminFetch("/api/v1/superadmin/admission-pages", {
       method: "POST",
-      body: JSON.stringify({ ...data, publish }),
+      body: JSON.stringify({
+        institution_id: data.institution_id,
+        institution_name: data.institution_name,
+        institution_location: data.institution_location,
+        institution_link: data.institution_link,
+        data,
+        status: publish ? "published" : "draft",
+      }),
     });
   },
 
   async update(id: number, data: any, publish?: boolean): Promise<any> {
-    const body = publish !== undefined ? { ...data, publish } : data;
+    const body: any = {
+      institution_id: data.institution_id,
+      institution_name: data.institution_name,
+      institution_location: data.institution_location,
+      institution_link: data.institution_link,
+      data,
+    };
+    if (publish !== undefined) {
+      body.status = publish ? "published" : "draft";
+    }
     return superadminFetch(`/api/v1/superadmin/admission-pages/${id}`, {
       method: "PUT",
       body: JSON.stringify(body),
