@@ -47,17 +47,34 @@ const STATIC_ROUTES: RouteDef[] = [
 
 const ADMISSION_LEVELS = ["+2", "bachelor", "master", "a-level", "ctevt"]
 
+const FETCH_TIMEOUT_MS = 5000
+
 async function safeFetchJson(
   url: string
 ): Promise<{ data?: Record<string, unknown[]> } | null> {
+  let timer: ReturnType<typeof setTimeout> | undefined
   try {
-    const res = await fetch(url, {
-      signal: AbortSignal.timeout(5000),
+    // Race a wall-clock timer against the whole fetch+parse, not just
+    // AbortSignal: during `next build` the patched fetch can ignore the
+    // signal, which previously let a stalled API call hang sitemap.xml
+    // generation past the 60s static-export limit and fail the build.
+    const dataPromise = (async () => {
+      try {
+        const res = await fetch(url, {
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        })
+        if (!res.ok) return null
+        return await res.json()
+      } catch {
+        return null
+      }
+    })()
+    const timeoutPromise = new Promise<null>((resolve) => {
+      timer = setTimeout(() => resolve(null), FETCH_TIMEOUT_MS)
     })
-    if (!res.ok) return null
-    return await res.json()
-  } catch {
-    return null
+    return await Promise.race([dataPromise, timeoutPromise])
+  } finally {
+    if (timer) clearTimeout(timer)
   }
 }
 
@@ -79,7 +96,11 @@ interface BlogSection {
 async function fetchBlogPages(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = []
 
-  const eduJson = await safeFetchJson(`${API_BASE_URL}/api/v1/education/blogs?page=1&limit=500`)
+  const [eduJson, providerJson, instJson] = await Promise.all([
+    safeFetchJson(`${API_BASE_URL}/api/v1/education/blogs?page=1&limit=500`),
+    safeFetchJson(`${API_BASE_URL}/api/v1/public/blogs?page=1&limit=500`),
+    safeFetchJson(`${API_BASE_URL}/api/v1/institutions/public/blogs?page=1&limit=500`),
+  ])
   const eduBlogs = eduJson?.data?.blogs ?? []
   if (Array.isArray(eduBlogs)) {
     for (const blog of eduBlogs as BlogSection[]) {
@@ -95,7 +116,6 @@ async function fetchBlogPages(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const providerJson = await safeFetchJson(`${API_BASE_URL}/api/v1/public/blogs?page=1&limit=500`)
   const providerBlogs = providerJson?.data?.blogs ?? []
   if (Array.isArray(providerBlogs)) {
     for (const blog of providerBlogs as BlogSection[]) {
@@ -112,7 +132,6 @@ async function fetchBlogPages(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const instJson = await safeFetchJson(`${API_BASE_URL}/api/v1/institutions/public/blogs?page=1&limit=500`)
   const instBlogs = instJson?.data?.blogs ?? []
   if (Array.isArray(instBlogs)) {
     for (const blog of instBlogs as BlogSection[]) {
@@ -147,7 +166,10 @@ interface NewsSection {
 async function fetchNewsPages(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = []
 
-  const instJson = await safeFetchJson(`${API_BASE_URL}/api/v1/institutions/public/news?page=1&limit=500`)
+  const [instJson, eduJson] = await Promise.all([
+    safeFetchJson(`${API_BASE_URL}/api/v1/institutions/public/news?page=1&limit=500`),
+    safeFetchJson(`${API_BASE_URL}/api/v1/education/news?page=1&limit=500`),
+  ])
   const instNews = instJson?.data?.news ?? []
   if (Array.isArray(instNews)) {
     for (const news of instNews as NewsSection[]) {
@@ -162,7 +184,6 @@ async function fetchNewsPages(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const eduJson = await safeFetchJson(`${API_BASE_URL}/api/v1/education/news?page=1&limit=500`)
   const eduNews = eduJson?.data?.news ?? []
   if (Array.isArray(eduNews)) {
     for (const news of eduNews as NewsSection[]) {
@@ -196,7 +217,10 @@ interface EventSection {
 async function fetchEventPages(): Promise<MetadataRoute.Sitemap> {
   const entries: MetadataRoute.Sitemap = []
 
-  const eduJson = await safeFetchJson(`${API_BASE_URL}/api/v1/education/events?page=1&limit=500`)
+  const [eduJson, instJson] = await Promise.all([
+    safeFetchJson(`${API_BASE_URL}/api/v1/education/events?page=1&limit=500`),
+    safeFetchJson(`${API_BASE_URL}/api/v1/institutions/public/events?page=1&limit=500`),
+  ])
   const eduEvents = eduJson?.data?.events ?? []
   if (Array.isArray(eduEvents)) {
     for (const event of eduEvents as EventSection[]) {
@@ -212,7 +236,6 @@ async function fetchEventPages(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  const instJson = await safeFetchJson(`${API_BASE_URL}/api/v1/institutions/public/events?page=1&limit=500`)
   const instEvents = instJson?.data?.events ?? []
   if (Array.isArray(instEvents)) {
     for (const event of instEvents as EventSection[]) {
