@@ -22,6 +22,9 @@ export interface TrendingCollegeAd {
     rating: number;
     location: string;
     type: string;
+    college_id: number;
+    website: string;
+    review_count: number;
   } | null;
 }
 

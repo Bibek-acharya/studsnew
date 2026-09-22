@@ -19,7 +19,6 @@ type CollegeAdItem = {
 };
 
 // Visual defaults for fields the backend does not provide per college.
-const DEFAULT_REVIEWS = "123";
 const DEFAULT_PROGRAMS = "+2, Bachelor, Master";
 const DEFAULT_WEBSITE = "studsphere.com";
 const DEFAULT_URL = "/find-college";
@@ -28,10 +27,12 @@ const mapAdToItem = (ad: TrendingCollegeAd): CollegeAdItem => ({
   title: ad.college?.name || ad.headline || "StudSphere",
   location: ad.college?.location || "Kathmandu",
   rating: ad.college?.rating ? Number(ad.college.rating).toFixed(1) : "4.8",
-  reviews: DEFAULT_REVIEWS,
+  reviews: String(ad.college?.review_count ?? 0),
   programs: DEFAULT_PROGRAMS,
-  website: DEFAULT_WEBSITE,
-  url: DEFAULT_URL,
+  website: ad.college?.website || DEFAULT_WEBSITE,
+  url: ad.college?.college_id
+    ? `/find-college/${ad.college.college_id}`
+    : DEFAULT_URL,
   image: getImageUrl(ad.college?.image_url),
 });
 
@@ -98,7 +99,7 @@ const TrendingCollegesAd: React.FC = () => {
     <div className="w-full max-w-300">
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-6">
         {spotlightItems.length > 0 && (
-          <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
+          <div className="my-2 rounded-md bg-brand-blue p-3 text-white md:p-4 lg:my-4">
             <h3 className="mb-3 text-[17px] font-medium">
               {data.spotlight[0]?.headline || "Monthly spotlight"}
             </h3>
@@ -111,7 +112,7 @@ const TrendingCollegesAd: React.FC = () => {
         )}
 
         {mostSearchedItems.length > 0 && (
-          <div className="my-2 rounded-md bg-[radial-gradient(circle_at_center,#0044ff_0%,#0011bb_100%)] p-3 text-white md:p-4 lg:my-4">
+          <div className="my-2 rounded-md bg-brand-blue p-3 text-white md:p-4 lg:my-4">
             <h3 className="mb-3 text-[17px] font-medium">
               {data.most_searched[0]?.headline || "Most searched"}
             </h3>
