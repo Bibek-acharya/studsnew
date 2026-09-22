@@ -9,6 +9,7 @@ import {
   postNewsComment,
   NewsComment,
   fetchPublicNewsBySlug,
+  incrementNewsShare,
 } from "@/services/newsApi";
 import { fetchInstitutionNewsBySlug } from "@/services/institutionNewsApi";
 import { getPublicNewsBySlug } from "@/services/scholarshipProviderApi";
@@ -98,6 +99,12 @@ const NewsDetailsPage: React.FC<{
   const [postingComment, setPostingComment] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [shareUrl, setShareUrl] = useState("");
+  // Local share-total override, keyed to the article object it belongs to so a
+  // stale count can never leak into a different article.
+  const [shareAdj, setShareAdj] = useState<{
+    source: object;
+    shares: number;
+  } | null>(null);
 
   useEffect(() => {
     params.then((p) => setId(p.slug));
@@ -295,6 +302,42 @@ const NewsDetailsPage: React.FC<{
     }
   };
 
+  // Only education news has a backend share endpoint; provider/inst variants
+  // can't be incremented, so they keep sharing but show no count.
+  const numericArticleId = article != null ? Number(article.id) : NaN;
+  const educationNewsId =
+    article != null &&
+    id != null &&
+    !id.startsWith("provider-") &&
+    !id.startsWith("inst-") &&
+    Number.isInteger(numericArticleId) &&
+    numericArticleId > 0
+      ? numericArticleId
+      : null;
+
+  const baseShares =
+    typeof article?.shares === "number" ? article.shares : null;
+  const shareCount =
+    shareAdj && shareAdj.source === article ? shareAdj.shares : baseShares;
+  const displayedShares =
+    educationNewsId != null && shareCount != null && shareCount > 0
+      ? shareCount
+      : null;
+
+  const handleShared = () => {
+    if (article == null || educationNewsId == null) return;
+    // Optimistic bump only when the payload actually carried a total; the
+    // server response is authoritative and overwrites it either way.
+    if (shareCount != null) {
+      setShareAdj({ source: article, shares: shareCount + 1 });
+    }
+    incrementNewsShare(educationNewsId).then((newTotal) => {
+      if (typeof newTotal === "number") {
+        setShareAdj({ source: article, shares: newTotal });
+      }
+    });
+  };
+
   if (loading) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center">
@@ -368,10 +411,19 @@ const NewsDetailsPage: React.FC<{
                 type="button"
                 onClick={() => setIsShareModalOpen(true)}
                 className="shrink-0 flex items-center gap-2 rounded-md border border-gray-200 bg-white p-2 text-gray-700 transition-colors hover:bg-gray-50"
-                aria-label="Share article"
+                aria-label={
+                  displayedShares != null
+                    ? `Share article, ${displayedShares} share${displayedShares === 1 ? "" : "s"}`
+                    : "Share article"
+                }
               >
                 <i className="fa-solid fa-share-nodes"></i>
                 <span className="text-sm font-medium">Share</span>
+                {displayedShares != null && (
+                  <span className="border-l border-gray-200 pl-2 text-sm font-semibold text-blue-600 tabular-nums">
+                    {displayedShares}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -640,6 +692,7 @@ const NewsDetailsPage: React.FC<{
           article.excerpt ||
           `Check out this article on Studsphere: ${article.title}`
         }
+        onShare={handleShared}
       />
     </div>
   );

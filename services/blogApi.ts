@@ -29,6 +29,7 @@ export interface BlogEntry {
   featured: boolean;
   published: boolean;
   views: number;
+  shares?: number;
   created_at: string;
 }
 
@@ -171,6 +172,7 @@ export async function fetchPublicBlogBySlug(
         featured: raw.featured ?? false,
         published: raw.published ?? raw.status === "published",
         views: raw.views || 0,
+        shares: typeof raw.shares === "number" ? raw.shares : undefined,
         created_at:
           raw.created_at ||
           raw.published_at ||
@@ -194,6 +196,7 @@ export async function fetchPublicBlogBySlug(
             featured: r.featured ?? false,
             published: r.published ?? r.status === "published",
             views: r.views || 0,
+            shares: typeof r.shares === "number" ? r.shares : undefined,
             created_at:
               r.created_at || r.published_at || new Date().toISOString(),
           }))
@@ -235,6 +238,7 @@ export async function fetchPublicBlogById(
         featured: raw.featured ?? false,
         published: raw.published ?? raw.status === "published",
         views: raw.views || 0,
+        shares: typeof raw.shares === "number" ? raw.shares : undefined,
         created_at:
           raw.created_at ||
           raw.published_at ||
@@ -258,6 +262,7 @@ export async function fetchPublicBlogById(
             featured: r.featured ?? false,
             published: r.published ?? r.status === "published",
             views: r.views || 0,
+            shares: typeof r.shares === "number" ? r.shares : undefined,
             created_at:
               r.created_at || r.published_at || new Date().toISOString(),
           }))
@@ -472,4 +477,26 @@ export async function postBlogComment(
     time: "Just now",
   };
   return comment;
+}
+
+// ─── Share tracking ──────────────────────────────────────────────────────────
+
+/**
+ * Record a share of a blog post and return the new total share count.
+ * Returns null on any failure (offline, 404, malformed payload) so callers
+ * can treat sharing as best-effort and never block the UI on it.
+ */
+export async function incrementBlogShare(
+  blogId: number | string,
+): Promise<number | null> {
+  try {
+    const result = await apiFetch<{ data?: { shares?: number } }>(
+      `/api/v1/education/blogs/${blogId}/share`,
+      { method: "POST" },
+    );
+    const shares = result?.data?.shares;
+    return typeof shares === "number" ? shares : null;
+  } catch {
+    return null;
+  }
 }

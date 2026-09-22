@@ -7,6 +7,7 @@ import {
   fetchPublicBlogBySlug,
   fetchBlogComments,
   postBlogComment,
+  incrementBlogShare,
   BlogEntry,
   BlogComment,
 } from "@/services/blogApi";
@@ -30,6 +31,15 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   const [resolvedBlogId, setResolvedBlogId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [postingComment, setPostingComment] = useState(false);
+  // Local share-total override, keyed to the blog object it belongs to so a
+  // stale count can never leak into a different post.
+  const [shareAdj, setShareAdj] = useState<{
+    source: object;
+    shares: number;
+  } | null>(null);
+  const [justCopied, setJustCopied] = useState<"instagram" | "copy" | null>(
+    null,
+  );
 
   useEffect(() => {
     params.then((p) => setId(p.slug));
@@ -186,6 +196,65 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
     }
   };
 
+  // Only education blogs get a backend share count; provider/inst payloads
+  // have no numeric education id, so they share without counting.
+  const parsedBlogId = resolvedBlogId != null ? Number(resolvedBlogId) : NaN;
+  const numericBlogId =
+    Number.isInteger(parsedBlogId) && parsedBlogId > 0 ? parsedBlogId : null;
+
+  const baseShares = typeof blog?.shares === "number" ? blog.shares : null;
+  const shareCount =
+    shareAdj && blog != null && shareAdj.source === blog
+      ? shareAdj.shares
+      : baseShares;
+  const displayedShares =
+    numericBlogId != null && shareCount != null && shareCount > 0
+      ? shareCount
+      : null;
+
+  const fireShareIncrement = () => {
+    if (blog == null || numericBlogId == null) return;
+    // Optimistic bump only when the payload actually carried a total; the
+    // server response is authoritative and overwrites it either way.
+    if (shareCount != null) {
+      setShareAdj({ source: blog, shares: shareCount + 1 });
+    }
+    incrementBlogShare(numericBlogId).then((newTotal) => {
+      if (typeof newTotal === "number") {
+        setShareAdj({ source: blog, shares: newTotal });
+      }
+    });
+  };
+
+  const shareVia = (
+    network: "facebook" | "linkedin" | "instagram" | "copy",
+  ) => {
+    const url = window.location.href;
+    if (network === "facebook") {
+      window.open(
+        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+    } else if (network === "linkedin") {
+      window.open(
+        `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+        "_blank",
+        "noopener,noreferrer",
+      );
+    } else {
+      // Instagram has no web-share URL — the standard pattern is copy-link.
+      try {
+        navigator.clipboard.writeText(url).catch(() => {});
+      } catch {
+        /* clipboard unavailable */
+      }
+      setJustCopied(network);
+      window.setTimeout(() => setJustCopied(null), 1600);
+    }
+    fireShareIncrement();
+  };
+
   if (loading || !id) {
     return (
       <div className="min-h-[40vh] flex items-center justify-center">
@@ -284,31 +353,64 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             <span className="text-gray-900 font-medium">
               Share this announcement:
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors"
-                aria-label="Share on Facebook"
-              >
-                <i className="fa-brands fa-facebook-f text-sm"></i>
-              </button>
-              <button
-                className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors"
-                aria-label="Share on Instagram"
-              >
-                <i className="fa-brands fa-instagram text-sm"></i>
-              </button>
-              <button
-                className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"
-                aria-label="Share on LinkedIn"
-              >
-                <i className="fa-brands fa-linkedin-in text-sm"></i>
-              </button>
-              <button
-                className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors"
-                aria-label="Copy Link"
-              >
-                <i className="fa-solid fa-link text-sm"></i>
-              </button>
+            <div className="flex items-center gap-3">
+              {displayedShares != null && (
+                <span className="flex items-center gap-1.5 text-sm text-gray-500">
+                  <i className="fa-solid fa-share-nodes"></i>
+                  {displayedShares} share
+                  {displayedShares === 1 ? "" : "s"}
+                </span>
+              )}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => shareVia("facebook")}
+                  className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors"
+                  aria-label="Share on Facebook"
+                >
+                  <i className="fa-brands fa-facebook-f text-sm"></i>
+                </button>
+                <button
+                  onClick={() => shareVia("instagram")}
+                  className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors"
+                  aria-label={
+                    justCopied === "instagram"
+                      ? "Link copied"
+                      : "Share on Instagram"
+                  }
+                  title="Copy link"
+                >
+                  <i
+                    className={`${
+                      justCopied === "instagram"
+                        ? "fa-solid fa-check"
+                        : "fa-brands fa-instagram"
+                    } text-sm`}
+                  ></i>
+                </button>
+                <button
+                  onClick={() => shareVia("linkedin")}
+                  className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors"
+                  aria-label="Share on LinkedIn"
+                >
+                  <i className="fa-brands fa-linkedin-in text-sm"></i>
+                </button>
+                <button
+                  onClick={() => shareVia("copy")}
+                  className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors"
+                  aria-label={
+                    justCopied === "copy" ? "Link copied" : "Copy Link"
+                  }
+                  title="Copy link"
+                >
+                  <i
+                    className={`${
+                      justCopied === "copy"
+                        ? "fa-solid fa-check"
+                        : "fa-solid fa-link"
+                    } text-sm`}
+                  ></i>
+                </button>
+              </div>
             </div>
           </div>
 

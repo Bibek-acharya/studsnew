@@ -9,6 +9,8 @@ type ShareCollegeModalProps = {
   shareUrl: string;
   shareTitle: string;
   shareText: string;
+  /** Optional: fired once per actual share action (social click or copy). */
+  onShare?: () => void;
 };
 
 const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
@@ -18,6 +20,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
   shareUrl,
   shareTitle,
   shareText,
+  onShare,
 }) => {
   const [copyLabel, setCopyLabel] = useState("Copy link");
 
@@ -92,6 +95,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
   ];
 
   const copyLink = async () => {
+    onShare?.();
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopyLabel("Copied");
@@ -137,6 +141,7 @@ const ShareCollegeModal: React.FC<ShareCollegeModalProps> = ({
                 rel="noreferrer"
                 className="group shrink-0"
                 aria-label={`Share on ${item.name}`}
+                onClick={() => onShare?.()}
               >
                 <span
                   className={`flex h-10 w-10 items-center justify-center rounded-full text-base transition-transform group-hover:scale-105 ${item.iconColor} ${item.iconBg}`}

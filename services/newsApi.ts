@@ -201,5 +201,32 @@ export async function fetchPublicNewsBySlug(slug: string): Promise<any> {
   const res = await fetch(`${API_BASE}/api/v1/education/news/by-slug/${slug}`);
   if (!res.ok) throw new Error("News not found");
   const data = await res.json();
+  // Payload passes through unmapped, so detail fields (views, shares, …)
+  // reach the page as-is.
   return data.data || data;
+}
+
+/**
+ * Record a share of a news article and return the new total share count.
+ * Returns null on any failure (offline, 404, malformed payload) so callers
+ * can treat sharing as best-effort and never block the UI on it.
+ */
+export async function incrementNewsShare(
+  newsId: number | string,
+): Promise<number | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_URL}/api/v1/education/news/${newsId}/share`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    const shares = json?.data?.shares;
+    return typeof shares === "number" ? shares : null;
+  } catch {
+    return null;
+  }
 }
