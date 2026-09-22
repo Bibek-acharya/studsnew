@@ -25,7 +25,10 @@ import {
 import Pagination from "@/components/ui/Pagination";
 
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
+import ByTypeAd from "./ads/ByTypeAd";
+import RatingAd from "./ads/RatingAd";
 import RecommendationFeedback from "./ads/RecommendationFeedback";
+import { useTrendingCollegeAds, useCollegeAdCardSettings } from "@/services/collegeAdApi";
 import ClaimCollegeModal from "./ClaimCollegeModal";
 
 interface CollegeGridProps {
@@ -160,6 +163,11 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   initialData,
 }) => {
   const router = useRouter();
+  const { data: trendingAds } = useTrendingCollegeAds();
+  const { data: adCardSettings } = useCollegeAdCardSettings();
+  const hasCollegeAds =
+    !!trendingAds &&
+    (trendingAds.spotlight.length > 0 || trendingAds.most_searched.length > 0);
   const { isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [savedColleges, setSavedColleges] = useState<(number | string)[]>([]);
@@ -737,12 +745,30 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                   setInquiryMessageSingle("");
                 }}
               />
-              {(index + 1) % 6 === 0 && index !== colleges.length - 1 && (() => {
-                const adIndex = Math.floor(index / 6) % 2;
+              {(index + 1) % 6 === 0 && (() => {
+                const slot = Math.floor(index / 6);
+                if (slot % 4 === 3) {
+                  return (
+                    <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
+                      <RecommendationFeedback />
+                    </div>
+                  );
+                }
+                if (!hasCollegeAds) return null;
+                // Per-slot settings gate (slot 3 / feedback is never gated above).
+                // Missing settings (still loading) are treated as enabled.
+                const slotKey =
+                  slot % 4 === 0
+                    ? "trending"
+                    : slot % 4 === 1
+                      ? "by_type"
+                      : "rating";
+                if (adCardSettings && !adCardSettings[slotKey]) return null;
                 return (
                   <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
-                    {adIndex === 0 && <TrendingCollegesAd />}
-                    {adIndex === 1 && <RecommendationFeedback />}
+                    {slot % 4 === 0 && <TrendingCollegesAd />}
+                    {slot % 4 === 1 && <ByTypeAd />}
+                    {slot % 4 === 2 && <RatingAd />}
                   </div>
                 );
               })()}

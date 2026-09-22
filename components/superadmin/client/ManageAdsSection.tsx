@@ -8,12 +8,14 @@ import ShowcaseBannerTab from "./ShowcaseBannerTab";
 import UniversityAffiliationSection from "./UniversityAffiliationSection";
 import CoursePageAdsSection from "./CoursePageAdsSection";
 import CollegePageAdsSection from "./CollegePageAdsSection";
+import CollegeAdCardsToggleSection from "./CollegeAdCardsToggleSection";
 import LandingCoursesTab from "./LandingCoursesTab";
 
 const TABS = [
   { id: "advertise", label: "Advertise Request" },
   { id: "course-ads", label: "Course Page Ads" },
   { id: "college-ads", label: "College Page Ads" },
+  { id: "college-ad-cards", label: "College Ad Cards" },
   { id: "popup", label: "Landing Page Popup" },
   { id: "hero", label: "Hero Banner" },
   { id: "showcase", label: "Showcase Banner" },
@@ -44,6 +46,7 @@ export default function ManageAdsSection() {
 
       {activeTab === "course-ads" && <CoursePageAdsSection />}
       {activeTab === "college-ads" && <CollegePageAdsSection />}
+      {activeTab === "college-ad-cards" && <CollegeAdCardsToggleSection />}
       {activeTab === "advertise" && <AdvertiseRequestSection />}
       {activeTab === "popup" && <PopupManagementTab />}
       {activeTab === "hero" && <HeroBannerTab />}
