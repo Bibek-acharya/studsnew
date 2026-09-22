@@ -27,6 +27,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   const [blog, setBlog] = useState<BlogEntry | null>(null);
   const [related, setRelated] = useState<BlogEntry[]>([]);
   const [comments, setComments] = useState<BlogComment[]>([]);
+  const [resolvedBlogId, setResolvedBlogId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [postingComment, setPostingComment] = useState(false);
 
@@ -37,6 +38,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
   useEffect(() => {
     if (!id) return;
     setLoading(true);
+    setResolvedBlogId(null);
 
     async function fetchBlog() {
       const safeId = id!;
@@ -76,6 +78,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             const json = await res.json();
             blogResult = json?.data || json;
             commentsData = await fetchBlogComments(safeId).catch(() => []);
+            setResolvedBlogId(safeId);
         } else if (safeId.startsWith("inst-")) {
           const instBlog = await getPublicInstitutionBlogBySlug(safeId);
           if (instBlog) {
@@ -101,10 +104,17 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
             setRelated([]);
           }
         } else {
-            [blogResult, commentsData] = await Promise.all([
-              fetchPublicBlogBySlug(safeId),
-              fetchBlogComments(safeId),
-            ]);
+            // Fetch the blog by slug first; only fetch comments with the
+            // blog's numeric id (the comments API rejects slug values).
+            blogResult = await fetchPublicBlogBySlug(safeId);
+            const numericId = blogResult?.blog?.id;
+            if (numericId != null && numericId > 0) {
+              setResolvedBlogId(String(numericId));
+            }
+            commentsData =
+              numericId != null && numericId > 0
+                ? await fetchBlogComments(String(numericId)).catch(() => [])
+                : [];
           }
           if (blogResult) {
             setBlog(blogResult.blog);
@@ -147,6 +157,10 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
     const text = commentInput.trim();
     if (!text || !id) return;
 
+    // Slug routes must post comments against the resolved numeric blog id;
+    // the comments API rejects non-numeric ids (400).
+    const targetId = resolvedBlogId ?? id;
+
     setPostingComment(true);
     try {
       const authorName = user
@@ -157,7 +171,7 @@ const BlogDetailsPage: React.FC<{ params: Promise<{ slug: string }> }> = ({
         user?.image_url ||
         `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=random`;
 
-      const newComment = await postBlogComment(id, {
+      const newComment = await postBlogComment(targetId, {
         author: authorName,
         avatar: avatarUrl,
         message: text,
