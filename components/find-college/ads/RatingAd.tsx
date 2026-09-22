@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { toast } from 'sonner';
+import { submitCollegeRecommendationFeedback } from '@/services/collegeAdApi';
 
 const ratingLabels: Record<number, string> = {
   1: "Poor",
@@ -13,6 +15,8 @@ const RatingAd: React.FC = () => {
   const [currentRating, setCurrentRating] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [activeTags, setActiveTags] = useState<Record<string, boolean>>({});
+  const [feedbackText, setFeedbackText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleMouseEnter = (index: number) => setHoverRating(index);
   const handleMouseLeave = () => setHoverRating(0);
@@ -21,6 +25,7 @@ const RatingAd: React.FC = () => {
     setCurrentRating(index);
     setIsModalOpen(true);
     setActiveTags({});
+    setFeedbackText("");
   };
 
   const getTagsForRating = (rating: number) => {
@@ -36,9 +41,30 @@ const RatingAd: React.FC = () => {
 
   const displayRating = hoverRating > 0 ? hoverRating : currentRating;
 
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      const reasons = Object.keys(activeTags).filter((k) => activeTags[k]);
+      await submitCollegeRecommendationFeedback({
+        helpful: currentRating >= 4,
+        reasons,
+        comment: feedbackText.trim() || undefined,
+        rating: currentRating,
+      });
+      toast.success("Thank you for your feedback!");
+      setIsModalOpen(false);
+      setFeedbackText("");
+    } catch {
+      toast.error("Failed to submit feedback. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <>
-      <div className="bg-white rounded-md shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 w-full p-5 md:p-6 flex flex-col md:flex-row items-center justify-center lg:justify-start gap-4 md:gap-8 transition-all my-2 lg:my-4">
+      <div className="bg-white rounded-md border border-gray-100 w-full p-5 md:p-6 flex flex-col md:flex-row items-center justify-center lg:justify-start gap-4 md:gap-8 transition-all my-2 lg:my-4">
         <div className="shrink-0 flex justify-center">
             <img 
                 src="https://i.pinimg.com/1200x/31/bb/5b/31bb5b12e99840c5a1571878f30b69ef.jpg" 
@@ -129,15 +155,16 @@ const RatingAd: React.FC = () => {
                 <textarea 
                     className="w-full border border-gray-300 rounded-md p-3 text-[15px] text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#1E3A8A] focus:border-[#1E3A8A] resize-none h-24" 
                     placeholder="Write here..."
+                    value={feedbackText}
+                    onChange={(e) => setFeedbackText(e.target.value)}
                 ></textarea>
             </div>
 
             <button 
-              onClick={() => {
-                alert("Thank you for your feedback!");
-                setIsModalOpen(false);
-              }}
-              className="bg-[#1E3A8A] hover:bg-[#152860] text-white font-semibold py-2.5 px-10 rounded-full mt-8 mx-auto block transition-colors ">
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={`bg-brand-blue hover:bg-brand-hover text-white font-semibold py-2.5 px-10 rounded-lg mt-8 mx-auto block transition-colors ${isSubmitting ? "opacity-60 pointer-events-none" : ""}`}
+            >
                 Submit
             </button>
         </div>

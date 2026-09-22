@@ -452,6 +452,7 @@ export default function CollegePageAdsSection() {
                   <table className="w-full text-left border-collapse text-sm">
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200 text-gray-600 font-medium">
+                        <th className="px-4 py-3">Rating</th>
                         <th className="px-4 py-3">Helpful</th>
                         <th className="px-4 py-3">Reasons</th>
                         <th className="px-4 py-3">Comment</th>
@@ -464,6 +465,9 @@ export default function CollegePageAdsSection() {
                           key={fb.id}
                           className="hover:bg-gray-50 border-b border-gray-200 transition-colors"
                         >
+                          <td className="px-4 py-3 text-gray-600">
+                            {fb.rating ? `★ ${fb.rating}` : "\u2014"}
+                          </td>
                           <td className="px-4 py-3">
                             {fb.helpful ? (
                               <span className="inline-flex items-center gap-1.5 text-green-600">

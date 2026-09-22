@@ -33,6 +33,8 @@ export interface CollegeFeedbackItem {
   helpful: boolean;
   reasons: string;
   comment: string;
+  /** Star rating 1-5; 0 means not provided. */
+  rating?: number;
   created_at: string;
 }
 
@@ -197,6 +199,8 @@ export interface CollegeRecommendationFeedbackPayload {
   helpful: boolean;
   reasons?: string[];
   comment?: string;
+  /** Star rating 1-5 (optional). */
+  rating?: number;
 }
 
 export async function submitCollegeRecommendationFeedback(
