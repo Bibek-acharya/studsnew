@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { FaCheckCircle } from "react-icons/fa";
 import { submitCollegeRecommendationFeedback } from "@/services/collegeAdApi";
+import { useAuth } from "@/services/AuthContext";
+import { toast as appToast } from "sonner";
 
 const CHECKBOX_KEYS = ["notInterested", "wrongLocation", "outOfBudget", "alreadyAdmitted"] as const;
 
@@ -14,6 +16,7 @@ const REASON_LABELS: Record<(typeof CHECKBOX_KEYS)[number], string> = {
 };
 
 const RecommendationFeedback: React.FC = () => {
+  const { isAuthenticated } = useAuth();
   const [selection, setSelection] = useState<"up" | "down" | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showLikeModal, setShowLikeModal] = useState(false);
@@ -104,6 +107,10 @@ const RecommendationFeedback: React.FC = () => {
   };
 
   const handleSubmitFeedback = () => {
+    if (!isAuthenticated) {
+      appToast.error("Please login to submit feedback");
+      return;
+    }
     const reasons = CHECKBOX_KEYS.filter((key) => checkboxes[key]).map(
       (key) => REASON_LABELS[key],
     );
@@ -125,6 +132,10 @@ const RecommendationFeedback: React.FC = () => {
   };
 
   const handleSubmitLike = () => {
+    if (!isAuthenticated) {
+      appToast.error("Please login to submit feedback");
+      return;
+    }
     submitCollegeRecommendationFeedback({
       helpful: true,
       comment: likeText.trim() || undefined,
@@ -207,7 +218,7 @@ const RecommendationFeedback: React.FC = () => {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-md shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] w-[550px] max-w-[95vw] p-6 sm:p-8"
+            className="bg-white rounded-md w-[550px] max-w-[95vw] p-6 sm:p-8"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
@@ -340,9 +351,9 @@ const RecommendationFeedback: React.FC = () => {
               <button
                 onClick={handleSubmitFeedback}
                 disabled={!canSubmit}
-                className={`px-6 py-2.5 rounded-md text-[15px] font-semibold transition-all ${
+                className={`px-6 py-2.5 rounded-lg text-[15px] font-semibold transition-all ${
                   canSubmit
-                    ? "bg-[#0000ff] text-white  hover:bg-blue-800"
+                    ? "bg-brand-blue text-white hover:bg-brand-hover"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
@@ -408,9 +419,9 @@ const RecommendationFeedback: React.FC = () => {
               <button
                 onClick={handleSubmitLike}
                 disabled={likeText.trim().length === 0}
-                className={`px-6 py-2.5 rounded-md text-[15px] font-semibold transition-all ${
+                className={`px-6 py-2.5 rounded-lg text-[15px] font-semibold transition-all ${
                   likeText.trim().length > 0
-                    ? "bg-[#0000ff] text-white hover:bg-blue-800"
+                    ? "bg-brand-blue text-white hover:bg-brand-hover"
                     : "bg-gray-200 text-gray-500"
                 }`}
               >
