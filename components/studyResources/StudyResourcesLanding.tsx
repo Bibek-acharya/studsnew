@@ -45,7 +45,7 @@ export default function StudyResourcesLanding({
       <div className="mx-auto w-full max-w-350 px-4 sm:px-0">
         <StudyResourcesCarousel slides={slides} />
 
-        <div className={hasSlides ? "mt-10 sm:mt-12" : "mt-3 sm:mt-6"}>
+        <div className={hasSlides ? "mt-8 sm:mt-10" : "mt-3 sm:mt-6"}>
           <div className="mb-6 flex flex-col gap-2 sm:mb-7 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-blue">
