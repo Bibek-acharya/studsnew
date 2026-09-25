@@ -1,6 +1,7 @@
 import EducationPage from "@/components/education/EducationPage";
 import HomeClientWrapper from "@/components/education/HomeClientWrapper";
 import { apiService, feedbackApi, College } from "@/services/api";
+import { extractCarouselSlides } from "@/services/carousel.api";
 import type { Metadata } from "next";
 
 const HOME_TITLE = "Find Colleges, Scholarships & Courses in Nepal | Studsphere";
@@ -79,8 +80,8 @@ export default async function Home() {
       .then((res) => res.data.exams)
       .catch(() => []),
     apiService
-      .getCarousels("landing")
-      .then((res) => res.data.carousels)
+      .getCarousels("landing", { active: true })
+      .then(extractCarouselSlides)
       .catch(() => []),
     apiService
       .getActiveAds("landing")

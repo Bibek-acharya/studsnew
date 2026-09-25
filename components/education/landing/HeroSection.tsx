@@ -1,76 +1,97 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Link as LinkIcon } from "lucide-react";
 import FeedbackWidget from "@/components/FeedbackWidget";
+import { getImageUrl } from "@/services/api";
+import type { CarouselSlide } from "@/services/api";
+
+type HeroSlide = Partial<CarouselSlide> & {
+  image?: string;
+  text?: string;
+  url?: string;
+};
+
+const normalizeSlide = (slide: HeroSlide): HeroSlide => {
+  const image = slide.image || slide.image_url || "";
+  return {
+    ...slide,
+    image: image ? getImageUrl(image) : "",
+    title: slide.title || slide.text,
+    link_url: slide.link_url || slide.url,
+  };
+};
+
+function readCarouselPayload(payload: unknown): CarouselSlide[] {
+  const data = (payload as { data?: unknown } | null)?.data;
+  if (Array.isArray(data)) return data as CarouselSlide[];
+  if (data && Array.isArray((data as { carousels?: unknown }).carousels)) {
+    return (data as { carousels: CarouselSlide[] }).carousels;
+  }
+  return [];
+}
 
 interface HeroSectionProps {
   onNavigate: (
     view: string,
     data?: { search?: string; [key: string]: unknown },
   ) => void;
-  slides?: {
-    image: string;
-    title?: string;
-    subtitle?: string;
-    link_url?: string;
-    button_text?: string;
-  }[];
+  slides?: HeroSlide[];
 }
 
 const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const fetchedRef = useRef(false);
-  const [fetchedSlides, setFetchedSlides] = useState(slides);
+  const [fetchedSlides, setFetchedSlides] = useState<HeroSlide[]>([]);
+  const displaySlides = useMemo(
+    () =>
+      (slides.length > 0 ? slides : fetchedSlides)
+        .filter((slide) => slide.active === true)
+        .map(normalizeSlide),
+    [fetchedSlides, slides],
+  );
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
   useEffect(() => {
-    if (slides.length > 0) {
-      setFetchedSlides(slides);
-      return;
-    }
+    if (slides.length > 0) return;
     if (fetchedRef.current) return;
     fetchedRef.current = true;
     const fetchCarousel = async () => {
       try {
         const res = await fetch(
-          `${API_BASE}/api/v1/system/carousels?page=landing`,
+          `${API_BASE}/api/v1/system/carousels?page=landing&active=true`,
         );
         const json = await res.json();
-        if (json.success && json.data && json.data.length > 0) {
-          setFetchedSlides(
-            json.data.map(
-              (s: {
-                image_url: string;
-                link_url: string;
-                title?: string;
-                subtitle?: string;
-              }) => ({
-                image: s.image_url.startsWith("/uploads")
-                  ? `${API_BASE}${s.image_url}`
-                  : s.image_url,
-                title: s.title,
-                subtitle: s.subtitle,
-                link_url: s.link_url,
-              }),
-            ),
-          );
+        const remoteSlides = readCarouselPayload(json).filter(
+          (slide) => slide.active === true,
+        );
+        if (remoteSlides.length > 0) {
+          setFetchedSlides(remoteSlides.map(normalizeSlide));
         }
       } catch {
-        // fallback to defaults
+        // Keep the static hero copy when the carousel endpoint is unavailable.
       }
     };
-    fetchCarousel();
+    void fetchCarousel();
+  }, [API_BASE, slides]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const updatePreference = () => setPrefersReducedMotion(mediaQuery.matches);
+    updatePreference();
+    mediaQuery.addEventListener("change", updatePreference);
+    return () => mediaQuery.removeEventListener("change", updatePreference);
   }, []);
 
   const heroSlides =
-    fetchedSlides.length > 0
-      ? fetchedSlides.map((s) => ({
-          image: s.image,
-          text: s.title || s.subtitle || "studsphere.com",
-          url: s.link_url || "https://studsphere.com",
+    displaySlides.length > 0
+      ? displaySlides.map((slide) => ({
+          image: slide.image ?? "",
+          text: slide.title || slide.subtitle || "studsphere.com",
+          url: slide.link_url || "https://studsphere.com",
         }))
       : [];
 
@@ -78,14 +99,15 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
   const safeIndex = slideCount > 0 ? currentSlide % slideCount : 0;
 
   useEffect(() => {
-    if (slideCount === 0) return;
+    if (slideCount < 2 || prefersReducedMotion) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slideCount);
     }, 5000);
     return () => clearInterval(interval);
-  }, [slideCount]);
+  }, [prefersReducedMotion, slideCount]);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
     const frame = requestAnimationFrame(() => {
       setFade(false);
@@ -95,7 +117,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
       cancelAnimationFrame(frame);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [currentSlide]);
+  }, [currentSlide, prefersReducedMotion]);
 
   return (
     <div className="w-full pt-2 pb-6 md:pb-4 flex justify-center px-4 sm:px-6 md:px-8">
@@ -107,14 +129,18 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
             className="absolute inset-0 z-0 overflow-hidden"
           >
             <div
-              className="flex h-full w-full transition-transform duration-700 ease-out"
-              style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+              className="flex h-full w-full transition-transform duration-700 ease-out motion-reduce:transition-none"
+              style={{ transform: `translateX(-${safeIndex * 100}%)` }}
             >
               {heroSlides.map((slide, index) => (
                 <div
                   key={index}
                   className="h-full w-full shrink-0 bg-cover bg-center"
-                  style={{ backgroundImage: `url('${slide.image}')` }}
+                  style={{
+                    backgroundImage: slide.image
+                      ? `url('${slide.image}')`
+                      : undefined,
+                  }}
                 ></div>
               ))}
             </div>
@@ -191,12 +217,13 @@ const HeroSection: React.FC<HeroSectionProps> = ({ slides = [] }) => {
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`nav-dot transition-all duration-300 focus:outline-none ${
-                      currentSlide === index
+                    className={`nav-dot transition-all duration-300 focus:outline-none motion-reduce:transition-none ${
+                      safeIndex === index
                         ? "w-5 md:w-8 h-1.5 md:h-2.5 rounded-full bg-brand-blue"
                         : "w-1.5 md:w-2.5 h-1.5 md:h-2.5 rounded-full bg-white/50 hover:bg-white/80"
                     }`}
                     aria-label={`Go to slide ${index + 1}`}
+                    aria-current={safeIndex === index ? "true" : undefined}
                   ></button>
                 ))}
               </div>

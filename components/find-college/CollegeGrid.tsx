@@ -25,7 +25,7 @@ import {
 import Pagination from "@/components/ui/Pagination";
 
 import TrendingCollegesAd from "./ads/TrendingCollegesAd";
-import ByTypeAd from "./ads/ByTypeAd";
+import ByTypeAd, { type CollegeTypeFilterId } from "./ads/ByTypeAd";
 import RatingAd from "./ads/RatingAd";
 import RecommendationFeedback from "./ads/RecommendationFeedback";
 import { useTrendingCollegeAds, useCollegeAdCardSettings } from "@/services/collegeAdApi";
@@ -198,6 +198,13 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
   const [inquiryMessageSingle, setInquiryMessageSingle] = useState("");
   const [isInquiryBulkSent, setIsInquiryBulkSent] = useState(false);
   const [isInquirySingleSent, setIsInquirySingleSent] = useState(false);
+
+  const handleTypeSelect = (type: CollegeTypeFilterId) => {
+    setFilters((prev) => ({
+      ...prev,
+      type: [type],
+    }));
+  };
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -767,7 +774,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
                 return (
                   <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
                     {slot % 4 === 0 && <TrendingCollegesAd />}
-                    {slot % 4 === 1 && <ByTypeAd />}
+                    {slot % 4 === 1 && <ByTypeAd onSelectType={handleTypeSelect} />}
                     {slot % 4 === 2 && <RatingAd />}
                   </div>
                 );

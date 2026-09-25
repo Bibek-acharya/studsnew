@@ -145,21 +145,28 @@ export interface EducationExamsResponse {
 
 export interface CarouselSlide {
   id: number;
+  page?: string;
   title: string;
-  subtitle: string;
-  description: string;
+  subtitle?: string;
+  description?: string;
   image_url: string;
-  link_url: string;
-  button_text: string;
+  link_url?: string;
+  button_text?: string;
   order: number;
   active: boolean;
+  created_at?: string;
 }
 
+export type CarouselDataEnvelope =
+  | CarouselSlide[]
+  | {
+      carousels?: CarouselSlide[];
+    };
+
 export interface CarouselsResponse {
-  data: {
-    carousels: CarouselSlide[];
-  };
-  message: string;
+  data: CarouselDataEnvelope;
+  message?: string;
+  success?: boolean;
 }
 
 export interface Ad {

@@ -144,6 +144,7 @@ const SuperadminJobDirectorySection = lazy(() => import("./SuperadminJobDirector
 const SuperadminCreateJobSection = lazy(() => import("./SuperadminCreateJobSection"));
 const SuperadminJobApplicantsSection = lazy(() => import("./SuperadminJobApplicantsSection"));
 const StudyResourcesSection = lazy(() => import("./StudyResourcesSection"));
+const MockTestsSection = lazy(() => import("./MockTestsSection"));
 const SuperadminMediaPressSection = lazy(
   () => import("./SuperadminMediaPressSection"),
 );
@@ -229,7 +230,8 @@ type SectionType =
   | `superadmin-job-applicants-${number}`
   | "superadmin-media-press"
   | "superadmin-downloads"
-  | "study-resources";
+  | "study-resources"
+  | "mock-tests";
 
 interface NavChild {
   section: SectionType;
@@ -414,7 +416,15 @@ const navItems: NavItemData[] = [
     label: "FAQ Management",
     section: "manage-faq",
   },
-  { icon: <BookOpen size={20} />, label: "Study Resources", section: "study-resources" },
+  {
+    icon: <BookOpen size={20} />,
+    label: "Study Resources",
+    section: "study-resources",
+    children: [
+      { section: "study-resources", label: "Documents & Videos" },
+      { section: "mock-tests", label: "Mock Tests" },
+    ],
+  },
   {
     icon: <MessageSquare size={20} />,
     label: "Message Management",
@@ -671,6 +681,8 @@ function DashboardShellInner() {
         return <FAQManageSection />;
       case "study-resources":
         return <StudyResourcesSection />;
+      case "mock-tests":
+        return <MockTestsSection />;
       case "create-universities":
         return <AddUniversitySection setActiveSection={navigateTo} />;
       case "draft-universities":

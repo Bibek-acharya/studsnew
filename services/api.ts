@@ -266,12 +266,13 @@ import { notificationApi } from "./notification.api";
 import { bookmarkApi } from "./bookmark.api";
 import { contactApi } from "./contact.api";
 import { dashboardApi } from "./dashboard.api";
-import { carouselApi } from "./carousel.api";
+import { carouselApi, type GetCarouselsOptions } from "./carousel.api";
 import { scholarshipEducationApi } from "./scholarship-education.api";
 import { reviewApi } from "./review.api";
 import { faqApi } from "./faq.api";
 import { educationApi } from "./education.api";
 import { studyResourcesApi } from "./studyResourcesApi";
+import type { StudyResourceFilters } from "./studyResourcesApi";
 
 export const apiService = {
   // Auth
@@ -455,8 +456,11 @@ export const apiService = {
   updateContactInquiryStatus: contactApi.updateContactInquiryStatus.bind(contactApi),
 
   // Carousel/Ads
-  getActiveAds: carouselApi.getActiveAds.bind(carouselApi),
-  getCarousels: carouselApi.getCarousels.bind(carouselApi),
+  // Lazy wrappers avoid evaluating carouselApi while this module and
+  // carousel.api.ts are still resolving their shared cycle.
+  getActiveAds: (page?: string) => carouselApi.getActiveAds(page),
+  getCarousels: (page?: string, options?: GetCarouselsOptions) =>
+    carouselApi.getCarousels(page, options),
 
   // Education Scholarships
   getEducationScholarships: scholarshipEducationApi.getEducationScholarships.bind(scholarshipEducationApi),
@@ -513,12 +517,22 @@ export const apiService = {
   deleteFAQItem: faqApi.deleteFAQItem.bind(faqApi),
 
   // Study Resources
-  listStudyResources: studyResourcesApi.listStudyResources.bind(studyResourcesApi),
-  getStudyResource: studyResourcesApi.getStudyResource.bind(studyResourcesApi),
-  createStudyResource: studyResourcesApi.createStudyResource.bind(studyResourcesApi),
-  adminListStudyResources: studyResourcesApi.adminListStudyResources.bind(studyResourcesApi),
-  updateStudyResource: studyResourcesApi.updateStudyResource.bind(studyResourcesApi),
-  deleteStudyResource: studyResourcesApi.deleteStudyResource.bind(studyResourcesApi),
+  // Lazy wrappers for the same reason as carousel above: a component that
+  // imports studyResourcesApi (or stripHtml from this module) before this one
+  // starts evaluating would otherwise hit its `const` in the temporal dead
+  // zone while these methods bind.
+  listStudyResources: (params?: StudyResourceFilters) =>
+    studyResourcesApi.listStudyResources(params),
+  getStudyResource: (id: number | string) =>
+    studyResourcesApi.getStudyResource(id),
+  createStudyResource: (form: FormData) =>
+    studyResourcesApi.createStudyResource(form),
+  adminListStudyResources: () => studyResourcesApi.adminListStudyResources(),
+  updateStudyResource: (
+    id: number,
+    data: Parameters<typeof studyResourcesApi.updateStudyResource>[1],
+  ) => studyResourcesApi.updateStudyResource(id, data),
+  deleteStudyResource: (id: number) => studyResourcesApi.deleteStudyResource(id),
 };
 
 // ─── Sphere AI (kept here as it uses API_BASE_URL) ──────────────────────────

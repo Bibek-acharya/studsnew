@@ -1,70 +1,105 @@
 "use client";
 
-import React, { useState } from "react";
-import { X, Upload } from "lucide-react";
-
-interface CarouselSlide {
-  id?: number;
-  title: string;
-  image_url: string;
-  link_url: string;
-  active: boolean;
-}
+import React, { useEffect, useRef, useState } from "react";
+import { Upload, X } from "lucide-react";
+import { getImageUrl } from "@/services/api";
+import type { CarouselSlide } from "@/services/api";
 
 interface HeroBannerModalProps {
   slide: CarouselSlide | null;
   onClose: (saved?: boolean) => void;
+  page?: "landing" | "study-resources";
+  itemLabel?: string;
 }
 
-export default function HeroBannerModal({ slide, onClose }: HeroBannerModalProps) {
-  const isEditing = !!slide;
+function getAuthHeaders(): Record<string, string> {
+  const token =
+    typeof window !== "undefined"
+      ? localStorage.getItem("superadmin_token")
+      : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+export default function HeroBannerModal({
+  slide,
+  onClose,
+  page = "landing",
+  itemLabel = "Hero Banner",
+}: HeroBannerModalProps) {
+  const isEditing = Boolean(slide);
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-  const token = typeof window !== "undefined" ? localStorage.getItem("superadmin_token") : null;
-  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
+  const modalTitleId = "carousel-slide-modal-title";
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const resolveUrl = (url: string) =>
-    url.startsWith("/uploads") ? `${API_BASE}${url}` : url;
-
-  const [imagePreview, setImagePreview] = useState(slide?.image_url ? resolveUrl(slide.image_url) : "");
-  const [imageUrl, setImageUrl] = useState(slide?.image_url || "");
+  const [imagePreview, setImagePreview] = useState(
+    slide?.image_url ? getImageUrl(slide.image_url) : "",
+  );
+  const [imageUrl, setImageUrl] = useState(slide?.image_url ?? "");
   const [uploading, setUploading] = useState(false);
-  const [title, setTitle] = useState(slide?.title || "");
-  const [linkUrl, setLinkUrl] = useState(slide?.link_url || "");
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [title, setTitle] = useState(slide?.title ?? "");
+  const [subtitle, setSubtitle] = useState(slide?.subtitle ?? "");
+  const [description, setDescription] = useState(slide?.description ?? "");
+  const [linkUrl, setLinkUrl] = useState(slide?.link_url ?? "");
+  const [buttonText, setButtonText] = useState(slide?.button_text ?? "");
   const [active, setActive] = useState(slide?.active ?? true);
   const [saving, setSaving] = useState(false);
+  const objectUrlRef = useRef<string | null>(null);
 
-  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    };
+  }, []);
+
+  const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (!file) return;
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
     setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
+    setImagePreview(objectUrl);
+    setUploadError(null);
   };
 
   const uploadImage = async (): Promise<string> => {
-    if (imageFile) {
-      setUploading(true);
-      try {
-        const formData = new FormData();
-        formData.append("file", imageFile);
-        const res = await fetch(`${API_BASE}/api/v1/scholarships/upload?folder=banners`, {
+    if (!imageFile) return imageUrl;
+
+    setUploading(true);
+    setUploadError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      const res = await fetch(
+        `${API_BASE}/api/v1/scholarships/upload?folder=banners`,
+        {
           method: "POST",
           body: formData,
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const json = await res.json();
-        if (json.success) {
-          const url = json.data?.url || "";
-          setImageUrl(url);
-          return url;
-        }
-      } catch {}
+          headers: getAuthHeaders(),
+        },
+      );
+      const json = await res.json();
+      const uploadedUrl = json?.data?.url;
+      if (!res.ok || !json.success || !uploadedUrl) {
+        throw new Error(json?.error || "Image upload failed");
+      }
+      setImageUrl(uploadedUrl);
+      return uploadedUrl;
+    } catch (requestError) {
+      const message =
+        requestError instanceof Error
+          ? requestError.message
+          : "Image upload failed";
+      setUploadError(message);
+      throw new Error(message);
+    } finally {
       setUploading(false);
     }
-    return imageUrl;
   };
 
-  const handleSave = async () => {
+  const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!title.trim()) {
       alert("Please enter a title");
       return;
@@ -80,117 +115,239 @@ export default function HeroBannerModal({ slide, onClose }: HeroBannerModalProps
       }
 
       const payload = {
+        page,
         title: title.trim(),
+        subtitle: subtitle.trim(),
+        description: description.trim(),
         image_url: finalImageUrl,
         link_url: linkUrl.trim(),
-        page: "landing",
+        button_text: buttonText.trim(),
         active,
       };
-
       const url = isEditing
-        ? `${API_BASE}/api/v1/admin/carousels/${slide!.id}`
+        ? `${API_BASE}/api/v1/admin/carousels/${slide?.id}`
         : `${API_BASE}/api/v1/admin/carousels`;
-
       const res = await fetch(url, {
         method: isEditing ? "PUT" : "POST",
-        headers: { "Content-Type": "application/json", ...headers },
+        headers: {
+          "Content-Type": "application/json",
+          ...getAuthHeaders(),
+        },
         body: JSON.stringify(payload),
       });
       const json = await res.json();
-      if (json.success) {
-        onClose(true);
-      } else {
-        alert(json.error || "Failed to save hero banner");
+      if (!res.ok || !json.success) {
+        throw new Error(json?.error || `Failed to save ${itemLabel.toLowerCase()}`);
       }
-    } catch {
-      alert("Network error");
+      onClose(true);
+    } catch (requestError) {
+      alert(
+        requestError instanceof Error
+          ? requestError.message
+          : "Network error",
+      );
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900">
-            {isEditing ? "Edit Hero Banner" : "Create Hero Banner"}
-          </h3>
-          <button onClick={() => onClose()} className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-            <X size={20} />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-5">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget && !saving) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={modalTitleId}
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter banner title"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Banner Image</label>
-            <label className="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:bg-gray-50 cursor-pointer block">
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="max-h-40 mx-auto rounded object-contain" />
-              ) : (
-                <div className="py-6">
-                  <Upload className="mx-auto text-gray-400 mb-2" size={32} />
-                  <p className="text-sm text-gray-500">Click to upload banner</p>
-                </div>
-              )}
-              <input type="file" accept="image/*" onChange={handleImageSelect} className="hidden" />
-            </label>
-            <p className="text-xs text-gray-400 mt-1">
-              Recommended size: 1400 x 540 px
+            <h3 id={modalTitleId} className="text-lg font-bold text-gray-900">
+              {isEditing ? "Edit" : "Create"} {itemLabel}
+            </h3>
+            <p className="mt-0.5 font-mono text-[10px] font-bold text-gray-400">
+              page={page}
             </p>
           </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Link URL</label>
-            <input
-              type="url"
-              value={linkUrl}
-              onChange={(e) => setLinkUrl(e.target.value)}
-              placeholder="https://example.com"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:border-blue-600 outline-none"
-            />
-            <p className="text-xs text-gray-400 mt-1">
-              URL users will go to when clicking the banner.
-            </p>
-          </div>
-
-          <label className="flex items-center gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={active}
-              onChange={(e) => setActive(e.target.checked)}
-              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <span className="text-sm text-gray-700">Active</span>
-          </label>
-        </div>
-
-        <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3 bg-gray-50 rounded-b-xl">
           <button
+            type="button"
             onClick={() => onClose()}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            aria-label="Close modal"
+            className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
           >
-            {saving ? "Saving..." : isEditing ? "Update" : "Create"}
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
+
+        <form onSubmit={handleSave}>
+          <div className="space-y-5 p-6">
+            <div>
+              <label
+                htmlFor="carousel-slide-title"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
+                Title
+              </label>
+              <input
+                id="carousel-slide-title"
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                required
+                placeholder="Enter slide title"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="carousel-slide-subtitle"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
+                Subtitle
+              </label>
+              <input
+                id="carousel-slide-subtitle"
+                type="text"
+                value={subtitle}
+                onChange={(event) => setSubtitle(event.target.value)}
+                placeholder="One short supporting line"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="carousel-slide-description"
+                className="mb-2 block text-sm font-semibold text-gray-700"
+              >
+                Description
+              </label>
+              <textarea
+                id="carousel-slide-description"
+                rows={3}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder="Explain what students get from this slide"
+                className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+              />
+            </div>
+
+            <div>
+              <span className="mb-2 block text-sm font-semibold text-gray-700">
+                Banner image
+              </span>
+              <label className="block cursor-pointer rounded-xl border-2 border-dashed border-gray-300 p-4 text-center hover:bg-gray-50">
+                {imagePreview ? (
+                  // A blob preview cannot go through the Next.js image loader.
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={imagePreview}
+                    alt="Banner preview"
+                    className="mx-auto max-h-40 rounded object-contain"
+                  />
+                ) : (
+                  <div className="py-6">
+                    <Upload className="mx-auto mb-2 text-gray-400" size={32} aria-hidden="true" />
+                    <p className="text-sm text-gray-500">Click to upload banner</p>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageSelect}
+                  disabled={saving}
+                  className="hidden"
+                />
+              </label>
+              <p className="mt-1 text-xs text-gray-400">
+                Recommended size: 1400 x 540 px
+              </p>
+              {uploadError && (
+                <p className="mt-1 text-xs font-medium text-red-600">
+                  {uploadError}
+                </p>
+              )}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="carousel-slide-link"
+                  className="mb-2 block text-sm font-semibold text-gray-700"
+                >
+                  Link URL
+                </label>
+                <input
+                  id="carousel-slide-link"
+                  type="url"
+                  value={linkUrl}
+                  onChange={(event) => setLinkUrl(event.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="carousel-slide-cta"
+                  className="mb-2 block text-sm font-semibold text-gray-700"
+                >
+                  Button text
+                </label>
+                <input
+                  id="carousel-slide-cta"
+                  type="text"
+                  value={buttonText}
+                  onChange={(event) => setButtonText(event.target.value)}
+                  placeholder="Explore now"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                />
+              </div>
+            </div>
+            <p className="-mt-3 text-xs text-gray-400">
+              The CTA only appears when a link URL is set.
+            </p>
+
+            <label className="flex cursor-pointer items-center gap-3">
+              <input
+                type="checkbox"
+                checked={active}
+                onChange={(event) => setActive(event.target.checked)}
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+              />
+              <span className="text-sm text-gray-700">Active</span>
+            </label>
+          </div>
+
+          <div className="flex justify-end gap-3 rounded-b-xl border-t border-gray-200 bg-gray-50 px-6 py-4">
+            <button
+              type="button"
+              onClick={() => onClose()}
+              disabled={saving}
+              className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving || uploading}
+              className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {uploading
+                ? "Uploading..."
+                : saving
+                  ? "Saving..."
+                  : isEditing
+                    ? "Update"
+                    : "Create"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

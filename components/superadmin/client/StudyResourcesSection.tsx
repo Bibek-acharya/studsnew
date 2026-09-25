@@ -9,6 +9,7 @@ import {
   Edit,
   FileText,
   Loader2,
+  PlayCircle,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -16,27 +17,26 @@ import {
   studyResourcesApi,
   StudyResource,
 } from "@/services/studyResourcesApi";
+import {
+  buildStudyResourceUploadFormData,
+  getStudyResourceDownloadUrl,
+  getStudyResourceStreamUrl,
+  getStudyResourceUploadRule,
+  isVideoStudyResourceType,
+  requestStudyResourcePlaybackToken,
+  STUDY_RESOURCE_API_TYPES,
+} from "@/services/studyResourcesApi";
+import { STUDY_RESOURCE_TYPE_LABELS } from "@/components/studyResources/studyResourceCategories";
 import CourseCombobox from "@/components/studyResources/CourseCombobox";
+import RichTextEditor from "@/components/shared/RichTextEditor";
+import {
+  formatDuration,
+  parseDurationToSeconds,
+} from "@/components/studyResources/videoFormat";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const TYPE_OPTIONS = [...STUDY_RESOURCE_API_TYPES];
 
-const TYPE_OPTIONS = [
-  "past-questions",
-  "study-notes",
-  "model-questions",
-  "syllabus",
-];
-
-const ACCEPTED =
-  ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.csv,.zip,.rar,.7z,image/*";
-const MAX_SIZE = 20 * 1024 * 1024; // 20 MB
-
-const RESOURCE_TYPE_LABELS: Record<string, string> = {
-  "past-questions": "Past Questions",
-  "study-notes": "Study Notes",
-  "model-questions": "Model Questions",
-  syllabus: "Syllabus",
-};
+const RESOURCE_TYPE_LABELS = STUDY_RESOURCE_TYPE_LABELS;
 
 const inputClass =
   "w-full px-3 py-2 border border-gray-300 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors text-sm";
@@ -46,6 +46,7 @@ const TYPE_STYLES: Record<string, string> = {
   "study-notes": "bg-green-100 text-green-700",
   "model-questions": "bg-purple-100 text-purple-700",
   syllabus: "bg-orange-100 text-orange-700",
+  "video-lectures": "bg-rose-100 text-rose-700",
 };
 
 function formatBytes(bytes: number | string): string {
@@ -71,7 +72,30 @@ interface EditForm {
   course: string;
   year: string;
   description: string;
+  /** Video lectures only: authored as "m:ss" or plain seconds. */
+  duration: string;
+  is_published: boolean;
 }
+
+interface CreateForm {
+  title: string;
+  resource_type: string;
+  course: string;
+  year: string;
+  description: string;
+  duration: string;
+  is_published: boolean;
+}
+
+const EMPTY_CREATE_FORM: CreateForm = {
+  title: "",
+  resource_type: "past-questions",
+  course: "",
+  year: "",
+  description: "",
+  duration: "",
+  is_published: true,
+};
 
 export default function StudyResourcesSection() {
   const [resources, setResources] = useState<StudyResource[]>([]);
@@ -85,14 +109,13 @@ export default function StudyResourcesSection() {
   // Add form
   const [showForm, setShowForm] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [title, setTitle] = useState("");
-  const [resourceType, setResourceType] = useState("past-questions");
-  const [course, setCourse] = useState("");
-  const [year, setYear] = useState("");
-  const [description, setDescription] = useState("");
+  const [createForm, setCreateForm] = useState<CreateForm>(EMPTY_CREATE_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const createIsVideo = isVideoStudyResourceType(createForm.resource_type);
+  const createRule = getStudyResourceUploadRule(createForm.resource_type);
 
   // Edit modal
   const [editTarget, setEditTarget] = useState<StudyResource | null>(null);
@@ -106,6 +129,7 @@ export default function StudyResourcesSection() {
     id: number | null;
     title: string;
   }>({ open: false, id: null, title: "" });
+  const [openingStreamId, setOpeningStreamId] = useState<number | null>(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const perPage = 10;
@@ -138,13 +162,32 @@ export default function StudyResourcesSection() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
-    if (selected && selected.size > MAX_SIZE) {
-      setFormError("File exceeds the 20 MB limit.");
+    if (selected && selected.size > createRule.maxBytes) {
+      setFormError(`File exceeds the ${createRule.maxLabel} limit.`);
       e.target.value = "";
       return;
     }
     setFormError(null);
     setFile(selected);
+  };
+
+  const handleCreateField = <K extends keyof CreateForm>(
+    field: K,
+    value: CreateForm[K],
+  ) => {
+    setCreateForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  /** Switching type resets the video-only fields and the file size limit. */
+  const handleCreateType = (resourceType: string) => {
+    setCreateForm((prev) => ({
+      ...prev,
+      resource_type: resourceType,
+      duration: isVideoStudyResourceType(resourceType) ? prev.duration : "",
+      is_published: isVideoStudyResourceType(resourceType)
+        ? prev.is_published
+        : true,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -153,29 +196,34 @@ export default function StudyResourcesSection() {
       setFormError("Please select a file to upload.");
       return;
     }
-    if (!title.trim()) {
+    if (!createForm.title.trim()) {
       setFormError("Title is required.");
+      return;
+    }
+    const durationSeconds = createIsVideo
+      ? parseDurationToSeconds(createForm.duration)
+      : null;
+    if (createIsVideo && createForm.duration.trim() && !Number.isFinite(durationSeconds)) {
+      setFormError("Duration must be seconds or m:ss (e.g. 90 or 1:30).");
       return;
     }
     setSubmitting(true);
     setFormError(null);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("title", title.trim());
-      formData.append("type", resourceType);
-      if (course.trim()) formData.append("course", course.trim());
-      if (year.trim()) formData.append("year", year.trim());
-      if (description.trim())
-        formData.append("description", description.trim());
+      const formData = buildStudyResourceUploadFormData({
+        file,
+        title: createForm.title,
+        type: createForm.resource_type,
+        course: createForm.course,
+        year: createForm.year,
+        description: createForm.description,
+        durationSeconds,
+        isPublished: createIsVideo ? createForm.is_published : undefined,
+      });
       await studyResourcesApi.createStudyResource(formData);
       showActionMsg("success", "Resource uploaded successfully");
       setFile(null);
-      setTitle("");
-      setResourceType("past-questions");
-      setCourse("");
-      setYear("");
-      setDescription("");
+      setCreateForm(EMPTY_CREATE_FORM);
       if (fileInputRef.current) fileInputRef.current.value = "";
       setShowForm(false);
       fetchResources();
@@ -202,17 +250,29 @@ export default function StudyResourcesSection() {
       course: resource.course || "",
       year: resource.year || "",
       description: resource.description || "",
+      duration:
+        resource.duration_seconds && resource.duration_seconds > 0
+          ? String(Math.round(resource.duration_seconds))
+          : "",
+      is_published: resource.is_published !== false,
     });
   };
 
-  const handleEditField = (field: keyof EditForm, value: string) => {
+  const editIsVideo = isVideoStudyResourceType(
+    editForm?.resource_type ?? editTarget?.resource_type,
+  );
+  const editRule = getStudyResourceUploadRule(
+    editForm?.resource_type ?? editTarget?.resource_type,
+  );
+
+  const handleEditField = (field: keyof EditForm, value: string | boolean) => {
     setEditForm((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
   const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = e.target.files?.[0] || null;
-    if (selected && selected.size > MAX_SIZE) {
-      showActionMsg("error", "File exceeds the 20 MB limit.");
+    if (selected && selected.size > editRule.maxBytes) {
+      showActionMsg("error", `File exceeds the ${editRule.maxLabel} limit.`);
       e.target.value = "";
       return;
     }
@@ -221,15 +281,45 @@ export default function StudyResourcesSection() {
 
   const handleEditSave = async () => {
     if (!editTarget || !editForm) return;
+
+    let durationSeconds: number | null = null;
+    if (editIsVideo && editForm.duration.trim()) {
+      durationSeconds = parseDurationToSeconds(editForm.duration);
+      if (!Number.isFinite(durationSeconds)) {
+        showActionMsg(
+          "error",
+          "Duration must be seconds or m:ss (e.g. 90 or 1:30).",
+        );
+        return;
+      }
+    }
+
+    const payload: Parameters<typeof studyResourcesApi.updateStudyResource>[1] =
+      {};
+    if (editForm.title !== editTarget.title) payload.title = editForm.title;
+    if (editForm.resource_type !== editTarget.resource_type) {
+      payload.resource_type = editForm.resource_type;
+    }
+    if (editForm.course !== (editTarget.course || "")) {
+      payload.course = editForm.course;
+    }
+    if (editForm.year !== (editTarget.year || "")) {
+      payload.year = editForm.year;
+    }
+    if (editForm.description !== (editTarget.description || "")) {
+      payload.description = editForm.description;
+    }
+    if (editIsVideo) {
+      const current = editTarget.duration_seconds ?? null;
+      if (durationSeconds !== current) payload.duration_seconds = durationSeconds;
+      const wasPublished = editTarget.is_published !== false;
+      if (editForm.is_published !== wasPublished) {
+        payload.is_published = editForm.is_published;
+      }
+    }
+
     setSavingEdit(true);
     try {
-      // Only send fields that actually changed.
-      const payload: Partial<EditForm> = {};
-      (Object.keys(editForm) as Array<keyof EditForm>).forEach((key) => {
-        if (editForm[key] !== (editTarget as unknown as EditForm)[key]) {
-          payload[key] = editForm[key];
-        }
-      });
       if (Object.keys(payload).length > 0) {
         await studyResourcesApi.updateStudyResource(editTarget.id, payload);
       }
@@ -275,8 +365,43 @@ export default function StudyResourcesSection() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  /**
+   * Video streams are authorization-gated, so an admin never gets a raw
+   * unauthenticated link: ask for a playback token with the superadmin
+   * session, and fall back to the public login-gated player if that fails.
+   */
+  const openLectureStream = async (resource: StudyResource) => {
+    setOpeningStreamId(resource.id);
+    // Opened synchronously so the new tab is not blocked as a popup.
+    const tab = window.open("", "_blank");
     try {
+      const authorization = await requestStudyResourcePlaybackToken(
+        resource.id,
+        { session: "superadmin" },
+      );
+      if (authorization.status === "authorized") {
+        const url = getStudyResourceStreamUrl(
+          resource.id,
+          authorization.token.token,
+        );
+        if (tab) tab.location.href = url;
+        else window.open(url, "_blank", "noopener");
+        return;
+      }
+      if (tab) tab.location.href = "/study-resources/video-lectures";
+      showActionMsg(
+        "error",
+        "This lecture could not be opened with the superadmin session. The video page plays it once you are logged in.",
+      );
+    } catch {
+      if (tab) tab.location.href = "/study-resources/video-lectures";
+      showActionMsg("error", "Failed to prepare the lecture for playback");
+    } finally {
+      setOpeningStreamId(null);
+    }
+  };
+
+  const handleDelete = async (id: number) => {    try {
       await studyResourcesApi.deleteStudyResource(id);
       showActionMsg("success", "Resource deleted successfully");
       fetchResources();
@@ -306,8 +431,8 @@ export default function StudyResourcesSection() {
           <div>
             <h2 className="text-xl font-bold text-gray-800">Study Resources</h2>
             <p className="mt-1 text-sm text-gray-500">
-              Manage study materials — past questions, notes, model questions &amp;
-              syllabus.
+              Manage study materials — past questions, notes, model questions,
+              syllabus &amp; video lectures.
             </p>
           </div>
           <button
@@ -346,18 +471,29 @@ export default function StudyResourcesSection() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">
-                  File (pdf, doc, ppt, xls, txt, csv, zip, images — max 20 MB)
+                  File ({createRule.hint} — max {createRule.maxLabel})
                 </label>
                 <input
                   ref={fileInputRef}
                   type="file"
-                  accept={ACCEPTED}
+                  accept={createRule.accept}
                   onChange={handleFileChange}
                   className="w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100"
                 />
                 {file && (
                   <p className="mt-1 text-xs text-gray-500">
                     {file.name} · {formatBytes(file.size)}
+                  </p>
+                )}
+                {file && file.size > createRule.maxBytes && (
+                  <p className="mt-1 text-xs font-medium text-red-600">
+                    This file is over the {createRule.maxLabel} limit for{" "}
+                    {RESOURCE_TYPE_LABELS[createForm.resource_type]}.
+                  </p>
+                )}
+                {createRule.note && (
+                  <p className="mt-1.5 text-[11px] leading-4 text-gray-400">
+                    {createRule.note}
                   </p>
                 )}
               </div>
@@ -368,8 +504,8 @@ export default function StudyResourcesSection() {
                   </label>
                   <input
                     type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={createForm.title}
+                    onChange={(e) => handleCreateField("title", e.target.value)}
                     className={inputClass}
                     placeholder="e.g. BCA 1st Semester — Mathematics"
                   />
@@ -379,8 +515,8 @@ export default function StudyResourcesSection() {
                     Type *
                   </label>
                   <select
-                    value={resourceType}
-                    onChange={(e) => setResourceType(e.target.value)}
+                    value={createForm.resource_type}
+                    onChange={(e) => handleCreateType(e.target.value)}
                     className={inputClass}
                   >
                     {TYPE_OPTIONS.map((type) => (
@@ -395,8 +531,8 @@ export default function StudyResourcesSection() {
                     Course
                   </label>
                   <CourseCombobox
-                    value={course}
-                    onChange={setCourse}
+                    value={createForm.course}
+                    onChange={(value) => handleCreateField("course", value)}
                     inputClassName={inputClass}
                     placeholder="Select or type course (e.g. BCA)"
                   />
@@ -407,23 +543,53 @@ export default function StudyResourcesSection() {
                   </label>
                   <input
                     type="text"
-                    value={year}
-                    onChange={(e) => setYear(e.target.value)}
+                    value={createForm.year}
+                    onChange={(e) => handleCreateField("year", e.target.value)}
                     className={inputClass}
                     placeholder="e.g. 2081"
                   />
                 </div>
+                {createIsVideo && (
+                  <>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-gray-600">
+                        Duration (seconds or m:ss)
+                      </label>
+                      <input
+                        type="text"
+                        value={createForm.duration}
+                        onChange={(e) =>
+                          handleCreateField("duration", e.target.value)
+                        }
+                        className={inputClass}
+                        placeholder="e.g. 1:30 or 90"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={createForm.is_published}
+                          onChange={(e) =>
+                            handleCreateField("is_published", e.target.checked)
+                          }
+                          className="h-4 w-4 rounded border-gray-300 accent-[#0000FF]"
+                        />
+                        Publish immediately (visible in the public collection)
+                      </label>
+                    </div>
+                  </>
+                )}
               </div>
               <div>
                 <label className="mb-1 block text-xs font-medium text-gray-600">
                   Description
                 </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
-                  className={inputClass}
-                  placeholder="Short description of the material"
+                <RichTextEditor
+                  value={createForm.description}
+                  onChange={(value) => handleCreateField("description", value)}
+                  placeholder="What will students learn from this material?"
+                  minHeight={110}
                 />
               </div>
               {formError && (
@@ -466,6 +632,9 @@ export default function StudyResourcesSection() {
             <div className="flex flex-col items-center justify-center gap-3 py-20 text-gray-400">
               <BookOpen size={48} className="stroke-1" />
               <p className="text-sm font-medium">No study resources found</p>
+              <p className="text-xs">
+                Documents and video lectures both live in this one list.
+              </p>
               <button
                 onClick={() => setShowForm(true)}
                 className="text-sm font-medium text-blue-600 hover:text-blue-700"
@@ -486,6 +655,9 @@ export default function StudyResourcesSection() {
                       <th className="px-4 py-3 text-left font-semibold text-gray-600">
                         Type
                       </th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-600">
+                        Status
+                      </th>
                       <th className="px-4 py-3 text-left font-semibold text-gray-600">
                         Course
                       </th>
@@ -494,6 +666,9 @@ export default function StudyResourcesSection() {
                       </th>
                       <th className="px-4 py-3 text-center font-semibold text-gray-600">
                         Size
+                      </th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-600">
+                        Views
                       </th>
                       <th className="px-4 py-3 text-center font-semibold text-gray-600">
                         Downloads
@@ -539,6 +714,24 @@ export default function StudyResourcesSection() {
                             {RESOURCE_TYPE_LABELS[resource.resource_type] ||
                               resource.resource_type}
                           </span>
+                          {isVideoStudyResourceType(resource.resource_type) && (
+                            <span className="mt-1 block text-[11px] text-gray-400">
+                              {formatDuration(resource.duration_seconds)}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span
+                            className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              resource.is_published === false
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-emerald-100 text-emerald-700"
+                            }`}
+                          >
+                            {resource.is_published === false
+                              ? "Draft"
+                              : "Published"}
+                          </span>
                         </td>
                         <td className="px-4 py-3 text-gray-600">
                           {resource.course || (
@@ -551,8 +744,23 @@ export default function StudyResourcesSection() {
                         <td className="px-4 py-3 text-center text-gray-600">
                           {formatBytes(resource.file_size)}
                         </td>
-                        <td className="px-4 py-3 text-center font-semibold text-gray-800">
-                          {resource.downloads ?? 0}
+                        <td className="px-4 py-3 text-center text-gray-600">
+                          {isVideoStudyResourceType(resource.resource_type) ? (
+                            <span className="font-semibold text-gray-800">
+                              {resource.views ?? 0}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-center text-gray-600">
+                          {isVideoStudyResourceType(resource.resource_type) ? (
+                            <span className="text-gray-400">—</span>
+                          ) : (
+                            <span className="font-semibold text-gray-800">
+                              {resource.downloads ?? 0}
+                            </span>
+                          )}
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-500">
                           {resource.created_at
@@ -561,15 +769,34 @@ export default function StudyResourcesSection() {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex items-center justify-end gap-1">
-                            <a
-                              href={`${API_BASE_URL}/api/v1/study-resources/${resource.id}/download`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
-                              title="Download"
-                            >
-                              <DownloadIcon size={15} />
-                            </a>
+                            {isVideoStudyResourceType(
+                              resource.resource_type,
+                            ) ? (
+                              <button
+                                type="button"
+                                onClick={() => openLectureStream(resource)}
+                                disabled={openingStreamId === resource.id}
+                                title="Watch lecture"
+                                aria-label={`Watch ${resource.title}`}
+                                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50"
+                              >
+                                {openingStreamId === resource.id ? (
+                                  <Loader2 size={15} className="animate-spin" />
+                                ) : (
+                                  <PlayCircle size={15} />
+                                )}
+                              </button>
+                            ) : (
+                              <a
+                                href={getStudyResourceDownloadUrl(resource.id)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                                title="Download"
+                              >
+                                <DownloadIcon size={15} />
+                              </a>
+                            )}
                             <button
                               onClick={() => openEdit(resource)}
                               className="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
@@ -693,11 +920,12 @@ export default function StudyResourcesSection() {
                 </div>
                 <div className="sm:col-span-2">
                   <label className="mb-1 block text-xs font-medium text-gray-600">
-                    Replace file (optional)
+                    Replace file (optional — {editRule.hint}, max{" "}
+                    {editRule.maxLabel})
                   </label>
                   <input
                     type="file"
-                    accept={ACCEPTED}
+                    accept={editRule.accept}
                     onChange={handleEditFileChange}
                     className="w-full text-sm text-gray-600 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-sm file:font-medium file:text-blue-600 hover:file:bg-blue-100"
                   />
@@ -710,7 +938,46 @@ export default function StudyResourcesSection() {
                       </span>
                     )}
                   </p>
+                  {editRule.note && (
+                    <p className="mt-1.5 text-[11px] leading-4 text-gray-400">
+                      {editRule.note}
+                    </p>
+                  )}
                 </div>
+                {editIsVideo && (
+                  <>
+                    <div>
+                      <label className="mb-1 block text-xs font-medium text-gray-600">
+                        Duration (seconds or m:ss)
+                      </label>
+                      <input
+                        type="text"
+                        value={editForm.duration}
+                        onChange={(e) =>
+                          handleEditField("duration", e.target.value)
+                        }
+                        className={inputClass}
+                        placeholder="e.g. 1:30 or 90"
+                      />
+                      <p className="mt-1 text-[11px] text-gray-400">
+                        Currently {formatDuration(editTarget.duration_seconds)}
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="flex items-center gap-2 text-xs font-medium text-gray-600">
+                        <input
+                          type="checkbox"
+                          checked={editForm.is_published}
+                          onChange={(e) =>
+                            handleEditField("is_published", e.target.checked)
+                          }
+                          className="h-4 w-4 rounded border-gray-300 accent-[#0000FF]"
+                        />
+                        Published (visible in the public video collection)
+                      </label>
+                    </div>
+                  </>
+                )}
                 <div className="sm:col-span-2">
                   <label className="mb-1 block text-xs font-medium text-gray-600">
                     Year
@@ -726,13 +993,13 @@ export default function StudyResourcesSection() {
                   <label className="mb-1 block text-xs font-medium text-gray-600">
                     Description
                   </label>
-                  <textarea
+                  <RichTextEditor
                     value={editForm.description}
-                    onChange={(e) =>
-                      handleEditField("description", e.target.value)
+                    onChange={(value) =>
+                      handleEditField("description", value)
                     }
-                    rows={3}
-                    className={inputClass}
+                    placeholder="What will students learn from this material?"
+                    minHeight={110}
                   />
                 </div>
               </div>

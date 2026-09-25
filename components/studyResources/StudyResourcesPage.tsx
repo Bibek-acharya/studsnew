@@ -1,32 +1,41 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   Book,
   Calendar,
+  ChevronLeft,
+  Clock,
   Download,
+  Eye,
   FileText,
   Loader2,
+  LockKeyhole,
+  Play,
   Search,
 } from "lucide-react";
 import {
+  getStudyResourceStreamUrl,
+  isVideoStudyResourceType,
   studyResourcesApi,
   StudyResource,
 } from "@/services/studyResourcesApi";
+import { stripHtml } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import CourseCombobox from "@/components/studyResources/CourseCombobox";
+import { formatDuration } from "@/components/studyResources/videoFormat";
+import {
+  buildStudyResourceFilters,
+  getStudyResourceCategoryByApiType,
+  resolveStudyResourceType,
+  STUDY_RESOURCE_TYPE_OPTIONS,
+  type ApiStudyResourceType,
+} from "./studyResourceCategories";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-
-const RESOURCE_TYPES = [
-  { value: "", label: "All resource types" },
-  { value: "past-questions", label: "Past Questions" },
-  { value: "study-notes", label: "Study Notes" },
-  { value: "model-questions", label: "Model Questions" },
-  { value: "syllabus", label: "Syllabus" },
-];
 
 // Courses and years are no longer hardcoded: courses come from the shared
 // course list endpoint (via CourseCombobox) and years are aggregated from
@@ -45,9 +54,18 @@ const inputClass =
 
 type DownloadTarget = { resource: StudyResource } | null;
 
-export default function StudyResourcesPage() {
+interface StudyResourcesPageProps {
+  lockedType?: ApiStudyResourceType;
+}
+
+export default function StudyResourcesPage({
+  lockedType,
+}: StudyResourcesPageProps = {}) {
   const router = useRouter();
   const { user } = useAuth();
+  const lockedCategory = lockedType
+    ? getStudyResourceCategoryByApiType(lockedType)
+    : undefined;
 
   const [resources, setResources] = useState<StudyResource[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,6 +74,7 @@ export default function StudyResourcesPage() {
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
+  const effectiveType = resolveStudyResourceType(lockedType, typeFilter);
   const [courseFilter, setCourseFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
   const [yearOptions, setYearOptions] = useState<string[]>([]);
@@ -71,14 +90,16 @@ export default function StudyResourcesPage() {
       setLoading(true);
       setError(null);
       try {
-        const res = await studyResourcesApi.listStudyResources({
-          q: searchQuery || undefined,
-          type: typeFilter || undefined,
-          course: courseFilter || undefined,
-          year: yearFilter || undefined,
-          page,
-          limit: 20,
-        });
+        const res = await studyResourcesApi.listStudyResources(
+          buildStudyResourceFilters({
+            lockedType,
+            selectedType: effectiveType,
+            query: searchQuery,
+            course: courseFilter,
+            year: yearFilter,
+            page,
+          }),
+        );
         const items = res?.data?.study_resources ?? [];
         setResources(items);
         const total = res?.data?.total ?? items.length;
@@ -104,7 +125,7 @@ export default function StudyResourcesPage() {
       }
     };
     loadResources();
-  }, [searchQuery, typeFilter, courseFilter, yearFilter, page]);
+  }, [searchQuery, effectiveType, courseFilter, yearFilter, page, lockedType]);
 
   const handleSearch = () => {
     setSearchQuery(searchInput.trim());
@@ -127,7 +148,7 @@ export default function StudyResourcesPage() {
   const handleReset = () => {
     setSearchInput("");
     setSearchQuery("");
-    setTypeFilter("");
+    if (!lockedType) setTypeFilter("");
     setCourseFilter("");
     setYearFilter("");
     setPage(1);
@@ -156,18 +177,29 @@ export default function StudyResourcesPage() {
       .split("-")
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(" ");
+  const CatalogHeading = lockedCategory ? "h1" : "h2";
 
   return (
     <div className="min-h-[70vh] bg-gray-50 py-8">
       <div className="mx-auto w-full max-w-350 px-4 pb-14 sm:px-0">
         {/* Header */}
         <section className="mb-7">
-          <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-            Past Questions &amp; Resources
-          </h1>
-          <p className="mt-2 max-w-xl text-sm text-gray-500">
-            Access past exam papers, study notes, model questions, and other
-            useful academic materials.
+          {lockedCategory && (
+            <Link
+              href="/study-resources"
+              className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-brand-blue transition-colors hover:text-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+            >
+              <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
+              All study resources
+            </Link>
+          )}
+          <CatalogHeading className="text-3xl font-bold text-gray-900 sm:text-4xl">
+            {lockedCategory ? lockedCategory.label : "Past Questions & Resources"}
+          </CatalogHeading>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+            {lockedCategory
+              ? lockedCategory.description
+              : "Access past exam papers, study notes, model questions, and other useful academic materials."}
           </p>
         </section>
 
@@ -199,6 +231,7 @@ export default function StudyResourcesPage() {
               <input
                 type="search"
                 placeholder="Search by title, subject, or course..."
+                aria-label="Search study resources"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -214,17 +247,31 @@ export default function StudyResourcesPage() {
           </div>
 
           <div className="mt-2.5 flex flex-col gap-2.5 sm:flex-row">
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className={`${inputClass} sm:flex-1`}
-            >
-              {RESOURCE_TYPES.map((t) => (
-                <option key={t.value} value={t.value}>
-                  {t.label}
-                </option>
-              ))}
-            </select>
+            {lockedCategory ? (
+              <div
+                className={`${inputClass} flex items-center gap-2 text-slate-700 sm:flex-1`}
+                aria-label={`Resource type locked to ${lockedCategory.label}`}
+              >
+                <LockKeyhole className="h-4 w-4 shrink-0 text-brand-blue" aria-hidden="true" />
+                <span className="truncate font-semibold">{lockedCategory.label}</span>
+                <span className="hidden text-xs text-slate-400 xl:inline">
+                  Fixed by this page
+                </span>
+              </div>
+            ) : (
+              <select
+                value={typeFilter}
+                onChange={(e) => setTypeFilter(e.target.value)}
+                aria-label="Filter by resource type"
+                className={`${inputClass} sm:flex-1`}
+              >
+                {STUDY_RESOURCE_TYPE_OPTIONS.map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            )}
             <div className="sm:flex-1">
               <CourseCombobox
                 value={courseFilter}
@@ -238,6 +285,7 @@ export default function StudyResourcesPage() {
             <select
               value={yearFilter}
               onChange={(e) => setYearFilter(e.target.value)}
+              aria-label="Filter by year"
               className={`${inputClass} sm:flex-1`}
             >
               <option value="">All years</option>
@@ -267,52 +315,96 @@ export default function StudyResourcesPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-                {resources.map((resource) => (
-                  <article
-                    key={resource.id}
-                    className="min-w-0 rounded-md border border-gray-200 bg-white p-4"
-                  >
-                    <div className="mb-4 flex items-start justify-between gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-blue-50 text-brand-blue">
-                        <FileText className="h-5 w-5" />
+                {resources.map((resource) => {
+                  const isVideo = isVideoStudyResourceType(
+                    resource.resource_type,
+                  );
+                  return (
+                    <article
+                      key={resource.id}
+                      className="min-w-0 rounded-md border border-gray-200 bg-white p-4"
+                    >
+                      <div className="mb-4 flex items-start justify-between gap-3">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
+                            isVideo
+                              ? "bg-rose-50 text-rose-600"
+                              : "bg-blue-50 text-brand-blue"
+                          }`}
+                        >
+                          {isVideo ? (
+                            <Play className="h-5 w-5" />
+                          ) : (
+                            <FileText className="h-5 w-5" />
+                          )}
+                        </div>
+                        <span className="rounded bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600">
+                          {typeLabel(resource.resource_type || "")}
+                        </span>
                       </div>
-                      <span className="rounded bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600">
-                        {typeLabel(resource.resource_type || "")}
-                      </span>
-                    </div>
-                    <h3 className="mb-2 text-base font-semibold text-gray-900">
-                      {resource.title}
-                    </h3>
-                    <p className="mb-4 min-h-[40px] text-[13px] leading-relaxed text-gray-500">
-                      {resource.description || "—"}
-                    </p>
-                    <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4 text-xs text-gray-500">
-                      {resource.course && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Book size={13} /> {resource.course}
+                      <h3 className="mb-2 text-base font-semibold text-gray-900">
+                        {resource.title}
+                      </h3>
+                      <p className="mb-4 min-h-[40px] text-[13px] leading-relaxed text-gray-500">
+                        {stripHtml(resource.description) || "—"}
+                      </p>
+                      <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4 text-xs text-gray-500">
+                        {resource.course && (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Book size={13} /> {resource.course}
+                          </span>
+                        )}
+                        {resource.year && (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Calendar size={13} /> {resource.year}
+                          </span>
+                        )}
+                        {isVideo ? (
+                          <span className="inline-flex items-center gap-1.5">
+                            <Clock size={13} />
+                            {formatDuration(resource.duration_seconds)}
+                          </span>
+                        ) : (
+                          <span>{formatFileSize(resource.file_size)}</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between gap-3 pt-4">
+                        <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                          {isVideo ? (
+                            <>
+                              <Eye size={13} /> {resource.views ?? 0} views
+                            </>
+                          ) : (
+                            <>
+                              <Download size={13} /> {resource.downloads}{" "}
+                              downloads
+                            </>
+                          )}
                         </span>
-                      )}
-                      {resource.year && (
-                        <span className="inline-flex items-center gap-1.5">
-                          <Calendar size={13} /> {resource.year}
-                        </span>
-                      )}
-                      <span>{formatFileSize(resource.file_size)}</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-3 pt-4">
-                      <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                        <Download size={13} /> {resource.downloads} downloads
-                      </span>
-                      <button
-                        onClick={() => handleDownload(resource)}
-                        disabled={downloadingId === resource.id}
-                        className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs font-semibold text-brand-blue hover:bg-blue-100 disabled:opacity-60"
-                      >
-                        <Download size={13} /> Download
-                      </button>
-                    </div>
-                  </article>
-                ))}
+                        {isVideo ? (
+                          // Playback is public, so it goes straight to the
+                          // backend stream for this exact lecture.
+                          <a
+                            href={getStudyResourceStreamUrl(resource.id)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                          >
+                            <Play size={13} /> Watch
+                          </a>
+                        ) : (
+                          <button
+                            onClick={() => handleDownload(resource)}
+                            disabled={downloadingId === resource.id}
+                            className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs font-semibold text-brand-blue hover:bg-blue-100 disabled:opacity-60"
+                          >
+                            <Download size={13} /> Download
+                          </button>
+                        )}
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
 
               {totalPages > 1 && (
