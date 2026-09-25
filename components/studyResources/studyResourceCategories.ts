@@ -36,25 +36,17 @@ export type StudyResourceCategoryIcon =
   | "video"
   | "mock-test";
 
-export interface StudyResourceCategoryVisual {
-  icon: StudyResourceCategoryIcon;
-  number: string;
-  accentClass: string;
-  glowClass: string;
-  hoverClass: string;
-  topBorderClass: string;
-  statusClass: string;
-}
-
 export interface StudyResourceCategory {
   slug: string;
   label: string;
   href: string;
   description: string;
   apiType: ApiStudyResourceType | null;
+  /** Kept for metadata/robots only; the cards do not render a status badge. */
   status: StudyResourceCategoryStatus;
   render: StudyResourceCategoryRender;
-  visual: StudyResourceCategoryVisual;
+  /** Which lucide icon represents the collection. */
+  icon: StudyResourceCategoryIcon;
 }
 
 export const STUDY_RESOURCE_CATEGORIES = [
@@ -67,15 +59,7 @@ export const STUDY_RESOURCE_CATEGORIES = [
     apiType: "study-notes",
     status: "available",
     render: "resources",
-    visual: {
-      icon: "notes",
-      number: "01",
-      accentClass: "bg-emerald-50 text-emerald-700 ring-emerald-100",
-      glowClass: "bg-emerald-300/35",
-      hoverClass: "hover:border-emerald-200 hover:shadow-emerald-100/80",
-      topBorderClass: "from-emerald-400 to-teal-500",
-      statusClass: "bg-emerald-50 text-emerald-700",
-    },
+    icon: "notes",
   },
   {
     slug: "past-questions",
@@ -86,15 +70,7 @@ export const STUDY_RESOURCE_CATEGORIES = [
     apiType: "past-questions",
     status: "available",
     render: "resources",
-    visual: {
-      icon: "past-questions",
-      number: "02",
-      accentClass: "bg-blue-50 text-blue-700 ring-blue-100",
-      glowClass: "bg-blue-300/35",
-      hoverClass: "hover:border-blue-200 hover:shadow-blue-100/80",
-      topBorderClass: "from-blue-500 to-indigo-600",
-      statusClass: "bg-blue-50 text-blue-700",
-    },
+    icon: "past-questions",
   },
   {
     slug: "model-questions",
@@ -105,15 +81,7 @@ export const STUDY_RESOURCE_CATEGORIES = [
     apiType: "model-questions",
     status: "available",
     render: "resources",
-    visual: {
-      icon: "model-questions",
-      number: "03",
-      accentClass: "bg-violet-50 text-violet-700 ring-violet-100",
-      glowClass: "bg-violet-300/35",
-      hoverClass: "hover:border-violet-200 hover:shadow-violet-100/80",
-      topBorderClass: "from-violet-500 to-purple-600",
-      statusClass: "bg-violet-50 text-violet-700",
-    },
+    icon: "model-questions",
   },
   {
     slug: "syllabus",
@@ -124,15 +92,7 @@ export const STUDY_RESOURCE_CATEGORIES = [
     apiType: "syllabus",
     status: "available",
     render: "resources",
-    visual: {
-      icon: "syllabus",
-      number: "04",
-      accentClass: "bg-amber-50 text-amber-700 ring-amber-100",
-      glowClass: "bg-amber-300/35",
-      hoverClass: "hover:border-amber-200 hover:shadow-amber-100/80",
-      topBorderClass: "from-amber-400 to-orange-500",
-      statusClass: "bg-amber-50 text-amber-700",
-    },
+    icon: "syllabus",
   },
   {
     slug: "video-lectures",
@@ -143,15 +103,7 @@ export const STUDY_RESOURCE_CATEGORIES = [
     apiType: STUDY_RESOURCE_VIDEO_TYPE,
     status: "available",
     render: "video-lectures",
-    visual: {
-      icon: "video",
-      number: "05",
-      accentClass: "bg-rose-50 text-rose-700 ring-rose-100",
-      glowClass: "bg-rose-300/35",
-      hoverClass: "hover:border-rose-200 hover:shadow-rose-100/80",
-      topBorderClass: "from-rose-400 to-pink-600",
-      statusClass: "bg-rose-50 text-rose-700",
-    },
+    icon: "video",
   },
   {
     slug: "mock-test",
@@ -162,15 +114,7 @@ export const STUDY_RESOURCE_CATEGORIES = [
     apiType: null,
     status: "available",
     render: "mock-tests",
-    visual: {
-      icon: "mock-test",
-      number: "06",
-      accentClass: "bg-cyan-50 text-cyan-700 ring-cyan-100",
-      glowClass: "bg-cyan-300/35",
-      hoverClass: "hover:border-cyan-200 hover:shadow-cyan-100/80",
-      topBorderClass: "from-cyan-400 to-sky-600",
-      statusClass: "bg-cyan-50 text-cyan-700",
-    },
+    icon: "mock-test",
   },
 ] as const satisfies readonly StudyResourceCategory[];
 

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import StudyResourcesLanding from "@/components/studyResources/StudyResourcesLanding";
-import StudyResourcesPage from "@/components/studyResources/StudyResourcesPage";
 import { carouselApi, extractCarouselSlides } from "@/services/carousel.api";
 import type { CarouselSlide } from "@/services/api";
 
@@ -16,7 +15,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Study Resources for Better Exam Preparation",
     description:
-      "Find practical study notes, previous-year questions, model questions, and syllabi in one place.",
+      "Find practical study notes, previous-year questions, model questions, syllabi, video lectures and mock tests in one place.",
     url: "/study-resources",
     type: "website",
   },
@@ -45,10 +44,8 @@ async function getActiveStudyResourceSlides(): Promise<CarouselSlide[]> {
 export default async function StudyResourcesRoutePage() {
   const slides = await getActiveStudyResourceSlides();
 
-  return (
-    <>
-      <StudyResourcesLanding slides={slides} />
-      <StudyResourcesPage />
-    </>
-  );
+  // The landing is the whole page: a carousel plus the six collection cards.
+  // Each card opens its own collection, so there is no second, generic
+  // catalogue underneath.
+  return <StudyResourcesLanding slides={slides} />;
 }
