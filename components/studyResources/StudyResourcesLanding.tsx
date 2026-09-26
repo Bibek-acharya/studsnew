@@ -39,16 +39,21 @@ export default function StudyResourcesLanding({
 
   return (
     <section className="bg-gray-50 pb-14 pt-6 sm:pb-16 sm:pt-8">
-      <h1 className="sr-only">Study resources for focused exam preparation</h1>
       {/* max-w-350 is the site content width; padding is mobile-only so the
           grid lines up with the rest of the desktop layout. */}
       <div className="mx-auto w-full max-w-350 px-4 sm:px-0">
         <StudyResourcesCarousel slides={slides} />
 
         <div className={hasSlides ? "mt-8 sm:mt-10" : "mt-3 sm:mt-6"}>
-          {/* No section heading: the six cards are self-describing, and the
-              sr-only h1 above still names the page for screen readers. */}
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* One visible h1, styled like the Find College page title. The
+              eyebrow and lead paragraph stay gone — the six cards below speak
+              for themselves. */}
+          <h1 className="mb-6 text-3xl font-bold text-gray-900 sm:mb-7">
+            Study Resources
+          </h1>
+
+          {/* One column on phones, two from `sm`, four across on desktop. */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {STUDY_RESOURCE_CATEGORIES.map((category) => {
               const Icon = CATEGORY_ICONS[category.icon];
 

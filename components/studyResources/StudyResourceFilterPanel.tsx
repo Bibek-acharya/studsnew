@@ -1,13 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { LockKeyhole, SlidersHorizontal, X } from "lucide-react";
+import { SlidersHorizontal, X } from "lucide-react";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import CourseCombobox from "./CourseCombobox";
-import {
-  STUDY_RESOURCE_TYPE_OPTIONS,
-  type StudyResourceCategory,
-} from "./studyResourceCategories";
 
 /**
  * The sidebar input treatment, matching the Find College filter card: neutral
@@ -17,15 +13,11 @@ export const FILTER_INPUT_CLASS =
   "w-full rounded-md border border-gray-200 bg-[#f8fafc] px-3 py-2 text-[13.5px] text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-brand-blue focus:ring-1 focus:ring-brand-blue";
 
 interface StudyResourceFilterPanelProps {
-  typeFilter: string;
-  onTypeChange: (value: string) => void;
   courseFilter: string;
   onCourseChange: (value: string) => void;
   yearFilter: string;
   onYearChange: (value: string) => void;
   yearOptions: string[];
-  /** Set on a route-locked collection page: the type is fixed, not chosen. */
-  lockedCategory?: StudyResourceCategory;
   onReset: () => void;
   /** Passed inside the mobile drawer only, to render the close button. */
   onClose?: () => void;
@@ -35,16 +27,18 @@ interface StudyResourceFilterPanelProps {
  * Every collection filter, stacked vertically in the same card the Find College
  * sidebar uses. The desktop page shows it in the left column; the mobile drawer
  * shows the very same panel, so there is only one filter markup to maintain.
+ *
+ * There is no resource-type control: a category page is already pinned to one
+ * type by its route, and the unfiltered catalog is a single mixed listing, so
+ * a type selector would either be inert or meaningless. Only course and year
+ * narrow a collection.
  */
 export default function StudyResourceFilterPanel({
-  typeFilter,
-  onTypeChange,
   courseFilter,
   onCourseChange,
   yearFilter,
   onYearChange,
   yearOptions,
-  lockedCategory,
   onReset,
   onClose,
 }: StudyResourceFilterPanelProps) {
@@ -79,42 +73,6 @@ export default function StudyResourceFilterPanel({
         </div>
       </div>
 
-      {/* On a locked collection page the type is fixed by the route, so the
-          selector is replaced by a read-only marker instead of being offered
-          and then ignored. */}
-      {lockedCategory ? (
-        <FilterSection title="Resource type">
-          <div
-            className={`${FILTER_INPUT_CLASS} flex items-center gap-2 text-slate-700`}
-            aria-label={`Resource type locked to ${lockedCategory.label}`}
-          >
-            <LockKeyhole
-              className="h-4 w-4 shrink-0 text-brand-blue"
-              aria-hidden="true"
-            />
-            <span className="truncate font-semibold">{lockedCategory.label}</span>
-            <span className="ml-auto shrink-0 text-xs text-slate-400">
-              Fixed by this page
-            </span>
-          </div>
-        </FilterSection>
-      ) : (
-        <FilterSection title="Resource type">
-          <select
-            value={typeFilter}
-            onChange={(e) => onTypeChange(e.target.value)}
-            aria-label="Filter by resource type"
-            className={FILTER_INPUT_CLASS}
-          >
-            {STUDY_RESOURCE_TYPE_OPTIONS.map((type) => (
-              <option key={type.value} value={type.value}>
-                {type.label}
-              </option>
-            ))}
-          </select>
-        </FilterSection>
-      )}
-
       <FilterSection title="Course">
         <CourseCombobox
           value={courseFilter}
@@ -146,7 +104,7 @@ export default function StudyResourceFilterPanel({
 }
 
 /** One collapsible group, built on the shared filter section. Open by default
- *  because the catalog has only three of them and none is long. */
+ *  because the catalog has only two of them and neither is long. */
 function FilterSection({
   title,
   children,

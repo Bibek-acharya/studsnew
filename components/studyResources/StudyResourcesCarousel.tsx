@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import { getImageUrl } from "@/services/api";
 import type { CarouselSlide } from "@/services/api";
 
@@ -20,18 +19,19 @@ interface CarouselDot {
  * Study-resource promotions, shown as images alone.
  *
  * It keeps the landing hero's frame and sliding track — one rounded banner, a
- * full-bleed image track on the dark base, dots flanked by the previous/next
- * controls — but every text overlay, link and CTA is gone, so the artwork
- * carries the slide by itself. The two heavy black scrims that only existed to
- * keep white copy readable are replaced by a single bottom gradient, which is
- * just enough to keep the controls legible over a pale image.
+ * full-bleed image track on the dark base, and dots centred along the bottom
+ * edge — but every text overlay, link and CTA is gone, so the artwork carries
+ * the slide by itself. The two heavy black scrims that only existed to keep white
+ * copy readable are replaced by a single bottom gradient, which is just enough
+ * to keep the dots legible over a pale image.
  *
- * It stays manual on purpose — dots and arrows only, no autoplay — and renders
- * nothing at all when no slide is active, so the collection grid below simply
- * moves up. Slide positions, not slide copy, carry the accessibility labels,
- * and reduced motion is handled in CSS: `motion-reduce:` switches off the track
- * transform and the dot transitions, which is all that is left to switch off now
- * that the copy fade is gone.
+ * The dots are the only control: the previous/next arrows have been removed, so
+ * the banner carries no chrome beyond a row of position markers. It stays manual
+ * on purpose — no autoplay — and renders nothing at all when no slide is active,
+ * so the collection grid below simply moves up. Slide positions, not slide copy,
+ * carry the accessibility labels, and reduced motion is handled in CSS:
+ * `motion-reduce:` switches off the track transform and the dot transitions,
+ * which is all that is left to switch off now that the copy fade is gone.
  */
 export default function StudyResourcesCarousel({
   slides,
@@ -46,10 +46,6 @@ export default function StudyResourcesCarousel({
   const safeIndex = slideCount > 0 ? currentIndex % slideCount : 0;
 
   if (slideCount === 0) return null;
-
-  const showPrevious = () =>
-    setCurrentIndex((safeIndex - 1 + slideCount) % slideCount);
-  const showNext = () => setCurrentIndex((safeIndex + 1) % slideCount);
 
   const dots: CarouselDot[] = activeSlides.map((_, index) => ({
     index,
@@ -92,48 +88,28 @@ export default function StudyResourcesCarousel({
         </div>
       </div>
 
-      {/* One scrim, under the controls only — no copy to keep legible here. */}
+      {/* One scrim, under the dots only — no copy to keep legible here. */}
       <div
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-28 bg-linear-to-t from-black/75 via-black/30 to-transparent"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-linear-to-t from-black/70 via-black/25 to-transparent"
         aria-hidden="true"
       />
 
-      {/* Controls: dots between the previous/next buttons */}
-      <div className="absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-3 pb-4 sm:gap-4 sm:pb-6">
-        <button
-          type="button"
-          onClick={showPrevious}
-          aria-label="Previous study resources slide"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-        >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-        </button>
-
-        <div className="flex items-center gap-2 sm:gap-3">
-          {dots.map((dot) => (
-            <button
-              key={dot.index}
-              type="button"
-              onClick={() => setCurrentIndex(dot.index)}
-              aria-label={dot.label}
-              aria-current={dot.isActive ? "true" : undefined}
-              className={`transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90 motion-reduce:transition-none ${
-                dot.isActive
-                  ? "h-1.5 w-5 rounded-full bg-brand-blue sm:h-2.5 sm:w-8"
-                  : "h-1.5 w-1.5 rounded-full bg-white/50 hover:bg-white/80 sm:h-2.5 sm:w-2.5"
-              }`}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={showNext}
-          aria-label="Next study resources slide"
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
-        >
-          <ArrowRight className="h-4 w-4" aria-hidden="true" />
-        </button>
+      {/* The dots are the whole control set: the previous/next arrows are gone. */}
+      <div className="absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 pb-4 sm:gap-3 sm:pb-6">
+        {dots.map((dot) => (
+          <button
+            key={dot.index}
+            type="button"
+            onClick={() => setCurrentIndex(dot.index)}
+            aria-label={dot.label}
+            aria-current={dot.isActive ? "true" : undefined}
+            className={`transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/90 motion-reduce:transition-none ${
+              dot.isActive
+                ? "h-1.5 w-5 rounded-full bg-brand-blue sm:h-2.5 sm:w-8"
+                : "h-1.5 w-1.5 rounded-full bg-white/50 hover:bg-white/80 sm:h-2.5 sm:w-2.5"
+            }`}
+          />
+        ))}
       </div>
 
       <p className="sr-only" aria-live="polite" aria-atomic="true">

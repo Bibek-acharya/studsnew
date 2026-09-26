@@ -11,6 +11,7 @@ import {
   Download,
   Eye,
   FileText,
+  FolderOpen,
   Loader2,
   Play,
   Search,
@@ -24,17 +25,23 @@ import {
 } from "@/services/studyResourcesApi";
 import { stripHtml } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
+import Pagination from "@/components/ui/Pagination";
 import StudyResourceFilterPanel from "@/components/studyResources/StudyResourceFilterPanel";
 import { formatDuration } from "@/components/studyResources/videoFormat";
 import {
   buildStudyResourceFilters,
   getStudyResourceCategoryByApiType,
-  resolveStudyResourceType,
   type ApiStudyResourceType,
 } from "./studyResourceCategories";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+
+/** Results per page, unchanged from the previous toolbar-based catalog. */
+const PAGE_SIZE = 20;
+
+/** How long typing settles before a search request goes out. */
+const SEARCH_DEBOUNCE_MS = 350;
 
 // Courses and years are no longer hardcoded: courses come from the shared
 // course list endpoint (via CourseCombobox) and years are aggregated from
@@ -68,12 +75,14 @@ export default function StudyResourcesPage({
 
   const [resources, setResources] = useState<StudyResource[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
 
+  // Search is autonomous: the input is the source of truth, `searchQuery` is
+  // the debounced value the request actually uses.
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
-  const effectiveType = resolveStudyResourceType(lockedType, typeFilter);
   const [courseFilter, setCourseFilter] = useState("");
   const [yearFilter, setYearFilter] = useState("");
   const [yearOptions, setYearOptions] = useState<string[]>([]);
@@ -87,25 +96,48 @@ export default function StudyResourcesPage({
   // same filter panel, which is how Find College handles its own filters.
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
+  // Settle the typed query before it reaches the API, so a burst of keystrokes
+  // costs one request rather than one per character.
   useEffect(() => {
+    const trimmed = searchInput.trim();
+    if (trimmed === searchQuery) return;
+
+    const timeoutId = setTimeout(() => {
+      setSearchQuery(trimmed);
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timeoutId);
+  }, [searchInput, searchQuery]);
+
+  useEffect(() => {
+    // Bumped for every run; a response from a superseded run is discarded, so
+    // a slow earlier request can never overwrite a newer result set.
+    const controller = new AbortController();
+    let active = true;
+
     const loadResources = async () => {
-      setLoading(true);
       setError(null);
+      // Keep the current results on screen while a new query is in flight and
+      // only show the skeleton for a cold first load.
+      setSearching(true);
       try {
         const res = await studyResourcesApi.listStudyResources(
           buildStudyResourceFilters({
             lockedType,
-            selectedType: effectiveType,
             query: searchQuery,
             course: courseFilter,
             year: yearFilter,
             page,
           }),
+          { signal: controller.signal },
         );
+        if (!active) return;
+
         const items = res?.data?.study_resources ?? [];
         setResources(items);
-        const total = res?.data?.total ?? items.length;
-        setTotalPages(Math.max(1, Math.ceil(total / 20)));
+        const responseTotal = res?.data?.total ?? items.length;
+        setTotal(responseTotal);
+        setTotalPages(Math.max(1, Math.ceil(responseTotal / PAGE_SIZE)));
         // Aggregate years from the envelope (when present) and the items.
         const years = new Set<string>();
         if (Array.isArray(res?.data?.years)) {
@@ -118,21 +150,26 @@ export default function StudyResourcesPage({
         });
         setYearOptions(Array.from(years));
       } catch (err) {
+        if (!active || controller.signal.aborted) return;
         setError(
           err instanceof Error ? err.message : "Failed to load study resources",
         );
         setResources([]);
+        setTotal(0);
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+          setSearching(false);
+        }
       }
     };
-    loadResources();
-  }, [searchQuery, effectiveType, courseFilter, yearFilter, page, lockedType]);
+    void loadResources();
 
-  const handleSearch = () => {
-    setSearchQuery(searchInput.trim());
-    setPage(1);
-  };
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [searchQuery, courseFilter, yearFilter, page, lockedType]);
 
   const yearsSortedDesc = useMemo(
     () =>
@@ -150,7 +187,6 @@ export default function StudyResourcesPage({
   const handleReset = () => {
     setSearchInput("");
     setSearchQuery("");
-    if (!lockedType) setTypeFilter("");
     setCourseFilter("");
     setYearFilter("");
     setPage(1);
@@ -181,13 +217,15 @@ export default function StudyResourcesPage({
       .join(" ");
   const CatalogHeading = lockedCategory ? "h1" : "h2";
 
+  // An empty page reports nothing rather than a backwards range like "1-0".
+  const showingFrom = resources.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const showingTo =
+    resources.length === 0
+      ? 0
+      : Math.min((page - 1) * PAGE_SIZE + resources.length, total);
+
   const filterPanel = (onClose?: () => void) => (
     <StudyResourceFilterPanel
-      typeFilter={typeFilter}
-      onTypeChange={(value) => {
-        setTypeFilter(value);
-        setPage(1);
-      }}
       courseFilter={courseFilter}
       onCourseChange={(value) => {
         setCourseFilter(value);
@@ -199,7 +237,6 @@ export default function StudyResourcesPage({
         setPage(1);
       }}
       yearOptions={yearsSortedDesc}
-      lockedCategory={lockedCategory}
       onReset={() => {
         handleReset();
         onClose?.();
@@ -222,10 +259,10 @@ export default function StudyResourcesPage({
               All study resources
             </Link>
           )}
-          <CatalogHeading className="text-3xl font-bold text-gray-900 sm:text-4xl">
+          <CatalogHeading className="mb-2 text-3xl font-bold text-gray-900">
             {lockedCategory ? lockedCategory.label : "Past Questions & Resources"}
           </CatalogHeading>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-gray-500">
+          <p className="max-w-2xl text-base text-gray-500">
             {lockedCategory
               ? lockedCategory.description
               : "Access past exam papers, study notes, model questions, and other useful academic materials."}
@@ -256,32 +293,46 @@ export default function StudyResourcesPage({
 
           {/* Results */}
           <main className="min-w-0 flex-1">
-            {/* Search stays above the results at every width, next to the
-                control that opens the drawer below lg. */}
-            <div className="mb-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
-              <div className="relative flex-1">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
-                <input
-                  type="search"
-                  placeholder="Search by title, subject, or course..."
-                  aria-label="Search study resources"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className={searchInputClass}
-                />
-              </div>
+            {/* Count and search share a row, exactly as CollegeGrid lays them
+                out: the tally on the left, search plus the drawer trigger on
+                the right. */}
+            <div className="mb-6 flex flex-col items-start justify-between gap-4 pb-2 sm:flex-row sm:items-center">
+              <p
+                className="text-base text-gray-900"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {loading
+                  ? "Loading resources..."
+                  : `Showing ${showingFrom}-${showingTo} of ${total} `}
+                {!loading && <span className="font-bold">Resources</span>}
+              </p>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleSearch}
-                  className="flex-1 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 sm:flex-none sm:w-28"
-                >
-                  Search
-                </button>
+              <div className="flex w-full items-center gap-2 sm:w-95">
+                <div className="relative flex-1">
+                  <Search
+                    size={16}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
+                  />
+                  <input
+                    type="search"
+                    placeholder="Search resources, courses..."
+                    aria-label="Search study resources"
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                    className={`${searchInputClass} ${
+                      searching ? "pr-9" : "pr-4"
+                    }`}
+                  />
+                  {searching && (
+                    <Loader2
+                      size={15}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-gray-400"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+
                 <button
                   type="button"
                   onClick={() => setShowMobileFilters(true)}
@@ -294,17 +345,50 @@ export default function StudyResourcesPage({
             </div>
 
             <section>
-              {loading ? (
-                <div className="flex items-center justify-center py-24 text-gray-400">
-                  <Loader2 size={28} className="animate-spin text-brand-blue" />
+              {error ? (
+                <div className="rounded-md border border-red-200 bg-red-50 p-6 text-center">
+                  <p className="font-semibold text-red-700">{error}</p>
                 </div>
-              ) : error ? (
-                <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
-                  {error}
+              ) : loading ? (
+                /* Cold first load only: a refetch keeps the current results on
+                   screen, the same way CollegeGrid keeps its previous data. */
+                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="flex animate-pulse flex-col rounded-md border border-gray-200 bg-white p-4"
+                      data-testid="resource-skeleton"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="h-10 w-10 rounded-md bg-gray-200" />
+                        <div className="h-5 w-20 rounded bg-gray-100" />
+                      </div>
+                      <div className="mt-4 h-5 w-3/4 rounded bg-gray-200" />
+                      <div className="mt-2.5 space-y-2">
+                        <div className="h-3 w-full rounded bg-gray-100" />
+                        <div className="h-3 w-2/3 rounded bg-gray-100" />
+                      </div>
+                      <div className="mt-4 border-b border-gray-200 pb-4">
+                        <div className="h-3 w-1/2 rounded bg-gray-100" />
+                      </div>
+                      <div className="flex items-center justify-between gap-3 pt-4">
+                        <div className="h-3 w-20 rounded bg-gray-100" />
+                        <div className="h-8 w-24 rounded-md bg-gray-200" />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               ) : resources.length === 0 ? (
-                <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
-                  No resources found. Try changing your search or filters.
+                <div className="flex flex-col items-center justify-center px-4 py-20">
+                  <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-50">
+                    <FolderOpen className="h-10 w-10 text-gray-300" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    No Resources Found
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Try changing your search or filters.
+                  </p>
                 </div>
               ) : (
                 <>
@@ -402,25 +486,11 @@ export default function StudyResourcesPage({
                   </div>
 
                   {totalPages > 1 && (
-                    <div className="mt-6 flex items-center justify-center gap-3">
-                      <button
-                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                        disabled={page === 1}
-                        className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 disabled:opacity-40"
-                      >
-                        Previous
-                      </button>
-                      <span className="text-sm text-gray-500">
-                        Page {page} of {totalPages}
-                      </span>
-                      <button
-                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                        disabled={page >= totalPages}
-                        className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 disabled:opacity-40"
-                      >
-                        Next
-                      </button>
-                    </div>
+                    <Pagination
+                      currentPage={page}
+                      totalPages={totalPages}
+                      onPageChange={setPage}
+                    />
                   )}
                 </>
               )}

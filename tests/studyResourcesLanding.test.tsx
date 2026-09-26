@@ -100,12 +100,24 @@ describe("study resources landing layout contract", () => {
     expect(html).not.toContain("Curated study collections");
     expect(html).not.toContain("Choose the resource that moves you forward.");
     expect(html).not.toContain("Start with a focused collection");
+  });
 
-    // No visible heading is left standing in their place, but the page still
-    // carries a name for screen readers.
-    expect(html).not.toMatch(/<h2[^>]*>/);
+  test("one visible page title sits above the cards, in the Find College style", () => {
+    const html = renderLanding();
+
+    // Exactly one heading on the page, and it is a real visible h1 — not a
+    // screen-reader-only duplicate.
+    const headings = html.match(/<h1[^>]*>/g) ?? [];
+    expect(headings).toHaveLength(1);
+    expect(headings[0]).not.toContain("sr-only");
+
     expect(html).toContain(
-      '<h1 class="sr-only">Study resources for focused exam preparation</h1>',
+      '<h1 class="mb-6 text-3xl font-bold text-gray-900 sm:mb-7">Study Resources</h1>',
+    );
+
+    // The title precedes the card grid.
+    expect(html.indexOf("Study Resources</h1>")).toBeLessThan(
+      html.indexOf('href="/study-resources/study-notes"'),
     );
   });
 
@@ -136,6 +148,15 @@ describe("study resources landing layout contract", () => {
       expect(html).toContain(`href="${href}"`);
       expect(html).toContain(`aria-label="View all: ${label}"`);
     });
+  });
+
+  test("the card grid is four across on desktop, tapering to one on phones", () => {
+    const html = renderLanding();
+
+    // One column on phones, two from `sm`, four on desktop.
+    expect(html).toContain("grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4");
+    // The old three-across desktop grid is gone.
+    expect(html).not.toContain("lg:grid-cols-3");
   });
 
   test("the config exposes an icon per collection and no palette fields", () => {

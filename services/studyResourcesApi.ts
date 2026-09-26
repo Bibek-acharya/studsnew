@@ -357,12 +357,21 @@ export async function requestStudyResourcePlaybackToken(
 }
 
 export const studyResourcesApi = {
+  /**
+   * Public document/video catalog.
+   *
+   * Pass `signal` to let the caller cancel a request it no longer needs — the
+   * debounced search on the collection pages uses it to drop superseded
+   * requests. The request line is unchanged; only cancellation is added.
+   */
   async listStudyResources(
     params: StudyResourceFilters = {},
+    options: { signal?: AbortSignal } = {},
   ): Promise<StudyResourcesResponse> {
-    return apiRequest<StudyResourcesResponse>(
-      buildStudyResourceQuery(params),
-    );
+    const path = buildStudyResourceQuery(params);
+    return options.signal
+      ? apiRequest<StudyResourcesResponse>(path, { signal: options.signal })
+      : apiRequest<StudyResourcesResponse>(path);
   },
 
   /**

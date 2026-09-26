@@ -173,21 +173,38 @@ describe("StudyResourcesCarousel", () => {
     );
   });
 
-  test("previous/next arrows and dots remain and still navigate", () => {
+  test("the dots are the only control: no previous/next arrows", () => {
     const container = render([slide(1), slide(2), slide(3)]);
 
-    const dots = container.querySelectorAll('button[aria-label^="Go to slide"]');
-    expect(dots).toHaveLength(3);
+    // The arrows have been removed from the public carousel.
+    expect(
+      container.querySelector('[aria-label="Previous study resources slide"]'),
+    ).toBeNull();
+    expect(
+      container.querySelector('[aria-label="Next study resources slide"]'),
+    ).toBeNull();
+    // Nor are the chevron glyphs they used to render.
+    expect(container.querySelector(".lucide-arrow-left")).toBeNull();
+    expect(container.querySelector(".lucide-arrow-right")).toBeNull();
 
-    click(container, "Next study resources slide");
-    expect(liveRegion(container)).toBe("Slide 2 of 3");
+    // Nothing else in the banner is a button apart from the dots.
+    const labels = Array.from(container.querySelectorAll("button")).map((b) =>
+      b.getAttribute("aria-label"),
+    );
+    expect(labels).toEqual(["Go to slide 1", "Go to slide 2", "Go to slide 3"]);
+  });
 
-    click(container, "Previous study resources slide");
+  test("the dots still navigate the whole set", () => {
+    const container = render([slide(1), slide(2), slide(3)]);
+
+    // Nothing advances on its own, and nothing steps without a click.
     expect(liveRegion(container)).toBe("Slide 1 of 3");
 
-    // Wraps backwards from the first slide to the last.
-    click(container, "Previous study resources slide");
+    click(container, "Go to slide 3");
     expect(liveRegion(container)).toBe("Slide 3 of 3");
+
+    click(container, "Go to slide 1");
+    expect(liveRegion(container)).toBe("Slide 1 of 3");
   });
 
   test("dots jump to a slide and mark the current one", () => {
@@ -209,7 +226,7 @@ describe("StudyResourcesCarousel", () => {
 
     // jsdom normalises the first offset to `-0%`.
     expect(track?.style.transform).toMatch(/translateX\(-?0%\)/);
-    click(container, "Next study resources slide");
+    click(container, "Go to slide 2");
     expect(track?.style.transform).toBe("translateX(-100%)");
   });
 });
