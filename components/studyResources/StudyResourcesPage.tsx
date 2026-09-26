@@ -12,9 +12,9 @@ import {
   Eye,
   FileText,
   Loader2,
-  LockKeyhole,
   Play,
   Search,
+  SlidersHorizontal,
 } from "lucide-react";
 import {
   getStudyResourceStreamUrl,
@@ -24,13 +24,12 @@ import {
 } from "@/services/studyResourcesApi";
 import { stripHtml } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
-import CourseCombobox from "@/components/studyResources/CourseCombobox";
+import StudyResourceFilterPanel from "@/components/studyResources/StudyResourceFilterPanel";
 import { formatDuration } from "@/components/studyResources/videoFormat";
 import {
   buildStudyResourceFilters,
   getStudyResourceCategoryByApiType,
   resolveStudyResourceType,
-  STUDY_RESOURCE_TYPE_OPTIONS,
   type ApiStudyResourceType,
 } from "./studyResourceCategories";
 
@@ -49,8 +48,8 @@ function formatFileSize(bytes: number | string): string {
   return `${Math.round(size / 1024)} KB`;
 }
 
-const inputClass =
-  "w-full border border-gray-200 rounded-md bg-white px-3 py-2 text-sm text-gray-900 outline-none focus:border-brand-blue";
+const searchInputClass =
+  "w-full rounded-md border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-brand-blue focus:ring-1 focus:ring-brand-blue";
 
 type DownloadTarget = { resource: StudyResource } | null;
 
@@ -84,6 +83,9 @@ export default function StudyResourcesPage({
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
   const [modalResource, setModalResource] = useState<DownloadTarget>(null);
+  // Below lg the sidebar column is replaced by a bottom drawer holding the very
+  // same filter panel, which is how Find College handles its own filters.
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
 
   useEffect(() => {
     const loadResources = async () => {
@@ -179,6 +181,33 @@ export default function StudyResourcesPage({
       .join(" ");
   const CatalogHeading = lockedCategory ? "h1" : "h2";
 
+  const filterPanel = (onClose?: () => void) => (
+    <StudyResourceFilterPanel
+      typeFilter={typeFilter}
+      onTypeChange={(value) => {
+        setTypeFilter(value);
+        setPage(1);
+      }}
+      courseFilter={courseFilter}
+      onCourseChange={(value) => {
+        setCourseFilter(value);
+        setPage(1);
+      }}
+      yearFilter={yearFilter}
+      onYearChange={(value) => {
+        setYearFilter(value);
+        setPage(1);
+      }}
+      yearOptions={yearsSortedDesc}
+      lockedCategory={lockedCategory}
+      onReset={() => {
+        handleReset();
+        onClose?.();
+      }}
+      onClose={onClose}
+    />
+  );
+
   return (
     <div className="min-h-[70vh] bg-gray-50 py-8">
       <div className="mx-auto w-full max-w-350 px-4 pb-14 sm:px-0">
@@ -203,234 +232,201 @@ export default function StudyResourcesPage({
           </p>
         </section>
 
-        {/* Toolbar */}
-        <section className="mb-6 rounded-md border border-gray-200 bg-white p-4">
-          <div className="mb-3 flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">
-                Browse resources
-              </h2>
-              <p className="text-[13px] text-gray-500">
-                Find the materials you need for your preparation.
-              </p>
-            </div>
-            <button
-              onClick={handleReset}
-              className="rounded-md bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-900 hover:bg-gray-200"
-            >
-              Reset
-            </button>
-          </div>
+        <div className="flex flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
+          {/* Desktop filter sidebar */}
+          <aside className="hidden w-full shrink-0 lg:block lg:w-75">
+            {filterPanel()}
+          </aside>
 
-          <div className="flex flex-col gap-2.5 sm:flex-row">
-            <div className="relative flex-1">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="search"
-                placeholder="Search by title, subject, or course..."
-                aria-label="Search study resources"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className={`${inputClass} pl-9`}
-              />
-            </div>
-            <button
-              onClick={handleSearch}
-              className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover sm:w-32"
+          {/* Mobile/tablet filter drawer: the same panel, lifted into a sheet */}
+          {showMobileFilters && (
+            <div
+              className="fixed inset-0 z-50 lg:hidden"
+              onClick={() => setShowMobileFilters(false)}
             >
-              Search
-            </button>
-          </div>
-
-          <div className="mt-2.5 flex flex-col gap-2.5 sm:flex-row">
-            {lockedCategory ? (
+              <div className="absolute inset-0 bg-black/50" />
               <div
-                className={`${inputClass} flex items-center gap-2 text-slate-700 sm:flex-1`}
-                aria-label={`Resource type locked to ${lockedCategory.label}`}
+                className="absolute bottom-0 left-0 right-0 max-h-[70vh] overflow-y-auto rounded-t-2xl bg-white shadow-xl"
+                onClick={(e) => e.stopPropagation()}
               >
-                <LockKeyhole className="h-4 w-4 shrink-0 text-brand-blue" aria-hidden="true" />
-                <span className="truncate font-semibold">{lockedCategory.label}</span>
-                <span className="hidden text-xs text-slate-400 xl:inline">
-                  Fixed by this page
-                </span>
+                {filterPanel(() => setShowMobileFilters(false))}
               </div>
-            ) : (
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value)}
-                aria-label="Filter by resource type"
-                className={`${inputClass} sm:flex-1`}
-              >
-                {STUDY_RESOURCE_TYPE_OPTIONS.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
-            )}
-            <div className="sm:flex-1">
-              <CourseCombobox
-                value={courseFilter}
-                onChange={setCourseFilter}
-                allowEmpty
-                emptyLabel="All courses"
-                placeholder="All courses"
-                inputClassName={inputClass}
-              />
             </div>
-            <select
-              value={yearFilter}
-              onChange={(e) => setYearFilter(e.target.value)}
-              aria-label="Filter by year"
-              className={`${inputClass} sm:flex-1`}
-            >
-              <option value="">All years</option>
-              {yearsSortedDesc.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
-
-        {/* List */}
-        <section>
-          {loading ? (
-            <div className="flex items-center justify-center py-24 text-gray-400">
-              <Loader2 size={28} className="animate-spin text-brand-blue" />
-            </div>
-          ) : error ? (
-            <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
-              {error}
-            </div>
-          ) : resources.length === 0 ? (
-            <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
-              No resources found. Try changing your search or filters.
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-                {resources.map((resource) => {
-                  const isVideo = isVideoStudyResourceType(
-                    resource.resource_type,
-                  );
-                  return (
-                    <article
-                      key={resource.id}
-                      className="min-w-0 rounded-md border border-gray-200 bg-white p-4"
-                    >
-                      <div className="mb-4 flex items-start justify-between gap-3">
-                        <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
-                            isVideo
-                              ? "bg-rose-50 text-rose-600"
-                              : "bg-blue-50 text-brand-blue"
-                          }`}
-                        >
-                          {isVideo ? (
-                            <Play className="h-5 w-5" />
-                          ) : (
-                            <FileText className="h-5 w-5" />
-                          )}
-                        </div>
-                        <span className="rounded bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600">
-                          {typeLabel(resource.resource_type || "")}
-                        </span>
-                      </div>
-                      <h3 className="mb-2 text-base font-semibold text-gray-900">
-                        {resource.title}
-                      </h3>
-                      <p className="mb-4 min-h-[40px] text-[13px] leading-relaxed text-gray-500">
-                        {stripHtml(resource.description) || "—"}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4 text-xs text-gray-500">
-                        {resource.course && (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Book size={13} /> {resource.course}
-                          </span>
-                        )}
-                        {resource.year && (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar size={13} /> {resource.year}
-                          </span>
-                        )}
-                        {isVideo ? (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Clock size={13} />
-                            {formatDuration(resource.duration_seconds)}
-                          </span>
-                        ) : (
-                          <span>{formatFileSize(resource.file_size)}</span>
-                        )}
-                      </div>
-                      <div className="flex items-center justify-between gap-3 pt-4">
-                        <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                          {isVideo ? (
-                            <>
-                              <Eye size={13} /> {resource.views ?? 0} views
-                            </>
-                          ) : (
-                            <>
-                              <Download size={13} /> {resource.downloads}{" "}
-                              downloads
-                            </>
-                          )}
-                        </span>
-                        {isVideo ? (
-                          // Playback is public, so it goes straight to the
-                          // backend stream for this exact lecture.
-                          <a
-                            href={getStudyResourceStreamUrl(resource.id)}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100"
-                          >
-                            <Play size={13} /> Watch
-                          </a>
-                        ) : (
-                          <button
-                            onClick={() => handleDownload(resource)}
-                            disabled={downloadingId === resource.id}
-                            className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs font-semibold text-brand-blue hover:bg-blue-100 disabled:opacity-60"
-                          >
-                            <Download size={13} /> Download
-                          </button>
-                        )}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="mt-6 flex items-center justify-center gap-3">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 disabled:opacity-40"
-                  >
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-500">
-                    Page {page} of {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                    disabled={page >= totalPages}
-                    className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 disabled:opacity-40"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
           )}
-        </section>
+
+          {/* Results */}
+          <main className="min-w-0 flex-1">
+            {/* Search stays above the results at every width, next to the
+                control that opens the drawer below lg. */}
+            <div className="mb-5 flex flex-col gap-2.5 sm:flex-row sm:items-center">
+              <div className="relative flex-1">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                />
+                <input
+                  type="search"
+                  placeholder="Search by title, subject, or course..."
+                  aria-label="Search study resources"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className={searchInputClass}
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSearch}
+                  className="flex-1 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 sm:flex-none sm:w-28"
+                >
+                  Search
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowMobileFilters(true)}
+                  className="flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-gray-200 bg-white px-3 py-2.5 text-[13px] font-semibold text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 lg:hidden"
+                >
+                  <SlidersHorizontal size={14} aria-hidden="true" />
+                  Filters
+                </button>
+              </div>
+            </div>
+
+            <section>
+              {loading ? (
+                <div className="flex items-center justify-center py-24 text-gray-400">
+                  <Loader2 size={28} className="animate-spin text-brand-blue" />
+                </div>
+              ) : error ? (
+                <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
+                  {error}
+                </div>
+              ) : resources.length === 0 ? (
+                <div className="rounded-md border border-dashed border-gray-200 bg-white p-10 text-center text-sm text-gray-500">
+                  No resources found. Try changing your search or filters.
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
+                    {resources.map((resource) => {
+                      const isVideo = isVideoStudyResourceType(
+                        resource.resource_type,
+                      );
+                      return (
+                        <article
+                          key={resource.id}
+                          className="min-w-0 rounded-md border border-gray-200 bg-white p-4"
+                        >
+                          <div className="mb-4 flex items-start justify-between gap-3">
+                            <div
+                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
+                                isVideo
+                                  ? "bg-rose-50 text-rose-600"
+                                  : "bg-blue-50 text-brand-blue"
+                              }`}
+                            >
+                              {isVideo ? (
+                                <Play className="h-5 w-5" />
+                              ) : (
+                                <FileText className="h-5 w-5" />
+                              )}
+                            </div>
+                            <span className="rounded bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600">
+                              {typeLabel(resource.resource_type || "")}
+                            </span>
+                          </div>
+                          <h3 className="mb-2 text-base font-semibold text-gray-900">
+                            {resource.title}
+                          </h3>
+                          <p className="mb-4 min-h-[40px] text-[13px] leading-relaxed text-gray-500">
+                            {stripHtml(resource.description) || "—"}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4 text-xs text-gray-500">
+                            {resource.course && (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Book size={13} /> {resource.course}
+                              </span>
+                            )}
+                            {resource.year && (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Calendar size={13} /> {resource.year}
+                              </span>
+                            )}
+                            {isVideo ? (
+                              <span className="inline-flex items-center gap-1.5">
+                                <Clock size={13} />
+                                {formatDuration(resource.duration_seconds)}
+                              </span>
+                            ) : (
+                              <span>{formatFileSize(resource.file_size)}</span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between gap-3 pt-4">
+                            <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                              {isVideo ? (
+                                <>
+                                  <Eye size={13} /> {resource.views ?? 0} views
+                                </>
+                              ) : (
+                                <>
+                                  <Download size={13} /> {resource.downloads}{" "}
+                                  downloads
+                                </>
+                              )}
+                            </span>
+                            {isVideo ? (
+                              // Playback is public, so it goes straight to the
+                              // backend stream for this exact lecture.
+                              <a
+                                href={getStudyResourceStreamUrl(resource.id)}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex items-center gap-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                              >
+                                <Play size={13} /> Watch
+                              </a>
+                            ) : (
+                              <button
+                                onClick={() => handleDownload(resource)}
+                                disabled={downloadingId === resource.id}
+                                className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs font-semibold text-brand-blue hover:bg-blue-100 disabled:opacity-60"
+                              >
+                                <Download size={13} /> Download
+                              </button>
+                            )}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+
+                  {totalPages > 1 && (
+                    <div className="mt-6 flex items-center justify-center gap-3">
+                      <button
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 disabled:opacity-40"
+                      >
+                        Previous
+                      </button>
+                      <span className="text-sm text-gray-500">
+                        Page {page} of {totalPages}
+                      </span>
+                      <button
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                        disabled={page >= totalPages}
+                        className="rounded-md border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600 disabled:opacity-40"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+          </main>
+        </div>
       </div>
 
       {/* Login required modal */}

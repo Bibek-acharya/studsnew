@@ -26,13 +26,14 @@ jest.mock("next/image", () => ({
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
+/** A slide still carrying the full copy the carousel used to render. */
 function slide(
   id: number,
   overrides: Partial<CarouselSlide> = {},
 ): CarouselSlide {
   return {
     id,
-    title: `Slide ${id}`,
+    title: `Title ${id}`,
     subtitle: `Subtitle ${id}`,
     description: `Description ${id}`,
     image_url: `/uploads/banner-${id}.png`,
@@ -58,18 +59,19 @@ function render(slides: CarouselSlide[]) {
   return container;
 }
 
-function click(
-  container: HTMLElement,
-  selector: string,
-  label?: string,
-): void {
-  const buttons = Array.from(container.querySelectorAll("button"));
-  const target = label
-    ? buttons.find((b) => b.getAttribute("aria-label") === label)
-    : buttons.find((b) => b.className.includes(selector));
-  if (!target) throw new Error(`control "${label ?? selector}" not found`);
+function control(container: HTMLElement, label: string): HTMLButtonElement {
+  const target = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.getAttribute("aria-label") === label,
+  );
+  if (!target) throw new Error(`control "${label}" not found`);
+  return target;
+}
+
+function click(container: HTMLElement, label: string): void {
   act(() => {
-    target.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    control(container, label).dispatchEvent(
+      new MouseEvent("click", { bubbles: true }),
+    );
   });
 }
 
@@ -77,29 +79,14 @@ function liveRegion(container: HTMLElement): string {
   return container.querySelector("[aria-live]")?.textContent ?? "";
 }
 
-beforeEach(() => {
-  // requestAnimationFrame + matchMedia are used for the fade and reduced motion.
-  window.matchMedia = jest.fn().mockImplementation((query: string) => ({
-    matches: false,
-    media: query,
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-  })) as unknown as typeof window.matchMedia;
-});
-
 afterEach(() => {
-  act(() => {
-    roots.forEach((root) => root.unmount());
-  });
-  roots.length = 0;
-  containers.forEach((container) => container.remove());
-  containers.length = 0;
+  while (roots.length) act(() => roots.pop()!.unmount());
+  while (containers.length) containers.pop()!.remove();
 });
 
 describe("StudyResourcesCarousel", () => {
   test("renders nothing when there are no active slides", () => {
-    const empty = render([]);
-    expect(empty.innerHTML).toBe("");
+    expect(render([]).innerHTML).toBe("");
 
     const allInactive = render([
       slide(1, { active: false }),
@@ -108,21 +95,61 @@ describe("StudyResourcesCarousel", () => {
     expect(allInactive.innerHTML).toBe("");
   });
 
-  test("only active slides take part in the rotation", () => {
+  test("shows images and nothing else — no copy, links or CTA", () => {
+    const container = render([
+      slide(1, {
+        title: "Past papers, sorted",
+        subtitle: "Every year, one place",
+        description: "Filter by course and year.",
+        link_url: "/study-resources/past-questions",
+        button_text: "Browse papers",
+      }),
+    ]);
+
+    const text = container.textContent ?? "";
+    for (const removed of [
+      "Past papers, sorted",
+      "Every year, one place",
+      "Filter by course and year.",
+      "Browse papers",
+      // The old decorative pill.
+      "Study resources",
+    ]) {
+      expect(text).not.toContain(removed);
+    }
+
+    // No link survives, so the slide cannot be clicked through to anywhere.
+    expect(container.querySelector("a")).toBeNull();
+    expect(container.querySelector("h1, h2, h3")).toBeNull();
+
+    // The image is still the whole slide.
+    const image = container.querySelector("img");
+    expect(image?.getAttribute("data-src")).toBe(
+      `${API_BASE}/uploads/banner-1.png`,
+    );
+  });
+
+  test("slide images resolve through the shared image URL helper", () => {
+    const container = render([slide(1, { image_url: "/uploads/banner.png" })]);
+
+    expect(container.querySelector("img")?.getAttribute("data-src")).toBe(
+      `${API_BASE}/uploads/banner.png`,
+    );
+  });
+
+  test("every active slide keeps its own image, inactive ones drop out", () => {
     const container = render([
       slide(1),
       slide(2, { active: false }),
       slide(3),
     ]);
 
-    // Two active slides => two dots, and the live region counts only those.
-    const dots = container.querySelectorAll('button[aria-label^="Go to slide"]');
-    expect(dots).toHaveLength(2);
-    expect(liveRegion(container)).toContain("1 of 2");
-
-    // The inactive slide's image is not in the track.
     const track = container.querySelector('[data-testid="carousel-track"]');
-    expect(track?.querySelectorAll("img")).toHaveLength(2);
+    const images = Array.from(track?.querySelectorAll("img") ?? []);
+    expect(images.map((img) => img.getAttribute("data-src"))).toEqual([
+      `${API_BASE}/uploads/banner-1.png`,
+      `${API_BASE}/uploads/banner-3.png`,
+    ]);
   });
 
   test("keeps the carousel and slide accessibility semantics", () => {
@@ -134,36 +161,44 @@ describe("StudyResourcesCarousel", () => {
       "Study resources promotions",
     );
 
-    const group = container.querySelector('[aria-roledescription="slide"]');
-    expect(group?.getAttribute("role")).toBe("group");
-    expect(group?.getAttribute("aria-label")).toBe("1 of 2");
+    const groups = container.querySelectorAll('[aria-roledescription="slide"]');
+    expect(groups).toHaveLength(2);
+    expect(groups[0].getAttribute("role")).toBe("group");
+    expect(groups[0].getAttribute("aria-label")).toBe("1 of 2");
+    expect(groups[1].getAttribute("aria-label")).toBe("2 of 2");
+
+    // Image alt text describes position, not the removed slide copy.
+    expect(groups[0].querySelector("img")?.getAttribute("alt")).toBe(
+      "Study resource slide 1 of 2",
+    );
   });
 
-  test("advances with the next/previous controls and wraps around", () => {
+  test("previous/next arrows and dots remain and still navigate", () => {
     const container = render([slide(1), slide(2), slide(3)]);
 
-    click(container, "", "Next study resources slide");
-    expect(liveRegion(container)).toContain("2 of 3");
+    const dots = container.querySelectorAll('button[aria-label^="Go to slide"]');
+    expect(dots).toHaveLength(3);
 
-    click(container, "", "Previous study resources slide");
-    expect(liveRegion(container)).toContain("1 of 3");
+    click(container, "Next study resources slide");
+    expect(liveRegion(container)).toBe("Slide 2 of 3");
+
+    click(container, "Previous study resources slide");
+    expect(liveRegion(container)).toBe("Slide 1 of 3");
 
     // Wraps backwards from the first slide to the last.
-    click(container, "", "Previous study resources slide");
-    expect(liveRegion(container)).toContain("3 of 3");
+    click(container, "Previous study resources slide");
+    expect(liveRegion(container)).toBe("Slide 3 of 3");
   });
 
   test("dots jump to a slide and mark the current one", () => {
     const container = render([slide(1), slide(2), slide(3)]);
 
-    click(container, "", "Go to slide 3: Slide 3");
-    expect(liveRegion(container)).toContain("3 of 3");
+    click(container, "Go to slide 3");
+    expect(liveRegion(container)).toBe("Slide 3 of 3");
 
     const current = container.querySelectorAll('[aria-current="true"]');
     expect(current).toHaveLength(1);
-    expect(current[0].getAttribute("aria-label")).toBe(
-      "Go to slide 3: Slide 3",
-    );
+    expect(current[0].getAttribute("aria-label")).toBe("Go to slide 3");
   });
 
   test("the track slides with a transform rather than swapping opacity", () => {
@@ -174,59 +209,7 @@ describe("StudyResourcesCarousel", () => {
 
     // jsdom normalises the first offset to `-0%`.
     expect(track?.style.transform).toMatch(/translateX\(-?0%\)/);
-    click(container, "", "Next study resources slide");
+    click(container, "Next study resources slide");
     expect(track?.style.transform).toBe("translateX(-100%)");
-  });
-
-  test("shows the active slide's title, subtitle, description and CTA", () => {
-    const container = render([
-      slide(1, {
-        title: "Past papers, sorted",
-        subtitle: "Every year, one place",
-        description: "Filter by course and year.",
-        link_url: "/study-resources/past-questions",
-        button_text: "Browse papers",
-      }),
-    ]);
-
-    expect(container.textContent).toContain("Past papers, sorted");
-    expect(container.textContent).toContain("Every year, one place");
-    expect(container.textContent).toContain("Filter by course and year.");
-    // No description => the fallback headline is used instead of a blank.
-    const bare = render([slide(9, { title: "", subtitle: "", description: "" })]);
-    expect(bare.textContent).toContain("Prepare for what comes next");
-
-    const cta = container.querySelector<HTMLAnchorElement>(
-      'a[href="/study-resources/past-questions"]',
-    );
-    expect(cta?.textContent).toContain("Browse papers");
-    // Internal links stay in the tab.
-    expect(cta?.getAttribute("target")).toBeNull();
-    expect(cta?.getAttribute("rel")).toBeNull();
-  });
-
-  test("external CTAs open safely in a new tab", () => {
-    const container = render([slide(1, { link_url: "https://example.com/1" })]);
-
-    const cta = container.querySelector<HTMLAnchorElement>(
-      `a[href="https://example.com/1"]`,
-    );
-    expect(cta?.getAttribute("target")).toBe("_blank");
-    expect(cta?.getAttribute("rel")).toBe("noopener noreferrer");
-  });
-
-  test("a slide without a link has no CTA", () => {
-    const container = render([slide(1, { link_url: "" })]);
-
-    expect(container.querySelector("a[href]")).toBeNull();
-    expect(container.textContent).toContain("Slide 1");
-  });
-
-  test("slide images resolve through the shared image URL helper", () => {
-    const container = render([slide(1, { image_url: "/uploads/banner.png" })]);
-
-    expect(container.querySelector("img")?.getAttribute("data-src")).toBe(
-      `${API_BASE}/uploads/banner.png`,
-    );
   });
 });

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
-  ArrowUpRight,
   BookOpenText,
+  ChevronRight,
   ClipboardCheck,
   FileClock,
   ListChecks,
@@ -46,21 +46,8 @@ export default function StudyResourcesLanding({
         <StudyResourcesCarousel slides={slides} />
 
         <div className={hasSlides ? "mt-8 sm:mt-10" : "mt-3 sm:mt-6"}>
-          <div className="mb-6 flex flex-col gap-2 sm:mb-7 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-brand-blue">
-                Curated study collections
-              </p>
-              <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-                Choose the resource that moves you forward.
-              </h2>
-            </div>
-            <p className="mt-1 max-w-xl text-sm leading-6 text-gray-500 lg:mt-0">
-              Start with a focused collection, download what you need, and
-              build a revision routine around the material you trust.
-            </p>
-          </div>
-
+          {/* No section heading: the six cards are self-describing, and the
+              sr-only h1 above still names the page for screen readers. */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {STUDY_RESOURCE_CATEGORIES.map((category) => {
               const Icon = CATEGORY_ICONS[category.icon];
@@ -70,26 +57,33 @@ export default function StudyResourcesLanding({
                   key={category.slug}
                   href={category.href}
                   aria-label={`${CARD_ACTION_LABEL}: ${category.label}`}
-                  className="group flex h-full flex-col rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:border-blue-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
+                  className="group flex h-full items-start gap-3.5 rounded-xl border border-gray-200 bg-white p-5 transition-all duration-200 hover:border-blue-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2 motion-reduce:transition-none"
                 >
-                  <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50 text-brand-blue">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-brand-blue">
                     <Icon className="h-5 w-5" aria-hidden="true" />
                   </span>
 
-                  <h3 className="mb-1.5 text-[15px] font-bold text-gray-900 transition-colors group-hover:text-brand-blue">
-                    {category.label}
-                  </h3>
-                  <p className="mb-4 text-[13px] leading-relaxed text-gray-500">
-                    {category.description}
-                  </p>
+                  {/* One content column, so the description lines up with the
+                      title rather than with the icon. */}
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="text-[15px] font-bold leading-tight text-gray-900 transition-colors group-hover:text-brand-blue">
+                        {category.label}
+                      </h3>
 
-                  <span className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue">
-                    {CARD_ACTION_LABEL}
-                    <ArrowUpRight
-                      className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none"
-                      aria-hidden="true"
-                    />
-                  </span>
+                      <span className="mt-px inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-brand-blue">
+                        {CARD_ACTION_LABEL}
+                        <ChevronRight
+                          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transform-none motion-reduce:transition-none"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-[13px] leading-relaxed text-gray-500">
+                      {category.description}
+                    </p>
+                  </div>
                 </Link>
               );
             })}

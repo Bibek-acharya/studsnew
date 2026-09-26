@@ -21,6 +21,12 @@ export interface HeroBannerTabProps {
   heading?: string;
   itemLabel?: string;
   description?: string;
+  /**
+   * Image-only slides — the study-resources carousel. The list drops its
+   * Content and Link & CTA columns and names rows by position instead of by
+   * title, because a slide there carries nothing but an image.
+   */
+  imageOnly?: boolean;
 }
 
 function getAuthHeaders(): Record<string, string> {
@@ -45,6 +51,7 @@ export default function HeroBannerTab({
   heading = "Hero Banners",
   itemLabel = "Hero Banner",
   description = "Drag rows or use the arrow controls — the first row appears first.",
+  imageOnly = false,
 }: HeroBannerTabProps) {
   const [slides, setSlides] = useState<CarouselSlide[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,7 +151,9 @@ export default function HeroBannerTab({
           ...getAuthHeaders(),
         },
         // Keep every editable field: the update endpoint replaces the record,
-        // so sending only the toggle flag would clear the copy.
+        // so sending only the toggle flag would clear the copy. That holds for
+        // image-only slides too — whatever text a row still carries is passed
+        // straight back rather than dropped here.
         body: JSON.stringify({
           page,
           title: slide.title,
@@ -179,6 +188,13 @@ export default function HeroBannerTab({
     setEditingSlide(slide);
     setIsModalOpen(true);
   };
+
+  /**
+   * How a row is named in its control labels. Image-only slides have no title
+   * to name them by, so they fall back to their position in the list.
+   */
+  const rowLabel = (slide: CarouselSlide, index: number) =>
+    imageOnly ? `slide ${index + 1}` : slide.title || itemLabel;
 
   const handleCreate = () => {
     setEditingSlide(null);
@@ -331,13 +347,21 @@ export default function HeroBannerTab({
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[1040px] border-collapse text-left text-sm">
+        <table
+          className={`w-full border-collapse text-left text-sm ${
+            imageOnly ? "min-w-[720px]" : "min-w-[1040px]"
+          }`}
+        >
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50 font-medium text-gray-600">
               <th className="px-4 py-3">Priority</th>
               <th className="px-4 py-3">Image</th>
-              <th className="px-4 py-3">Content</th>
-              <th className="px-4 py-3">Link &amp; CTA</th>
+              {!imageOnly && (
+                <>
+                  <th className="px-4 py-3">Content</th>
+                  <th className="px-4 py-3">Link &amp; CTA</th>
+                </>
+              )}
               <th className="px-4 py-3">Active</th>
               <th className="px-4 py-3">Created</th>
               <th className="px-4 py-3 text-center">Actions</th>
@@ -346,7 +370,10 @@ export default function HeroBannerTab({
           <tbody>
             {slides.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                <td
+                  colSpan={imageOnly ? 5 : 7}
+                  className="px-4 py-8 text-center text-gray-500"
+                >
                   No {itemLabel.toLowerCase()}s created yet.
                 </td>
               </tr>
@@ -383,7 +410,7 @@ export default function HeroBannerTab({
                         type="button"
                         onClick={() => void applyReorder(index, index - 1)}
                         disabled={index === 0 || reordering}
-                        aria-label={`Move ${slide.title || itemLabel} up`}
+                        aria-label={`Move ${rowLabel(slide, index)} up`}
                         title="Move up"
                         className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-25"
                       >
@@ -393,7 +420,7 @@ export default function HeroBannerTab({
                         type="button"
                         onClick={() => void applyReorder(index, index + 1)}
                         disabled={index === slides.length - 1 || reordering}
-                        aria-label={`Move ${slide.title || itemLabel} down`}
+                        aria-label={`Move ${rowLabel(slide, index)} down`}
                         title="Move down"
                         className="flex h-6 w-6 items-center justify-center rounded text-gray-400 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 disabled:cursor-not-allowed disabled:opacity-25"
                       >
@@ -406,7 +433,7 @@ export default function HeroBannerTab({
                   {slide.image_url ? (
                     <Image
                       src={getImageUrl(slide.image_url)}
-                      alt=""
+                      alt={`${imageOnly ? "Slide" : "Hero banner"} ${index + 1}`}
                       width={80}
                       height={56}
                       unoptimized
@@ -418,29 +445,33 @@ export default function HeroBannerTab({
                     </div>
                   )}
                 </td>
-                <td className="max-w-[280px] px-4 py-3">
-                  <p className="truncate font-semibold text-gray-900">
-                    {slide.title || "-"}
-                  </p>
-                  {slide.subtitle && (
-                    <p className="mt-0.5 truncate text-xs text-gray-500">
-                      {slide.subtitle}
-                    </p>
-                  )}
-                </td>
-                <td className="max-w-[220px] px-4 py-3 text-gray-600">
-                  <p className="truncate">{slide.link_url || "-"}</p>
-                  {slide.button_text && (
-                    <p className="mt-0.5 truncate text-xs text-gray-400">
-                      CTA: {slide.button_text}
-                    </p>
-                  )}
-                </td>
+                {!imageOnly && (
+                  <>
+                    <td className="max-w-[280px] px-4 py-3">
+                      <p className="truncate font-semibold text-gray-900">
+                        {slide.title || "-"}
+                      </p>
+                      {slide.subtitle && (
+                        <p className="mt-0.5 truncate text-xs text-gray-500">
+                          {slide.subtitle}
+                        </p>
+                      )}
+                    </td>
+                    <td className="max-w-[220px] px-4 py-3 text-gray-600">
+                      <p className="truncate">{slide.link_url || "-"}</p>
+                      {slide.button_text && (
+                        <p className="mt-0.5 truncate text-xs text-gray-400">
+                          CTA: {slide.button_text}
+                        </p>
+                      )}
+                    </td>
+                  </>
+                )}
                 <td className="px-4 py-3">
                   <button
                     type="button"
                     onClick={() => void handleToggleActive(slide)}
-                    aria-label={`${slide.active ? "Deactivate" : "Activate"} ${slide.title || itemLabel}`}
+                    aria-label={`${slide.active ? "Deactivate" : "Activate"} ${rowLabel(slide, index)}`}
                     aria-pressed={slide.active}
                     className={`rounded-full px-2 py-1 text-xs font-bold uppercase ${
                       slide.active
@@ -461,7 +492,7 @@ export default function HeroBannerTab({
                     <button
                       type="button"
                       onClick={() => handleEdit(slide)}
-                      aria-label={`Edit ${slide.title || itemLabel}`}
+                      aria-label={`Edit ${rowLabel(slide, index)}`}
                       title="Edit"
                       className="rounded p-1.5 text-gray-400 hover:bg-blue-50 hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                     >
@@ -470,7 +501,7 @@ export default function HeroBannerTab({
                     <button
                       type="button"
                       onClick={() => void handleDelete(slide.id)}
-                      aria-label={`Delete ${slide.title || itemLabel}`}
+                      aria-label={`Delete ${rowLabel(slide, index)}`}
                       title="Delete"
                       className="rounded p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600"
                     >
@@ -489,6 +520,7 @@ export default function HeroBannerTab({
           slide={editingSlide}
           page={page}
           itemLabel={itemLabel}
+          imageOnly={imageOnly}
           onClose={handleModalClose}
         />
       )}

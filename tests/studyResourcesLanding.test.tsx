@@ -94,6 +94,50 @@ describe("study resources landing layout contract", () => {
     expect(renderLanding()).not.toContain("Past Questions &amp; Resources");
   });
 
+  test("the section heading, its title and its lead paragraph are gone", () => {
+    const html = renderLanding();
+
+    expect(html).not.toContain("Curated study collections");
+    expect(html).not.toContain("Choose the resource that moves you forward.");
+    expect(html).not.toContain("Start with a focused collection");
+
+    // No visible heading is left standing in their place, but the page still
+    // carries a name for screen readers.
+    expect(html).not.toMatch(/<h2[^>]*>/);
+    expect(html).toContain(
+      '<h1 class="sr-only">Study resources for focused exam preparation</h1>',
+    );
+  });
+
+  test("each card keeps icon, title and a right-side action in one row", () => {
+    const html = renderLanding();
+
+    // The row holding icon, title and action is a flex line; the title and the
+    // action share it, and the description follows in the content column.
+    expect(html).toContain("flex h-full items-start gap-3.5");
+    expect(html).toContain("flex items-start justify-between gap-3");
+    expect(html).toContain("min-w-0 flex-1");
+
+    // Icon stays in its house chip, action gets a right chevron, and the
+    // description sits under the title rather than under the icon.
+    expect(html).toContain("h-11 w-11 shrink-0");
+    expect(html).toContain("lucide-chevron-right");
+    expect(html).toContain("mt-2 text-[13px] leading-relaxed text-gray-500");
+
+    // The old stacked layout is gone.
+    expect(html).not.toContain("mb-4 flex h-11 w-11");
+    expect(html).not.toContain("mt-auto");
+  });
+
+  test("cards keep their accessible action labels and destinations", () => {
+    const html = renderLanding();
+
+    EXPECTED_CARDS.forEach(([label, href]) => {
+      expect(html).toContain(`href="${href}"`);
+      expect(html).toContain(`aria-label="View all: ${label}"`);
+    });
+  });
+
   test("the config exposes an icon per collection and no palette fields", () => {
     STUDY_RESOURCE_CATEGORIES.forEach((category) => {
       expect(typeof category.icon).toBe("string");

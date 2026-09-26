@@ -101,7 +101,8 @@ export default function ManageAdsSection() {
             page="study-resources"
             heading="Study Resources Carousel"
             itemLabel="Study Resources Slide"
-            description="Slides pinned to page=study-resources. Drag rows or use the arrow controls to change the order students see them in."
+            description="Images only, pinned to page=study-resources. Drag rows or use the arrow controls to change the order students see them in."
+            imageOnly
           />
         )}
         {activeTab === "showcase" && <ShowcaseBannerTab />}

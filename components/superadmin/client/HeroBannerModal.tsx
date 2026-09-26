@@ -10,6 +10,12 @@ interface HeroBannerModalProps {
   onClose: (saved?: boolean) => void;
   page?: "landing" | "study-resources";
   itemLabel?: string;
+  /**
+   * Image-only slides — the study-resources carousel. The form drops every text
+   * field and asks for nothing but a picture; the copy columns are still sent
+   * as empty strings so the API contract stays exactly the same.
+   */
+  imageOnly?: boolean;
 }
 
 function getAuthHeaders(): Record<string, string> {
@@ -25,6 +31,7 @@ export default function HeroBannerModal({
   onClose,
   page = "landing",
   itemLabel = "Hero Banner",
+  imageOnly = false,
 }: HeroBannerModalProps) {
   const isEditing = Boolean(slide);
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -100,7 +107,9 @@ export default function HeroBannerModal({
 
   const handleSave = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!title.trim()) {
+    // Image-only slides have no title field at all, so only the landing hero
+    // can fail this check.
+    if (!imageOnly && !title.trim()) {
       alert("Please enter a title");
       return;
     }
@@ -109,19 +118,21 @@ export default function HeroBannerModal({
     try {
       const finalImageUrl = await uploadImage();
       if (!finalImageUrl) {
-        alert("Please upload a banner image");
+        alert(`Please upload a ${imageOnly ? "slide" : "banner"} image`);
         setSaving(false);
         return;
       }
 
+      // The text columns stay in the payload either way: the backend keeps
+      // accepting them, and image-only slides simply store empty strings.
       const payload = {
         page,
-        title: title.trim(),
-        subtitle: subtitle.trim(),
-        description: description.trim(),
+        title: imageOnly ? "" : title.trim(),
+        subtitle: imageOnly ? "" : subtitle.trim(),
+        description: imageOnly ? "" : description.trim(),
         image_url: finalImageUrl,
-        link_url: linkUrl.trim(),
-        button_text: buttonText.trim(),
+        link_url: imageOnly ? "" : linkUrl.trim(),
+        button_text: imageOnly ? "" : buttonText.trim(),
         active,
       };
       const url = isEditing
@@ -186,61 +197,70 @@ export default function HeroBannerModal({
 
         <form onSubmit={handleSave}>
           <div className="space-y-5 p-6">
-            <div>
-              <label
-                htmlFor="carousel-slide-title"
-                className="mb-2 block text-sm font-semibold text-gray-700"
-              >
-                Title
-              </label>
-              <input
-                id="carousel-slide-title"
-                type="text"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                required
-                placeholder="Enter slide title"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
-              />
-            </div>
+            {imageOnly ? (
+              <p className="text-sm leading-relaxed text-gray-500">
+                This carousel shows the picture on its own — there is no title,
+                description or button to fill in.
+              </p>
+            ) : (
+              <>
+                <div>
+                  <label
+                    htmlFor="carousel-slide-title"
+                    className="mb-2 block text-sm font-semibold text-gray-700"
+                  >
+                    Title
+                  </label>
+                  <input
+                    id="carousel-slide-title"
+                    type="text"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    required
+                    placeholder="Enter slide title"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                  />
+                </div>
 
-            <div>
-              <label
-                htmlFor="carousel-slide-subtitle"
-                className="mb-2 block text-sm font-semibold text-gray-700"
-              >
-                Subtitle
-              </label>
-              <input
-                id="carousel-slide-subtitle"
-                type="text"
-                value={subtitle}
-                onChange={(event) => setSubtitle(event.target.value)}
-                placeholder="One short supporting line"
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
-              />
-            </div>
+                <div>
+                  <label
+                    htmlFor="carousel-slide-subtitle"
+                    className="mb-2 block text-sm font-semibold text-gray-700"
+                  >
+                    Subtitle
+                  </label>
+                  <input
+                    id="carousel-slide-subtitle"
+                    type="text"
+                    value={subtitle}
+                    onChange={(event) => setSubtitle(event.target.value)}
+                    placeholder="One short supporting line"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                  />
+                </div>
 
-            <div>
-              <label
-                htmlFor="carousel-slide-description"
-                className="mb-2 block text-sm font-semibold text-gray-700"
-              >
-                Description
-              </label>
-              <textarea
-                id="carousel-slide-description"
-                rows={3}
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder="Explain what students get from this slide"
-                className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
-              />
-            </div>
+                <div>
+                  <label
+                    htmlFor="carousel-slide-description"
+                    className="mb-2 block text-sm font-semibold text-gray-700"
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    id="carousel-slide-description"
+                    rows={3}
+                    value={description}
+                    onChange={(event) => setDescription(event.target.value)}
+                    placeholder="Explain what students get from this slide"
+                    className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                  />
+                </div>
+              </>
+            )}
 
             <div>
               <span className="mb-2 block text-sm font-semibold text-gray-700">
-                Banner image
+                {imageOnly ? "Slide image" : "Banner image"}
               </span>
               <label className="block cursor-pointer rounded-xl border-2 border-dashed border-gray-300 p-4 text-center hover:bg-gray-50">
                 {imagePreview ? (
@@ -248,13 +268,15 @@ export default function HeroBannerModal({
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={imagePreview}
-                    alt="Banner preview"
+                    alt={`${imageOnly ? "Slide" : "Banner"} preview`}
                     className="mx-auto max-h-40 rounded object-contain"
                   />
                 ) : (
                   <div className="py-6">
                     <Upload className="mx-auto mb-2 text-gray-400" size={32} aria-hidden="true" />
-                    <p className="text-sm text-gray-500">Click to upload banner</p>
+                    <p className="text-sm text-gray-500">
+                      Click to upload {imageOnly ? "slide image" : "banner"}
+                    </p>
                   </div>
                 )}
                 <input
@@ -275,43 +297,47 @@ export default function HeroBannerModal({
               )}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="carousel-slide-link"
-                  className="mb-2 block text-sm font-semibold text-gray-700"
-                >
-                  Link URL
-                </label>
-                <input
-                  id="carousel-slide-link"
-                  type="url"
-                  value={linkUrl}
-                  onChange={(event) => setLinkUrl(event.target.value)}
-                  placeholder="https://example.com"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="carousel-slide-cta"
-                  className="mb-2 block text-sm font-semibold text-gray-700"
-                >
-                  Button text
-                </label>
-                <input
-                  id="carousel-slide-cta"
-                  type="text"
-                  value={buttonText}
-                  onChange={(event) => setButtonText(event.target.value)}
-                  placeholder="Explore now"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
-                />
-              </div>
-            </div>
-            <p className="-mt-3 text-xs text-gray-400">
-              The CTA only appears when a link URL is set.
-            </p>
+            {!imageOnly && (
+              <>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="carousel-slide-link"
+                      className="mb-2 block text-sm font-semibold text-gray-700"
+                    >
+                      Link URL
+                    </label>
+                    <input
+                      id="carousel-slide-link"
+                      type="url"
+                      value={linkUrl}
+                      onChange={(event) => setLinkUrl(event.target.value)}
+                      placeholder="https://example.com"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="carousel-slide-cta"
+                      className="mb-2 block text-sm font-semibold text-gray-700"
+                    >
+                      Button text
+                    </label>
+                    <input
+                      id="carousel-slide-cta"
+                      type="text"
+                      value={buttonText}
+                      onChange={(event) => setButtonText(event.target.value)}
+                      placeholder="Explore now"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-blue-600"
+                    />
+                  </div>
+                </div>
+                <p className="-mt-3 text-xs text-gray-400">
+                  The CTA only appears when a link URL is set.
+                </p>
+              </>
+            )}
 
             <label className="flex cursor-pointer items-center gap-3">
               <input
