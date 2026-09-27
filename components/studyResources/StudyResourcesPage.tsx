@@ -20,6 +20,7 @@ import {
 import {
   getStudyResourceStreamUrl,
   isVideoStudyResourceType,
+  requestStudyResourcePlaybackToken,
   studyResourcesApi,
   StudyResource,
 } from "@/services/studyResourcesApi";
@@ -58,7 +59,11 @@ function formatFileSize(bytes: number | string): string {
 const searchInputClass =
   "w-full rounded-md border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-brand-blue focus:ring-1 focus:ring-brand-blue";
 
-type DownloadTarget = { resource: StudyResource } | null;
+/** What the login modal is asking for, so its copy names the real action. */
+type AccessTarget = {
+  resource: StudyResource;
+  action: "download" | "watch";
+} | null;
 
 interface StudyResourcesPageProps {
   lockedType?: ApiStudyResourceType;
@@ -91,7 +96,9 @@ export default function StudyResourcesPage({
 
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [downloadingId, setDownloadingId] = useState<number | null>(null);
-  const [modalResource, setModalResource] = useState<DownloadTarget>(null);
+  const [watchingId, setWatchingId] = useState<number | null>(null);
+  const [watchError, setWatchError] = useState<string | null>(null);
+  const [modalResource, setModalResource] = useState<AccessTarget>(null);
   // Below lg the sidebar column is replaced by a bottom drawer holding the very
   // same filter panel, which is how Find College handles its own filters.
   const [showMobileFilters, setShowMobileFilters] = useState(false);
@@ -194,7 +201,7 @@ export default function StudyResourcesPage({
 
   const handleDownload = (resource: StudyResource) => {
     if (!user) {
-      setModalResource({ resource });
+      setModalResource({ resource, action: "download" });
       setLoginModalOpen(true);
       return;
     }
@@ -208,6 +215,51 @@ export default function StudyResourcesPage({
       "_self",
     );
     setTimeout(() => setDownloadingId(null), 1500);
+  };
+
+  /**
+   * Playback is gated, so a watch is a two-step handshake: trade the session
+   * for a short-lived token bound to this one resource, then open the stream
+   * carrying it. A 401 is a normal outcome here, not a failure — the service
+   * reports it as `login-required` and the catalog answers it the same way the
+   * download button does.
+   */
+  const handleWatch = async (resource: StudyResource) => {
+    if (!user) {
+      setModalResource({ resource, action: "watch" });
+      setLoginModalOpen(true);
+      return;
+    }
+    setWatchError(null);
+    setWatchingId(resource.id);
+    // Opened synchronously so the token round-trip does not cost the new tab
+    // to the popup blocker; the placeholder is closed again on failure.
+    const tab = window.open("", "_blank");
+    try {
+      const authorization = await requestStudyResourcePlaybackToken(
+        resource.id,
+      );
+      if (authorization.status !== "authorized") {
+        if (tab) tab.close();
+        setWatchError(authorization.message);
+        return;
+      }
+      const url = getStudyResourceStreamUrl(
+        resource.id,
+        authorization.token.token,
+      );
+      if (tab) tab.location.href = url;
+      else window.open(url, "_blank", "noopener");
+    } catch (err) {
+      if (tab) tab.close();
+      setWatchError(
+        err instanceof Error
+          ? err.message
+          : "Failed to prepare this lecture for playback",
+      );
+    } finally {
+      setWatchingId(null);
+    }
   };
 
   const typeLabel = (value: string) =>
@@ -392,6 +444,12 @@ export default function StudyResourcesPage({
                 </div>
               ) : (
                 <>
+                  {watchError && (
+                    <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-6 text-center">
+                      <p className="font-semibold text-red-700">{watchError}</p>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
                     {resources.map((resource) => {
                       const isVideo = isVideoStudyResourceType(
@@ -460,16 +518,18 @@ export default function StudyResourcesPage({
                               )}
                             </span>
                             {isVideo ? (
-                              // Playback is public, so it goes straight to the
-                              // backend stream for this exact lecture.
-                              <a
-                                href={getStudyResourceStreamUrl(resource.id)}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="inline-flex items-center gap-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100"
+                              // Playback is not public: the stream endpoint
+                              // only answers a short-lived token bound to this
+                              // one resource, so the click has to trade the
+                              // session for that token before it opens
+                              // anything.
+                              <button
+                                onClick={() => handleWatch(resource)}
+                                disabled={watchingId === resource.id}
+                                className="inline-flex items-center gap-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 disabled:opacity-60"
                               >
                                 <Play size={13} /> Watch
-                              </a>
+                              </button>
                             ) : (
                               <button
                                 onClick={() => handleDownload(resource)}
@@ -516,7 +576,7 @@ export default function StudyResourcesPage({
               Login required
             </h2>
             <p className="text-sm leading-relaxed text-gray-500">
-              Please log in to download
+              Please log in to {modalResource?.action ?? "download"}
               {modalResource ? ` "${modalResource.resource.title}"` : " this resource"}.
             </p>
             <div className="mt-6 flex gap-2.5">
