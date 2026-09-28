@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGlobalCourses, searchGlobalCourses, fetchCourseFilterCounts, CourseFilterCountsResponse } from "@/services/course-api";
 import type { GlobalCourse } from "@/types/course";
@@ -11,7 +11,10 @@ import {
   defaultCourseFilterCounts,
   CourseFilterCounts,
 } from "./types";
+import { buildCourseFilterCounts, filterCourses } from "./filter-matching";
 import CourseGrid from "./CourseGrid";
+
+const COURSES_PER_PAGE = 18;
 
 interface CourseFinderPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -25,16 +28,35 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({
   onNavigate,
   initialData,
 }) => {
-  const [filters, setFilters] = useState<CourseFinderFilters>(
-    defaultCourseFinderFilters,
-  );
+  // Filters, the applied search term and the page number live in one state
+  // object, so every change that reshapes the result set resets to page 1 by
+  // construction. Resetting from an effect left page 3 selected after a filter
+  // narrowed the results to a single page, which rendered an empty grid.
+  const [finder, setFinder] = useState<{
+    filters: CourseFinderFilters;
+    search: string;
+    currentPage: number;
+  }>({ filters: defaultCourseFinderFilters, search: "", currentPage: 1 });
+  const { filters, search: debouncedSearch, currentPage } = finder;
   const [globalSearch, setGlobalSearch] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const setFilters = useCallback(
+    (next: CourseFinderFilters) =>
+      setFinder((prev) => ({ ...prev, filters: next, currentPage: 1 })),
+    [],
+  );
+  const setCurrentPage = useCallback(
+    (page: number) => setFinder((prev) => ({ ...prev, currentPage: page })),
+    [],
+  );
 
   // Debounce search input
   React.useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(globalSearch), 300);
+    const timer = setTimeout(
+      () => setFinder((prev) => ({ ...prev, search: globalSearch, currentPage: 1 })),
+      300,
+    );
     return () => clearTimeout(timer);
   }, [globalSearch]);
 
@@ -48,69 +70,44 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({
   });
 
   // Fetch search results when search is active
-  const { data: searchData } = useQuery({
+  const { data: searchData, isFetching: isSearchFetching } = useQuery({
     queryKey: ["global-courses-search", debouncedSearch],
     queryFn: () => searchGlobalCourses(debouncedSearch),
     enabled: debouncedSearch.trim().length > 0,
   });
 
-  // Fetch filter counts from backend
-  const { data: filterCountsData } = useQuery({
+  // Kept for the server-rendered payload; facet counts themselves are derived
+  // from the loaded courses because the API groups them by the raw stored
+  // spelling, which never lines up with the grouped public filter options.
+  useQuery({
     queryKey: ["course-filter-counts"],
     queryFn: fetchCourseFilterCounts,
     initialData: initialData?.counts,
   });
 
-  const allCourses = allData?.courses || [];
-  const baseCourses = debouncedSearch.trim() ? (searchData || []) : allCourses;
+  const allCourses = useMemo(() => allData?.courses ?? [], [allData]);
+  const isSearching = debouncedSearch.trim().length > 0;
+  const baseCourses = useMemo(
+    () => (isSearching ? (searchData ?? []) : allCourses),
+    [isSearching, searchData, allCourses],
+  );
 
-  // Map backend filter counts to frontend format
-  const filterCounts: CourseFilterCounts = useMemo(() => {
-    if (!filterCountsData) return defaultCourseFilterCounts;
-    return {
-      byAcademic: filterCountsData.level_counts || {},
-      byField: filterCountsData.field_counts || {},
-      byUniversity: filterCountsData.affiliation_counts || {},
-      byProvider: {},
-      byDuration: {},
-    };
-  }, [filterCountsData]);
+  // Facet counts always reflect the unfiltered set so the sidebar stays stable
+  // while the user toggles options.
+  const filterCounts: CourseFilterCounts = useMemo(
+    () => (allCourses.length > 0 ? buildCourseFilterCounts(allCourses) : defaultCourseFilterCounts),
+    [allCourses],
+  );
 
-  const filteredCourses = useMemo(() => {
-    return baseCourses.filter((course) => {
-      // Academic Level Filter — match against full level string
-      if (filters.academicLevels.length > 0) {
-        const level = (course.level || "").toLowerCase();
-        const matchesLevel = filters.academicLevels.some((l) => {
-          const filterLabel = l.toLowerCase();
-          return level.includes(filterLabel) || filterLabel.includes(level);
-        });
-        if (!matchesLevel) return false;
-      }
+  const filteredCourses = useMemo(
+    () => filterCourses(baseCourses, filters),
+    [baseCourses, filters],
+  );
 
-      // Field of Study Filter — match against full field string
-      if (filters.fields.length > 0) {
-        const field = (course.fieldOfStudy || course.field || "").toLowerCase();
-        const matchesField = filters.fields.some((f) => {
-          const filterLabel = f.toLowerCase();
-          return field.includes(filterLabel) || filterLabel.includes(field);
-        });
-        if (!matchesField) return false;
-      }
-
-      // University/Board Filter — match against affiliation name
-      if (filters.universities.length > 0) {
-        const affiliation = (course.affiliationName || "").toLowerCase();
-        const matchesUni = filters.universities.some((u) => {
-          const filterLabel = u.toLowerCase();
-          return affiliation.includes(filterLabel) || filterLabel.includes(affiliation);
-        });
-        if (!matchesUni) return false;
-      }
-
-      return true;
-    });
-  }, [baseCourses, filters]);
+  const totalPages = Math.max(1, Math.ceil(filteredCourses.length / COURSES_PER_PAGE));
+  const activePage = Math.min(currentPage, totalPages);
+  const rangeStart = filteredCourses.length === 0 ? 0 : (activePage - 1) * COURSES_PER_PAGE + 1;
+  const rangeEnd = Math.min(activePage * COURSES_PER_PAGE, filteredCourses.length);
 
   const hasActiveFilters =
     filters.academicLevels.length > 0 ||
@@ -152,7 +149,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({
           <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-2">
             <div>
               <h1 className="text-base font-normal text-gray-900">
-                Showing 1-{filteredCourses.length} of {filteredCourses.length}{" "}
+                Showing {rangeStart}-{rangeEnd} of {filteredCourses.length}{" "}
                 <span className="font-bold">courses</span>
               </h1>
             </div>
@@ -186,11 +183,12 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({
 
           <CourseGrid
             courses={filteredCourses}
-            totalCourses={filteredCourses.length}
+            currentPage={activePage}
+            onPageChange={setCurrentPage}
             onNavigate={onNavigate}
             filters={filters}
             onFiltersChange={setFilters}
-            isLoading={isLoading}
+            isLoading={isLoading || isSearchFetching}
           />
         </section>
       </main>

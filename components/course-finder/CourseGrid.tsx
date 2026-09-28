@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
 import { GlobalCourse } from "@/types/course";
@@ -16,7 +16,8 @@ interface CourseGridProps {
     data: { courseId: number; courseTitle: string },
   ) => void;
   courses: GlobalCourse[];
-  totalCourses: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   isLoading?: boolean;
   filters: CourseFinderFilters;
   onFiltersChange: (next: CourseFinderFilters) => void;
@@ -27,10 +28,11 @@ const COURSES_PER_PAGE = 18;
 const CourseGrid: React.FC<CourseGridProps> = ({
   onNavigate,
   courses,
+  currentPage,
+  onPageChange,
   isLoading,
 }) => {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
   const { savedCourseIds, pendingBookmarks, toggleSaved } = useCourseBookmarks();
 
   const allCourses = useMemo(() => {
@@ -59,7 +61,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {allCourses.length === 0 && !isLoading && (
+        {currentCourses.length === 0 && !isLoading && (
           <div className="col-span-1 md:col-span-2 xl:col-span-3 flex flex-col items-center justify-center py-20 px-4">
             <BookOpen className="w-12 h-12 text-gray-300 mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-1">No Courses Found</h3>
@@ -123,7 +125,7 @@ const CourseGrid: React.FC<CourseGridProps> = ({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          onPageChange={setCurrentPage}
+          onPageChange={onPageChange}
         />
       </div>
     </>

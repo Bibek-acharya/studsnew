@@ -10,6 +10,11 @@ import {
 import { FaSliders } from "react-icons/fa6";
 import GlobalFilterSection from "@/components/ui/GlobalFilterSection";
 import { NEPAL_DISTRICTS } from "@/lib/location-data";
+import {
+  ACADEMIC_LEVEL_OPTIONS,
+  FIELD_OPTIONS,
+  UNIVERSITY_OPTIONS,
+} from "./filter-matching";
 
 interface CourseFiltersProps {
   filters: CourseFinderFilters;
@@ -17,6 +22,19 @@ interface CourseFiltersProps {
   onChange: (next: CourseFinderFilters) => void;
   onClose?: () => void;
 }
+
+// ── Pending: province / district filter ─────────────────────────────────────────
+//
+// `CourseFinderFilters.province` ("All Provinces") and `.location` ([]) exist in
+// ./types.ts but have never been rendered or applied. These declarations are the
+// scaffold for that province -> district cascade; see the sibling filters that
+// do ship one: components/find-college/FilterSidebar.tsx and
+// components/admissions/AdmissionFilterSidebar.tsx.
+//
+// Before wiring this up, note that `Course.location` is a free-text field, so
+// matching it against NEPAL_DISTRICTS needs the alias-list treatment used for
+// levels and fields in ./filter-matching. Shipping the UI first is what made the
+// level filter drop every "Diploma (CTEVT)" course.
 
 type DistrictOption = {
   id: string;
@@ -30,95 +48,6 @@ type ProvinceOption = {
 };
 
 type ProvinceName = keyof typeof NEPAL_DISTRICTS;
-
-// ── Filter Data ────────────────────────────────────────────────────────────────
-
-const ACADEMIC_LEVELS = [
-  { id: "Higher Secondary (+2)", label: "Higher Secondary (+2)" },
-  { id: "A Levels", label: "A Levels" },
-  { id: "Pre-Diploma / TSLC", label: "Pre-Diploma / TSLC" },
-  { id: "Diploma / PCL", label: "Diploma / PCL" },
-  { id: "Bachelor's Degree", label: "Bachelor's Degree" },
-  { id: "Postgraduate Diploma", label: "Postgraduate Diploma" },
-  { id: "Master's Degree", label: "Master's Degree" },
-  { id: "M.Phil.", label: "M.Phil." },
-  { id: "PhD / Doctorate", label: "PhD / Doctorate" },
-  { id: "Professional Qualifications", label: "Professional Qualifications" },
-  { id: "Certificate Courses", label: "Certificate Courses" },
-  { id: "Short-Term Courses", label: "Short-Term Courses" },
-  { id: "Vocational / Technical Training", label: "Vocational / Technical Training" },
-  { id: "Skill Development Programs", label: "Skill Development Programs" },
-  { id: "Entrance Preparation", label: "Entrance Preparation" },
-  { id: "Language & Test Preparation", label: "Language & Test Preparation" },
-  { id: "Continuing / Lifelong Education", label: "Continuing / Lifelong Education" },
-];
-
-const FIELDS = [
-  { id: "Management & Business", label: "Management & Business" },
-  { id: "Accounting & Finance", label: "Accounting & Finance" },
-  { id: "Computer Science & Information Technology", label: "Computer Science & Information Technology" },
-  { id: "Engineering", label: "Engineering" },
-  { id: "Science & Mathematics", label: "Science & Mathematics" },
-  { id: "Medicine & Health Sciences", label: "Medicine & Health Sciences" },
-  { id: "Nursing", label: "Nursing" },
-  { id: "Pharmacy", label: "Pharmacy" },
-  { id: "Dentistry", label: "Dentistry" },
-  { id: "Ayurveda & Alternative Medicine", label: "Ayurveda & Alternative Medicine" },
-  { id: "Agriculture", label: "Agriculture" },
-  { id: "Veterinary & Animal Science", label: "Veterinary & Animal Science" },
-  { id: "Forestry & Environmental Studies", label: "Forestry & Environmental Studies" },
-  { id: "Education & Teaching", label: "Education & Teaching" },
-  { id: "Humanities", label: "Humanities" },
-  { id: "Social Sciences", label: "Social Sciences" },
-  { id: "Law & Legal Studies", label: "Law & Legal Studies" },
-  { id: "Economics", label: "Economics" },
-  { id: "Hospitality & Hotel Management", label: "Hospitality & Hotel Management" },
-  { id: "Travel & Tourism", label: "Travel & Tourism" },
-  { id: "Architecture, Design & Planning", label: "Architecture, Design & Planning" },
-  { id: "Media & Communication", label: "Media & Communication" },
-  { id: "Arts & Fine Arts", label: "Arts & Fine Arts" },
-  { id: "Fashion & Textile", label: "Fashion & Textile" },
-  { id: "Aviation", label: "Aviation" },
-  { id: "Sports & Physical Education", label: "Sports & Physical Education" },
-  { id: "Library & Information Science", label: "Library & Information Science" },
-  { id: "Languages & Literature", label: "Languages & Literature" },
-  { id: "Public Administration & Governance", label: "Public Administration & Governance" },
-  { id: "Development Studies", label: "Development Studies" },
-  { id: "Disaster & Risk Management", label: "Disaster & Risk Management" },
-  { id: "Maritime / Marine Studies", label: "Maritime / Marine Studies" },
-  { id: "Food & Nutrition", label: "Food & Nutrition" },
-  { id: "Religious & Cultural Studies", label: "Religious & Cultural Studies" },
-  { id: "Security & Defence Studies", label: "Security & Defence Studies" },
-  { id: "Technical & Vocational", label: "Technical & Vocational" },
-  { id: "Professional Studies", label: "Professional Studies" },
-  { id: "Language & Test Preparation", label: "Language & Test Preparation" },
-  { id: "Skill & Short-Term Courses", label: "Skill & Short-Term Courses" },
-  { id: "Other / Interdisciplinary", label: "Other / Interdisciplinary" },
-];
-
-const UNIVERSITIES = [
-  { id: "Tribhuvan University (TU)", label: "Tribhuvan University (TU)" },
-  { id: "Kathmandu University (KU)", label: "Kathmandu University (KU)" },
-  { id: "Pokhara University (PU)", label: "Pokhara University (PU)" },
-  { id: "Purbanchal University (PoU)", label: "Purbanchal University (PoU)" },
-  { id: "Nepal Sanskrit University (NSU)", label: "Nepal Sanskrit University (NSU)" },
-  { id: "Lumbini Buddhist University (LBU)", label: "Lumbini Buddhist University (LBU)" },
-  { id: "Mid-West University (MU)", label: "Mid-West University (MU)" },
-  { id: "Far Western University (FWU)", label: "Far Western University (FWU)" },
-  { id: "Agriculture and Forestry University (AFU)", label: "Agriculture and Forestry University (AFU)" },
-  { id: "Nepal Open University (NOU)", label: "Nepal Open University (NOU)" },
-  { id: "Rajarshi Janak University (RJU)", label: "Rajarshi Janak University (RJU)" },
-  { id: "Manmohan Technical University (MTU)", label: "Manmohan Technical University (MTU)" },
-  { id: "Gandaki University (GU)", label: "Gandaki University (GU)" },
-  { id: "Lumbini Technological University (LTU)", label: "Lumbini Technological University (LTU)" },
-  { id: "Madhesh University (MU)", label: "Madhesh University (MU)" },
-  { id: "University of Nepal", label: "University of Nepal" },
-  { id: "Madan Bhandari University of Science and Technology (MBUST)", label: "Madan Bhandari University of Science and Technology (MBUST)" },
-  { id: "Vidushi Yogmaya Himalayan Ayurveda University", label: "Vidushi Yogmaya Himalayan Ayurveda University" },
-  { id: "Shahid Dasharath Chand Health Sciences University", label: "Shahid Dasharath Chand Health Sciences University" },
-  { id: "National Examinations Board (NEB)", label: "National Examinations Board (NEB)" },
-  { id: "Council for Technical Education and Vocational Training (CTEVT)", label: "Council for Technical Education and Vocational Training (CTEVT)" },
-];
 
 
 // ── Sub-Components ────────────────────────────────────────────────────────────
@@ -212,9 +141,9 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
       }
     };
 
-    addTags("academicLevels", ACADEMIC_LEVELS);
-    addTags("fields", FIELDS);
-    addTags("universities", UNIVERSITIES);
+    addTags("academicLevels", ACADEMIC_LEVEL_OPTIONS);
+    addTags("fields", FIELD_OPTIONS);
+    addTags("universities", UNIVERSITY_OPTIONS);
 
     if (filters.entranceRequired !== "") {
       tags.push({ key: "entranceRequired", value: filters.entranceRequired, label: `Entrance: ${filters.entranceRequired}` });
@@ -309,7 +238,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
               </div>
               <div className="flex flex-col gap-3.5 custom-scrollbar max-h-[280px] overflow-y-auto pr-1">
-                {ACADEMIC_LEVELS.filter((l) =>
+                {ACADEMIC_LEVEL_OPTIONS.filter((l) =>
                   l.label.toLowerCase().includes(academicSearch.toLowerCase()),
                 ).map((level) => (
                   <CheckboxItem
@@ -338,7 +267,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
               </div>
               <div className="flex flex-col gap-3.5 custom-scrollbar max-h-[280px] overflow-y-auto pr-1">
-                {FIELDS.filter((f) =>
+                {FIELD_OPTIONS.filter((f) =>
                   f.label.toLowerCase().includes(fieldSearch.toLowerCase()),
                 ).map((field) => (
                   <CheckboxItem
@@ -367,7 +296,7 @@ const CourseFilters: React.FC<CourseFiltersProps> = ({
                 <i className="fa-solid fa-magnifying-glass absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
               </div>
               <div className="flex flex-col gap-3.5 custom-scrollbar max-h-[280px] overflow-y-auto pr-1">
-                {UNIVERSITIES.filter((u) =>
+                {UNIVERSITY_OPTIONS.filter((u) =>
                   u.label.toLowerCase().includes(universitySearch.toLowerCase()),
                 ).map((uni) => (
                   <CheckboxItem
