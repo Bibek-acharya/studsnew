@@ -1,5 +1,6 @@
 import { apiRequest } from "./api";
 import { fetchCourses } from "./course-api";
+import type { ResourceAccess } from "./coinsApi";
 import type { GlobalCourse } from "@/types/course";
 
 export {
@@ -34,6 +35,15 @@ export interface StudyResource {
   duration_seconds?: number | null;
   /** Video lectures only: play counter. */
   views?: number;
+  /**
+   * Per-resource coin state, present only while the gate is on.
+   *
+   * Its ABSENCE is the feature switch: with the gate off the list endpoint
+   * sends no `access` block, `resolveResourceAccess` returns null for the item,
+   * and the card renders exactly as it did before coins existed. Nothing in the
+   * UI is told the gate is on, so the UI cannot turn it on either.
+   */
+  access?: ResourceAccess | null;
 }
 
 export interface StudyResourceListEnvelope {

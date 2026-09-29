@@ -538,7 +538,35 @@ describe("StudyResourcesPage result states", () => {
     expect(container.textContent).toContain("Try changing your search or filters.");
   });
 
-  test("a failed request is reported in the shared error panel", async () => {
+  test("each card renders the extracted ResourceCard, not an inline copy", async () => {
+  stub = { items: [{ id: 1, title: "One" } as StudyResource], total: 1 };
+  const container = await render();
+
+  // The card used to be inline JSX here and again in VideoLecturesPage. It is
+  // one component now, so a locked state cannot be implemented on one page and
+  // forgotten on the other.
+  expect(container.querySelectorAll("article.min-w-0")).toHaveLength(1);
+  expect(container.querySelector("article h3")?.textContent).toBe("One");
+});
+
+test("with no coin state on the item, the card is the pre-coins card exactly", async () => {
+  stub = { items: [{ id: 1, title: "One" } as StudyResource], total: 1 };
+  const container = await render();
+
+  // The gate is off for this item, so there is no badge, no dialog, and the
+  // plain Download button the catalogue always had. Switching the gate on is
+  // therefore not a visual redesign of the grid.
+  const text = container.textContent ?? "";
+  expect(text).not.toContain("StudsTokens");
+  expect(text).not.toContain("Starter");
+  expect(container.querySelector("[role='dialog']")).toBeNull();
+  const download = Array.from(container.querySelectorAll("button")).find(
+    (b) => b.textContent?.trim() === "Download",
+  );
+  expect(download?.className).toContain("bg-blue-50");
+});
+
+test("a failed request is reported in the shared error panel", async () => {
     stub = { failWith: "Service unavailable" };
     const container = await render();
 

@@ -2,25 +2,19 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  Calendar,
-  ChevronLeft,
-  Eye,
-  Loader2,
-  LockKeyhole,
-  PlayCircle,
-  Search,
-} from "lucide-react";
+import { ChevronLeft, Loader2, PlayCircle, Search } from "lucide-react";
 import {
   studyResourcesApi,
   type StudyResource,
   type StudyResourcePage,
 } from "@/services/studyResourcesApi";
-import { stripHtml } from "@/services/api";
+import { useAuth } from "@/services/AuthContext";
 import CourseCombobox from "@/components/studyResources/CourseCombobox";
+import ResourceCard from "@/components/studyResources/ResourceCard";
+import { resolveResourceAccess } from "@/components/coins/useCoinState";
+import { coinsApi, type CoinBalance } from "@/services/coinsApi";
 import { requireStudyResourceCategory } from "./studyResourceCategories";
 import VideoLecturePlayer from "./VideoLecturePlayer";
-import { formatCount, formatDuration } from "./videoFormat";
 
 const PAGE_SIZE = 12;
 const category = requireStudyResourceCategory("video-lectures");
@@ -37,12 +31,18 @@ export default function VideoLecturesPage({
   initialPage,
 }: VideoLecturesPageProps) {
   const seeded = useRef(false);
+  const { user } = useAuth();
   const [resources, setResources] = useState<StudyResource[]>(
     initialPage?.items ?? [],
   );
   const [total, setTotal] = useState(initialPage?.total ?? 0);
   const [loading, setLoading] = useState(!initialPage);
   const [error, setError] = useState<string | null>(null);
+  // The wallet, tagged with the user it was read for. See the effect below.
+  const [wallet, setWallet] = useState<{
+    userId: number | null;
+    balance: CoinBalance | null;
+  } | null>(null);
 
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -108,6 +108,43 @@ export default function VideoLecturesPage({
       }),
     [yearOptions],
   );
+
+  // One wallet read for the list, and only for a signed-in student. Tagged with
+  // the user it belongs to and derived below, so signing out resolves every
+  // badge to `anonymous` without a cascading setState inside the effect.
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    // `user.id` is optional on the session type; a session without one is not a
+    // wallet we can attribute, so the read is tagged null and the derived
+    // balance stays null: undetermined, never zero.
+    const userId = user.id ?? null;
+    void coinsApi.getBalance().then((balance) => {
+      if (active) setWallet({ userId, balance });
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  // Null means "no wallet could be read", never zero. See useCoinState.
+  const balance =
+    user && wallet?.userId === (user.id ?? null) ? wallet.balance : null;
+
+  /**
+   * The one access decision, shared with the document catalogue. A lecture with
+   * no `access` block resolves to null, so with the gate off the list renders
+   * exactly as it did before coins existed — including the removal of the
+   * `text-slate-400` "Sign in to play" label, which sat at 2.56:1 contrast
+   * (06 §11.2) and is replaced by the state badge when the gate is on.
+   */
+  const accessFor = (lecture: StudyResource) =>
+    resolveResourceAccess({
+      access: lecture.access ?? null,
+      balance,
+      signedIn: Boolean(user),
+      isPublished: lecture.is_published,
+    });
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   // Derived, not stored: a filtered-out selection falls back to the first
@@ -259,65 +296,18 @@ export default function VideoLecturesPage({
             </div>
           ) : (
             <ul className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-              {resources.map((lecture) => {
-                const isSelected = lecture.id === selectedId;
-                return (
-                  <li key={lecture.id} className="min-w-0">
-                    <button
-                      type="button"
-                      onClick={() => setSelectedId(lecture.id)}
-                      aria-pressed={isSelected}
-                      className={`group flex h-full w-full flex-col rounded-md border bg-white p-4 text-left transition-all ${
-                        isSelected
-                          ? "border-rose-300 shadow-[0_10px_30px_-20px_rgba(225,29,72,0.55)] ring-1 ring-rose-200"
-                          : "border-gray-200 hover:-translate-y-0.5 hover:border-rose-200 hover:shadow-[0_14px_32px_-24px_rgba(15,23,42,0.5)]"
-                      }`}
-                    >
-                      <div className="mb-4 flex items-start justify-between gap-3">
-                        <span
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors ${
-                            isSelected
-                              ? "bg-rose-600 text-white"
-                              : "bg-rose-50 text-rose-500 group-hover:bg-rose-100"
-                          }`}
-                        >
-                          <PlayCircle className="h-5 w-5" aria-hidden="true" />
-                        </span>
-                        <span className="rounded bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600">
-                          {formatDuration(lecture.duration_seconds)}
-                        </span>
-                      </div>
-                      <h3 className="mb-2 text-base font-semibold text-gray-900">
-                        {lecture.title}
-                      </h3>
-                      <p className="mb-4 line-clamp-2 min-h-[40px] text-[13px] leading-relaxed text-gray-500">
-                        {stripHtml(lecture.description) || "—"}
-                      </p>
-                      <div className="mt-auto flex flex-wrap items-center gap-3 border-t border-gray-100 pt-3 text-xs text-gray-500">
-                        {lecture.course && (
-                          <span className="truncate">{lecture.course}</span>
-                        )}
-                        {lecture.year && (
-                          <span className="inline-flex items-center gap-1.5">
-                            <Calendar size={12} aria-hidden="true" />
-                            {lecture.year}
-                          </span>
-                        )}
-                        <span className="ml-auto inline-flex items-center gap-1.5">
-                          <Eye size={12} aria-hidden="true" />
-                          <span className="sr-only">Views:</span>
-                          {formatCount(lecture.views)}
-                        </span>
-                        {/* Playback is gated, so say so before the tap. */}
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-400">
-                          <LockKeyhole size={12} aria-hidden="true" />
-                          Sign in to play
-                        </span>
-                      </div>
-                    </button>
-                  </li>
-                );
-              })}
+              {resources.map((lecture) => (
+                <ResourceCard
+                  key={lecture.id}
+                  resource={lecture}
+                  variant="video"
+                  access={accessFor(lecture)}
+                  selected={lecture.id === selectedId}
+                  onSelect={() => setSelectedId(lecture.id)}
+                  onPrimaryAction={() => setSelectedId(lecture.id)}
+                  onSignIn={() => setSelectedId(lecture.id)}
+                />
+              ))}
             </ul>
           )}
 

@@ -4,16 +4,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Book,
-  Calendar,
   ChevronLeft,
-  Clock,
-  Download,
-  Eye,
-  FileText,
   FolderOpen,
   Loader2,
-  Play,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
@@ -24,11 +17,13 @@ import {
   studyResourcesApi,
   StudyResource,
 } from "@/services/studyResourcesApi";
-import { stripHtml } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import Pagination from "@/components/ui/Pagination";
+import Modal from "@/components/ui/Modal";
 import StudyResourceFilterPanel from "@/components/studyResources/StudyResourceFilterPanel";
-import { formatDuration } from "@/components/studyResources/videoFormat";
+import ResourceCard from "@/components/studyResources/ResourceCard";
+import { resolveResourceAccess } from "@/components/coins/useCoinState";
+import { coinsApi, type CoinBalance } from "@/services/coinsApi";
 import {
   buildStudyResourceFilters,
   getStudyResourceCategoryByApiType,
@@ -47,14 +42,6 @@ const SEARCH_DEBOUNCE_MS = 350;
 // Courses and years are no longer hardcoded: courses come from the shared
 // course list endpoint (via CourseCombobox) and years are aggregated from
 // the list response (data.years + item values).
-
-function formatFileSize(bytes: number | string): string {
-  const size = Number(bytes) || 0;
-  if (size <= 0) return "—";
-  if (size >= 1024 * 1024)
-    return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-  return `${Math.round(size / 1024)} KB`;
-}
 
 const searchInputClass =
   "w-full rounded-md border border-gray-200 bg-white py-2.5 pl-9 pr-4 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-brand-blue focus:ring-1 focus:ring-brand-blue";
@@ -102,6 +89,12 @@ export default function StudyResourcesPage({
   // Below lg the sidebar column is replaced by a bottom drawer holding the very
   // same filter panel, which is how Find College handles its own filters.
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  // The wallet, read once for the whole grid and tagged with the user it
+  // belongs to. See the effect below for why it is tagged rather than bare.
+  const [wallet, setWallet] = useState<{
+    userId: number | null;
+    balance: CoinBalance | null;
+  } | null>(null);
 
   // Settle the typed query before it reaches the API, so a burst of keystrokes
   // costs one request rather than one per character.
@@ -191,6 +184,34 @@ export default function StudyResourcesPage({
     [yearOptions],
   );
 
+  // One wallet read for the whole grid, and only once a student is signed in.
+  //
+  // The read is stored against the user it was for rather than in a bare
+  // balance, and the balance the cards see is DERIVED from that. Setting state
+  // to null on sign-out would be a synchronous setState inside this effect,
+  // which cascades a render; deriving it means signing out resolves every card
+  // to `anonymous` with no extra render at all, and a stale wallet for a
+  // previous user can never be shown to the next one.
+  useEffect(() => {
+    if (!user) return;
+    let active = true;
+    // `user.id` is optional on the session type. A session without one is not a
+    // wallet we can attribute, so the read is tagged with null and the derived
+    // balance stays null: undetermined, never zero.
+    const userId = user.id ?? null;
+    void coinsApi.getBalance().then((balance) => {
+      if (active) setWallet({ userId, balance });
+    });
+    return () => {
+      active = false;
+    };
+  }, [user]);
+
+  // Null means "no wallet could be read", never a zero balance. Every card
+  // falls back to undetermined rather than to "cannot afford" (06 §2.2).
+  const balance =
+    user && wallet?.userId === (user.id ?? null) ? wallet.balance : null;
+
   const handleReset = () => {
     setSearchInput("");
     setSearchQuery("");
@@ -262,12 +283,24 @@ export default function StudyResourcesPage({
     }
   };
 
-  const typeLabel = (value: string) =>
-    value
-      .split("-")
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ");
   const CatalogHeading = lockedCategory ? "h1" : "h2";
+
+  /**
+   * One call for every card, and the only place access is decided.
+   *
+   * An item with no `access` block resolves to null, which is the whole
+   * inertness mechanism: with the gate off the list endpoint sends nothing, so
+   * `ResourceCard` draws no badge, mounts no dialog and renders today's plain
+   * Download button.
+   */
+  const accessFor = (resource: StudyResource) =>
+    resolveResourceAccess({
+      access: resource.access ?? null,
+      balance,
+      signedIn: Boolean(user),
+      busy: downloadingId === resource.id || watchingId === resource.id,
+      isPublished: resource.is_published,
+    });
 
   // An empty page reports nothing rather than a backwards range like "1-0".
   const showingFrom = resources.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
@@ -450,97 +483,33 @@ export default function StudyResourcesPage({
                     </div>
                   )}
 
+                  {/* The grid itself. Unchanged: `grid-cols-1 sm:grid-cols-2
+                      xl:grid-cols-3` at the same gap. The coin badge lives in
+                      the card's own header row, so no column width moves. */}
                   <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
                     {resources.map((resource) => {
                       const isVideo = isVideoStudyResourceType(
                         resource.resource_type,
                       );
                       return (
-                        <article
+                        <ResourceCard
                           key={resource.id}
-                          className="min-w-0 rounded-md border border-gray-200 bg-white p-4"
-                        >
-                          <div className="mb-4 flex items-start justify-between gap-3">
-                            <div
-                              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-md ${
-                                isVideo
-                                  ? "bg-rose-50 text-rose-600"
-                                  : "bg-blue-50 text-brand-blue"
-                              }`}
-                            >
-                              {isVideo ? (
-                                <Play className="h-5 w-5" />
-                              ) : (
-                                <FileText className="h-5 w-5" />
-                              )}
-                            </div>
-                            <span className="rounded bg-gray-100 px-2 py-1 text-[11px] font-bold text-gray-600">
-                              {typeLabel(resource.resource_type || "")}
-                            </span>
-                          </div>
-                          <h3 className="mb-2 text-base font-semibold text-gray-900">
-                            {resource.title}
-                          </h3>
-                          <p className="mb-4 min-h-[40px] text-[13px] leading-relaxed text-gray-500">
-                            {stripHtml(resource.description) || "—"}
-                          </p>
-                          <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 pb-4 text-xs text-gray-500">
-                            {resource.course && (
-                              <span className="inline-flex items-center gap-1.5">
-                                <Book size={13} /> {resource.course}
-                              </span>
-                            )}
-                            {resource.year && (
-                              <span className="inline-flex items-center gap-1.5">
-                                <Calendar size={13} /> {resource.year}
-                              </span>
-                            )}
-                            {isVideo ? (
-                              <span className="inline-flex items-center gap-1.5">
-                                <Clock size={13} />
-                                {formatDuration(resource.duration_seconds)}
-                              </span>
-                            ) : (
-                              <span>{formatFileSize(resource.file_size)}</span>
-                            )}
-                          </div>
-                          <div className="flex items-center justify-between gap-3 pt-4">
-                            <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
-                              {isVideo ? (
-                                <>
-                                  <Eye size={13} /> {resource.views ?? 0} views
-                                </>
-                              ) : (
-                                <>
-                                  <Download size={13} /> {resource.downloads}{" "}
-                                  downloads
-                                </>
-                              )}
-                            </span>
-                            {isVideo ? (
-                              // Playback is not public: the stream endpoint
-                              // only answers a short-lived token bound to this
-                              // one resource, so the click has to trade the
-                              // session for that token before it opens
-                              // anything.
-                              <button
-                                onClick={() => handleWatch(resource)}
-                                disabled={watchingId === resource.id}
-                                className="inline-flex items-center gap-2 rounded-md bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-100 disabled:opacity-60"
-                              >
-                                <Play size={13} /> Watch
-                              </button>
-                            ) : (
-                              <button
-                                onClick={() => handleDownload(resource)}
-                                disabled={downloadingId === resource.id}
-                                className="inline-flex items-center gap-2 rounded-md bg-blue-50 px-3 py-2 text-xs font-semibold text-brand-blue hover:bg-blue-100 disabled:opacity-60"
-                              >
-                                <Download size={13} /> Download
-                              </button>
-                            )}
-                          </div>
-                        </article>
+                          resource={resource}
+                          variant="document"
+                          access={accessFor(resource)}
+                          onPrimaryAction={() =>
+                            isVideo
+                              ? void handleWatch(resource)
+                              : handleDownload(resource)
+                          }
+                          onSignIn={() => {
+                            setModalResource({
+                              resource,
+                              action: isVideo ? "watch" : "download",
+                            });
+                            setLoginModalOpen(true);
+                          }}
+                        />
                       );
                     })}
                   </div>
@@ -559,46 +528,55 @@ export default function StudyResourcesPage({
         </div>
       </div>
 
-      {/* Login required modal */}
-      {loginModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 p-5"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setLoginModalOpen(false);
-          }}
+      {/*
+        The login modal, now on the shared `Modal` shell. The copy is the
+        existing copy and the classes are the existing classes — what changed is
+        that it now moves focus into itself, traps Tab inside it, closes on
+        Escape, and hands focus back to the card button that opened it. Without
+        those it declared `aria-modal` and then trapped keyboard users on the
+        page behind it (06 §11.1).
+      */}
+      <Modal
+        open={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        labelledBy="login-required-title"
+        describedBy="login-required-body"
+      >
+        <h2
+          id="login-required-title"
+          className="mb-2 text-lg font-semibold text-gray-900"
         >
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="w-full max-w-sm rounded-lg bg-white p-6"
+          Log in to unlock
+        </h2>
+        <p
+          id="login-required-body"
+          className="text-sm leading-relaxed text-gray-500"
+        >
+          {modalResource?.action === "watch"
+            ? "Sign in to play this lecture. You can browse the whole collection without an account."
+            : "Sign in to download this resource. You can browse the whole catalogue without an account."}
+        </p>
+        <div className="mt-6 flex gap-2.5">
+          <button
+            type="button"
+            onClick={() => setLoginModalOpen(false)}
+            className="flex-1 rounded-md bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-200"
           >
-            <h2 className="mb-2 text-lg font-semibold text-gray-900">
-              Login required
-            </h2>
-            <p className="text-sm leading-relaxed text-gray-500">
-              Please log in to {modalResource?.action ?? "download"}
-              {modalResource ? ` "${modalResource.resource.title}"` : " this resource"}.
-            </p>
-            <div className="mt-6 flex gap-2.5">
-              <button
-                onClick={() => setLoginModalOpen(false)}
-                className="flex-1 rounded-md bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-900 hover:bg-gray-200"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => {
-                  setLoginModalOpen(false);
-                  router.push("/login");
-                }}
-                className="flex-1 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
-              >
-                Log in
-              </button>
-            </div>
-          </div>
+            Not now
+          </button>
+          <button
+            type="button"
+            data-modal-initial
+            onClick={() => {
+              setLoginModalOpen(false);
+              router.push("/login");
+            }}
+            className="flex-1 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
+          >
+            Log in
+          </button>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

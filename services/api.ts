@@ -120,7 +120,17 @@ export async function apiRequest<T>(
   }
 
   if (!response.ok) {
-    const errorMessage = data.message || data.error || "Request failed";
+    // `error` is a string on most endpoints and an OBJECT on the coin gate's
+    // (§2.3 promotes it to { code, message, data }). Reading `.message` off the
+    // object keeps a real sentence in the Error; the string form is unchanged,
+    // so every existing caller sees exactly what it saw before.
+    const rawError = data.error;
+    const errorMessage =
+      data.message ||
+      (rawError && typeof rawError === "object"
+        ? rawError.message
+        : rawError) ||
+      "Request failed";
     if (
       response.status === 401 &&
       typeof window !== "undefined" &&
@@ -131,8 +141,18 @@ export async function apiRequest<T>(
     ) {
       window.dispatchEvent(new CustomEvent("auth-expired"));
     }
-    const err = new Error(errorMessage) as Error & { status?: number };
+    // `status` is what the existing callers branch on. `payload` is the parsed
+    // body, attached additively for the endpoints whose failure IS an object
+    // rather than a string — the coin gate's 402 carries required / available /
+    // shortfall / ways_to_earn (03-api-contract.md §2.3), and a caller that
+    // cannot read it has to guess, which is the drift that object exists to
+    // prevent. Nothing existing reads this field, so nothing else changes.
+    const err = new Error(errorMessage) as Error & {
+      status?: number;
+      payload?: unknown;
+    };
     err.status = response.status;
+    err.payload = data;
     throw err;
   }
 
