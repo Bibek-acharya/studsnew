@@ -43,6 +43,16 @@ const API_BASE_URL =
 /** Results per page, unchanged from the previous toolbar-based catalog. */
 const PAGE_SIZE = 20;
 
+/**
+ * The type-less grid's own heading, kept as the fallback for the render that
+ * passes neither a lock nor a `heading`. No route renders that combination
+ * today, so the fallback exists only so the grid can be mounted in a test and
+ * in a storybook without inventing a page.
+ */
+const DEFAULT_TITLE = "Past Questions & Resources";
+const DEFAULT_DESCRIPTION =
+  "Access past exam papers, study notes, model questions, and other useful academic materials.";
+
 /** How long typing settles before a search request goes out. */
 const SEARCH_DEBOUNCE_MS = 350;
 
@@ -61,10 +71,27 @@ type AccessTarget = {
 
 interface StudyResourcesPageProps {
   lockedType?: ApiStudyResourceType;
+  /**
+   * The page's own heading, for the route that renders the MIXED catalogue —
+   * every API-backed type, documents and video lectures together, which is
+   * what `?affordable=1` needs behind it (see `app/study-resources/can-unlock`).
+   *
+   * It exists because the grid had two identities and only one of them was a
+   * page. A locked type names itself and links back to the landing; the
+   * type-less grid drew an `h2` and no way back, which is why it was never
+   * routed. Supplying a heading is what makes this render a landing page: an
+   * `h1` of its own and the same "All study resources" link back that every
+   * collection has.
+   */
+  heading?: {
+    title: string;
+    description: string;
+  };
 }
 
 export default function StudyResourcesPage({
   lockedType,
+  heading,
 }: StudyResourcesPageProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
@@ -315,7 +342,23 @@ export default function StudyResourcesPage({
     }
   };
 
-  const CatalogHeading = lockedCategory ? "h1" : "h2";
+  /**
+   * One page, one `h1`.
+   *
+   * A locked type names itself. The mixed catalogue is named by the route that
+   * renders it. Only the render with neither — which no route reaches — keeps
+   * the `h2` this grid has always drawn when it was a section rather than a
+   * page.
+   */
+  const CatalogHeading = lockedCategory || heading ? "h1" : "h2";
+  const title = heading?.title ?? lockedCategory?.label ?? DEFAULT_TITLE;
+  const description =
+    heading?.description ?? lockedCategory?.description ?? DEFAULT_DESCRIPTION;
+  /**
+   * Both page-level renders have somewhere to return to, so both link back the
+   * same way. The one that has no page-level identity is the one with no link.
+   */
+  const backHref = lockedCategory || heading ? "/study-resources" : null;
 
   /**
    * One call for every card, and the only place access is decided.
@@ -357,8 +400,23 @@ export default function StudyResourcesPage({
    * which is the same signal `useCoinState` returns null for. The toggle hides
    * itself then, the way this panel has no resource-type selector: a control
    * that provably removes nothing is not a control.
+   *
+   * It is also not drawn BEFORE the request has come back. `isGateOffForItems`
+   * answers `false` for a page with no items, because an empty or failed
+   * response says nothing about the gate — which is right, and is why the
+   * toggle is kept for an empty collection where a course or year filter may
+   * have emptied it. It is wrong for the seconds BEFORE any response exists:
+   * rendering the control then and withdrawing it the moment an ungated
+   * collection arrived is a control offered and taken back, on every cold load
+   * of the catalogue, which is the shape the product is in today. So the panel
+   * waits for the first answer, and a loading page is not that answer.
+   *
+   * The cost is one pop-in on a gated collection. The alternative was a
+   * pop-out on an ungated one, which is the default state today and the worse of
+   * the two: a control that appears and then takes itself back is read as a
+   * fault, while one that arrives with the data reads as arriving.
    */
-  const affordableAvailable = !isGateOffForItems(resources);
+  const affordableAvailable = !loading && !isGateOffForItems(resources);
 
   // An empty page reports nothing rather than a backwards range like "1-0".
   const showingFrom = visibleResources.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
@@ -371,19 +429,29 @@ export default function StudyResourcesPage({
         );
 
   /**
-   * What the tally can honestly claim. The filter only sees the page it has
-   * fetched, so it can only count what it can see — while the result set is one
-   * page long that count IS the collection ("Showing 1-14 of 14 Resources") and
-   * is used. With more pages to walk, the server's count is the only figure
-   * there is, and it is what pagination needs anyway: the size of the
-   * collection being paged.
+   * What the tally can honestly claim.
    *
-   * Nothing visible is excluded from that substitution on purpose. With an
-   * empty grid it would render "of 0 Resources" under a collection that has
-   * resources in it, which is the one thing this filter must never do.
+   * The filter narrows the page already fetched, so it can only count that
+   * page — and it only ever holds one page at a time. Three sentences, and
+   * which one is true depends on how much the page knows:
+   *
+   *  - **Unfiltered, or filtered to nothing.** The server's own range and its
+   *    own total. The empty case keeps the collection's size on purpose: "of 0"
+   *    under a collection of 45 is the one thing this filter must never say.
+   *  - **Filtered, and the whole collection fits on one page.** The visible
+   *    count IS the collection, so the ordinary range is exactly true and is
+   *    used unchanged.
+   *  - **Filtered, with pages left to walk.** There is no honest range to
+   *    print. The three visible cards are not positions 1 to 3 of 45 — they are
+   *    the only ones this page was able to check — so the count is reported as
+   *    the page's own, and the collection's total is stated beside it as the
+   *    separate fact it is. The range is dropped rather than approximated.
    */
+  const singlePage = totalPages <= 1;
+  const affordableTally =
+    affordableOnly && visibleResources.length > 0 && !singlePage;
   const tallyTotal =
-    affordableOnly && totalPages <= 1 && visibleResources.length > 0
+    affordableOnly && singlePage && visibleResources.length > 0
       ? visibleResources.length
       : total;
 
@@ -411,6 +479,7 @@ export default function StudyResourcesPage({
       affordableOnly={affordableOnly}
       affordableAvailable={affordableAvailable}
       onAffordableChange={writeAffordableParam}
+      signedIn={Boolean(user)}
       onReset={() => {
         handleReset();
         onClose?.();
@@ -424,9 +493,9 @@ export default function StudyResourcesPage({
       <div className="mx-auto w-full max-w-350 px-4 pb-14 sm:px-0">
         {/* Header */}
         <section className="mb-7">
-          {lockedCategory && (
+          {backHref && (
             <Link
-              href="/study-resources"
+              href={backHref}
               className="mb-4 inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-brand-blue transition-colors hover:text-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
             >
               <ChevronLeft className="h-3.5 w-3.5" aria-hidden="true" />
@@ -434,13 +503,9 @@ export default function StudyResourcesPage({
             </Link>
           )}
           <CatalogHeading className="mb-2 text-3xl font-bold text-gray-900">
-            {lockedCategory ? lockedCategory.label : "Past Questions & Resources"}
+            {title}
           </CatalogHeading>
-          <p className="max-w-2xl text-base text-gray-500">
-            {lockedCategory
-              ? lockedCategory.description
-              : "Access past exam papers, study notes, model questions, and other useful academic materials."}
-          </p>
+          <p className="max-w-2xl text-base text-gray-500">{description}</p>
         </section>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
@@ -476,10 +541,29 @@ export default function StudyResourcesPage({
                 aria-live="polite"
                 aria-atomic="true"
               >
-                {loading
-                  ? "Loading resources..."
-                  : `Showing ${showingFrom}-${showingTo} of ${tallyTotal} `}
-                {!loading && <span className="font-bold">Resources</span>}
+                {loading ? (
+                  "Loading resources..."
+                ) : affordableTally ? (
+                  // Filtered, and there are pages left to walk. Two facts, each
+                  // labelled as what it is: what this page could check, and how
+                  // big the collection is. No range — see `affordableTally`.
+                  <>
+                    {visibleResources.length}{" "}
+                    <span className="font-bold">
+                      {visibleResources.length === 1 ? "Resource" : "Resources"}
+                    </span>{" "}
+                    you can unlock now
+                    <span className="text-gray-500">
+                      {" "}
+                      · {total} in this collection
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    Showing {showingFrom}-{showingTo} of {tallyTotal}{" "}
+                    <span className="font-bold">Resources</span>
+                  </>
+                )}
               </p>
 
               <div className="flex w-full items-center gap-2 sm:w-95">

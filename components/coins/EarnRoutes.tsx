@@ -26,8 +26,22 @@ import Link from "next/link";
 import { fmtCoins } from "@/components/coins/useCoinState";
 import type { UnavailableRoute, WayToEarn } from "@/services/coinsApi";
 
-/** The one link that ends a dead end. Present on every earn surface. */
-export const AFFORDABLE_CATALOGUE_HREF = "/study-resources?affordable=1";
+/**
+ * The one link that ends a dead end. Present on every earn surface.
+ *
+ * It points at the mixed-catalogue route, NOT at the landing: the landing
+ * renders a carousel and six cards and ignores `?affordable=1` entirely, so a
+ * link aimed there sends the student to a page that silently discards the only
+ * thing they asked for. `/can-unlock` is the render that actually honours the
+ * parameter — an `h1`, a way back, and every type the API prices in one grid.
+ *
+ * The copy below and the route have to agree, and they do: the route shows
+ * every priced resource, documents and video lectures together, and does not
+ * claim to be the whole site — mock tests are charged when a paper is opened
+ * rather than when it is listed, so they carry no price for a list to compare.
+ * A smaller true promise beats "everything".
+ */
+export const AFFORDABLE_CATALOGUE_HREF = "/study-resources/can-unlock?affordable=1";
 
 const ROUTE_ICON: Record<string, typeof UserPlus> = {
   REFERRAL: UserPlus,

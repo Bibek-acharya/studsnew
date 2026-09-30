@@ -33,8 +33,24 @@ interface StudyResourceFilterPanelProps {
    * control that cannot narrow anything: there is no resource-type selector
    * here either, for the same reason. A checkbox that provably removes nothing
    * is not a control, it is a promise the page cannot keep.
+   *
+   * The page also withholds it until the request has come back at all, so it is
+   * never offered on a guess and then taken back.
    */
   affordableAvailable?: boolean;
+  /**
+   * Whether the viewer is signed in, and the only thing the caption below the
+   * checkbox is about. Omit it and no caption is drawn, so a surface that does
+   * not know the answer says nothing rather than guessing.
+   *
+   * A signed-out visitor keeps the control: hiding a filter because of who you
+   * are is the walled-in feeling this whole feature exists to take away, and the
+   * page is honest about it — with no wallet to read, nothing is *known* to be
+   * out of reach, so nothing is removed. That is the same rule the filter uses
+   * everywhere else, and the caption is what stops the checked box from reading
+   * as a promise the page is not keeping.
+   */
+  signedIn?: boolean;
   /** Passed inside the mobile drawer only, to render the close button. */
   onClose?: () => void;
 }
@@ -60,6 +76,7 @@ export default function StudyResourceFilterPanel({
   affordableOnly = false,
   onAffordableChange,
   affordableAvailable = false,
+  signedIn,
   onClose,
 }: StudyResourceFilterPanelProps) {
   // Both, or neither: a checkbox with no handler would be a control that lies.
@@ -148,6 +165,19 @@ export default function StudyResourceFilterPanel({
               Can unlock now
             </span>
           </label>
+          {/*
+            The caption, in the panel's own body grey, and only for a viewer who
+            is not signed in — the one case where the box above is checked and
+            provably removing nothing. It states the reason rather than
+            apologising for it: the page has no balance to compare against yet,
+            and unknown is not a refusal. The line costs no control and no
+            colour that is not already in this card.
+          */}
+          {signedIn === false && (
+            <p className="mt-2 pl-7 text-[12.5px] leading-relaxed text-gray-500">
+              Sign in and this checks your balance.
+            </p>
+          )}
         </div>
       )}
     </div>

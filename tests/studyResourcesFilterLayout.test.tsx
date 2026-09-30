@@ -352,6 +352,79 @@ describe("StudyResourcesPage has no resource-type control", () => {
   });
 });
 
+describe("a grid mounted as a page by its own route", () => {
+  /**
+   * `/study-resources/can-unlock` is the anti-dead-end link's destination, and
+   * it is the one render with no locked type. Before it existed the grid drew
+   * an `h2` and no way back, which is precisely why it was never a page anyone
+   * could land on — and the pinned contract above ("Past Questions &
+   * Resources", `h1, h2`) is the fallback for the mount with no heading at all,
+   * which is a test and a storybook, not a route.
+   */
+  async function renderHeaded(
+    heading: { title: string; description: string },
+  ): Promise<HTMLElement> {
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    containers.push(container);
+    const root = createRoot(container);
+    roots.push(root);
+    await act(async () => {
+      root.render(<StudyResourcesPage heading={heading} />);
+    });
+    await flush();
+    return container;
+  }
+
+  test("takes its h1 and description from the route, not from a category", async () => {
+    const container = await renderHeaded({
+      title: "Resources you can unlock",
+      description: "Notes, papers and lectures, in one list.",
+    });
+
+    expect(container.querySelector("h1")?.textContent).toBe(
+      "Resources you can unlock",
+    );
+    expect(container.textContent).toContain(
+      "Notes, papers and lectures, in one list.",
+    );
+    // The type-less fallback heading is gone on a page that named itself.
+    expect(container.textContent).not.toContain("Past Questions & Resources");
+  });
+
+  test("has the same way back every collection on this site has", async () => {
+    const container = await renderHeaded({
+      title: "Resources you can unlock",
+      description: "Notes, papers and lectures, in one list.",
+    });
+
+    const back = Array.from(container.querySelectorAll("a")).find((a) =>
+      (a.textContent ?? "").includes("All study resources"),
+    );
+    expect(back?.getAttribute("href")).toBe("/study-resources");
+  });
+
+  test("asks the API for every type, which is what makes it the whole catalogue", async () => {
+    // A category route pins `type`, so it can only ever show one collection.
+    // This one sends no type at all, which is the request that returns the four
+    // document types plus video lectures.
+    stub = {
+      items: [{ id: 1, title: "One" } as StudyResource],
+      total: 1,
+    };
+    const container = await renderHeaded({
+      title: "Resources you can unlock",
+      description: "Notes, papers and lectures, in one list.",
+    });
+
+    expect(listStudyResources).toHaveBeenLastCalledWith(
+      expect.objectContaining({ type: undefined }),
+      expect.anything(),
+    );
+    expect(container.querySelectorAll("article.min-w-0")).toHaveLength(1);
+  });
+});
+
 describe("StudyResourcesPage autonomous search", () => {
   // Only this group needs the clock under its own control, to prove the debounce
   // holds a request back. Fake timers elsewhere would also hold back React's own

@@ -68,7 +68,7 @@ jest.mock("@/components/studyResources/CourseCombobox", () => ({
 
 // A stable object: `useAuth`'s result is an effect dependency on the page, and a
 // fresh literal every render would re-run the wallet read forever.
-const mockUser = { id: 7 };
+let mockUser: { id: number } | null = { id: 7 };
 
 jest.mock("@/services/AuthContext", () => ({
   useAuth: () => ({ user: mockUser }),
@@ -210,6 +210,7 @@ beforeEach(() => {
   mockItems = [];
   mockTotal = 0;
   mockBalance = WALLET_100;
+  mockUser = { id: 7 };
   mockReplace.mockReset();
   listStudyResources.mockClear();
 });
@@ -445,6 +446,75 @@ describe("the Can unlock now toggle", () => {
     );
   });
 
+  test("is not offered before the first response, so it cannot appear and vanish", async () => {
+    // `isGateOffForItems([])` answers false on purpose — an empty page says
+    // nothing about the gate — which is right for a collection a course or year
+    // filter emptied and wrong for the seconds before any answer exists. Drawn
+    // on that second, the control appeared on the first paint of every ungated
+    // catalogue and took itself back when the items landed.
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    containers.push(container);
+    const root = createRoot(container);
+    roots.push(root);
+    mockQuery = "affordable=1";
+
+    let release: ((value: unknown) => void) | undefined;
+    listStudyResources.mockImplementationOnce(
+      () => new Promise((resolve) => (release = resolve)),
+    );
+
+    await act(async () => {
+      root.render(<StudyResourcesPage lockedType={"study-notes" as never} />);
+    });
+    // In flight: no response, so no answer, so no control.
+    expect(checkbox(container)).toBeNull();
+
+    // Gated items land and it arrives with them.
+    mockItems = [item(1, "Forty tokens", gated(40))];
+    mockTotal = 1;
+    await act(async () => {
+      release?.({
+        data: { study_resources: mockItems, total: 1, years: ["2081"] },
+      });
+      await Promise.resolve();
+    });
+    await flush();
+    expect(checkbox(container)).not.toBeNull();
+  });
+
+  test("a signed-out viewer keeps the toggle, and is told why nothing left the page", async () => {
+    // Hiding a filter because of who you are is the walled-in feeling this
+    // feature exists to remove. So the control stays, and the one sentence that
+    // keeps a checked box from reading as a promise the page is not keeping is
+    // drawn under it.
+    mockUser = null;
+    mockBalance = null;
+    mockItems = [item(1, "One", gated(40)), item(2, "Two", gated(40))];
+    mockTotal = 2;
+    const container = await render("affordable=1");
+
+    const input = checkbox(container);
+    expect(input).not.toBeNull();
+    expect(input?.checked).toBe(true);
+    expect(container.querySelector("aside")?.textContent).toContain(
+      "Sign in and this checks your balance",
+    );
+    // No wallet, no known shortfall, so nothing is excluded.
+    expect(cardTitles(container)).toEqual(["One", "Two"]);
+  });
+
+  test("a signed-in viewer is not told about signing in", async () => {
+    mockItems = [item(1, "One", gated(40)), item(2, "Two", gated(40))];
+    mockTotal = 2;
+    const container = await render("affordable=1");
+
+    expect(checkbox(container)).not.toBeNull();
+    expect(container.querySelector("aside")?.textContent).not.toContain(
+      "Sign in and this checks your balance",
+    );
+  });
+
   test("pressing it writes ?affordable=1", async () => {
     mockItems = gatedCatalogue();
     mockTotal = 2;
@@ -571,11 +641,75 @@ describe("?affordable=1 combines with the existing filters", () => {
 
     // Twenty per page, so 45 results is three pages, and only one of them is
     // affordable on this page.
-    expect(container.textContent).toContain("Showing 1-1 of 45");
     const pageTwo = Array.from(container.querySelectorAll("button")).find(
       (b) => b.textContent?.trim() === "2",
     );
     expect(pageTwo).toBeDefined();
+  });
+});
+
+// ── the tally, which cannot count what it has not fetched ──────────────────────
+
+describe("the tally says only what the page knows", () => {
+  test("one page, filtered: the visible count IS the collection, so the ordinary range is used", async () => {
+    mockItems = [item(1, "Forty tokens", gated(40)), item(2, "Five hundred tokens", gated(500))];
+    mockTotal = 2;
+    const container = await render("affordable=1");
+
+    // Nothing was hidden from this page — one page held the whole collection —
+    // so "Showing 1-1 of 1" is exactly true and the page says it.
+    expect(tallyText(container)).toContain("Showing 1-1 of 1");
+    expect(tallyText(container)).not.toContain("you can unlock now");
+  });
+
+  test("several pages, filtered: no range, because the visible cards are not positions 1-n of the total", async () => {
+    mockItems = [item(1, "Forty tokens", gated(40)), item(2, "Five hundred tokens", gated(500))];
+    mockTotal = 45;
+    const container = await render("affordable=1");
+
+    // The old sentence was "Showing 1-1 of 45": a range and a total that are both
+    // false, since the one visible card is the only one this page could check
+    // and 45 is the size of the collection being paged. The count is now the
+    // page's own and the total is labelled as the collection's.
+    expect(tallyText(container)).toContain("1 Resource you can unlock now");
+    expect(tallyText(container)).toContain("45 in this collection");
+    expect(tallyText(container)).not.toContain("Showing 1-1");
+    expect(tallyText(container)).not.toContain("of 45");
+  });
+
+  test("several pages, filtered: the plural is not a bare " + "'s'", async () => {
+    mockItems = [
+      item(1, "Forty tokens", gated(40)),
+      item(2, "Fifty tokens", gated(50)),
+      item(3, "Five hundred tokens", gated(500)),
+    ];
+    mockTotal = 45;
+    const container = await render("affordable=1");
+
+    expect(tallyText(container)).toContain("2 Resources you can unlock now");
+  });
+
+  test("unfiltered, the tally is untouched whatever the page holds", async () => {
+    mockItems = [item(1, "One", gated(40)), item(2, "Two", gated(40))];
+    mockTotal = 45;
+    const container = await render();
+
+    // No filter, no new sentence: the server's own range and total, as always.
+    expect(tallyText(container)).toContain("Showing 1-2 of 45");
+    expect(tallyText(container)).not.toContain("you can unlock now");
+  });
+
+  test("with the gate off, the filtered tally is identical to the unfiltered one", async () => {
+    // The default state of the product. Nothing about the tally may differ from
+    // a page that never had the parameter.
+    mockItems = [item(1, "One"), item(2, "Two")];
+    mockTotal = 2;
+
+    const unfiltered = await render();
+    const filtered = await render("affordable=1");
+
+    expect(tallyText(filtered)).toBe(tallyText(unfiltered));
+    expect(tallyText(filtered)).toBe("Showing 1-2 of 2 Resources");
   });
 });
 
