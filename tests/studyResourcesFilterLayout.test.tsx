@@ -6,8 +6,13 @@ import { createRoot, type Root } from "react-dom/client";
 import StudyResourcesPage from "@/components/studyResources/StudyResourcesPage";
 import type { StudyResource } from "@/services/studyResourcesApi";
 
+// The page keeps the "Can unlock now" filter in the URL now, so it reads it with
+// `useSearchParams` and writes it back through the router. This suite sets no
+// param, which is the default case it was already asserting.
 jest.mock("next/navigation", () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
+  usePathname: () => "/study-resources/study-notes",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 // The course combobox reaches the network for its option list, which is not

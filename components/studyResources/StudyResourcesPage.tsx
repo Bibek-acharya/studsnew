@@ -2,7 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ChevronLeft,
   FolderOpen,
@@ -29,6 +29,13 @@ import {
   getStudyResourceCategoryByApiType,
   type ApiStudyResourceType,
 } from "./studyResourceCategories";
+import {
+  AFFORDABLE_PARAM,
+  AFFORDABLE_PARAM_ON,
+  isAffordableParamOn,
+  isGateOffForItems,
+  matchesAffordableFilter,
+} from "./affordableFilter";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
@@ -60,6 +67,11 @@ export default function StudyResourcesPage({
   lockedType,
 }: StudyResourcesPageProps = {}) {
   const router = useRouter();
+  const pathname = usePathname();
+  // The one filter this page keeps in the URL rather than in state, so a
+  // reload and a shared `?affordable=1` link land in exactly the same view.
+  // Read the same way as every other param on this site: `get`, one spelling.
+  const searchParams = useSearchParams();
   const { user } = useAuth();
   const lockedCategory = lockedType
     ? getStudyResourceCategoryByApiType(lockedType)
@@ -212,12 +224,32 @@ export default function StudyResourcesPage({
   const balance =
     user && wallet?.userId === (user.id ?? null) ? wallet.balance : null;
 
+  /**
+   * The URL owns `?affordable=1`. The panel never holds the state itself, which
+   * is what lets the checkbox, Reset and a reload from the insufficient screen's
+   * "Browse resources you can unlock now" link all agree.
+   *
+   * `replace`, not `push`: turning a filter on is not somewhere a student means
+   * to be able to go back to, and the clearable path is the checkbox itself.
+   * The page number is deliberately NOT reset — the filter narrows what is
+   * already fetched, so nothing is re-requested.
+   */
+  const writeAffordableParam = (next: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next) params.set(AFFORDABLE_PARAM, AFFORDABLE_PARAM_ON);
+    else params.delete(AFFORDABLE_PARAM);
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname);
+  };
+
   const handleReset = () => {
     setSearchInput("");
     setSearchQuery("");
     setCourseFilter("");
     setYearFilter("");
     setPage(1);
+    // Reset means every filter, and this one lives in the URL like the rest.
+    writeAffordableParam(false);
   };
 
   const handleDownload = (resource: StudyResource) => {
@@ -302,12 +334,66 @@ export default function StudyResourcesPage({
       isPublished: resource.is_published,
     });
 
+  /**
+   * `?affordable=1`, resolved through the same `accessFor` call the cards use —
+   * one decision, read twice, never two verdicts on one resource.
+   *
+   * It narrows the page already fetched rather than asking the server again,
+   * which is why it costs nothing and why it composes with search, course, year
+   * and pagination instead of replacing them. See `affordableFilter.ts`: it
+   * excludes only what is positively known to be unaffordable, so with the gate
+   * off — `access` absent everywhere — this is the identity function and the
+   * catalogue stays whole.
+   */
+  const affordableOnly = isAffordableParamOn(
+    searchParams.get(AFFORDABLE_PARAM),
+  );
+  const visibleResources = affordableOnly
+    ? resources.filter((resource) => matchesAffordableFilter(accessFor(resource)))
+    : resources;
+
+  /**
+   * With the gate off the list endpoint sends no `access` block on any item,
+   * which is the same signal `useCoinState` returns null for. The toggle hides
+   * itself then, the way this panel has no resource-type selector: a control
+   * that provably removes nothing is not a control.
+   */
+  const affordableAvailable = !isGateOffForItems(resources);
+
   // An empty page reports nothing rather than a backwards range like "1-0".
-  const showingFrom = resources.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const showingFrom = visibleResources.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
   const showingTo =
-    resources.length === 0
+    visibleResources.length === 0
       ? 0
-      : Math.min((page - 1) * PAGE_SIZE + resources.length, total);
+      : Math.min(
+          (page - 1) * PAGE_SIZE + visibleResources.length,
+          total,
+        );
+
+  /**
+   * What the tally can honestly claim. The filter only sees the page it has
+   * fetched, so it can only count what it can see — while the result set is one
+   * page long that count IS the collection ("Showing 1-14 of 14 Resources") and
+   * is used. With more pages to walk, the server's count is the only figure
+   * there is, and it is what pagination needs anyway: the size of the
+   * collection being paged.
+   *
+   * Nothing visible is excluded from that substitution on purpose. With an
+   * empty grid it would render "of 0 Resources" under a collection that has
+   * resources in it, which is the one thing this filter must never do.
+   */
+  const tallyTotal =
+    affordableOnly && totalPages <= 1 && visibleResources.length > 0
+      ? visibleResources.length
+      : total;
+
+  /**
+   * The filter emptied a page that had results. Distinct from the empty result
+   * set below, which is the server saying there is nothing here at all, and
+   * which keeps its existing copy.
+   */
+  const filteredOutEverything =
+    resources.length > 0 && visibleResources.length === 0;
 
   const filterPanel = (onClose?: () => void) => (
     <StudyResourceFilterPanel
@@ -322,6 +408,9 @@ export default function StudyResourcesPage({
         setPage(1);
       }}
       yearOptions={yearsSortedDesc}
+      affordableOnly={affordableOnly}
+      affordableAvailable={affordableAvailable}
+      onAffordableChange={writeAffordableParam}
       onReset={() => {
         handleReset();
         onClose?.();
@@ -389,7 +478,7 @@ export default function StudyResourcesPage({
               >
                 {loading
                   ? "Loading resources..."
-                  : `Showing ${showingFrom}-${showingTo} of ${total} `}
+                  : `Showing ${showingFrom}-${showingTo} of ${tallyTotal} `}
                 {!loading && <span className="font-bold">Resources</span>}
               </p>
 
@@ -475,6 +564,34 @@ export default function StudyResourcesPage({
                     Try changing your search or filters.
                   </p>
                 </div>
+              ) : filteredOutEverything ? (
+                /*
+                  The filter emptied a page that had results, so the empty state
+                  is the same treatment as the one above — same ground, same
+                  tile, same grey icon — with copy that says what happened and a
+                  way back. The page can only be here because every item on it
+                  was positively unaffordable, so "nothing here is covered" is
+                  what the screen actually established.
+                */
+                <div className="flex flex-col items-center justify-center px-4 py-20">
+                  <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-gray-50">
+                    <FolderOpen className="h-10 w-10 text-gray-300" />
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Nothing You Can Unlock Here Yet
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-500">
+                    Nothing here is covered by your StudsTokens right now. Clear
+                    the filter to browse the whole catalogue.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => writeAffordableParam(false)}
+                    className="mt-6 rounded-md bg-brand-blue px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue focus-visible:ring-offset-2"
+                  >
+                    Show all resources
+                  </button>
+                </div>
               ) : (
                 <>
                   {watchError && (
@@ -487,7 +604,7 @@ export default function StudyResourcesPage({
                       xl:grid-cols-3` at the same gap. The coin badge lives in
                       the card's own header row, so no column width moves. */}
                   <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3">
-                    {resources.map((resource) => {
+                    {visibleResources.map((resource) => {
                       const isVideo = isVideoStudyResourceType(
                         resource.resource_type,
                       );

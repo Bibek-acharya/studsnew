@@ -19,6 +19,22 @@ interface StudyResourceFilterPanelProps {
   onYearChange: (value: string) => void;
   yearOptions: string[];
   onReset: () => void;
+  /**
+   * The "Can unlock now" filter, which is `?affordable=1`.
+   *
+   * `checked` is read from the URL and the press is reported upward; the panel
+   * holds no state of its own, so a reload, a shared link and this checkbox
+   * cannot disagree. Omit both and the control is not drawn at all.
+   */
+  affordableOnly?: boolean;
+  onAffordableChange?: (next: boolean) => void;
+  /**
+   * Hidden while the coin gate is off, which is how this panel already treats a
+   * control that cannot narrow anything: there is no resource-type selector
+   * here either, for the same reason. A checkbox that provably removes nothing
+   * is not a control, it is a promise the page cannot keep.
+   */
+  affordableAvailable?: boolean;
   /** Passed inside the mobile drawer only, to render the close button. */
   onClose?: () => void;
 }
@@ -30,8 +46,9 @@ interface StudyResourceFilterPanelProps {
  *
  * There is no resource-type control: a category page is already pinned to one
  * type by its route, and the unfiltered catalog is a single mixed listing, so
- * a type selector would either be inert or meaningless. Only course and year
- * narrow a collection.
+ * a type selector would either be inert or meaningless. Course and year narrow
+ * a collection, and so does "Can unlock now" — which is drawn only while the
+ * coin gate is on, for the same reason the type selector is absent.
  */
 export default function StudyResourceFilterPanel({
   courseFilter,
@@ -40,8 +57,15 @@ export default function StudyResourceFilterPanel({
   onYearChange,
   yearOptions,
   onReset,
+  affordableOnly = false,
+  onAffordableChange,
+  affordableAvailable = false,
   onClose,
 }: StudyResourceFilterPanelProps) {
+  // Both, or neither: a checkbox with no handler would be a control that lies.
+  const showAffordable =
+    affordableAvailable && typeof onAffordableChange === "function";
+
   return (
     <div className="relative w-full rounded-md border border-gray-200 bg-white p-6">
       <div className="mb-2 flex items-center justify-between gap-3">
@@ -99,6 +123,33 @@ export default function StudyResourceFilterPanel({
           ))}
         </select>
       </FilterSection>
+
+      {/*
+        The third filter, in the panel's own `pb-4` closing rhythm so the card
+        reads as one list rather than a form with something bolted on the end.
+        The label wraps the input, which gives the checkbox its accessible name
+        without an `id` — and the panel renders twice on a page (sidebar and
+        drawer), so a fixed id would be duplicated in the document.
+
+        The box is the house `.custom-checkbox`, the same one the Find College
+        filter card this panel copies uses: slate hairline, blue when checked.
+        No new colour, and nothing else in the panel shifts.
+      */}
+      {showAffordable && (
+        <div className="pb-4">
+          <label className="group flex w-full cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={affordableOnly}
+              onChange={(event) => onAffordableChange?.(event.target.checked)}
+              className="custom-checkbox"
+            />
+            <span className="text-[14.5px] text-[#475569] transition-colors group-hover:text-gray-900">
+              Can unlock now
+            </span>
+          </label>
+        </div>
+      )}
     </div>
   );
 }
