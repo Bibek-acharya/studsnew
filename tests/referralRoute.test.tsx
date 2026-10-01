@@ -10,10 +10,12 @@
  * student is one step from an account, the friend who sent the link is not
  * present to explain, and the code is not what they came for.
  *
- * The second is that §2.4 is read defensively. A missing `coins_pending` filled
- * with a zero is not a rendering detail — it is a student shown "nothing on hold"
- * while 180 StudsTokens are actually reserved for them, and no amount of correct
- * copy elsewhere can fix that.
+ * The second is that §2.4 is read defensively, in BOTH directions. A missing
+ * stat filled with a zero is not a rendering detail — it is a student shown as
+ * having earned nothing when 540 StudsTokens are in their balance. And a stat the
+ * server has RETIRED must not survive in the reader, because the mechanic behind
+ * `coins_pending` is gone and a client still reading it renders a number nobody
+ * sent.
  */
 import InviteCapturePage, { metadata } from "@/app/r/[code]/page";
 import ReferralAliasPage from "@/app/referral/page";
@@ -109,16 +111,19 @@ describe("06's URL resolves rather than 404ing", () => {
 
 describe("§2.4 is read defensively, and a missing figure is never a zero", () => {
   const envelope = (data: unknown) => ({ success: true, data });
+  // §2.4's `stats`, verbatim against the implementation: `expired` is a fifth
+  // bucket and `coins_pending` is GONE, because a referral payout no longer
+  // reserves from the referrer and there is no reserved balance to report.
   const validStats = {
     invited: 14,
     qualified: 9,
     pending: 3,
-    rejected: 2,
+    expired: 1,
+    rejected: 1,
     coins_earned_total: 540,
-    coins_pending: 180,
     this_month_qualified: 4,
     monthly_cap_remaining: 6,
-    lifetime_cap_remaining: 1460,
+    lifetime_cap_remaining: 60,
   };
 
   afterEach(() => {
@@ -137,9 +142,13 @@ describe("§2.4 is read defensively, and a missing figure is never a zero", () =
     const summary = await coinsApi.getReferralSummary();
     expect(summary?.referral_code).toBe("7K2M9Q4XTB");
     expect(summary?.stats.coins_earned_total).toBe(540);
-    expect(summary?.stats.coins_pending).toBe(180);
-    // The endpoint, exactly as §2.4 names it.
-    expect(mockedApiRequest.mock.calls[0][0]).toBe("/api/v1/referral/me");
+    expect(summary?.stats.expired).toBe(1);
+    // The endpoint the server MOUNTS. internal/coins/routes.go mounts
+    // `GET /api/v1/referrals` and has never mounted `/referral/me`, so a client
+    // asking for the old spelling gets a 404, `getReferralSummary` returns null,
+    // and every signed-in student sees the error card instead of their code.
+    // The test used to assert the misspelling, which is how it stayed green.
+    expect(mockedApiRequest.mock.calls[0][0]).toBe("/api/v1/referrals");
   });
 
   test("a body with no code is null, not an empty object", async () => {
@@ -162,14 +171,30 @@ describe("§2.4 is read defensively, and a missing figure is never a zero", () =
     mockedApiRequest.mockResolvedValue(
       envelope({
         referral_code: "7K2M9Q4XTB",
-        stats: { ...validStats, coins_pending: "not a number", invited: -4 },
+        stats: { ...validStats, coins_earned_total: "not a number", invited: -4 },
       }),
     );
     const summary = await coinsApi.getReferralSummary();
-    expect(summary?.stats.coins_pending).toBe(0);
+    expect(summary?.stats.coins_earned_total).toBe(0);
     // A negative count is not a thing, and rendering one would be a lie of a
     // different kind: it reads as a debt.
     expect(summary?.stats.invited).toBe(0);
+  });
+
+  test("there is no pending-coins figure, because the server sends none", async () => {
+    // The load-bearing consequence of dropping `coins_pending`. A reader that
+    // still looked for it would find `undefined`, coerce it to 0, and the held
+    // group would render "0 StudsTokens" — a figure the server never sent, on the
+    // one group whose entire job is to not read as spendable money.
+    mockedApiRequest.mockResolvedValue(
+      envelope({
+        referral_code: "7K2M9Q4XTB",
+        stats: validStats,
+      }),
+    );
+    const summary = await coinsApi.getReferralSummary();
+    const stats = summary?.stats as unknown as Record<string, unknown> | undefined;
+    expect(stats?.coins_pending).toBeUndefined();
   });
 
   test("a missing link degrades to empty rather than being rebuilt", async () => {
@@ -199,7 +224,7 @@ describe("§2.4 is read defensively, and a missing figure is never a zero", () =
     // If §2.4 gains or loses a figure, this list changes with it.
     expect(Object.keys(validStats).sort()).toEqual([
       "coins_earned_total",
-      "coins_pending",
+      "expired",
       "invited",
       "lifetime_cap_remaining",
       "monthly_cap_remaining",
@@ -208,6 +233,21 @@ describe("§2.4 is read defensively, and a missing figure is never a zero", () =
       "rejected",
       "this_month_qualified",
     ]);
+  });
+
+  test("a reader drops a figure the server no longer sends", async () => {
+    // A client tolerant of EXTRA fields is correct — the server may add one. The
+    // direction that matters is the other: this reader must not carry a figure the
+    // server has retired, because every consumer of it renders a number.
+    mockedApiRequest.mockResolvedValue(
+      envelope({
+        referral_code: "7K2M9Q4XTB",
+        stats: { ...validStats, coins_pending: 180 },
+      }),
+    );
+    const summary = await coinsApi.getReferralSummary();
+    const stats = summary?.stats as unknown as Record<string, unknown> | undefined;
+    expect(stats?.coins_pending).toBeUndefined();
   });
 });
 

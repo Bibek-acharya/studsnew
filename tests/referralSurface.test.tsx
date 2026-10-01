@@ -6,9 +6,9 @@
  *
  * The load-bearing test in this file is the first one. "3 referrals, 180 coins"
  * is the kind of sentence that is not obviously a lie and is wrong in three ways,
- * and the only defence against it is that no function in the codebase adds
- * `coins_earned_total` to `coins_pending` and no test asserts such a total
- * exists.
+ * and the only defence against it is that the held group carries no coin figure
+ * at all — so there is nothing on this surface that could be summed, and the one
+ * figure that IS shown is labelled as money in the balance.
  */
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -31,36 +31,48 @@ import type {
 
 (globalThis as Record<string, unknown>).IS_REACT_ACT_ENVIRONMENT = true;
 
-/** §2.4's worked example, verbatim. */
+/** §2.4's worked example, verbatim against the implementation. */
 const STATS: ReferralStats = {
   invited: 14,
   qualified: 9,
   pending: 3,
-  rejected: 2,
+  expired: 1,
+  rejected: 1,
   coins_earned_total: 540,
-  coins_pending: 180,
   this_month_qualified: 4,
   monthly_cap_remaining: 6,
-  lifetime_cap_remaining: 1460,
+  lifetime_cap_remaining: 60,
 };
 
 describe("settled and held are never added together", () => {
-  test("the two coin figures stay separate figures", () => {
+  test("the settled figure is the only coin figure on the surface", () => {
     const settled = buildReferralGroups(STATS).find((g) => g.group === "settled");
     const hold = buildReferralGroups(STATS).find((g) => g.group === "on-hold");
 
     expect(settled?.coins).toBe(540);
-    expect(hold?.coins).toBe(180);
 
-    // The load-bearing assertion. 540 + 180 = 720 is a number this feature must
-    // never show a student: 180 of it is reserved, not available, and the
-    // student will check it against their balance in a week and find it missing.
-    expect(settled!.coins! + hold!.coins!).toBe(720);
+    // THE load-bearing assertion, and it is stronger than the one it replaced.
+    // There used to be a second figure here — a `coins_pending` of 180 — and the
+    // old test's job was to prove the two were never summed into 720. The server
+    // no longer sends it: a referral payout credits the referrer directly instead
+    // of reserving against their balance, so there is no reserved balance and
+    // nothing to report. The stronger property is that the held group now carries
+    // NO figure at all rather than a zero the server never sent.
+    expect(hold?.coins).toBeNull();
+
     const renderedGroups = buildReferralGroups(STATS);
     expect(renderedGroups).toHaveLength(3);
-    // No group carries a combined figure, and the not-confirmed group carries no
-    // figure at all rather than a zero the server never sent.
-    expect(renderedGroups.filter((g) => g.coins === null)).toHaveLength(1);
+    // Two of the three groups carry no figure: the one that will never pay, and
+    // the one whose value the server does not report.
+    expect(renderedGroups.filter((g) => g.coins === null)).toHaveLength(2);
+  });
+
+  test("the held group still states its COUNT, because the server sends one", () => {
+    // Dropping the coin figure must not drop the count. `pending` is a real
+    // server field and "3 on hold" is a true answer; "0 on hold" would tell a
+    // student three invitations are unaccounted for.
+    const hold = buildReferralGroups(STATS).find((g) => g.group === "on-hold");
+    expect(hold?.count).toBe("3 on hold");
   });
 
   test("the held group says plainly that the money is not in the balance", () => {
@@ -87,7 +99,7 @@ describe("a referral that did not qualify is a fact, not a failure", () => {
     // Counted, so the page's arithmetic reconciles and "where did my other two
     // go" is answerable from the screen. 06 §1.7 forbids scolding the student
     // for inviting someone, and §0.4 reserves red for a failed fraud check.
-    expect(notConfirmed.count).toBe("2 not confirmed");
+    expect(notConfirmed.count).toBe("1 not confirmed");
     expect(notConfirmed.tone).toBe("neutral");
     expect(notConfirmed.coins).toBeNull();
     // No row is dressed as a failure.
@@ -262,7 +274,7 @@ describe("the rendered surface", () => {
     container.remove();
   });
 
-  test("the ledger shows both figures under their own headings", () => {
+  test("the ledger shows the settled figure, and names the hold without pricing it", () => {
     act(() => {
       root.render(<ReferralLedger stats={STATS} rows={null} />);
     });
@@ -271,14 +283,22 @@ describe("the rendered surface", () => {
     expect(text).toContain("Added to your balance");
     expect(text).toContain("540");
     expect(text).toContain("On hold");
-    expect(text).toContain("180");
     expect(text).toContain("Not in your balance yet");
-    expect(text).toContain("2 not confirmed");
+    expect(text).toContain("1 not confirmed");
 
-    // The dishonest sentence this page exists to avoid.
+    // THE assertion, and it is about absence. The server retired `coins_pending`,
+    // so the only coin figure on this surface is the settled one. "0
+    // StudsTokens" on the held group would be a figure nobody sent, on the one
+    // group whose entire job is to not read as money in the balance.
+    // Word-bounded, and deliberately not `not.toContain("0 StudsTokens")`:
+    // "540 StudsTokens" contains that substring, so the naive assertion fails on
+    // the settled group and would not have tested the held one at all.
+    expect(text).not.toMatch(/\b0\s+StudsTokens/);
+    expect(text).not.toMatch(/On hold[\s\S]{0,120}?\d+\s*StudsTokens/);
+
+    // The dishonest sentences this page exists to avoid.
     expect(text).not.toContain("720");
     expect(text).not.toMatch(/\b3 referrals\b/);
-    // And no bare combined total under any label.
     expect(text).not.toMatch(/total[^.]*\b720\b/i);
   });
 

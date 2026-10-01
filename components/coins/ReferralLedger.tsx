@@ -3,17 +3,18 @@
 /**
  * The referral groups and the per-referral rows.
  *
- * This is where §2.4's eight numbers stop being numbers. The whole honesty
- * argument for the surface is in `components/coins/referralView.ts`; this
- * component's only job is to put the three groups on screen with the tone each
- * one is allowed and never let them blur into one figure.
+ * This is where §2.4's numbers stop being numbers. The whole honesty argument
+ * for the surface is in `components/coins/referralView.ts`; this component's
+ * only job is to put the three groups on screen with the tone each one is allowed
+ * and never let them blur into one figure.
  *
  * ## The structural rules it enforces
  *
  * 1. **No combined total.** There is no headline anywhere on this surface that
- *    adds `coins_earned_total` to `coins_pending`. A student reading this page
- *    sees two numbers under two headings, and the headings are what make the
- *    numbers mean anything.
+ *    adds figures together. There is in fact only one coin figure left on it —
+ *    the settled one — because §2.4 retired `coins_pending` when the mechanic
+ *    stopped reserving. So "no total" is no longer a discipline this component
+ *    has to hold; it is what the data leaves behind.
  * 2. **Amber means a clock, and only here.** The `on-hold` group is the one
  *    place on this page where something is genuinely in progress, so it is the
  *    one place amber appears. The settled group is emerald because it landed.
@@ -89,9 +90,10 @@ const ROW_ICON = {
 } as const;
 
 function CoinFigure({ coins }: { coins: number | null }) {
-  // Null renders NOTHING rather than a zero. "0 StudsTokens" next to a
-  // not-confirmed group would state a figure the server never sent, and a zero
-  // on a money surface is a claim.
+  // Null renders NOTHING rather than a zero, and this is load-bearing twice over:
+  // §2.4 reports no amount for the held group at all, and "0 StudsTokens" beside
+  // "On hold" would state a figure the server never sent while telling a student
+  // their invitations are worth nothing. A zero on a money surface is a claim.
   if (coins === null) return null;
   return (
     <span className="text-sm font-bold tabular-nums text-gray-900">

@@ -7,23 +7,27 @@
  * of them mean different things to the same student, and the difference is
  * seven days long.
  *
- * §2.4 sends `coins_earned_total` and `coins_pending`, and the second is the
- * ledger's `reserved` balance — real StudsTokens, already set aside, not yet
- * released. The obvious page renders a single headline: "3 referrals, 180
- * coins". That sentence is false in three ways at once. It implies the 180 is
- * in the balance when it is not spendable. It implies all three referrals paid
- * when some are in a hold that may not release. And it is a number the student
- * will check against their wallet in a week and find does not match — which is
- * the moment they stop believing every other figure on the product.
+ * §2.4 sends ONE coin figure, `coins_earned_total`, and it is the settled one.
+ * The obvious page renders a single headline: "3 referrals, 180 coins". That
+ * sentence is false in three ways at once. It implies the 180 is in the balance
+ * when it is not spendable. It implies all three referrals paid when some are in
+ * a hold that may not release. And it is a number the student will check against
+ * their wallet in a week and find does not match — which is the moment they stop
+ * believing every other figure on the product.
  *
- * So there is no combined figure anywhere on this surface, by construction. The
- * settled number and the held number are different fields, rendered in different
- * groups, under different words, in different colours, and are never added
- * together by any function in this file. §2.4's guarantee that `coins_pending`
- * is the `reserved` balance — "so it can never disagree with
- * `GET /coins/balance`" — is exactly what makes the split honest rather than
- * merely cautious: the two figures on this page are the two figures in the
- * wallet.
+ * So there is no combined figure anywhere on this surface, by construction, and
+ * the property is now stronger than it was. §2.4 used to send a second figure,
+ * `coins_pending`, so the split was "two separate numbers, never added". The
+ * mechanic changed — a referral payout credits the referrer directly instead of
+ * reserving against their balance — and the server retired the field. So the
+ * held group carries NO coin figure at all: null, never a zero. The honest
+ * rendering of an amount the server does not report is to not report one, and a
+ * `0` beside "On hold" would tell a student their invitations are worth nothing,
+ * which is a different false claim from the one this file exists to prevent.
+ *
+ * What the held group DOES carry is its count, because `pending` is a real server
+ * field: "3 on hold" is a true answer, and the per-referral rows answer "until
+ * when" with `eligible_at`.
  *
  * ## The three groups, and why the third one is neutral grey
  *
@@ -206,9 +210,18 @@ export function buildReferralGroups(stats: ReferralStats): ReferralGroupView[] {
       tone: "clock",
       label: "On hold",
       count: `${fmtCoins(stats.pending)} on hold`,
-      coins: stats.coins_pending,
-      // The lead clause is the one doing the work: "not in your balance yet"
-      // next to a number is what stops this group being read as money.
+      // NO figure, and null rather than 0. §2.4 used to send a `coins_pending`
+      // here; the mechanic changed and the server retired it, because a referral
+      // payout credits the referrer directly instead of reserving against their
+      // balance. There is no reserved balance and so no amount to report.
+      //
+      // The count survives — `pending` is a real server field and "3 on hold" is
+      // a true answer. It is the AMOUNT that cannot be named, and a `0` here
+      // would tell the student their invitations are worth nothing, which is a
+      // different and equally false claim.
+      coins: null,
+      // The lead clause is what does the work now that no number precedes it: it
+      // states what is true, which is that nothing is in the balance yet.
       note: `Not in your balance yet. ${HOLD_RULE}`,
     },
     {

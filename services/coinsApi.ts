@@ -98,31 +98,48 @@ export interface CoinBalance {
 /**
  * §2.4's `stats`: the referrer's own counts and coin figures.
  *
- * Every field is a fact the SERVER computed. Two of them are the whole reason
- * this interface is careful about which number is which:
+ * Every field is a fact the SERVER computed, and there is exactly one coin
+ * figure among them.
  *
- *  - `coins_earned_total` is settled. It is in the balance and it stays there.
- *  - `coins_pending` is the `reserved` balance — §2.4 is explicit that it "is
- *    not a separate figure", so it can never disagree with §2.1. It is real
- *    money in a 7-day hold, and it is NOT spendable and NOT in
- *    `total_available`.
+ * ## There is no pending-coins figure, and that is deliberate
  *
- * A client that added them together, or rendered either without saying which
- * one it was, would be the "3 referrals, 180 coins" claim this feature must not
- * make. So they are separate fields here and they are rendered in separate
- * groups by `components/coins/referralView.ts`.
+ * This interface used to carry `coins_pending`, described as the ledger's
+ * `reserved` balance — coins promised but not yet issued, so that §2.4's page
+ * could never disagree with `GET /coins/balance`. The mechanic changed: a
+ * referral payout credits the referrer directly instead of reserving against
+ * their balance, and the 7-day wait lives in the referral row's state machine.
+ * Nothing reserves any more, so there is no reserved balance to report.
  *
- * `invited` is not the sum of the other three in every configuration — a capped
- * invite is counted separately — so no arithmetic is done on these fields
- * anywhere except the one documented reconstruction in `monthlyCap`.
+ * The field is REMOVED rather than redefined to zero. A reader that still
+ * looked for it would find `undefined`, coerce it, and the held group would
+ * render a figure the server never sent — which on that group is the specific
+ * dishonesty this surface exists to prevent. §2.4 now answers "how much is on
+ * hold" with per-referral `status` and `eligible_at` instead, which
+ * `MyReferral` carries and no aggregate does.
+ *
+ * `coins_earned_total` is the only coin figure here, and it is money in the
+ * balance. `components/coins/referralView.ts` renders it in the settled group
+ * and gives the held group no figure at all.
+ *
+ * ## Why the counts are five and not three
+ *
+ * `pending` counts only rows that MAY still pay. Terminal rows are counted in
+ * `expired` and `rejected`, so `invited === qualified + pending + expired +
+ * rejected` holds and no referral that can never pay is reported as one that
+ * might. `qualified` folds in clawed-back referrals: they did qualify, and
+ * rendering "0 qualified" to a student who was credited and then reversed is
+ * worse than showing no number.
+ *
+ * No arithmetic is done on these fields anywhere except the one documented
+ * reconstruction in `monthlyCap`.
  */
 export interface ReferralStats {
   invited: number;
   qualified: number;
   pending: number;
+  expired: number;
   rejected: number;
   coins_earned_total: number;
-  coins_pending: number;
   this_month_qualified: number;
   monthly_cap_remaining: number;
   lifetime_cap_remaining: number;
@@ -504,8 +521,12 @@ function nonNegative(value: unknown): number {
  * Returns null — the page's error state — unless there is a `referral_code` to
  * show and a `stats` object to read. The alternative, filling a missing stat
  * with zero, is the exact lie this module exists to prevent: a student whose
- * `coins_pending` failed to parse would be shown "nothing on hold" and would
- * stop waiting for coins that are in fact reserved for them.
+ * `coins_earned_total` failed to parse would be shown as having earned nothing
+ * and would stop expecting coins that are in fact in their balance.
+ *
+ * The field list below is exhaustive and is the reason a retired figure cannot
+ * survive here: anything the server stops sending is no longer read, so no
+ * consumer of this object can render it.
  */
 function readReferralSummary(payload: unknown): ReferralSummary | null {
   const data = unwrapData(payload);
@@ -526,9 +547,9 @@ function readReferralSummary(payload: unknown): ReferralSummary | null {
       invited: nonNegative(stats.invited),
       qualified: nonNegative(stats.qualified),
       pending: nonNegative(stats.pending),
+      expired: nonNegative(stats.expired),
       rejected: nonNegative(stats.rejected),
       coins_earned_total: nonNegative(stats.coins_earned_total),
-      coins_pending: nonNegative(stats.coins_pending),
       this_month_qualified: nonNegative(stats.this_month_qualified),
       monthly_cap_remaining: nonNegative(stats.monthly_cap_remaining),
       lifetime_cap_remaining: nonNegative(stats.lifetime_cap_remaining),
@@ -739,7 +760,12 @@ export const coinsApi = {
     options: { signal?: AbortSignal } = {},
   ): Promise<ReferralSummary | null> {
     try {
-      const response = await apiRequest<unknown>("/api/v1/referral/me", {
+      // The path the server MOUNTS. `internal/coins/routes.go` registers
+      // `GET /api/v1/referrals` and has never registered `/api/v1/referral/me`,
+      // which §2.4 originally spelled. The old spelling 404s, the catch below
+      // turns that into null, and a signed-in student sees the error card instead
+      // of their referral code — the one thing this page exists to give them.
+      const response = await apiRequest<unknown>("/api/v1/referrals", {
         suppressAuthExpired: true,
         ...(options.signal ? { signal: options.signal } : {}),
       });
