@@ -8,6 +8,7 @@ import { Menu, Search } from "lucide-react";
 import { getImageUrl } from "@/services/api";
 import { useAuth } from "@/services/AuthContext";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import CoinBalanceChip from "@/components/coins/CoinBalanceChip";
 import {
   NotificationsProvider,
   useStudentNotifications,
@@ -75,6 +76,17 @@ function DashboardHeader({ onMenuClick }: { onMenuClick: () => void }) {
       </div>
 
       <div className="flex items-center gap-4 lg:gap-6">
+        {/*
+          The same chip as the public navbar, mounted per 06 §12. Two mounts
+          rather than one lifted chip because the two headers are different
+          components on different routes — the public navbar is hidden on
+          `/user/dashboard/*` by `navbar-wrapper.tsx`, so the dashboard header is
+          the only one on these pages. Each instance reads independently, which
+          is one extra balance read per page across the two hosts and never two
+          on one page.
+        */}
+        <CoinBalanceChip user={user} />
+
         <NotificationBell
           notifications={items.slice(0, 10)}
           unreadCount={unreadCount}

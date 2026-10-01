@@ -15,6 +15,7 @@ import {
   Bookmark,
   Star,
   Bell,
+  Coins,
   Settings,
   BadgeQuestionMark,
   LogOut,
@@ -83,6 +84,15 @@ export default function Sidebar({
       label: "My Profile",
       icon: User,
       href: "/user/dashboard/profile",
+    },
+    {
+      // 06 §12. Above Bookmarks because a balance is a thing a student checks,
+      // and a sidebar that buries it under nine other items is why the header
+      // chip has to exist at all.
+      id: "coins",
+      label: "Coins",
+      icon: Coins,
+      href: "/user/dashboard/coins",
     },
     {
       id: "bookmarks",

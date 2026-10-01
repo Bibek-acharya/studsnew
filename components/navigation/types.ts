@@ -1,6 +1,13 @@
 export interface EducationNavbarProps {
   onNavigate?: (view: string, data?: { level?: string }) => void;
   user?: {
+    /**
+     * Optional because some call sites pass a narrowed object, but present on
+     * the real session: `CoinBalanceChip` tags its balance read with `user.id`,
+     * and a session without one resolves to an unattributable wallet, which it
+     * renders as undetermined rather than as zero.
+     */
+    id?: number;
     first_name: string;
     last_name: string;
     email: string;
