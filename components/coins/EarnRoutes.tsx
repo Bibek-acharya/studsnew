@@ -51,7 +51,11 @@ const ROUTE_ICON: Record<string, typeof UserPlus> = {
 
 const ROUTE_HREF: Record<string, string> = {
   PROFILE: "/user/dashboard/profile",
-  REFERRAL: "/user/dashboard/coins",
+  // The referral slice landed, so this is the real page rather than the wallet
+  // it used to point at. It was a placeholder pointing at `/user/dashboard/coins`
+  // because there was nowhere else to send a student: a route list whose
+  // "Invite" button lands on the balance page is a route that does not exist.
+  REFERRAL: "/user/dashboard/referral",
   UPLOAD: "/user/dashboard/coins",
 };
 

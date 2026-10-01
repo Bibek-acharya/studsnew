@@ -50,6 +50,7 @@ import StarterAllowanceCard from "@/components/coins/StarterAllowanceCard";
 import TransactionJournal from "@/components/coins/TransactionJournal";
 import WalletExpiryStamp from "@/components/coins/WalletExpiryStamp";
 import { AFFORDABLE_CATALOGUE_HREF } from "@/components/coins/EarnRoutes";
+import { SPEND_STATUS } from "@/components/coins/spendStatus";
 import { daysLeft } from "@/components/coins/expiry";
 import { fmtCoins } from "@/components/coins/useCoinState";
 import { coinsApi, type CoinBalance } from "@/services/coinsApi";
@@ -59,13 +60,16 @@ type Phase = "loading" | "ready" | "error";
 /**
  * The one honest sentence about the gates.
  *
+ * Moved to `components/coins/spendStatus.ts` and imported rather than declared
+ * here, because the referral page shows a StudsToken figure too and two copies
+ * of this sentence would be free to drift apart. A drift here is not a typo, it
+ * is a promise the platform stops keeping. The wording is unchanged.
+ *
  * "Not switched on yet" rather than a date, because nobody has committed to a
  * date and 09 §"What support must never promise" is explicit that there is no
  * commitment to when a gate flips. A date here would be invented, and it is the
  * single line on this page most likely to end up wrong.
  */
-const SPEND_STATUS =
-  "Right now you can earn StudsTokens but not spend them yet. Everything you earn is kept, and it starts unlocking resources when that switches on.";
 
 export default function WalletSection() {
   const { user } = useAuth();
@@ -233,9 +237,13 @@ export default function WalletSection() {
             never be shown a profile route.
 
             So this is navigation, not arithmetic: where each route lives, with
-            no number beside it. When the referral slice lands, `/referral/me`
-            supplies the real `ways_to_earn` and this list is replaced by
-            `EarnRoutes` rather than extended.
+            no number beside it. The referral route now has a page of its own at
+            `/user/dashboard/referral` — that is the one change the referral slice
+            made here. It did NOT replace this list with `EarnRoutes`, because the
+            blocker was never the absence of a referral page: it is the absence of
+            a 402 body, and this page has no shortfall and therefore no
+            `ways_to_earn`. Replacing the list would need the economy to answer a
+            question this page cannot ask.
           */}
           <ul className="mt-4 space-y-2">
             {[
@@ -246,7 +254,7 @@ export default function WalletSection() {
               },
               {
                 label: "Invite a friend",
-                href: "/user/dashboard/coins",
+                href: "/user/dashboard/referral",
                 cta: "Invite",
               },
               {

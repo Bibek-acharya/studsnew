@@ -16,6 +16,7 @@ import {
   Star,
   Bell,
   Coins,
+  UserPlus,
   Settings,
   BadgeQuestionMark,
   LogOut,
@@ -93,6 +94,17 @@ export default function Sidebar({
       label: "Coins",
       icon: Coins,
       href: "/user/dashboard/coins",
+    },
+    {
+      // Directly under Coins, because this is the Coins surface's own earn
+      // route and a student who has just read their balance is the one most
+      // likely to want it. The same argument as the entry above: a page that
+      // exists and that no nav item points at is a dead end, which is the
+      // failure the anti-dead-end link was fixed for.
+      id: "referral",
+      label: "Invite a friend",
+      icon: UserPlus,
+      href: "/user/dashboard/referral",
     },
     {
       id: "bookmarks",

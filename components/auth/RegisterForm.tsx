@@ -1,11 +1,72 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/services/AuthContext";
 import { apiService } from "@/services/api";
-import { Eye, EyeOff, Mail, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, Mail, ArrowLeft, Info } from "lucide-react";
+import {
+  persistReferralInvite,
+  resolveReferralInvite,
+  clearReferralInvite,
+  type ReferralInvite,
+} from "@/lib/referralInvite";
+
+/**
+ * The server's view of the invite, and the browser's.
+ *
+ * They differ, and the difference is the whole reason this is
+ * `useSyncExternalStore` and not a `useState` initialiser: the prerendered HTML
+ * was produced without a `window`, so `getServerSnapshot` must return the
+ * no-invite answer. Returning anything else would be a hydration mismatch, and a
+ * mismatch on the signup form is a console error and a flash.
+ */
+const NO_INVITE: ReferralInvite = { code: null, source: "none" };
+
+/** The `ref` parameter, or null. Never throws: a URL is not user input here. */
+function readRefParam(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return new URLSearchParams(window.location.search).get("ref");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Cached so the snapshot is referentially stable.
+ *
+ * `useSyncExternalStore` compares snapshots by identity and re-renders whenever
+ * they differ, so a function returning a fresh object every call would loop
+ * forever. Caching on the raw parameter means the decision runs once per
+ * distinct URL rather than once per render — and it also means
+ * `resolveReferralInvite` is called during render, which is only sound because
+ * it is pure.
+ */
+let cachedRef: string | null = null;
+let cachedInvite: ReferralInvite = NO_INVITE;
+let cachedResolved = false;
+
+function inviteSnapshot(): ReferralInvite {
+  const ref = readRefParam();
+  if (!cachedResolved || ref !== cachedRef) {
+    cachedRef = ref;
+    cachedInvite = resolveReferralInvite(ref);
+    cachedResolved = true;
+  }
+  return cachedInvite;
+}
+
+/** Back/forward within a signup flow should re-read the URL, not a stale copy. */
+function subscribeToUrl(onChange: () => void): () => void {
+  window.addEventListener("popstate", onChange);
+  return () => window.removeEventListener("popstate", onChange);
+}
+
+function useReferralInvite(): ReferralInvite {
+  return useSyncExternalStore(subscribeToUrl, inviteSnapshot, () => NO_INVITE);
+}
 
 type Step = "email" | "details" | "verify";
 
@@ -28,6 +89,38 @@ export default function RegisterForm() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [otpTimer, setOtpTimer] = useState(120);
   const [otpResendDisabled, setOtpResendDisabled] = useState(false);
+
+  /**
+   * The invite code this registration will carry, if any.
+   *
+   * Read from the URL through `useSyncExternalStore` rather than
+   * `useSearchParams`, and that is a two-part decision.
+   *
+   * `useSearchParams` in a client component opts the whole route into a
+   * client-render bailout, and `/register` is currently STATIC in the build — a
+   * public signup page, which this feature has no business making per-request.
+   * `app/study-resources/can-unlock` is the repo's precedent for treating that
+   * trade as not worth making.
+   *
+   * `useState` + an effect that reads `window.location.search` is the other
+   * tempting answer and it is worse twice over: it renders one frame without the
+   * notice, and it trips `react-hooks/set-state-in-effect` for a real reason —
+   * the URL is not component state, it is an external store the browser owns,
+   * and `useSyncExternalStore` is the API for exactly that. It also gets
+   * back/forward right for free, which an effect with `[]` never would.
+   */
+  const invite = useReferralInvite();
+
+  /**
+   * Remember the code for a later visit to a bare `/register`.
+   *
+   * A separate effect from the read because `resolveReferralInvite` is pure and
+   * this is the write. It calls no `setState`, so it is not a cascading render,
+   * and it re-runs only when the code itself changes.
+   */
+  useEffect(() => {
+    if (invite.code) persistReferralInvite(invite.code);
+  }, [invite.code]);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -99,6 +192,11 @@ export default function RegisterForm() {
         password: password,
         first_name: firstName.trim(),
         last_name: lastName.trim(),
+        // The code is a plain string the server normalises and looks up; it
+        // carries no amount and can change nothing about what the account is
+        // worth. Omitted entirely when there is no invite, rather than sent as
+        // an empty string, so the field is absent rather than blank.
+        ...(invite.code ? { referral_code: invite.code } : {}),
       });
       accountCreated = true;
     } catch (err: unknown) {
@@ -113,6 +211,11 @@ export default function RegisterForm() {
       setLoading(false);
       return;
     }
+
+    // The referral is attributed at user creation, so the code has done its job
+    // and is single-use per account. Leaving it behind would mean a second
+    // account created from this browser carried a code that cannot be used.
+    clearReferralInvite();
     
     try {
       await apiService.sendOTP(email.trim(), "verification");
@@ -194,9 +297,36 @@ export default function RegisterForm() {
     setError("");
   };
 
+  /**
+   * The only thing this form says about an invite that went wrong.
+   *
+   * A student who followed a friend's link and arrived here is one step from an
+   * account, the friend is not present to explain, and the code is not what they
+   * came for. So the notice states the failure in a sentence and then stops: no
+   * error styling, no red, nothing that reads as a rejected registration, and no
+   * suggestion to go back and try a link again. There is nothing to retry — the
+   * link is what it is, and the account is worth having either way.
+   *
+   * It renders only for `invalid-link`, which is a code that was present and
+   * cannot be one. A code that is well-formed but unknown is NOT reported, and
+   * the reason is in `03-api-contract.md` §2.5: there is deliberately no way to
+   * ask whether a code exists, so this form cannot honestly claim one does not.
+   * The server stages an unknown code, attributes nothing, and says nothing.
+   */
+  const inviteNotice =
+    invite.source === "invalid-link" ? (
+      <p className="flex items-start gap-2 rounded-md border border-gray-200 bg-gray-50 p-3 text-xs leading-5 text-gray-600">
+        <Info size={13} className="mt-0.5 shrink-0 text-gray-400" aria-hidden="true" />
+        <span>
+          That invite link did not work. You can still create an account.
+        </span>
+      </p>
+    ) : null;
+
   if (step === "email") {
     return (
       <form onSubmit={handleEmailSubmit} className="space-y-5">
+        {inviteNotice}
         <button
           type="button"
           onClick={() => {
@@ -282,6 +412,7 @@ export default function RegisterForm() {
   if (step === "details") {
     return (
       <form onSubmit={handleDetailsSubmit} className="space-y-5">
+        {inviteNotice}
         
 
         <div className="flex gap-4">

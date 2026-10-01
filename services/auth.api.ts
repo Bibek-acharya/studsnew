@@ -80,6 +80,18 @@ export const authApi = {
     role?: string;
     education_level?: string;
     access_code?: string;
+    /**
+     * The inviter's code, as captured from the share link
+     * (`/r/[code]` → `?ref=`). Optional, and omitted rather than sent empty
+     * when there is none.
+     *
+     * This conforms to a field the server already declares —
+     * `RegisterRequest.ReferralCode` in `internal/auth/dto.go` — and carries no
+     * amount, no role and nothing that can change what the account is worth. The
+     * server normalises it, looks it up, and attributes nothing if it matches no
+     * row. See `lib/referralInvite.ts` for how the code reaches here.
+     */
+    referral_code?: string;
   }): Promise<RegisterResponse> {
     return apiRequest<RegisterResponse>("/api/v1/auth/register", {
       method: "POST",

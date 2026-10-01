@@ -96,6 +96,74 @@ export interface CoinBalance {
 }
 
 /**
+ * §2.4's `stats`: the referrer's own counts and coin figures.
+ *
+ * Every field is a fact the SERVER computed. Two of them are the whole reason
+ * this interface is careful about which number is which:
+ *
+ *  - `coins_earned_total` is settled. It is in the balance and it stays there.
+ *  - `coins_pending` is the `reserved` balance — §2.4 is explicit that it "is
+ *    not a separate figure", so it can never disagree with §2.1. It is real
+ *    money in a 7-day hold, and it is NOT spendable and NOT in
+ *    `total_available`.
+ *
+ * A client that added them together, or rendered either without saying which
+ * one it was, would be the "3 referrals, 180 coins" claim this feature must not
+ * make. So they are separate fields here and they are rendered in separate
+ * groups by `components/coins/referralView.ts`.
+ *
+ * `invited` is not the sum of the other three in every configuration — a capped
+ * invite is counted separately — so no arithmetic is done on these fields
+ * anywhere except the one documented reconstruction in `monthlyCap`.
+ */
+export interface ReferralStats {
+  invited: number;
+  qualified: number;
+  pending: number;
+  rejected: number;
+  coins_earned_total: number;
+  coins_pending: number;
+  this_month_qualified: number;
+  monthly_cap_remaining: number;
+  lifetime_cap_remaining: number;
+}
+
+/** §2.4's 200 body. */
+export interface ReferralSummary {
+  /** The student's own code, in the exact form the server stores it. */
+  referral_code: string;
+  /**
+   * The server's share link, used verbatim.
+   *
+   * Never rebuilt from `referral_code`. The server knows the host and the
+   * routing; a client that concatenated them would produce a link that works in
+   * development and 404s in production, and the code's whole purpose is to be
+   * passed to another person.
+   */
+  referral_link: string;
+  stats: ReferralStats;
+}
+
+/** One referral as `/api/v1/referrals/mine` would report it. */
+export type ReferralRowState = "settled" | "on-hold" | "not-confirmed" | "capped";
+
+/**
+ * One referred friend, as far as this client is willing to claim.
+ *
+ * `label` is empty when the endpoint sends no name, and the row renders
+ * generically. This client will not fall back to a generated placeholder like
+ * "Friend 1", because a list that numbers its people is a list that has
+ * invented them.
+ */
+export interface MyReferral {
+  id: string;
+  label: string;
+  state: ReferralRowState;
+  /** The hold's end, when the endpoint reports one. Null renders no date. */
+  holdUntil: string | null;
+}
+
+/**
  * The per-resource state the gated list endpoint carries alongside each item.
  *
  * Absent means the gate is off for that item, and the card renders exactly as
@@ -423,6 +491,180 @@ function readBalance(payload: unknown): CoinBalance | null {
   };
 }
 
+/** A count or a coin figure, floored at zero. NaN, null and junk are 0. */
+function nonNegative(value: unknown): number {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  return Math.max(0, Math.round(n));
+}
+
+/**
+ * §2.4, read defensively.
+ *
+ * Returns null — the page's error state — unless there is a `referral_code` to
+ * show and a `stats` object to read. The alternative, filling a missing stat
+ * with zero, is the exact lie this module exists to prevent: a student whose
+ * `coins_pending` failed to parse would be shown "nothing on hold" and would
+ * stop waiting for coins that are in fact reserved for them.
+ */
+function readReferralSummary(payload: unknown): ReferralSummary | null {
+  const data = unwrapData(payload);
+  const code = typeof data.referral_code === "string" ? data.referral_code : "";
+  const stats =
+    data.stats && typeof data.stats === "object"
+      ? (data.stats as Record<string, unknown>)
+      : null;
+  if (!code || !stats) return null;
+
+  return {
+    referral_code: code,
+    // A missing link is survivable — the code is still shareable by hand — so it
+    // degrades to an empty string and the share row drops the link targets
+    // rather than building a URL the server did not give us.
+    referral_link: typeof data.referral_link === "string" ? data.referral_link : "",
+    stats: {
+      invited: nonNegative(stats.invited),
+      qualified: nonNegative(stats.qualified),
+      pending: nonNegative(stats.pending),
+      rejected: nonNegative(stats.rejected),
+      coins_earned_total: nonNegative(stats.coins_earned_total),
+      coins_pending: nonNegative(stats.coins_pending),
+      this_month_qualified: nonNegative(stats.this_month_qualified),
+      monthly_cap_remaining: nonNegative(stats.monthly_cap_remaining),
+      lifetime_cap_remaining: nonNegative(stats.lifetime_cap_remaining),
+    },
+  };
+}
+
+/**
+ * The status vocabulary `/api/v1/referrals/mine` is documented to use, mapped
+ * onto the four states 06 §6 renders.
+ *
+ * Deliberately generous on spelling (`pending`/`pending_hold`/`held`/
+ * `reserved`) and strict on meaning: anything not in this table maps to null and
+ * the ROW IS DROPPED. A referral whose state this client cannot name is not
+ * rendered in a state this client guessed, because every state here is a claim
+ * about someone's money.
+ */
+function toReferralRowState(value: unknown): ReferralRowState | null {
+  const key = String(value ?? "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  switch (key) {
+    case "pending":
+    case "pending_hold":
+    case "held":
+    case "reserved":
+    case "on_hold":
+      return "on-hold";
+    case "qualified":
+    case "released":
+    case "confirmed":
+    case "paid":
+      return "settled";
+    case "failed":
+    case "rejected":
+    case "revoked":
+    case "not_qualified":
+    case "not_confirmed":
+      return "not-confirmed";
+    case "capped":
+      return "capped";
+    default:
+      return null;
+  }
+}
+
+/** The first non-empty string among `keys`, or "". */
+function firstString(row: Record<string, unknown>, keys: string[]): string {
+  for (const key of keys) {
+    const value = row[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return "";
+}
+
+/**
+ * A row's identity, accepting the number as readily as the string.
+ *
+ * A JSON list keyed by a numeric `id` is entirely ordinary, and reading it with
+ * a string-only helper would silently drop it and fall back to a positional
+ * index — which is stable only until the list is re-sorted, and `buildReferralRows`
+ * sorts.
+ */
+function rowId(row: Record<string, unknown>, fallback: number): string {
+  for (const key of ["id", "referral_id", "uuid"]) {
+    const value = row[key];
+    if (typeof value === "string" && value.trim().length > 0) return value.trim();
+    if (typeof value === "number" && Number.isFinite(value)) return String(value);
+  }
+  return String(fallback);
+}
+
+/**
+ * `/api/v1/referrals/mine`, read as an ENRICHMENT and never as a dependency.
+ *
+ * ## Why this function is allowed to exist at all
+ *
+ * `03-api-contract.md` lists this endpoint in its route table ("My referrals
+ * and their status") and gives it a §2.x section number in §2's neighbours, but
+ * no section in the document actually specifies its body. 06 §6 requires
+ * per-referral rows with a name and a hold date, so the two documents are in
+ * tension and neither can be satisfied without guessing.
+ *
+ * The guess is confined to here, and it is made safe by what it is NOT allowed
+ * to do:
+ *
+ *  - The page's counts, coin figures, cap and every headline come from §2.4,
+ *    which IS specified. A response this reader cannot make sense of cannot
+ *    change a single number on the page.
+ *  - Unrecognised rows are dropped, unrecognised statuses are dropped, and a
+ *    failed request returns null. Absence renders nothing.
+ *  - The caller treats null and [] identically, so the page is complete and
+ *    correct before this endpoint exists.
+ *
+ * When the backend documents and ships its own shape, the mapping below is the
+ * only thing that needs to change, and no number on the page moves.
+ *
+ * A bare array and a `{ items: [] }` envelope are both accepted, because those
+ * are the two shapes §2.2 and §2.4 establish for this API and either is a
+ * plausible reading of a list.
+ */
+function readMyReferrals(payload: unknown): MyReferral[] | null {
+  const data = unwrapData(payload);
+  const list = Array.isArray(data)
+    ? data
+    : Array.isArray(data.items)
+      ? (data.items as unknown[])
+      : null;
+  if (!list) return null;
+
+  const rows: MyReferral[] = [];
+  for (const raw of list as unknown[]) {
+    if (!raw || typeof raw !== "object") continue;
+    const row = raw as Record<string, unknown>;
+    const state = toReferralRowState(row.status ?? row.state);
+    if (!state) continue;
+
+    const name = firstString(row, ["name", "friend_name", "referred_user_name"]);
+    const parts = [row.first_name, row.last_name]
+      .filter((part): part is string => typeof part === "string" && part.trim().length > 0)
+      .map((part) => part.trim());
+    const label = name || (parts.length > 0 ? parts.join(" ") : "");
+
+    const holdUntil =
+      firstString(row, ["hold_until", "hold_expires_at", "release_at"]) || null;
+
+    rows.push({
+      id: rowId(row, rows.length),
+      label,
+      state,
+      holdUntil,
+    });
+  }
+  return rows;
+}
+
 /**
  * Turn one unlock attempt into a screen-defining outcome.
  *
@@ -481,6 +723,47 @@ export const coinsApi = {
     } catch {
       // No wallet is a rendering state, not an error banner: a failed balance
       // read must not tell a signed-in student they have nothing.
+      return null;
+    }
+  },
+
+  /**
+   * §2.4. The referrer's own code, link and stats.
+   *
+   * A 401 is suppressed for the same reason as §2.1's: "not signed in" is a
+   * rendering state on this page, not a reason to wipe the session. Null means
+   * the page could not be read and must say so — never zero, which would report
+   * a student with nine paid referrals as having none.
+   */
+  async getReferralSummary(
+    options: { signal?: AbortSignal } = {},
+  ): Promise<ReferralSummary | null> {
+    try {
+      const response = await apiRequest<unknown>("/api/v1/referral/me", {
+        suppressAuthExpired: true,
+        ...(options.signal ? { signal: options.signal } : {}),
+      });
+      return readReferralSummary(response);
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * `/api/v1/referrals/mine` — the per-referral list, as an optional
+   * enrichment. See `readMyReferrals` for why the payload is read this
+   * defensively and why the page does not depend on the result.
+   */
+  async listMyReferrals(
+    options: { signal?: AbortSignal } = {},
+  ): Promise<MyReferral[] | null> {
+    try {
+      const response = await apiRequest<unknown>("/api/v1/referrals/mine", {
+        suppressAuthExpired: true,
+        ...(options.signal ? { signal: options.signal } : {}),
+      });
+      return readMyReferrals(response);
+    } catch {
       return null;
     }
   },
