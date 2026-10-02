@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Users, Briefcase, Newspaper, Download } from "lucide-react";
+import { Users, Briefcase, Newspaper, Download, Coins } from "lucide-react";
 
 const routeMap: Record<string, string> = {
   educationPage: "/",
@@ -29,6 +29,13 @@ const connectItems = [
   { label: "Careers", href: "/careers", icon: Briefcase, external: false },
   { label: "Media & Press", href: "/media-press", icon: Newspaper, external: false },
   { label: "Downloads", href: "/downloads", icon: Download, external: false },
+  // The published coin table. Consumer Protection Act 2075 s.16(2)(n) requires the
+  // price, what is included and the expiry to be published, and 04 §6 is explicit
+  // that a terms-page clause is NOT the disclosure the provision contemplates — it
+  // needs to be a page a reader can reach before they spend. A disclosure with no
+  // link to it is not published, so this sits in the footer next to the other
+  // standing informational pages.
+  { label: "StudsToken coin table", href: "/coins", icon: Coins, external: false },
 ];
 
 const Newsletter = dynamic(() => import("./Newsletter"), { ssr: false });
