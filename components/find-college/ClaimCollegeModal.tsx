@@ -215,9 +215,9 @@ export default function ClaimCollegeModal({ college, onClose }: ClaimCollegeModa
                     className={inputClass} placeholder="9-digit PAN number" maxLength={9} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Registration Number</label>
                   <input type="text" value={formData.registration_number} onChange={e => updateField("registration_number", e.target.value)}
-                    className={inputClass} placeholder="e.g. 12345/078" required />
+                    className={inputClass} placeholder="e.g. 12345/078" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Website URL</label>
@@ -241,7 +241,7 @@ export default function ClaimCollegeModal({ college, onClose }: ClaimCollegeModa
                   className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                   Cancel
                 </button>
-                <button type="button" onClick={submitClaim} disabled={submitting || !formData.email || !formData.institution_name || !formData.registration_number}
+                <button type="button" onClick={submitClaim} disabled={submitting || !formData.email || !formData.institution_name}
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2">
                   {submitting ? <Loader2 size={16} className="animate-spin" /> : <Mail size={16} />}
                   {submitting ? "Submitting..." : "Submit & Verify Email"}
