@@ -173,7 +173,19 @@ export function buildStudyResourceUploadFormData(
   return form;
 }
 
-function buildStudyResourceQuery(params: StudyResourceFilters): string {
+/**
+ * Builds the catalogue list URL.
+ *
+ * `signedIn` selects the path, and it is a parameter rather than something inferred
+ * from the token so the CALLER states which catalogue it wants. Inferring it here would
+ * mean a token that fails to attach silently downgrades a student to the public list —
+ * and a public list means no access block, which means a card that offers a Download
+ * the server will then refuse.
+ */
+function buildStudyResourceQuery(
+  params: StudyResourceFilters,
+  signedIn = false,
+): string {
   const search = new URLSearchParams();
   if (params.q) search.set("q", params.q);
   if (params.type) search.set("type", params.type);
@@ -182,7 +194,8 @@ function buildStudyResourceQuery(params: StudyResourceFilters): string {
   if (params.page) search.set("page", String(params.page));
   if (params.limit) search.set("limit", String(params.limit));
   const qs = search.toString();
-  return `/api/v1/study-resources${qs ? `?${qs}` : ""}`;
+  const path = signedIn ? "/api/v1/study-resources/access" : "/api/v1/study-resources";
+  return `${path}${qs ? `?${qs}` : ""}`;
 }
 
 /**
@@ -382,6 +395,34 @@ export const studyResourcesApi = {
     return options.signal
       ? apiRequest<StudyResourcesResponse>(path, { signal: options.signal })
       : apiRequest<StudyResourcesResponse>(path);
+  },
+
+  /**
+   * The catalogue WITH the coin access block, for a signed-in student.
+   *
+   * `GET /api/v1/study-resources/access` is a session-scoped twin of the public
+   * catalogue, because the access block carries two per-user facts — whether this
+   * student already holds the item, and how many included unlocks they have left —
+   * and the public route discloses metadata only.
+   *
+   * **When `signedIn` is false this falls back to the public path** rather than
+   * calling the session route and taking a 401. An anonymous visitor must still get a
+   * catalogue; trading a missing access block for an error page would be a bad deal.
+   *
+   * The fallback is also what makes the ungated case free: with every gate off the
+   * public list carries no `access` either, and `ResourceCard` renders exactly as it
+   * did before this feature existed.
+   */
+  async listStudyResourcesWithAccess(
+    params: StudyResourceFilters = {},
+    options: { signal?: AbortSignal; signedIn?: boolean } = {},
+  ): Promise<StudyResourcePage> {
+    const signedIn = options.signedIn ?? true;
+    const path = buildStudyResourceQuery(params, signedIn);
+    const response = options.signal
+      ? await apiRequest<StudyResourcesResponse>(path, { signal: options.signal })
+      : await apiRequest<StudyResourcesResponse>(path);
+    return normalizeStudyResourceList(response);
   },
 
   /**

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, Loader2, PlayCircle, Search } from "lucide-react";
 import {
   studyResourcesApi,
+  STUDY_RESOURCE_VIDEO_TYPE,
   type StudyResource,
   type StudyResourcePage,
 } from "@/services/studyResourcesApi";
@@ -60,13 +61,21 @@ export default function VideoLecturesPage({
     setLoading(true);
     setError(null);
     try {
-      const result = await studyResourcesApi.listVideoLectures({
-        q: searchQuery || undefined,
-        course: courseFilter || undefined,
-        year: yearFilter || undefined,
-        page,
-        limit: PAGE_SIZE,
-      });
+      // The session-scoped list when signed in, so each lecture card carries its
+      // access block. Signed out it falls back to the public list, which carries none —
+      // the same thing an ungated deployment gets either way. See
+      // StudyResourcesPage for the identical wiring and the reasoning.
+      const result = await studyResourcesApi.listStudyResourcesWithAccess(
+        {
+          q: searchQuery || undefined,
+          type: STUDY_RESOURCE_VIDEO_TYPE,
+          course: courseFilter || undefined,
+          year: yearFilter || undefined,
+          page,
+          limit: PAGE_SIZE,
+        },
+        { signedIn: Boolean(user) },
+      );
       setResources(result.items);
       setTotal(result.total);
       const years = new Set<string>(result.years);
@@ -85,7 +94,9 @@ export default function VideoLecturesPage({
     } finally {
       setLoading(false);
     }
-  }, [searchQuery, courseFilter, yearFilter, page]);
+    // `user` is in the deps because the fetch branches on it — see the note on
+    // StudyResourcesPage's identical wiring.
+  }, [searchQuery, courseFilter, yearFilter, page, user]);
 
   useEffect(() => {
     // The server already delivered page 1; only refetch once filters change.

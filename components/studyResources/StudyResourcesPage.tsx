@@ -160,7 +160,15 @@ export default function StudyResourcesPage({
       // only show the skeleton for a cold first load.
       setSearching(true);
       try {
-        const res = await studyResourcesApi.listStudyResources(
+        // The SESSION-SCOPED list when signed in, so each card carries its access
+        // block — the price, whether this student already holds the item, and how many
+        // included unlocks they have left.
+        //
+        // Signed out, this falls back to the public list, which carries no access block
+        // and therefore renders exactly as it did before coin gating existed. That is
+        // also what an ungated deployment gets from either route, so the fallback costs
+        // nothing and needs no separate path.
+        const res = await studyResourcesApi.listStudyResourcesWithAccess(
           buildStudyResourceFilters({
             lockedType,
             query: searchQuery,
@@ -168,22 +176,25 @@ export default function StudyResourcesPage({
             year: yearFilter,
             page,
           }),
-          { signal: controller.signal },
+          { signal: controller.signal, signedIn: Boolean(user) },
         );
         if (!active) return;
 
-        const items = res?.data?.study_resources ?? [];
+        // `listStudyResourcesWithAccess` returns the NORMALIZED page rather than the
+        // raw envelope, so the items, total and year facets arrive already unwrapped.
+        // The old `listStudyResources` call returned the envelope and this block read
+        // `res.data.study_resources` out of it.
+        const items = res?.items ?? [];
         setResources(items);
-        const responseTotal = res?.data?.total ?? items.length;
+        const responseTotal = res?.total ?? items.length;
         setTotal(responseTotal);
         setTotalPages(Math.max(1, Math.ceil(responseTotal / PAGE_SIZE)));
-        // Aggregate years from the envelope (when present) and the items.
+        // Aggregate the envelope's distinct years with the years on this page's items,
+        // so a facet survives a filter that hides the item carrying it.
         const years = new Set<string>();
-        if (Array.isArray(res?.data?.years)) {
-          res.data.years.forEach((y) => {
-            if (typeof y === "string" && y.trim()) years.add(y.trim());
-          });
-        }
+        (res?.years ?? []).forEach((y) => {
+          if (typeof y === "string" && y.trim()) years.add(y.trim());
+        });
         items.forEach((item) => {
           if (item.year && item.year.trim()) years.add(item.year.trim());
         });
@@ -208,7 +219,10 @@ export default function StudyResourcesPage({
       active = false;
       controller.abort();
     };
-  }, [searchQuery, courseFilter, yearFilter, page, lockedType]);
+    // `user` is in the deps because the fetch branches on it: a student who signs in
+    // while this page is open should get access blocks on the next load, rather than
+    // keeping the anonymous list until some unrelated filter happens to change.
+  }, [searchQuery, courseFilter, yearFilter, page, lockedType, user]);
 
   const yearsSortedDesc = useMemo(
     () =>

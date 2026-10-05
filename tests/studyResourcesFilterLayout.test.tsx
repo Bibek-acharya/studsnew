@@ -71,6 +71,35 @@ type ListStudyResourcesArgs = [
   options?: { signal?: AbortSignal },
 ];
 
+/**
+ * The NORMALIZED page shape, which is what `listStudyResourcesWithAccess` returns.
+ *
+ * `listStudyResources` hands back the raw envelope; the access variant unwraps it. The
+ * stub has to mirror that difference exactly — returning an envelope where the page
+ * expects a page makes it read `res.items` off an object without that field and render
+ * an empty catalogue, which looks identical to the filter having emptied it.
+ */
+function stubNormalizedPage(params?: unknown, options?: { signal?: AbortSignal }) {
+  // Delegate to the same spy the public-list path uses, then unwrap.
+  //
+  // This is what keeps every assertion in this file about the request — the params,
+  // the abort signal, the debounce — working without rewriting them. The page calls
+  // `listStudyResourcesWithAccess`, so if this stub called a different spy the
+  // assertions below would read zero calls and report "the page stopped fetching",
+  // which is a page regression that is actually a mock-author problem.
+  return listStudyResources(params, options).then((envelope) => {
+    const data = (envelope as { data?: Record<string, unknown> })?.data ?? {};
+    return {
+      items: data.study_resources ?? [],
+      total: data.total ?? 0,
+      page: 1,
+      limit: 20,
+      years: data.years ?? [],
+      courses: [],
+    };
+  });
+}
+
 const listStudyResources = jest.fn<
   Promise<unknown>,
   ListStudyResourcesArgs
@@ -80,6 +109,14 @@ jest.mock("@/services/studyResourcesApi", () => ({
   studyResourcesApi: {
     listStudyResources: (params?: unknown, options?: { signal?: AbortSignal }) =>
       listStudyResources(params, options),
+    // The page fetches the SESSION-SCOPED list, which is what carries each card's access
+    // block. It has to be in the mock or the call is undefined and the page renders
+    // empty. Same envelope the real normalizer accepts, so the assertions below still
+    // exercise the page.
+    listStudyResourcesWithAccess: (
+      params?: unknown,
+      options?: { signal?: AbortSignal },
+    ) => stubNormalizedPage(params, options),
   },
   isVideoStudyResourceType: () => false,
   getStudyResourceStreamUrl: (id: number) => `/stream/${id}`,

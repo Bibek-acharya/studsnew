@@ -98,7 +98,32 @@ const listStudyResources = jest.fn<Promise<unknown>, [params?: unknown]>(() =>
 );
 
 jest.mock("@/services/studyResourcesApi", () => ({
-  studyResourcesApi: { listStudyResources: (p?: unknown) => listStudyResources(p) },
+  studyResourcesApi: {
+    listStudyResources: (p?: unknown) => listStudyResources(p),
+    // The page now fetches the SESSION-SCOPED list, which is what carries each card's
+    // access block. The mock has to offer it or the call is undefined and the catalogue
+    // renders empty — which is exactly what happened when the page was switched over.
+    //
+    // It returns the SAME envelope the real normalizer accepts, so every behavioural
+    // assertion below still exercises the page rather than the mock.
+    listStudyResourcesWithAccess: (p?: unknown) =>
+      // Returns the NORMALIZED page, because that is what the real function returns —
+      // `listStudyResources` hands back the raw envelope while
+      // `listStudyResourcesWithAccess` unwraps it. Returning the envelope here made
+      // the page read `res.items` off an object with no such field and render an empty
+      // catalogue, which is indistinguishable from the filter having emptied it.
+      listStudyResources(p).then((envelope) => {
+        const data = (envelope as { data?: Record<string, unknown> })?.data ?? {};
+        return {
+          items: data.study_resources ?? [],
+          total: data.total ?? 0,
+          page: 1,
+          limit: mockItems.length,
+          years: data.years ?? [],
+          courses: data.courses ?? [],
+        };
+      }),
+  },
   isVideoStudyResourceType: () => false,
   getStudyResourceStreamUrl: (id: number) => `/stream/${id}`,
 }));
