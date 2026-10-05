@@ -45,19 +45,6 @@ interface CollegeGridProps {
   };
 }
 
-type ArrayFilterKey = {
-  [K in keyof CollegeFilters]: CollegeFilters[K] extends string[] ? K : never;
-}[keyof CollegeFilters];
-
-const SEARCHABLE_FILTER_KEYS: Array<ArrayFilterKey> = [
-  "stream",
-  "facilities",
-  "feeRange",
-  "duration",
-  "popularity",
-  "quick",
-];
-
 const FILTER_LABELS: Record<string, string> = {
   plus2: "+2 / Higher Secondary",
   alevel: "A Level",
@@ -241,22 +228,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
     setCurrentPage(1);
   }, [filters]);
 
-  const searchTerms = useMemo(
-    () =>
-      [
-        filters.search,
-        ...filters.academic.map(toFilterLabel),
-        ...filters.program.map(toFilterLabel),
-        ...filters.course.map(toFilterLabel),
-        ...filters.courseDuration.map(toFilterLabel),
-        ...SEARCHABLE_FILTER_KEYS.flatMap((key) => filters[key]).map(
-          toFilterLabel,
-        ),
-      ]
-        .map((value) => String(value).trim())
-        .filter(Boolean),
-    [filters],
-  );
+  const searchText = useMemo(() => filters.search.trim(), [filters.search]);
 
   const locationTerms = useMemo(
     () =>
@@ -318,8 +290,11 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({
       if (universityTerms.length > 0)
         params.affiliation = universityTerms.join(",");
       if (filters.feeMax < 2000000) params.feeMax = filters.feeMax;
-      if (searchTerms.length > 0) params.search = searchTerms.join(" ");
+      if (searchText) params.search = searchText;
       if (filters.academic.length > 0) params.academic = filters.academic;
+      if (filters.program.length > 0) params.program = filters.program;
+      if (filters.facilities.length > 0)
+        params.facilities = filters.facilities;
 
       // Fetch from both APIs in parallel
       const [collegeRes, institutionRes] = await Promise.all([
