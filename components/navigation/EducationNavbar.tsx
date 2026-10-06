@@ -527,17 +527,6 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 </div>
 
                 <div className="hidden md:flex items-center gap-1.5 xs:gap-2 sm:gap-3 shrink-0">
-                  {/*
-                    The StudsToken chip, first in the cluster and immediately
-                    before the bell (06 §12). It self-reads: signed out it never
-                    fetches, a failed read renders the link with no number, and a
-                    slow read holds a fixed-size skeleton, so none of those three
-                    states can move anything to the right of it. See
-                    CoinBalanceChip.tsx for the balance-when-nothing-is-buyable
-                    decision.
-                  */}
-                  <CoinBalanceChip user={user} />
-
                   {/* Notification Bell - Desktop */}
                   <div className="menu-anchor relative group/notif hidden sm:block">
                     <button
@@ -909,6 +898,18 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                                   ></div>
                                 </div>
                               </div>
+                            </div>
+                            {/*
+                              The StudsToken chip lives in the profile menu, not
+                              the nav cluster. It self-reads and routes to the
+                              wallet on its own; the wrapper only closes the menu
+                              on the way through.
+                            */}
+                            <div
+                              className="flex items-center px-3 py-2"
+                              onClick={() => setActiveMenu(null)}
+                            >
+                              <CoinBalanceChip user={user} />
                             </div>
                             <button
                               onClick={() => go("myApplications")}

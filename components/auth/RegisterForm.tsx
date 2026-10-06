@@ -8,10 +8,12 @@ import { apiService } from "@/services/api";
 import { Eye, EyeOff, Mail, ArrowLeft, Info } from "lucide-react";
 import {
   persistReferralInvite,
+  persistReferralCookie,
   resolveReferralInvite,
   clearReferralInvite,
   type ReferralInvite,
 } from "@/lib/referralInvite";
+import { normalizeReferralCode } from "@/lib/referralCode";
 
 /**
  * The server's view of the invite, and the browser's.
@@ -121,6 +123,39 @@ export default function RegisterForm() {
   useEffect(() => {
     if (invite.code) persistReferralInvite(invite.code);
   }, [invite.code]);
+
+  /**
+   * The code the student can TYPE.
+   *
+   * Until now the only carriers were a shared LINK (`?ref=`) and localStorage —
+   * there was nowhere on this form to enter a code read off a screen, which is
+   * how most invites actually travel.
+   *
+   * `null` means "untouched, show whatever the link or storage carries" and is
+   * NOT the same as an empty string: an untouched input defers to the arriving
+   * invitation, while a field the student cleared or replaced says what THEY
+   * chose — including nothing. Seeding would need a `setState` in an effect to
+   * copy `invite.code` into state, which is the exact `set-state-in-effect`
+   * failure this file's own `useSyncExternalStore` reasoning exists to avoid;
+   * deriving the shown value needs neither, and it cannot mismatch hydration
+   * because the server snapshot is the no-invite answer either way.
+   */
+  const [typedReferralCode, setTypedReferralCode] = useState<string | null>(null);
+  const shownReferralCode = typedReferralCode ?? invite.code ?? "";
+
+  /**
+   * What this signup actually sends, resolved once so the register payload, the
+   * Google redirect and the display hint can never disagree.
+   *
+   * Typed input is normalised the way the server does (uppercase, Crockford
+   * aliases, junk dropped) so a code pasted with a trailing space or a hyphen
+   * still works; input that normalises to nothing sends no code at all rather
+   * than falling back to a stored one, because crediting a friend the student
+   * never named is the one outcome a referral feature must never produce.
+   */
+  const effectiveReferralCode = shownReferralCode.trim()
+    ? normalizeReferralCode(shownReferralCode) || null
+    : null;
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -194,9 +229,10 @@ export default function RegisterForm() {
         last_name: lastName.trim(),
         // The code is a plain string the server normalises and looks up; it
         // carries no amount and can change nothing about what the account is
-        // worth. Omitted entirely when there is no invite, rather than sent as
-        // an empty string, so the field is absent rather than blank.
-        ...(invite.code ? { referral_code: invite.code } : {}),
+        // worth. Omitted entirely when there is no invite — typed or
+        // link-carried — rather than sent as an empty string, so the field is
+        // absent rather than blank.
+        ...(effectiveReferralCode ? { referral_code: effectiveReferralCode } : {}),
       });
       accountCreated = true;
     } catch (err: unknown) {
@@ -330,6 +366,16 @@ export default function RegisterForm() {
         <button
           type="button"
           onClick={() => {
+            // The OAuth dance loses the query string, so the code is parked in
+            // the cookie GoogleCallback reads (`referralCodeFrom`) and in
+            // localStorage for a later email signup. Without this, a code typed
+            // or link-carried moments earlier was dropped the moment the
+            // student chose Google — the backend was asking for a value this
+            // form never wrote.
+            if (effectiveReferralCode) {
+              persistReferralInvite(effectiveReferralCode);
+              persistReferralCookie(effectiveReferralCode);
+            }
             window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?prompt=select_account`;
           }}
           className="w-full bg-white border border-gray-200 rounded-md py-3 px-4 flex items-center justify-center gap-3 font-semibold text-gray-800 transition-colors hover:bg-gray-50"
@@ -366,6 +412,36 @@ export default function RegisterForm() {
           </div>
           {error && (
             <p className="text-[11px] text-red-500 mt-1">{error}</p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="referral-code"
+            className="block text-sm font-medium text-gray-900 mb-2"
+          >
+            Referral code{" "}
+            <span className="font-normal text-gray-400">(optional)</span>
+          </label>
+          <input
+            id="referral-code"
+            type="text"
+            placeholder="Enter a friend's code"
+            value={shownReferralCode}
+            onChange={(e) => {
+              setTypedReferralCode(e.target.value);
+              setError("");
+            }}
+            autoCapitalize="characters"
+            autoComplete="off"
+            spellCheck={false}
+            maxLength={40}
+            className="w-full border border-gray-200 rounded-md py-3 px-4 text-gray-800 placeholder-gray-400 uppercase focus:outline-none focus:ring-0 focus:border-brand-blue transition-colors"
+          />
+          {effectiveReferralCode && (
+            <p className="mt-1 text-[11px] font-medium text-emerald-600">
+              Code applied
+            </p>
           )}
         </div>
 

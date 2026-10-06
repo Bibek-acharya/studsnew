@@ -259,6 +259,86 @@ export function getStudyResourceDownloadUrl(id: number | string): string {
   return `${API_BASE_URL}/api/v1/study-resources/${id}/download`;
 }
 
+/**
+ * The document sample: the first few pages of a published PDF, inline.
+ *
+ * The route is PUBLIC by design — the buying decision should not need a
+ * session, and the backend's guard is what it serves, not who asks: at most a
+ * few pages, with at least one always withheld. So unlike the stream URL no
+ * token travels here, and unlike the download URL nothing is charged. The
+ * fetch → blob → object-URL detour (rather than pointing an iframe at the
+ * route directly) is what lets the modal tell "too short to sample" (422)
+ * from "not previewable" (404) from "the network dropped" — distinctions an
+ * iframe's silent about:blank cannot make.
+ */
+export function getStudyResourcePreviewUrl(id: number | string): string {
+  return `${API_BASE_URL}/api/v1/study-resources/${id}/preview`;
+}
+
+/** The backend's machine-readable code for a PDF too short to sample. */
+export const STUDY_RESOURCE_PREVIEW_UNAVAILABLE_CODE = "PREVIEW_UNAVAILABLE";
+
+/**
+ * Outcome of asking for a sample. `unavailable` is a normal state — a draft,
+ * a non-PDF, a one-page document — not a failure: the modal shows the reason
+ * and offers nothing to retry. `error` is the transient one and gets the
+ * retry button. Mirrored on PlaybackAuthorization's shape for the same
+ * reason: a refusal the UI must speak is not an exception.
+ */
+export type StudyResourcePreviewOutcome =
+  | { status: "ok"; blobUrl: string }
+  | { status: "unavailable"; message: string }
+  | { status: "error"; message: string };
+
+export async function fetchStudyResourcePreview(
+  id: number | string,
+  options?: { signal?: AbortSignal },
+): Promise<StudyResourcePreviewOutcome> {
+  let response: Response;
+  try {
+    response = await fetch(getStudyResourcePreviewUrl(id), {
+      signal: options?.signal,
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    return {
+      status: "error",
+      message: "Could not load the preview. Check your connection and try again.",
+    };
+  }
+
+  if (response.ok) {
+    const blob = await response.blob();
+    return { status: "ok", blobUrl: URL.createObjectURL(blob) };
+  }
+
+  let code: string | undefined;
+  let message = "Preview not available for this resource.";
+  try {
+    const data = (await response.json()) as {
+      code?: string;
+      message?: string;
+      error?: string;
+    };
+    code = data?.code;
+    if (data?.message || data?.error) message = data.message || data.error || message;
+  } catch {
+    // A non-JSON refusal body keeps the default sentence.
+  }
+
+  if (
+    response.status === 422 ||
+    code === STUDY_RESOURCE_PREVIEW_UNAVAILABLE_CODE
+  ) {
+    return {
+      status: "unavailable",
+      message:
+        "This document is too short to sample. Unlock it to read the whole thing.",
+    };
+  }
+  return { status: "unavailable", message };
+}
+
 /** Short-lived credential the backend issues for one lecture's stream. */
 export interface StudyResourcePlaybackToken {
   token: string;

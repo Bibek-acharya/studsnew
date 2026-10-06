@@ -43,6 +43,8 @@ interface AuthContextType {
     lastName: string,
     role: string,
     educationLevel: string,
+    /** Optional invite code, forwarded to the server's own staging. */
+    referralCode?: string,
   ) => Promise<void>;
   verifyOTP: (email: string, otp: string) => Promise<void>;
   sendOTP: (email: string) => Promise<void>;
@@ -221,6 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     lastName: string,
     role: string,
     educationLevel: string,
+    referralCode?: string,
   ) => {
     const response = await apiService.register({
       email,
@@ -229,6 +232,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       last_name: lastName,
       role: role || "student",
       education_level: educationLevel,
+      // Absent rather than blank when there is no invite — same contract as
+      // the form's own payload, so the server sees a field only when a code
+      // actually travelled with this signup.
+      ...(referralCode ? { referral_code: referralCode } : {}),
     });
 
     if (!response.data?.requires_otp) {

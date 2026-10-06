@@ -117,21 +117,55 @@ export function readStoredReferralInvite(): string | null {
 }
 
 /**
+ * Park the code where the GOOGLE OAuth callback can still read it.
+ *
+ * The query string does not survive the dance: Google returns the browser to a
+ * callback URL carrying only `code` and `state`, so `GoogleCallback` reads the
+ * invite from the `referral_code` cookie instead (`referralCodeFrom`,
+ * internal/auth/handler.go) — SameSite=Lax survives Google's top-level
+ * redirect back. Nothing has ever set this cookie, which is why a code typed or
+ * clicked before "Continue with Google" was silently dropped: the backend was
+ * asking for a value the client never wrote.
+ *
+ * A 30-minute max-age bounds the blast radius rather than relying on someone to
+ * clear it: the cookie only needs to outlive one OAuth round trip, and a stale
+ * code lingering for a later, unrelated signup is a referral attributed to the
+ * wrong invitation. The email path does not need it at all — that code travels
+ * in the registration body.
+ *
+ * Best effort, like every storage access in this file: a browser with cookies
+ * blocked loses the Google attribution and nothing else.
+ */
+export function persistReferralCookie(code: string | null | undefined): void {
+  if (!code || typeof document === "undefined") return;
+  try {
+    document.cookie = `referral_code=${encodeURIComponent(code)}; path=/; max-age=1800; SameSite=Lax`;
+  } catch {
+    // Nothing to do and nowhere to report it: see the header.
+  }
+}
+
+/**
  * Forget the code.
  *
  * Called once the registration request has been made. A referral is attributed
  * at user creation and the field is single-use per account, so keeping the code
  * around afterwards risks nothing but confusion — and a student who later
  * registers a second account from the same browser would otherwise carry a code
- * that cannot be used.
+ * that cannot be used. The cookie goes with the localStorage entry for the same
+ * reason: it is the same code, parked in the second carrier.
  */
 export function clearReferralInvite(): void {
   const store = storage();
-  if (!store) return;
-  try {
-    store.removeItem(STORAGE_KEY);
-  } catch {
-    // Nothing to do and nowhere to report it: this is a tidy-up.
+  if (store) {
+    try {
+      store.removeItem(STORAGE_KEY);
+    } catch {
+      // Nothing to do and nowhere to report it: this is a tidy-up.
+    }
+  }
+  if (typeof document !== "undefined") {
+    document.cookie = "referral_code=; path=/; max-age=0; SameSite=Lax";
   }
 }
 

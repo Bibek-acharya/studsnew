@@ -36,6 +36,7 @@ import {
 } from "lucide-react";
 import CoinBadge from "@/components/coins/CoinBadge";
 import ResourceAccessDialog from "@/components/coins/ResourceAccessDialog";
+import ResourcePreviewButton from "./ResourcePreviewButton";
 import type { ResolvedResourceAccess } from "@/components/coins/useCoinState";
 import { stripHtml } from "@/services/api";
 import {
@@ -188,17 +189,26 @@ function CardBody({
           contrast, in one place only.
         */}
         {variant === "document" && (
-          <ResourceAccessDialog
-            access={access ?? UNGATED_ACCESS}
-            resource={resource}
-            resourceType={isVideo ? "video" : "study_resource"}
-            signInHref="/login"
-            enabled={access !== null}
-            busy={busy}
-            onSignIn={onSignIn}
-            onUnlocked={onPrimaryAction}
-            onPlainAction={onPrimaryAction}
-          />
+          <div className="flex items-center gap-2">
+            {/*
+              The sample, beside the spend: PDFs only, self-contained, and not
+              a coin state — it renders the same whether the gate is on or
+              off, because the preview route serves its first-pages sample to
+              anyone and never the whole document.
+            */}
+            <ResourcePreviewButton resource={resource} />
+            <ResourceAccessDialog
+              access={access ?? UNGATED_ACCESS}
+              resource={resource}
+              resourceType={isVideo ? "video" : "study_resource"}
+              signInHref="/login"
+              enabled={access !== null}
+              busy={busy}
+              onSignIn={onSignIn}
+              onUnlocked={onPrimaryAction}
+              onPlainAction={onPrimaryAction}
+            />
+          </div>
         )}
       </div>
     </>

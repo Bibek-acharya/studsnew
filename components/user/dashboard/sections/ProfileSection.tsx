@@ -750,6 +750,19 @@ export default function ProfileSection() {
                               }
                               className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
                             >
+                              {/*
+                                The placeholder IS the empty state. Without it,
+                                value="" renders as a blank box in some browsers
+                                and a pre-picked first option in others, and a
+                                box that looks answered is a field nobody
+                                touches — which is how a profile reaches 11/12
+                                with gender the missing check. "Select gender"
+                                cannot be chosen back, so a real pick is the only
+                                way out of it.
+                              */}
+                              <option value="" disabled>
+                                Select gender
+                              </option>
                               <option>Male</option>
                               <option>Female</option>
                               <option>Other</option>

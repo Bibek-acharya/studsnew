@@ -4,6 +4,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../services/AuthContext";
 import { validators, useFieldValidation } from "@/utils/validation";
+import {
+  clearReferralInvite,
+  persistReferralCookie,
+  persistReferralInvite,
+  readStoredReferralInvite,
+} from "@/lib/referralInvite";
+import { normalizeReferralCode } from "@/lib/referralCode";
 
 interface SignupViewProps {
   onSwitch: () => void;
@@ -24,6 +31,24 @@ const SignupView: React.FC<SignupViewProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { register } = useAuth();
+
+  /**
+   * The invite code this signup carries, with the same two-carrier rules as
+   * /register (see lib/referralInvite): whatever link or storage arrived with
+   * this student is shown by default, and what they type replaces it —
+   * including clearing it to nothing. Read once at mount rather than per
+   * render: the value is fixed for the life of one signup attempt, and this
+   * modal never server-renders (AuthModal only mounts it after an interaction),
+   * so there is no hydration snapshot to disagree with.
+   */
+  const [typedReferralCode, setTypedReferralCode] = useState<string | null>(null);
+  const [storedReferralCode] = useState<string | null>(() =>
+    readStoredReferralInvite(),
+  );
+  const shownReferralCode = typedReferralCode ?? storedReferralCode ?? "";
+  const effectiveReferralCode = shownReferralCode.trim()
+    ? normalizeReferralCode(shownReferralCode) || null
+    : null;
 
   const {
     values,
@@ -98,7 +123,13 @@ const SignupView: React.FC<SignupViewProps> = ({
         lastName,
         "student",
         "",
+        effectiveReferralCode ?? undefined,
       );
+      // The referral is attributed at user creation, so the code has done its
+      // job and is single-use per account — clear both carriers (localStorage
+      // and the Google cookie) exactly as /register does, or a second account
+      // created from this browser would carry a code that cannot be used.
+      clearReferralInvite();
       if (onOTPRequired) {
         onOTPRequired(values.email);
       } else {
@@ -130,6 +161,14 @@ const SignupView: React.FC<SignupViewProps> = ({
   };
 
   const handleGoogleLogin = () => {
+    // Same parking as the register form's Google button: GoogleCallback reads
+    // the invite from the `referral_code` cookie, and nothing wrote it before —
+    // so a code carried by link or typed here vanished the moment Google took
+    // over. See persistReferralCookie for the round-trip argument.
+    if (effectiveReferralCode) {
+      persistReferralInvite(effectiveReferralCode);
+      persistReferralCookie(effectiveReferralCode);
+    }
     window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google?prompt=select_account`;
   };
 
@@ -560,6 +599,32 @@ const SignupView: React.FC<SignupViewProps> = ({
           {touched.confirmPassword && errors.confirmPassword && (
             <p className="text-[11px] text-red-500 mt-1 ml-1">
               {errors.confirmPassword}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label
+            htmlFor="modal-referral-code"
+            className="block text-xs font-medium text-gray-500 mb-1.5"
+          >
+            Referral code <span className="text-gray-400">(optional)</span>
+          </label>
+          <input
+            id="modal-referral-code"
+            type="text"
+            placeholder="Enter a friend's code"
+            autoComplete="off"
+            spellCheck={false}
+            maxLength={40}
+            disabled={loading}
+            className="w-full pl-3.5 pr-4 py-2.5 border border-gray-200 rounded-md text-sm text-gray-800 placeholder:text-gray-400 focus:ring-1 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors disabled:bg-gray-50"
+            value={shownReferralCode}
+            onChange={(e) => setTypedReferralCode(e.target.value)}
+          />
+          {effectiveReferralCode && (
+            <p className="mt-1 ml-1 text-[11px] font-medium text-emerald-600">
+              Code applied
             </p>
           )}
         </div>
